@@ -7,28 +7,76 @@
    Page seeds are "thin" ({id,kind[,settings overrides][,blocks]}) — app.js materialises full
    settings from each section's defaults() at editor start, so defaults have a single source. */
 (function () {
-  // ---------- storefront imagery (Unsplash, same style as the rest of the prototype) ----------
+  // Prototype-only stand-ins from the Voltix Minimal clothing demo.
+  // Not for commercial use. Each key matches the frame that consumes it:
+  // hero ~2:1 slideshow, iwt/blog ~4:3, cat ~3:4 collection tiles,
+  // p* 1400x2000 catalog shots (about 3:4), ug* lifestyle tiles for a square wall.
+  const shot = (file, v, w) =>
+    'https://cdn.shopify.com/s/files/1/0824/4861/3621/files/' + file + '?v=' + v + '&width=' + w;
   const IMG = {
-    hero1: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1400&q=80',
-    hero2: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1400&q=80',
-    iwt:   'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=1100&q=80',
-    cat1:  'https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=700&q=80',
-    cat2:  'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=700&q=80',
-    cat3:  'https://images.unsplash.com/photo-1556306535-0f09a537f0a3?auto=format&fit=crop&w=700&q=80',
-    cat4:  'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=700&q=80',
-    p1: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=600&q=80',
-    p2: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=600&q=80',
-    p3: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=600&q=80',
-    p4: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?auto=format&fit=crop&w=600&q=80',
-    p5: 'https://images.unsplash.com/photo-1485968579580-b6d095142e6e?auto=format&fit=crop&w=600&q=80',
-    p6: 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=600&q=80',
-    av1: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80',
-    av2: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
-    av3: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=200&q=80',
-    blog1: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=800&q=80',
-    blog2: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=800&q=80',
-    svcShip: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=300&q=80',
-    svcVip: 'https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?auto=format&fit=crop&w=300&q=80',
+    hero1: shot('Rectangle_150897.png', '1790760274', 1800),
+    hero2: shot('Rectangle_150897_1.png', '1790760274', 1800),
+    hero3: shot('Rectangle_150897_2.png', '1790760274', 1800),
+    iwt: shot('Rectangle_771_4.png', '1790761727', 1400),
+    iwt2: shot('Rectangle_150912.png', '1790760273', 1400),
+    cat1: shot('Rectangle_150865_4.png', '1790760272', 900),
+    cat2: shot('Rectangle_150865_5.png', '1790760272', 900),
+    cat3: shot('Rectangle_150865_6.png', '1790760272', 900),
+    cat4: shot('Rectangle_150865_7.png', '1790760272', 900),
+    cat5: shot('Rectangle_150865_8.png', '1790760272', 900),
+    cat6: shot('Rectangle_727_2.png', '1790762047', 900),
+    p1: shot('Rectangle_151009.png', '1791374340', 900),
+    p1b: shot('Rectangle_151026.png', '1791374326', 900),
+    p1c: shot('Rectangle_151027.png', '1791374322', 900),
+    p1d: shot('Rectangle_151030.png', '1791374329', 900),
+    p1sand: shot('MinimalBeigeWide-LegTrousers.png', '1791783885', 900),
+    p1blk: shot('Rectangle_151009_0238d1d3-46a7-448b-827c-b56c2202a714.png', '1791450043', 900),
+    p2: shot('Rectangle_151232.png', '1791449614', 900),
+    p2b: shot('Rectangle_151233.png', '1791449618', 900),
+    p2c: shot('Rectangle_151231.png', '1791449622', 900),
+    p2ivr: shot('Rectangle_151210.png', '1791449394', 900),
+    p3: shot('Rectangle_151272.png', '1791453079', 900),
+    p3b: shot('Rectangle_151273.png', '1791453083', 900),
+    p4: shot('Rectangle150928.png', '1791370037', 900),
+    p4b: shot('Rectangle150970_1.png', '1791370037', 900),
+    p5: shot('Rectangle_150910.png', '1791368089', 900),
+    p5b: shot('Rectangle_150924.png', '1791368074', 900),
+    p5c: shot('Rectangle_150923.png', '1791368077', 900),
+    // Product-page gallery only. Same Breton sweater set as the Minimal PDP screenshot.
+    look1: shot('Rectangle_150910.png', '1791368089', 1200),
+    look2: shot('Rectangle_150924.png', '1791368074', 1200),
+    look3: shot('Rectangle_150923.png', '1791368077', 1200),
+    look4: shot('Rectangle_150925.png', '1791368070', 1200),
+    look5: shot('Rectangle_150921.png', '1791368085', 1200),
+    look6: shot('Rectangle_150922.png', '1791368081', 1200),
+    p6: shot('DeepBrownTailoredWide-LegTrousers.png', '1791783778', 900),
+    p7: shot('Rectangle_151119.png', '1791451213', 900),
+    p8: shot('Rectangle_151005.png', '1791450400', 900),
+    p9: shot('Rectangle_151252.png', '1791454769', 900),
+    p10: shot('Rectangle_151003.png', '1791374129', 900),
+    p11: shot('Rectangle150927.png', '1791369170', 900),
+    p12: shot('Rectangle150926.png', '1791368357', 900),
+    p13: shot('Rectangle_151245.png', '1791452346', 900),
+    p14: shot('Rectangle_151266.png', '1791452637', 900),
+    p15: shot('Rectangle_151090_1.png', '1791453293', 900),
+    p16: shot('Rectangle_151035.png', '1791373850', 900),
+    p17: shot('Rectangle_151001.png', '1791373168', 900),
+    p18: shot('Rectangle150951.png', '1791438084', 900),
+    p19: shot('Rectangle151090.png', '1791438852', 900),
+    p20: shot('MinimalBeigeTailoredWoolOvercoat_05de1806-9b05-4715-8687-899f5978254c.png', '1791783634', 900),
+    av1: shot('image_29_6.png', '1790760273', 400),
+    av2: shot('Cinematic_Countryside_Tailoring_Duo_81f9be3a-dfd4-4ad6-9d9e-ce3079045a2a.png', '1790851232', 400),
+    av3: shot('Triple_Power_Suits_in_Glass_Architecture.png', '1790851313', 400),
+    blog1: shot('Rectangle_150904_1.png', '1790762254', 1400),
+    blog2: shot('Rectangle_150906.png', '1791176746', 1400),
+    ug1: shot('Rectangle_724_7.png', '1790762047', 900),
+    ug2: shot('Rectangle_725_19.png', '1790762047', 900),
+    ug3: shot('Rectangle_726_2.png', '1790762047', 900),
+    ug4: shot('Rectangle_728_1.png', '1790762047', 900),
+    ug5: shot('Rectangle_727_2.png', '1790762047', 900),
+    ug6: shot('Rectangle_560_5.png', '1790762047', 800),
+    svcShip: shot('delivery_1_4.svg', '1790770946', 250),
+    svcVip: shot('secured-payment_1_2.svg', '1790760271', 250),
   };
 
   // ---------- theme list ("My theme" tab) ----------
@@ -46,6 +94,7 @@
   // template and are picked directly (no submenu). `noun` labels the assignment count.
   const PAGE_OPTIONS = [
     { value: 'home',        label: 'Home page' },
+    { value: 'product',     label: 'Products',        multi: true, noun: 'products' },
     { value: 'collection',  label: 'Collections',     multi: true, noun: 'collections' },
     { value: 'collections', label: 'Collections list' },
   ];
@@ -53,6 +102,13 @@
   // ---------- Add-Section catalog (Shopify-style popover; 5 groups) ----------
   // kind === null  => "coming soon" stub (kept so coverage count reads true to the PRD).
   const CATALOG = [
+    { id: 'product-page', label: 'Product page', entries: [
+      { kind: 'breadcrumbs', name: 'Breadcrumbs', desc: 'Store path; current page name off on desktop, on on mobile by default', pages: ['product'] },
+      { kind: 'product-main', name: 'Product information', desc: 'Gallery, buy box and purchase blocks for this product', pages: ['product'] },
+      { kind: 'vendor-reviews', name: 'Vendor reviews', desc: 'Reviews across every product from the same vendor', pages: ['product'] },
+      // Product reviews and related products are not theme sections. Their data has no admin yet.
+      // A later app will supply the sections. Renderers stay in sections/product-reviews.js and sections/related-products.js.
+    ] },
     { id: 'collection', label: 'Collection', entries: [
       { kind: 'collection-banner', name: 'Collection banner', desc: 'Hero image + copy at the top of a collection' },
       { kind: 'collection-list', name: 'Collection list', desc: 'Sub-category cards / collection navigation strip' },
@@ -82,7 +138,7 @@
       { kind: 'as-seen-in', name: 'As seen in', desc: 'Press / media logo strip' },
     ] },
     { id: 'engagement', label: 'Engagement & utility', entries: [
-      { kind: 'faq', name: 'FAQ', desc: 'Accordion questions + support panel' },
+      { kind: 'faq', name: 'FAQ', desc: 'Accordion questions with optional support copy' },
       { kind: 'newsletter', name: 'Newsletter', desc: 'Email capture block' },
       { kind: 'custom-html', name: 'Custom HTML', desc: 'Raw HTML embed' },
     ] },
@@ -90,8 +146,24 @@
 
   // ---------- Theme settings · 8 groups (verbatim from theme-settings.canvas.tsx) ----------
   // Row kinds: {sub} = subheading, {info} = helper line, otherwise a field descriptor.
-  const FONT_HEAD = ['Playfair Display', 'DM Serif Display', 'Manrope', 'Inter', 'Georgia'].map((v) => ({ value: v, label: v }));
-  const FONT_BODY = ['Inter', 'Manrope', 'Lato', 'Source Sans 3', 'system-ui'].map((v) => ({ value: v, label: v }));
+  const FONT_HEAD = ['DM Sans', 'Playfair Display', 'DM Serif Display', 'Manrope', 'Inter', 'Georgia'].map((v) => ({ value: v, label: v }));
+  const FONT_BODY = ['DM Sans', 'Inter', 'Manrope', 'Lato', 'Source Sans 3', 'system-ui'].map((v) => ({ value: v, label: v }));
+  const WEIGHT_OPTS = [
+    { value: '400', label: 'Regular' },
+    { value: '500', label: 'Medium' },
+    { value: '600', label: 'Semibold' },
+    { value: '700', label: 'Bold' },
+  ];
+  const FONT_ROLE = [
+    { value: 'body', label: 'Body font' },
+    { value: 'heading', label: 'Headings font' },
+  ];
+  const TEXT_CASE = [
+    { value: 'none', label: 'None' },
+    { value: 'capitalize', label: 'Title Case' },
+    { value: 'uppercase', label: 'UPPERCASE' },
+    { value: 'lowercase', label: 'lowercase' },
+  ];
   const SETTINGS_GROUPS = [
     { key: 'colors', name: 'Colors', desc: 'Brand, surface and status colors', open: true, fields: [
       { sub: 'Brand' },
@@ -109,19 +181,41 @@
       { key: 'error_color', label: 'Error / destructive', control: 'color', default: '#D92D20' },
       { key: 'success_color', label: 'Success', control: 'color', default: '#12B76A' },
     ] },
-    { key: 'typography', name: 'Typography', desc: 'Font families, sizing and rhythm', open: true, fields: [
-      { sub: 'Font families' },
-      { key: 'heading_font', label: 'Heading font', control: 'select', options: FONT_HEAD, default: 'Playfair Display' },
-      { key: 'body_font', label: 'Body font', control: 'select', options: FONT_BODY, default: 'Inter' },
-      { sub: 'Sizing' },
-      { key: 'base_font_size', label: 'Base font size', control: 'range', min: 12, max: 20, step: 1, unit: 'px', default: 16, info: 'Scales every body & heading size proportionally.' },
-      { key: 'heading_scale', label: 'Heading scale', control: 'select', default: 'large', info: 'Multiplies every heading size — applies to H1 / H2 / H3 alike.', options: [
-        { value: 'small', label: 'Small (×0.85)' }, { value: 'medium', label: 'Medium (×1.00)' }, { value: 'large', label: 'Large (×1.20)' } ] },
-      { sub: 'Weight & rhythm' },
-      { key: 'heading_font_weight', label: 'Heading weight', control: 'range', min: 300, max: 900, step: 100, default: 700 },
-      { key: 'body_font_weight', label: 'Body weight', control: 'range', min: 300, max: 700, step: 100, default: 400 },
-      { key: 'line_height', label: 'Line height', control: 'range', min: 1.2, max: 2.0, step: 0.05, default: 1.5 },
-      { key: 'letter_spacing', label: 'Letter spacing', control: 'range', min: -1, max: 3, step: 0.1, unit: 'px', default: 0 },
+    { key: 'typography', name: 'Typography', desc: 'Storefront type, matched to the current theme', open: true, fields: [
+      { sub: 'Body' },
+      { key: 'body_font', label: 'Font', control: 'select', options: FONT_BODY, default: 'DM Sans' },
+      { key: 'body_bold_weight', label: 'Bolder font weight', control: 'select', options: WEIGHT_OPTS, default: '500', info: 'Used to highlight certain titles and labels.' },
+      { key: 'base_font_size', label: 'Base size', control: 'range', min: 12, max: 22, step: 1, unit: 'px', default: 16 },
+      { sub: 'Headings' },
+      { key: 'heading_font', label: 'Font', control: 'select', options: FONT_HEAD, default: 'DM Sans' },
+      { key: 'heading_scale', label: 'Font size scale', control: 'range', min: 100, max: 150, step: 1, unit: '%', default: 100 },
+      { key: 'heading_scale_mobile', label: 'Mobile font size scale', control: 'range', min: 50, max: 150, step: 1, unit: '%', default: 80 },
+      { key: 'heading_letter_spacing', label: 'Letter spacing', control: 'range', min: -10, max: 10, step: 1, unit: '%', default: -4 },
+      { key: 'heading_uppercase', label: 'Uppercase headings', control: 'toggle', default: false },
+      { sub: 'Display headings' },
+      { key: 'display_headings', label: 'Use for display headings', control: 'toggle', default: false },
+      { key: 'display_base_size', label: 'Base size', control: 'range', min: 20, max: 100, step: 1, unit: 'px', default: 56 },
+      { key: 'display_uppercase', label: 'Uppercase display headings', control: 'toggle', default: false },
+      { sub: 'Subheadings' },
+      { key: 'subheading_scale', label: 'Font size scale', control: 'range', min: 75, max: 150, step: 1, unit: '%', default: 112 },
+      { key: 'subheading_family', label: 'Font family', control: 'select', options: FONT_ROLE, default: 'body' },
+      { key: 'subheading_weight', label: 'Font weight', control: 'select', options: WEIGHT_OPTS, default: '500' },
+      { key: 'subheading_letter_spacing', label: 'Letter spacing', control: 'range', min: -10, max: 10, step: 1, unit: '%', default: 0 },
+      { key: 'subheading_transform', label: 'Text transform', control: 'select', options: TEXT_CASE, default: 'capitalize' },
+      { sub: 'Product cards title' },
+      { key: 'card_title_scale', label: 'Font size scale', control: 'range', min: 75, max: 150, step: 1, unit: '%', default: 112 },
+      { key: 'card_title_family', label: 'Font family', control: 'select', options: FONT_ROLE, default: 'heading' },
+      { key: 'card_title_weight', label: 'Font weight', control: 'select', options: WEIGHT_OPTS, default: '500' },
+      { key: 'card_title_uppercase', label: 'Uppercase product title', control: 'toggle', default: false },
+      { sub: 'Navigation' },
+      { key: 'nav_family', label: 'Font family', control: 'select', options: FONT_ROLE, default: 'body' },
+      { key: 'nav_weight', label: 'Font weight', control: 'select', options: WEIGHT_OPTS, default: '500' },
+      { key: 'nav_uppercase', label: 'Uppercase navigation', control: 'toggle', default: false },
+      { sub: 'Buttons' },
+      { key: 'button_font_family', label: 'Font family', control: 'select', options: FONT_ROLE, default: 'heading' },
+      { key: 'button_font_weight', label: 'Font weight', control: 'select', options: WEIGHT_OPTS, default: '500' },
+      { key: 'button_letter_spacing', label: 'Letter spacing', control: 'range', min: -10, max: 10, step: 1, unit: '%', default: 0 },
+      { key: 'button_text_transform', label: 'Text transform', control: 'select', options: TEXT_CASE, default: 'capitalize' },
     ] },
     { key: 'buttons', name: 'Buttons', desc: 'Primary, secondary and shape', fields: [
       { sub: 'Primary button' },
@@ -136,12 +230,10 @@
       { key: 'button_border_radius', label: 'Corner radius', control: 'range', min: 0, max: 40, step: 1, unit: 'px', default: 40, info: 'Capped at 40px — once radius ≥ height ÷ 2 the corners are fully pilled.' },
       { key: 'button_height', label: 'Height', control: 'range', min: 32, max: 64, step: 1, unit: 'px', default: 44 },
       { key: 'button_horizontal_padding', label: 'Horizontal padding', control: 'range', min: 8, max: 48, step: 1, unit: 'px', default: 24 },
-      { key: 'button_text_transform', label: 'Label case', control: 'select', default: 'uppercase', options: [
-        { value: 'none', label: 'None' }, { value: 'uppercase', label: 'UPPERCASE' }, { value: 'lowercase', label: 'lowercase' } ] },
     ] },
     { key: 'layout', name: 'Layout', desc: 'Page width, spacing and radius', fields: [
       { sub: 'Container' },
-      { key: 'page_width', label: 'Max page width', control: 'range', min: 960, max: 1600, step: 10, unit: 'px', default: 1200 },
+      { key: 'page_width', label: 'Max page width', control: 'range', min: 960, max: 2400, step: 10, unit: 'px', default: 1440, info: 'Shopify Horizon Default uses Narrow (90rem / 1440px). Side gutters grow outside this content width.' },
       { sub: 'Section spacing' },
       { key: 'section_spacing_desktop', label: 'Vertical gap · Desktop', control: 'range', min: 16, max: 160, step: 4, unit: 'px', default: 64 },
       { key: 'section_spacing_mobile', label: 'Vertical gap · Mobile', control: 'range', min: 8, max: 100, step: 2, unit: 'px', default: 40 },
@@ -164,8 +256,6 @@
       { sub: 'Text' },
       { key: 'product_card_text_alignment', label: 'Text alignment', control: 'select', default: 'center', options: [
         { value: 'left', label: 'Left' }, { value: 'center', label: 'Center' } ] },
-      { key: 'product_title_size', label: 'Title size', control: 'select', default: 'medium', options: [
-        { value: 'small', label: 'Small' }, { value: 'medium', label: 'Medium' }, { value: 'large', label: 'Large' } ] },
       { sub: 'Defaults' },
       { info: 'These defaults apply to every Featured collection or product grid. Individual sections can override each toggle.' },
       { key: 'show_vendor_by_default', label: 'Show vendor', control: 'toggle', default: false },
@@ -206,37 +296,47 @@
   // ---------- sample platform resources (drive product/collection/menu/blog/page pickers) ----------
   const SAMPLE = {
     products: [
-      { id: 'p1', title: 'Linen-feel wide pants', vendor: 'Aura Studio', price: 32.99, compareAt: 45.0, rating: 4.8, reviews: 214, image: IMG.p1, swatches: ['#2b2f36', '#c8b6a6', '#d9d2c5'] },
-      { id: 'p2', title: 'Soft rib tee', status: 'draft', vendor: 'Aura Studio', price: 18.99, compareAt: 26.0, rating: 4.6, reviews: 98, image: IMG.p2, swatches: ['#1b3a2b', '#eae3d6'] },
-      { id: 'p3', title: 'Editorial shell dress', vendor: 'Aura Studio', price: 41.5, compareAt: 58.0, rating: 4.9, reviews: 176, image: IMG.p3, swatches: ['#3a3f4a', '#9fb0a0', '#d8c3a5'],
+      { id: 'p1', handle: 'linen-feel-wide-pants', title: 'Linen-feel wide pants', vendor: 'Aura Studio', category: 'Bottoms', sku: 'AUR-LINEN-SND-S', inventory: 7, price: 35.0, compareAt: 45.0, rating: 4.8, reviews: 214, image: IMG.p1, images: [IMG.look1, IMG.look2, IMG.look3, IMG.look4, IMG.look5, IMG.look6], swatches: ['#c8b6a6', '#2b2f36', '#e8e1d6'], tags: ['tag__hot_Best Seller', 'tag__new_Spring Edit'], description: 'A relaxed wide-leg trouser cut from a breathable linen blend.', variants: [
+        { id: 'p1-snd-s', title: 'Sand / S', color: 'Sand', size: 'S', sku: 'AUR-LINEN-SND-S', price: 35.0, compareAt: 45.0, inventory: 7, image: IMG.p1sand, available: true },
+        { id: 'p1-snd-m', title: 'Sand / M', color: 'Sand', size: 'M', sku: 'AUR-LINEN-SND-M', price: 35.0, compareAt: 45.0, inventory: 12, image: IMG.p1sand, available: true },
+        { id: 'p1-blk-s', title: 'Black / S', color: 'Black', size: 'S', sku: 'AUR-LINEN-BLK-S', price: 32.99, compareAt: 45.0, inventory: 18, image: IMG.p1blk, available: true },
+        { id: 'p1-blk-m', title: 'Black / M', color: 'Black', size: 'M', sku: 'AUR-LINEN-BLK-M', price: 32.99, compareAt: 45.0, inventory: 0, image: IMG.p1blk, available: false },
+        { id: 'p1-crm-s', title: 'Cream / S', color: 'Cream', size: 'S', sku: 'AUR-LINEN-CRM-S', price: 35.0, compareAt: 45.0, inventory: 0, image: IMG.p1c, available: false },
+        { id: 'p1-crm-m', title: 'Cream / M', color: 'Cream', size: 'M', sku: 'AUR-LINEN-CRM-M', price: 35.0, compareAt: 45.0, inventory: 0, image: IMG.p1c, available: false },
+      ] },
+      { id: 'p2', handle: 'soft-rib-tee', title: 'Soft rib tee', status: 'draft', vendor: 'Aura Studio', category: 'Tops', sku: 'AUR-RIB-TEE', inventory: 0, price: 18.99, compareAt: 26.0, rating: 4.6, reviews: 98, image: IMG.p2, images: [IMG.p2, IMG.p2b, IMG.p2c], swatches: ['#1b3a2b', '#eae3d6'], tags: ['tag__hot_End of Summer Sale'], description: 'A soft rib tee with an easy everyday drape.', variants: [
+        { id: 'p2-frs-s', title: 'Forest / S', color: 'Forest', size: 'S', sku: 'AUR-RIB-FRS-S', price: 18.99, compareAt: 26.0, inventory: 0, image: IMG.p2, available: false },
+        { id: 'p2-ivr-m', title: 'Ivory / M', color: 'Ivory', size: 'M', sku: 'AUR-RIB-IVR-M', price: 18.99, compareAt: 26.0, inventory: 0, image: IMG.p2ivr, available: false },
+      ] },
+      { id: 'p3', title: 'Editorial shell dress', vendor: 'Aura Studio', category: 'Dresses', price: 41.5, compareAt: 58.0, rating: 4.9, reviews: 176, image: IMG.p3, images: [IMG.p3, IMG.p3b], swatches: ['#3a3f4a', '#9fb0a0', '#d8c3a5'],
         variants: [
           { id: 'p3-blk-m', title: 'Black / M', price: 41.5, compareAt: 58.0 },
           { id: 'p3-blk-s', title: 'Black / S', price: 41.5, compareAt: 58.0 },
           { id: 'p3-snd-m', title: 'Sand / M', price: 44.0, compareAt: 60.0 },
           { id: 'p3-grn-l', title: 'Sage / L', price: 44.0, compareAt: 60.0 },
         ] },
-      { id: 'p4', title: 'Street denim jacket', status: 'draft', vendor: 'Aura Studio', price: 54.0, compareAt: 72.0, rating: 4.7, reviews: 132, image: IMG.p4, swatches: ['#33415c', '#1b1f24'],
+      { id: 'p4', title: 'Street denim jacket', status: 'draft', vendor: 'Aura Studio', category: 'Outerwear', price: 54.0, compareAt: 72.0, rating: 4.7, reviews: 132, image: IMG.p4, images: [IMG.p4, IMG.p4b], swatches: ['#33415c', '#1b1f24'],
         variants: [
           { id: 'p4-ind-m', title: 'Indigo / M', price: 54.0, compareAt: 72.0 },
           { id: 'p4-ind-l', title: 'Indigo / L', price: 56.0, compareAt: 74.0 },
           { id: 'p4-blk-m', title: 'Black / M', price: 58.0, compareAt: 76.0 },
         ] },
-      { id: 'p5', title: 'Crewneck sweater', vendor: 'Aura Studio', price: 44.0, compareAt: 0, rating: 4.5, reviews: 64, image: IMG.p5, swatches: ['#6b705c', '#cb997e'] },
-      { id: 'p6', title: 'Pleated midi skirt', vendor: 'Aura Studio', price: 38.0, compareAt: 49.0, rating: 4.4, reviews: 51, image: IMG.p6, swatches: ['#1b1f24', '#b08968'] },
-      { id: 'p7', title: 'Canvas weekender tote', vendor: 'Aura Studio', price: 29.0, compareAt: 39.0, rating: 4.7, reviews: 83, image: IMG.cat1, swatches: ['#b08968', '#2b2f36'] },
-      { id: 'p8', title: 'Everyday rib socks · 3 pack', vendor: 'Aura Studio', price: 16.0, compareAt: 24.0, rating: 4.6, reviews: 119, image: IMG.cat2, swatches: ['#eae3d6', '#1b1f24'] },
-      { id: 'p9', title: 'Mini canvas pouch', vendor: 'Aura Studio', price: 14.0, compareAt: 19.0, rating: 4.5, reviews: 72, image: IMG.p1, swatches: ['#c8b6a6', '#2b2f36'] },
-      { id: 'p10', title: 'Travel care kit', vendor: 'Aura Studio', price: 12.0, compareAt: 18.0, rating: 4.6, reviews: 91, image: IMG.p2, swatches: ['#d9d2c5'] },
-      { id: 'p11', title: 'Essential hair scarf', vendor: 'Aura Studio', price: 18.0, compareAt: 25.0, rating: 4.4, reviews: 54, image: IMG.p3, swatches: ['#1b1f24', '#d8c3a5'] },
-      { id: 'p12', title: 'Cotton sleep mask', vendor: 'Aura Studio', price: 9.5, compareAt: 14.0, rating: 4.7, reviews: 108, image: IMG.p4, swatches: ['#33415c', '#eae3d6'] },
-      { id: 'p13', title: 'Everyday claw clip set', vendor: 'Aura Studio', price: 15.0, compareAt: 21.0, rating: 4.6, reviews: 137, image: IMG.p5, swatches: ['#6b705c', '#cb997e'] },
-      { id: 'p14', title: 'Compact jewelry case', vendor: 'Aura Studio', price: 20.0, compareAt: 28.0, rating: 4.8, reviews: 66, image: IMG.p6, swatches: ['#b08968', '#1b1f24'] },
-      { id: 'p15', title: 'Soft-touch headband', vendor: 'Aura Studio', price: 11.0, compareAt: 16.0, rating: 4.5, reviews: 84, image: IMG.cat1, swatches: ['#d8c3a5', '#1b1f24'] },
-      { id: 'p16', title: 'Linen scrunchie set', vendor: 'Aura Studio', price: 13.0, compareAt: 18.0, rating: 4.6, reviews: 102, image: IMG.cat2, swatches: ['#c8b6a6', '#9fb0a0'] },
-      { id: 'p17', title: 'Pocket mirror', vendor: 'Aura Studio', price: 8.0, compareAt: 12.0, rating: 4.4, reviews: 47, image: IMG.p1, swatches: ['#2b2f36'] },
-      { id: 'p18', title: 'Mini travel comb', vendor: 'Aura Studio', price: 7.5, compareAt: 11.0, rating: 4.5, reviews: 59, image: IMG.p2, swatches: ['#eae3d6'] },
-      { id: 'p19', title: 'Reusable garment bag', vendor: 'Aura Studio', price: 17.0, compareAt: 24.0, rating: 4.7, reviews: 73, image: IMG.p3, swatches: ['#3a3f4a'] },
-      { id: 'p20', title: 'Delicate wash bag set', vendor: 'Aura Studio', price: 10.0, compareAt: 15.0, rating: 4.6, reviews: 96, image: IMG.p4, swatches: ['#eae3d6', '#33415c'] },
+      { id: 'p5', title: 'Crewneck sweater', vendor: 'Aura Studio', category: 'Tops', price: 44.0, compareAt: 0, rating: 4.5, reviews: 64, image: IMG.p5, images: [IMG.p5, IMG.p5b, IMG.p5c], swatches: ['#6b705c', '#cb997e'] },
+      { id: 'p6', title: 'Pleated midi skirt', status: 'archived', vendor: 'Aura Studio', category: 'Dresses', price: 38.0, compareAt: 49.0, rating: 4.4, reviews: 51, image: IMG.p6, swatches: ['#1b1f24', '#b08968'] },
+      { id: 'p7', title: 'Canvas weekender tote', vendor: 'Aura Studio', price: 29.0, compareAt: 39.0, rating: 4.7, reviews: 83, image: IMG.p7, swatches: ['#b08968', '#2b2f36'] },
+      { id: 'p8', title: 'Everyday rib socks · 3 pack', status: 'deactivated', vendor: 'Aura Studio', price: 16.0, compareAt: 24.0, rating: 4.6, reviews: 119, image: IMG.p8, swatches: ['#eae3d6', '#1b1f24'] },
+      { id: 'p9', title: 'Mini canvas pouch', vendor: 'Aura Studio', price: 14.0, compareAt: 19.0, rating: 4.5, reviews: 72, image: IMG.p9, swatches: ['#c8b6a6', '#2b2f36'] },
+      { id: 'p10', title: 'Travel care kit', vendor: 'Aura Studio', price: 12.0, compareAt: 18.0, rating: 4.6, reviews: 91, image: IMG.p10, swatches: ['#d9d2c5'] },
+      { id: 'p11', title: 'Essential hair scarf', vendor: 'Aura Studio', price: 18.0, compareAt: 25.0, rating: 4.4, reviews: 54, image: IMG.p11, swatches: ['#1b1f24', '#d8c3a5'] },
+      { id: 'p12', title: 'Cotton sleep mask', vendor: 'Aura Studio', price: 9.5, compareAt: 14.0, rating: 4.7, reviews: 108, image: IMG.p12, swatches: ['#33415c', '#eae3d6'] },
+      { id: 'p13', title: 'Everyday claw clip set', vendor: 'Aura Studio', price: 15.0, compareAt: 21.0, rating: 4.6, reviews: 137, image: IMG.p13, swatches: ['#6b705c', '#cb997e'] },
+      { id: 'p14', title: 'Compact jewelry case', vendor: 'Aura Studio', price: 20.0, compareAt: 28.0, rating: 4.8, reviews: 66, image: IMG.p14, swatches: ['#b08968', '#1b1f24'] },
+      { id: 'p15', title: 'Soft-touch headband', vendor: 'Aura Studio', price: 11.0, compareAt: 16.0, rating: 4.5, reviews: 84, image: IMG.p15, swatches: ['#d8c3a5', '#1b1f24'] },
+      { id: 'p16', title: 'Linen scrunchie set', vendor: 'Aura Studio', price: 13.0, compareAt: 18.0, rating: 4.6, reviews: 102, image: IMG.p16, swatches: ['#c8b6a6', '#9fb0a0'] },
+      { id: 'p17', title: 'Pocket mirror', vendor: 'Aura Studio', price: 8.0, compareAt: 12.0, rating: 4.4, reviews: 47, image: IMG.p17, swatches: ['#2b2f36'] },
+      { id: 'p18', title: 'Mini travel comb', vendor: 'Aura Studio', price: 7.5, compareAt: 11.0, rating: 4.5, reviews: 59, image: IMG.p18, swatches: ['#eae3d6'] },
+      { id: 'p19', title: 'Reusable garment bag', vendor: 'Aura Studio', price: 17.0, compareAt: 24.0, rating: 4.7, reviews: 73, image: IMG.p19, swatches: ['#3a3f4a'] },
+      { id: 'p20', title: 'Delicate wash bag set', vendor: 'Aura Studio', price: 10.0, compareAt: 15.0, rating: 4.6, reviews: 96, image: IMG.p20, swatches: ['#eae3d6', '#33415c'] },
     ],
     // Service / membership products bound by the Shipping Insurance & VIP Club components.
     // They carry their own price and show up in the Order Summary like a normal line item.
@@ -249,8 +349,8 @@
       { id: 'new-arrivals', title: 'New arrivals', image: IMG.cat2, count: 32 },
       { id: 'dresses', title: 'Dresses', image: IMG.cat3, count: 27 },
       { id: 'tops', title: 'Tops', image: IMG.cat4, count: 41 },
-      { id: 'bottoms', title: 'Bottoms', image: IMG.p1, count: 36 },
-      { id: 'sale', title: 'Sale', image: IMG.p4, count: 19 },
+      { id: 'bottoms', title: 'Bottoms', image: IMG.cat5, count: 36 },
+      { id: 'sale', title: 'Sale', image: IMG.cat6, count: 19 },
     ],
     menus: [
       { id: 'menu-main', name: 'Main menu', items: [
@@ -333,7 +433,6 @@
     // is the built-in fallback (can't be deleted). `assigned` is a mock count shown in the
     // selector submenu ("Assigned to N collections"). Single types (home / collections) simply
     // keep a one-item list. Extra collection templates seed the multi-template UX.
-    // Product (PDP) templates are omitted until that page type is finished.
     templates: {
       home: { list: [
         { id: 'default', name: 'Home page', assigned: '—', sections: [
@@ -343,6 +442,22 @@
           { id: 'sec-home-testi', kind: 'testimonial' },
           { id: 'sec-home-faq', kind: 'faq' },
           { id: 'sec-home-news', kind: 'newsletter' },
+        ] },
+      ] },
+      product: { list: [
+        { id: 'default', name: 'Default product', isDefault: true, assigned: 18, assignedResourceIds: ['p1', 'p2', 'p4', 'p5', 'p7', 'p8', 'p9', 'p10', 'p11', 'p12', 'p13', 'p14', 'p15', 'p16', 'p17', 'p18', 'p19', 'p20'], sections: [
+          { id: 'sec-pdp-breadcrumbs', kind: 'breadcrumbs', hidden: true },
+          { id: 'sec-pdp-main', kind: 'product-main' },
+          { id: 'sec-pdp-story', kind: 'media-with-text' },
+          { id: 'sec-pdp-testimonial', kind: 'testimonial' },
+          { id: 'sec-pdp-faq', kind: 'faq' },
+        ] },
+        { id: 'lookbook', name: 'Lookbook', basedOn: 'default', assigned: 2, assignedResourceIds: ['p3', 'p6'], sections: [
+          { kind: 'breadcrumbs', hidden: true },
+          { kind: 'product-main' },
+          { kind: 'media-with-text' },
+          { kind: 'testimonial' },
+          { kind: 'faq' },
         ] },
       ] },
       collection: { list: [

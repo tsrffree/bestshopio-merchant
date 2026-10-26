@@ -50,14 +50,13 @@
     },
     defaultBlocks: () => ([
       { id: OS.uid('mwt'), kind: 'image', hidden: false, settings: { image: OS.sample.IMG.iwt, image_width: 50, image_position: 'left', subheading: 'The science of comfort', heading: 'Engineered for your body', content: 'Our linen-feel fabric is breathable, lightweight and designed to move with you all day long.', button_text: 'Explore the technology', button_url: '#', button_style: 'text' } },
-      { id: OS.uid('mwt'), kind: 'image', hidden: false, settings: { image: OS.sample.IMG.cat3, image_width: 50, image_position: 'right', subheading: 'Made to last', heading: 'Considered, not disposable', content: 'Every piece is built from durable materials and finished by hand, so it stays with you season after season.', button_text: 'Our story', button_url: '#', button_style: 'underline' } },
+      { id: OS.uid('mwt'), kind: 'image', hidden: false, settings: { image: OS.sample.IMG.iwt2, image_width: 50, image_position: 'right', subheading: 'Made to last', heading: 'Considered, not disposable', content: 'Every piece is built from durable materials and finished by hand, so it stays with you season after season.', button_text: 'Our story', button_url: '#', button_style: 'underline' } },
     ]),
     render: function (s, blocks, ctx) {
       const t = ctx.tokens, mob = ctx.mob;
       const text = OS.col(s.text, (t.colors && t.colors.text_color) || '#1a1a1a');
       const bg = OS.bgOrTransparent(s.background);
-      const padV = OS.secSpace(t, mob), padH = OS.pagePad(t, mob);
-      const maxW = s.full_width ? '100%' : OS.pageWidth(t) + 'px';
+      const padV = OS.secSpace(t, mob), padX = OS.pageGutter(t, mob, { fullWidth: !!s.full_width });
       const gap = SP[s.spacing] != null ? SP[s.spacing] : 40;
       const rad = OS.layoutRadius(t, 'image');
       const list = (blocks || []).filter((b) => !b.hidden);
@@ -85,8 +84,8 @@
         const inner = b.image_position === 'right' ? txt + media : media + txt;
         return '<div class="mwt-row" data-block-id="' + OS.esc(b0.id) + '" style="grid-template-columns:' + cols + ';gap:' + OS.clamp(64, 24, 80, 64) + 'px;margin-bottom:' + gap + 'px">' + inner + '</div>';
       }).join('');
-      return '<div class="mwtx' + (mob ? ' mob' : '') + '" style="background:' + bg + ';color:' + text + ';font-family:' + OS.bodyFamily(t) + ';padding:' + padV + 'px ' + padH + 'px">' +
-        '<div style="max-width:' + maxW + ';margin:0 auto">' + heading + (list.length ? rows : '<div style="text-align:center;opacity:.5;font-size:13px;padding:24px">Add an image block.</div>') + '</div></div>';
+      return '<div class="mwtx' + (mob ? ' mob' : '') + '" style="background:' + bg + ';color:' + text + ';font-family:' + OS.bodyFamily(t) + ';padding:' + padV + 'px ' + padX + '">' +
+        '<div style="max-width:100%;margin:0 auto">' + heading + (list.length ? rows : '<div style="text-align:center;opacity:.5;font-size:13px;padding:24px">Add an image block.</div>') + '</div></div>';
     },
   });
 })();

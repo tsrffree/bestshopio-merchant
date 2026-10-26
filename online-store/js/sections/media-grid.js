@@ -59,13 +59,13 @@
         { key: 'title', control: 'text', label: 'Title', default: '' },
         { key: 'link', control: 'url', label: 'Link', default: '' },
       ],
-      defaults: () => ({ media_type: 'image', image: OS.sample.IMG.cat1, title: 'A caption' }),
+      defaults: () => ({ media_type: 'image', image: OS.sample.IMG.iwt, title: 'A caption' }),
     },
     defaultBlocks: () => ([
-      { id: OS.uid('mg'), kind: 'item', hidden: false, settings: { media_type: 'image', image: OS.sample.IMG.cat1, title: 'Turmeric · Ginger', link: '' } },
-      { id: OS.uid('mg'), kind: 'item', hidden: false, settings: { media_type: 'image', image: OS.sample.IMG.cat2, title: 'Matcha · Coffee', link: '' } },
-      { id: OS.uid('mg'), kind: 'item', hidden: false, settings: { media_type: 'image', image: OS.sample.IMG.cat3, title: 'Citrus · Mint', link: '' } },
-      { id: OS.uid('mg'), kind: 'item', hidden: false, settings: { media_type: 'image', image: OS.sample.IMG.cat4, title: 'Berry · Acai', link: '' } },
+      { id: OS.uid('mg'), kind: 'item', hidden: false, settings: { media_type: 'image', image: OS.sample.IMG.iwt, title: 'Turmeric · Ginger', link: '' } },
+      { id: OS.uid('mg'), kind: 'item', hidden: false, settings: { media_type: 'image', image: OS.sample.IMG.iwt2, title: 'Matcha · Coffee', link: '' } },
+      { id: OS.uid('mg'), kind: 'item', hidden: false, settings: { media_type: 'image', image: OS.sample.IMG.blog1, title: 'Citrus · Mint', link: '' } },
+      { id: OS.uid('mg'), kind: 'item', hidden: false, settings: { media_type: 'image', image: OS.sample.IMG.blog2, title: 'Berry · Acai', link: '' } },
     ]),
     render: function (s, blocks, ctx) {
       const t = ctx.tokens, mob = ctx.mob;

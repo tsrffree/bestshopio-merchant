@@ -43,7 +43,7 @@
       { key: 'text', control: 'color', label: 'Text', default: '', allowTransparent: true, info: 'Blank inherits the theme text color.' },
       { key: 'handle_color', control: 'color', label: 'Handle', default: '#FFFFFF' },
     ],
-    defaults: () => ({ before_image: OS.sample.IMG.cat3, after_image: OS.sample.IMG.cat1 }),
+    defaults: () => ({ before_image: OS.sample.IMG.hero1, after_image: OS.sample.IMG.hero3 }),
     render: function (s, blocks, ctx) {
       const t = ctx.tokens, mob = ctx.mob;
       const bg = OS.bgOrTransparent(s.background);
@@ -54,8 +54,8 @@
       const rad = OS.layoutRadius(t, 'image');
       const pos = OS.clamp(s.drag_initial_position, 0, 100, 50);
       const handleCol = OS.col(s.handle_color, '#FFFFFF') || '#FFFFFF';
-      const before = OS.esc(s.before_image || OS.sample.IMG.cat3);
-      const after = OS.esc(s.after_image || OS.sample.IMG.cat1);
+      const before = OS.esc(s.before_image || OS.sample.IMG.hero1);
+      const after = OS.esc(s.after_image || OS.sample.IMG.hero3);
 
       const header =
         (s.subheading ? '<div class="ba-sub">' + OS.esc(s.subheading) + '</div>' : '') +

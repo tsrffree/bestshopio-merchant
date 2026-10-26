@@ -93,7 +93,7 @@
       const t = ctx.tokens, mob = ctx.mob, c = t.colors || {};
       const bg = OS.bgOrTransparent(OS.col(s.background, c.footer_background || '#103635'));
       const fg = s.text || '#fff', headFg = s.heading_text || '#fff';
-      const padH = OS.pagePad(t, mob), maxW = s.full_width ? 1480 : OS.clamp(1200, 360, 1480, 1200);
+      const padX = OS.pageGutter(t, mob, { fullWidth: !!s.full_width });
       const list = (blocks || []).filter((b) => !b.hidden);
       const cols = OS.clamp(Number(s.desktop_columns) || 5, 2, 6, 5);
       const blockHtml = (b0) => {
@@ -122,13 +122,24 @@
       const social = s.show_social_media ? '<div class="ft-social">' + Object.keys(SOC).filter((k) => (t.social_media || {})[k]).map((k) => '<a href="' + OS.esc(t.social_media[k]) + '">' + SOC[k] + '</a>').join('') + '</div>' : '';
       const copy = s.show_copyright ? '<div>' + OS.esc((s.copyright_text || '').replace('{{year}}', '2026').replace('{{shop_name}}', 'Aura')) + (s.show_powered_by ? ' · Powered by BestShopio' : '') + '</div>' : '<div></div>';
       const bottom = (social || s.show_copyright) ? '<div class="ft-bottom" style="border-top:1px solid rgba(255,255,255,.14)">' + copy + social + '</div>' : '';
-      return '<div class="ftx' + (mob ? ' mob' : '') + (mob && s.mobile_layout === 'accordion' ? ' acc' : '') + '" style="background:' + bg + ';color:' + fg + ';padding:' + OS.secSpace(t, mob) + 'px ' + padH + 'px;font-family:' + OS.bodyFamily(t) + '">' +
-        '<div class="ft-inner" style="max-width:' + maxW + 'px"><div class="ft-cols" style="grid-template-columns:repeat(' + (s.footer_layout === 'simpleHorizontal' ? 1 : cols) + ',minmax(0,1fr))">' +
+      return '<div class="ftx' + (mob ? ' mob' : '') + (mob && s.mobile_layout === 'accordion' ? ' acc' : '') + '" style="background:' + bg + ';color:' + fg + ';padding:' + OS.secSpace(t, mob) + 'px ' + padX + ';font-family:' + OS.bodyFamily(t) + '">' +
+        '<div class="ft-inner"><div class="ft-cols" style="grid-template-columns:repeat(' + (s.footer_layout === 'simpleHorizontal' ? 1 : cols) + ',minmax(0,1fr))">' +
         (list.length ? list.map(blockHtml).join('') : '<div style="opacity:.6;font-size:13px">Add a footer block.</div>') + '</div>' + bottom + '</div></div>';
     },
     hydrate: function (root) {
       if (!root.classList.contains('acc')) return;
-      root.querySelectorAll('.ft-acc').forEach((a) => { const h = a.querySelector('.ft-bh'); if (h) { h.style.cursor = 'pointer'; h.onclick = (e) => { e.stopPropagation(); a.classList.toggle('open'); }; } });
+      const groups = [...root.querySelectorAll('.ft-acc')];
+      groups.forEach((a) => {
+        const h = a.querySelector('.ft-bh');
+        if (!h) return;
+        h.style.cursor = 'pointer';
+        h.onclick = (e) => {
+          e.stopPropagation();
+          const open = !a.classList.contains('open');
+          groups.forEach((other) => other.classList.remove('open'));
+          if (open) a.classList.add('open');
+        };
+      });
     },
   });
 })();

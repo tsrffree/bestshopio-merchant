@@ -234,11 +234,15 @@
       });
 
       // --- Signed-in card ---
+      const accords = [...el.querySelectorAll('[data-ck-accord]')];
       el.querySelectorAll('[data-ck-accord-toggle]').forEach((btn) => {
         btn.addEventListener('click', (e) => {
           // Ignore toggles that originate from the kebab / its popover.
           if (e.target.closest('[data-ck-addr-kebab]') || e.target.closest('.ck-mini-pop')) return;
-          btn.closest('[data-ck-accord]').classList.toggle('open');
+          const box = btn.closest('[data-ck-accord]');
+          const open = !box.classList.contains('open');
+          accords.forEach((other) => other.classList.remove('open'));
+          if (open) box.classList.add('open');
         });
       });
 

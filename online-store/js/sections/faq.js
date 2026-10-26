@@ -16,7 +16,6 @@
     '.faqx .faq-a{display:grid;grid-template-rows:0fr;transition:grid-template-rows .22s ease}',
     '.faqx .faq-item.open .faq-a{grid-template-rows:1fr}',
     '.faqx .faq-a-in{overflow:hidden}.faqx .faq-a-in .pad{padding:0 14px 16px;font-size:14px;line-height:1.6;opacity:.85}',
-    '.faqx .faq-btn{display:inline-flex;align-items:center;justify-content:center;border:0;cursor:pointer;border-radius:999px;padding:13px 32px;font-size:13px;font-weight:600;margin-top:20px;font-family:inherit}',
     '.faqx .faq-support{margin-top:18px;font-size:13px;opacity:.8;line-height:1.7}',
     '.faqx .faq-media{border-radius:14px;overflow:hidden;background-size:cover;background-position:center;min-height:280px}',
     '.faqx .faq-grid{display:grid;gap:48px;align-items:start}',
@@ -38,14 +37,9 @@
       { key: 'media_image', control: 'image', label: 'Media image', default: '', visibleWhen: (s) => s.layout_style === 'and-media' },
       { key: 'media_position', control: 'segmented', label: 'Media position', default: 'right', options: [{ value: 'left', label: 'Left' }, { value: 'right', label: 'Right' }], visibleWhen: (s) => s.layout_style === 'and-media' },
       { key: 'media_width', control: 'range', label: 'Media width', min: 30, max: 60, step: 1, unit: '%', default: 50, visibleWhen: (s) => s.layout_style === 'and-media' },
-      { sub: 'Call to action' },
-      { key: 'button_text', control: 'text', label: 'Button text', default: 'Get in touch' },
-      { key: 'button_link', control: 'url', label: 'Button link', default: '#' },
       { sub: 'Colors' },
       { key: 'background', control: 'color', label: 'Background', default: 'transparent', allowTransparent: true },
       { key: 'heading_color', control: 'color', label: 'Heading', default: '', allowTransparent: true, info: 'Blank inherits the theme heading color.' },
-      { key: 'button_background', control: 'color', label: 'Button background', default: '#0F0F0F' },
-      { key: 'button_text_color', control: 'color', label: 'Button text', default: '#FFFFFF' },
       { key: 'accordion_background', control: 'color', label: 'Accordion background', default: '#F4F4F4', allowTransparent: true },
     ],
     blocks: {
@@ -66,8 +60,7 @@
       const t = ctx.tokens, mob = ctx.mob;
       const head = OS.col(s.heading_color, (t.colors && t.colors.heading_color) || '#1a1a1a');
       const bg = OS.bgOrTransparent(s.background);
-      const padV = OS.secSpace(t, mob), padH = OS.pagePad(t, mob);
-      const maxW = s.full_width ? '100%' : OS.pageWidth(t) + 'px';
+      const padV = OS.secSpace(t, mob), padX = OS.pageGutter(t, mob, { fullWidth: !!s.full_width });
       const items = (blocks || []).filter((b) => !b.hidden && b.settings.question);
       const accBg = OS.bgOrTransparent(s.accordion_background);
       const acc = items.length
@@ -80,27 +73,39 @@
         (s.subheading ? '<div class="faq-sub">' + OS.esc(s.subheading) + '</div>' : '') +
         '<h2 style="font-family:' + OS.headingFamily(t) + ';font-size:' + OS.headingSize(t, mob ? 26 : 34) + 'px;color:' + head + ';text-align:' + align + '">' + OS.esc(s.heading || 'FAQ') + '</h2>' +
         (s.content ? '<div class="faq-rich" style="text-align:' + align + '">' + s.content + '</div>' : '');
-      const btn = s.button_text ? '<a class="faq-btn" href="' + OS.esc(s.button_link || '#') + '" style="background:' + (s.button_background || '#0f0f0f') + ';color:' + (s.button_text_color || '#fff') + '">' + OS.esc(s.button_text) + '</a>' : '';
       const support = (s.support_hours || s.answer_time) ? '<div class="faq-support">' + OS.esc(s.support_hours || '') + (s.answer_time ? '<br>' + OS.esc(s.answer_time) : '') + '</div>' : '';
 
       let inner;
       if (s.layout_style === 'and-media' && !mob) {
         const mw = OS.clamp(s.media_width, 30, 60, 50);
         const media = '<div class="faq-media" style="background-image:url(' + OS.esc(s.media_image || OS.sample.IMG.iwt) + ')"></div>';
-        const text = '<div>' + headerBlk('left') + acc + '<div style="text-align:center">' + btn + '</div></div>';
+        const text = '<div>' + headerBlk('left') + acc + '</div>';
         const cols = s.media_position === 'left' ? (mw + '% 1fr') : ('1fr ' + mw + '%');
         inner = '<div class="faq-grid" style="grid-template-columns:' + cols + '">' + (s.media_position === 'left' ? media + text : text + media) + '</div>';
       } else if (s.layout_style === 'and-text' && !mob && s.text_position !== 'center') {
-        const text = '<div>' + headerBlk('left') + support + btn + '</div>';
+        const text = '<div>' + headerBlk('left') + support + '</div>';
         inner = '<div class="faq-grid" style="grid-template-columns:4fr 6fr">' + (s.text_position === 'right' ? acc + text : text + acc) + '</div>';
       } else {
-        inner = '<div style="max-width:760px;margin:0 auto;text-align:' + (mob ? 'center' : (s.text_position || 'left')) + '">' + headerBlk(mob ? 'center' : (s.text_position || 'left')) + acc + support + '<div style="text-align:center">' + btn + '</div></div>';
+        inner = '<div style="max-width:760px;margin:0 auto;text-align:' + (mob ? 'center' : (s.text_position || 'left')) + '">' + headerBlk(mob ? 'center' : (s.text_position || 'left')) + acc + support + '</div>';
       }
-      return '<div class="faqx" style="background:' + bg + ';color:' + ((t.colors && t.colors.text_color) || '#1a1a1a') + ';font-family:' + OS.bodyFamily(t) + ';padding:' + padV + 'px ' + padH + 'px">' +
-        '<div style="max-width:' + maxW + ';margin:0 auto">' + inner + '</div></div>';
+      return '<div class="faqx" style="background:' + bg + ';color:' + ((t.colors && t.colors.text_color) || '#1a1a1a') + ';font-family:' + OS.bodyFamily(t) + ';padding:' + padV + 'px ' + padX + '">' +
+        '<div style="max-width:100%;margin:0 auto">' + inner + '</div></div>';
     },
     hydrate: function (root) {
-      root.querySelectorAll('.faq-q').forEach((q) => q.addEventListener('click', () => { q.closest('.faq-item').classList.toggle('open'); }));
+      const items = [...root.querySelectorAll('.faq-item')];
+      let kept = false;
+      items.forEach((item) => {
+        if (!item.classList.contains('open')) return;
+        if (kept) item.classList.remove('open');
+        else kept = true;
+      });
+      root.querySelectorAll('.faq-q').forEach((q) => q.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const item = q.closest('.faq-item');
+        const open = !item.classList.contains('open');
+        items.forEach((other) => other.classList.remove('open'));
+        if (open) item.classList.add('open');
+      }));
     },
   });
 })();

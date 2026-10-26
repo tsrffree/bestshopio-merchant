@@ -7,12 +7,12 @@
     '.hdx{position:relative;font-family:inherit}.hdx *{box-sizing:border-box}',
     '.hdx .hd-bar{display:flex;align-items:center;gap:18px;padding:16px 0;min-height:64px}',
     '.hdx .hd-inner{margin:0 auto;width:100%}',
-    '.hdx .hd-logo{font-weight:800;letter-spacing:-.02em;line-height:1;flex:none}',
+    '.hdx .hd-logo{font-weight:var(--os-heading-weight,500);letter-spacing:var(--os-heading-tracking,-0.04em);line-height:1;flex:none}',
     '.hdx .hd-logo img{display:block;object-fit:contain}',
     '.hdx .hd-nav{display:flex;gap:22px;align-items:center;flex:1}',
     '.hdx .hd-nav.center{justify-content:center}.hdx .hd-nav.right{justify-content:flex-end}',
     '.hdx .hd-li{position:relative}',
-    '.hdx .hd-link{display:inline-flex;align-items:center;gap:4px;font-size:13.5px;font-weight:600;cursor:pointer;white-space:nowrap;color:inherit;text-decoration:none}',
+    '.hdx .hd-link{display:inline-flex;align-items:center;gap:4px;font-size:13.5px;font-weight:var(--os-nav-weight,500);text-transform:var(--os-nav-transform,none);cursor:pointer;white-space:nowrap;color:inherit;text-decoration:none}',
     '.hdx .hd-link .cv{font-size:9px;opacity:.6}',
     '.hdx .hd-drop{position:absolute;top:100%;left:0;background:#fff;color:#111;border:1px solid #eee;box-shadow:0 12px 30px rgba(0,0,0,.12);border-radius:10px;padding:14px;min-width:200px;opacity:0;visibility:hidden;transform:translateY(6px);transition:.15s;z-index:20}',
     '.hdx .hd-li:hover .hd-drop{opacity:1;visibility:visible;transform:none}',
@@ -43,12 +43,8 @@
   OS.register('header', {
     name: 'Header', group: 'header', icon: 'header',
     schema: [
-      { key: 'variant', control: 'segmented', label: 'Header variant', default: 'basic', options: [{ value: 'basic', label: 'Basic header' }, { value: 'search', label: 'Search header' }] },
-      { key: 'layout', control: 'segmented', label: 'Header layout', default: 'logoLeft', options: [{ value: 'logoLeft', label: 'Logo left' }, { value: 'logoTopCenter', label: 'Logo top center' }], visibleWhen: (s) => s.variant === 'basic' },
-      { sub: 'Logo' },
-      { key: 'logo_image', control: 'image', label: 'Logo image', default: '' },
-      { key: 'logo_text', control: 'text', label: 'Logo text', default: 'AURA' },
-      { key: 'logo_width', control: 'range', label: 'Logo width (desktop)', min: 48, max: 220, step: 4, unit: 'px', default: 96 },
+      { key: 'variant', control: 'segmented', label: 'Header variant', default: 'basic', options: [{ value: 'basic', label: 'Basic' }, { value: 'search', label: 'Search' }] },
+      { key: 'layout', control: 'segmented', label: 'Header layout', default: 'logoLeft', options: [{ value: 'logoLeft', label: 'Left' }, { value: 'logoTopCenter', label: 'Top center' }], visibleWhen: (s) => s.variant === 'basic' },
       { sub: 'Menu' },
       { key: 'menu', control: 'menu', label: 'Main menu', default: 'menu-main' },
       { key: 'menu_alignment', control: 'segmented', label: 'Menu alignment', default: 'center', options: [{ value: 'left', label: 'Left' }, { value: 'center', label: 'Center' }, { value: 'right', label: 'Right' }], visibleWhen: (s) => s.variant === 'search' || s.layout === 'logoTopCenter' },
@@ -66,12 +62,12 @@
       { key: 'background', control: 'color', label: 'Background', default: '#FFFFFF', allowTransparent: true },
       { key: 'text_color', control: 'color', label: 'Text / icon', default: '#111827' },
     ],
-    defaults: () => ({}),
+    defaults: () => ({ logo_text: 'AURA', logo_width: 96, logo_image: '' }),
     render: function (s, blocks, ctx) {
       const t = ctx.tokens, mob = ctx.mob;
       const trans = !!ctx.transparentHeader;
       const bg = trans ? 'transparent' : OS.bgOrTransparent(s.background), fg = trans ? '#ffffff' : (s.text_color || '#111');
-      const padH = OS.pagePad(t, mob), maxW = OS.pageWidth(t);
+      const padX = OS.pageGutter(t, mob);
       const isSearch = s.variant === 'search';
       const menu = menuOf(s);
       const logo = s.logo_image
@@ -105,7 +101,7 @@
       const secondRow = (!mob && (isSearch || s.layout === 'logoTopCenter')) ? '<div style="padding-bottom:12px">' + nav + '</div>' : '';
       const drawer = mob ? drawerHtml(menu, fg) : '';
       return '<div class="hdx' + (mob ? ' mob' : '') + (trans ? ' trans' : '') + '" style="background:' + bg + ';' + ((s.border_bottom && !trans) ? 'border-bottom:1px solid ' + ((t.colors && t.colors.border_color) || '#eee') + ';' : '') + 'font-family:' + OS.bodyFamily(t) + '">' +
-        '<div class="hd-inner" style="max-width:' + maxW + 'px;padding:0 ' + padH + 'px"><div class="hd-bar">' + bar + '</div>' + secondRow + '</div>' + drawer + '</div>';
+        '<div class="hd-inner" style="padding:0 ' + padX + '"><div class="hd-bar">' + bar + '</div>' + secondRow + '</div>' + drawer + '</div>';
     },
     hydrate: function (root) {
       const open = root.querySelector('[data-hd-open]'); const dr = root.querySelector('.hd-drawer'); const sc = root.querySelector('.hd-scrim'); const cl = root.querySelector('[data-hd-close]');

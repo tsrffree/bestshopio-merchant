@@ -464,7 +464,14 @@
         const drawerBtn = host.querySelector('[data-cpg-drawer]'); if (drawerBtn) drawerBtn.onclick = (e) => { stop(e); st.drawer = true; repaint(); };
         host.querySelectorAll('[data-cpg-dclose]').forEach((b) => b.onclick = (e) => { stop(e); st.drawer = false; repaint(); });
         host.querySelectorAll('[data-cpg-opt]').forEach((b) => b.onclick = (e) => { stop(e); const p = b.getAttribute('data-cpg-opt').split(':'); toggleVal(p[0], p.slice(1).join(':')); st.page = 1; st.loaded = 1; repaint(); });
-        host.querySelectorAll('[data-cpg-acc]').forEach((b) => b.onclick = (e) => { stop(e); const id = b.getAttribute('data-cpg-acc'); const cur = (id in st.open) ? st.open[id] : (s.open_first_group && FILTER_GROUPS[0].id === id); st.open[id] = !cur; repaint(); });
+        host.querySelectorAll('[data-cpg-acc]').forEach((b) => b.onclick = (e) => {
+          stop(e);
+          const id = b.getAttribute('data-cpg-acc');
+          const cur = (id in st.open) ? st.open[id] : (s.open_first_group && FILTER_GROUPS[0].id === id);
+          const next = !cur;
+          FILTER_GROUPS.forEach((g) => { st.open[g.id] = next && g.id === id; });
+          repaint();
+        });
         host.querySelectorAll('[data-cpg-tb]').forEach((b) => b.onclick = (e) => { stop(e); const id = b.getAttribute('data-cpg-tb'); st.topbar = st.topbar === id ? null : id; repaint(); });
         const pmin = host.querySelector('[data-cpg-pmin]'); if (pmin) { pmin.onclick = stop; pmin.onchange = (e) => { stop(e); setPrice(pmin.value, null); }; }
         const pmax = host.querySelector('[data-cpg-pmax]'); if (pmax) { pmax.onclick = stop; pmax.onchange = (e) => { stop(e); setPrice(null, pmax.value); }; }

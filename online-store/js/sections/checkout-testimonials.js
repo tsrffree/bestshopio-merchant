@@ -23,7 +23,7 @@
       { key: 'background', control: 'color', label: 'Background', default: 'transparent', allowTransparent: true },
       { key: 'card_background', control: 'color', label: 'Card background', default: '#FFFFFF', allowTransparent: true },
       { key: 'star_color', control: 'color', label: 'Star color', default: '#F5B301' },
-      { key: 'verified_color', control: 'color', label: 'Verified badge', default: '#22C55E' },
+      { key: 'verified_color', control: 'color', label: 'Verified badge', default: '#008060' },
       { sub: 'Advanced' },
       { key: 'custom_css', control: 'custom_css', label: 'Custom CSS', default: '' },
     ],
@@ -61,7 +61,7 @@
           (b.heading ? '<div class="cktm-h">' + esc(b.heading) + '</div>' : '') +
           '<div class="cktm-q">' + (b.content || '') + '</div>' +
           '<div class="cktm-author">' + (b.avatar ? '<div class="cktm-av' + (b.round_avatar ? ' round' : '') + '" style="background-image:url(' + esc(b.avatar) + ')"></div>' : '') +
-          '<div><div class="cktm-name">' + esc(b.author || 'Verified buyer') + '</div>' + (b.show_verified ? '<div class="cktm-verified" style="color:' + (s.verified_color || '#22c55e') + '">✓ Verified buyer</div>' : '') + '</div></div>' +
+          '<div><div class="cktm-name">' + esc(b.author || 'Verified buyer') + '</div>' + (b.show_verified ? '<div class="cktm-verified" style="color:' + (s.verified_color || '#008060') + '">✓ Verified buyer</div>' : '') + '</div></div>' +
         '</div>';
       }).join('');
       const head = '<div class="cktm-head">' + (s.subheading ? '<div class="cktm-sub">' + esc(s.subheading) + '</div>' : '') +
@@ -87,6 +87,6 @@
   .cktm-av{width:38px;height:38px;background-size:cover;background-position:center;background-color:#e7e9ee;flex:none}
   .cktm-av.round{border-radius:50%}
   .cktm-name{font-size:var(--ck-small-fs);font-weight:600}
-  .cktm-verified{font-size:11px}
+  .cktm-verified{font-size:11px;font-weight:700}
   `);
 })();

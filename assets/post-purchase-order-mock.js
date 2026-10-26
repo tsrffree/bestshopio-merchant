@@ -3,10 +3,10 @@
    after the 20-minute merge window closes, at most one Late Upsell Order. */
 (function () {
   const IMG = {
-    base: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=240&q=80',
-    baseUpsell: 'https://images.unsplash.com/photo-1485968579580-b6d095142e6e?auto=format&fit=crop&w=240&q=80',
-    lateUpsell: 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=240&q=80',
-    lateDownsell: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=240&q=80',
+    base: 'https://cdn.shopify.com/s/files/1/0824/4861/3621/files/Rectangle_151009.png?v=1791374340&width=480',
+    baseUpsell: 'https://cdn.shopify.com/s/files/1/0824/4861/3621/files/Rectangle_150910.png?v=1791368089&width=480',
+    lateUpsell: 'https://cdn.shopify.com/s/files/1/0824/4861/3621/files/DeepBrownTailoredWide-LegTrousers.png?v=1791783778&width=480',
+    lateDownsell: 'https://cdn.shopify.com/s/files/1/0824/4861/3621/files/Rectangle_151232.png?v=1791449614&width=480',
   };
 
   const customer = {

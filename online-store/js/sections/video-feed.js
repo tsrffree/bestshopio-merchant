@@ -70,12 +70,12 @@
         { key: 'platform', control: 'select', label: 'Platform', default: 'none', options: [{ value: 'none', label: 'None' }, { value: 'tiktok', label: 'TikTok' }, { value: 'instagram', label: 'Instagram' }, { value: 'youtube', label: 'YouTube' }] },
         { key: 'associated_product', control: 'product', label: 'Associated product', default: '' },
       ],
-      defaults: () => ({ cover_image: OS.sample.IMG.cat1, username: '@creator', title: 'Watch the look' }),
+      defaults: () => ({ cover_image: OS.sample.IMG.p3, username: '@creator', title: 'Watch the look' }),
     },
     defaultBlocks: () => ([
-      { id: OS.uid('vid'), kind: 'item', hidden: false, settings: { cover_image: OS.sample.IMG.cat1, username: '@aria.style', title: 'Styling the linen set 3 ways', platform: 'tiktok', associated_product: 'p1' } },
-      { id: OS.uid('vid'), kind: 'item', hidden: false, settings: { cover_image: OS.sample.IMG.cat2, username: '@maya.fit', title: 'My everyday capsule haul', platform: 'instagram', associated_product: 'p2' } },
-      { id: OS.uid('vid'), kind: 'item', hidden: false, settings: { cover_image: OS.sample.IMG.cat3, username: '@theo', title: 'Unboxing the new drop', platform: 'youtube', associated_product: 'p3' } },
+      { id: OS.uid('vid'), kind: 'item', hidden: false, settings: { cover_image: OS.sample.IMG.p3, username: '@aria.style', title: 'Styling the linen set 3 ways', platform: 'tiktok', associated_product: 'p1' } },
+      { id: OS.uid('vid'), kind: 'item', hidden: false, settings: { cover_image: OS.sample.IMG.p4, username: '@maya.fit', title: 'My everyday capsule haul', platform: 'instagram', associated_product: 'p2' } },
+      { id: OS.uid('vid'), kind: 'item', hidden: false, settings: { cover_image: OS.sample.IMG.p5, username: '@theo', title: 'Unboxing the new drop', platform: 'youtube', associated_product: 'p3' } },
     ]),
     render: function (s, blocks, ctx) {
       const t = ctx.tokens, mob = ctx.mob;

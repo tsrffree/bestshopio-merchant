@@ -33,27 +33,27 @@
   const TAG_SZ = { large: 13, medium: 12, small: 11 };
 
   const BLOCK_KINDS = {
-    tag: { name: 'Tag', fields: [
+    tag: { name: 'Tag', icon: 'label', fields: [
       { key: 'tag_text', control: 'text', label: 'Tag text', default: 'Best seller' },
       { key: 'tag_color', control: 'color', label: 'Tag color', default: '', allowTransparent: true, info: 'Blank inherits the theme primary color.' },
     ], defaults: () => ({}) },
-    title: { name: 'Title', fields: [
+    title: { name: 'Title', icon: 'heading', fields: [
       { key: 'title_size', control: 'select', label: 'Title size', default: 'large', options: [{ value: 'large', label: 'Large' }, { value: 'medium', label: 'Medium' }, { value: 'small', label: 'Small' }] },
     ], defaults: () => ({}) },
-    rating: { name: 'Rating', fields: [], defaults: () => ({}) },
-    price: { name: 'Price', fields: [
+    rating: { name: 'Rating', icon: 'starLine', fields: [], defaults: () => ({}) },
+    price: { name: 'Price', icon: 'priceTag', fields: [
       { key: 'show_compare_at', control: 'toggle', label: 'Show compare-at price', default: true },
       { key: 'show_savings', control: 'toggle', label: 'Show savings text', default: true },
     ], defaults: () => ({}) },
-    variant: { name: 'Variant picker', fields: [
+    variant: { name: 'Variant picker', icon: 'variant', fields: [
       { key: 'picker_type', control: 'segmented', label: 'Picker type', default: 'buttons', options: [{ value: 'buttons', label: 'Buttons' }, { value: 'dropdown', label: 'Dropdown' }] },
     ], defaults: () => ({}) },
     quantity: { name: 'Quantity selector', fields: [], defaults: () => ({}) },
-    buy: { name: 'Buy buttons', fields: [
+    buy: { name: 'Buy buttons', icon: 'cart', fields: [
       { key: 'button_text', control: 'text', label: 'Add to cart text', default: 'Add to cart' },
       { key: 'show_paypal', control: 'toggle', label: 'Show PayPal button', default: true },
     ], defaults: () => ({}) },
-    description: { name: 'Description', fields: [
+    description: { name: 'Description', icon: 'text', fields: [
       { key: 'heading', control: 'text', label: 'Heading', default: 'Details' },
       { key: 'content', control: 'richtext', label: 'Description', default: 'Add product details, materials and care instructions here.' },
     ], defaults: () => ({}) },
@@ -90,7 +90,7 @@
       const maxW = s.full_width ? '100%' : OS.pageWidth(t) + 'px';
       const sale = p.compareAt && p.compareAt > p.price, pct = sale ? Math.round((1 - p.price / p.compareAt) * 100) : 0;
       const saleColor = c.sale_price_color || '#d92d20';
-      const thumbs = [p.image, OS.sample.IMG.iwt, OS.sample.IMG.cat2, OS.sample.IMG.cat4];
+      const thumbs = (p.images && p.images.length) ? p.images.slice(0, 4) : [p.image];
 
       const rowHtml = (b0) => {
         const b = b0.settings, kind = b0.kind; let body = '';

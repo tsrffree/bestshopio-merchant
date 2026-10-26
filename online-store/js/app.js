@@ -64,6 +64,7 @@
     plusCircle: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg>',
     x: svg('<path d="M18 6 6 18M6 6l12 12"/>', 14),
     search: svg('<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>'),
+    sparkles: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12 2.5 13.6 8.4 19.5 10 13.6 11.6 12 17.5 10.4 11.6 4.5 10 10.4 8.4 12 2.5z"/><path d="m18.5 14.2.9 2.4 2.4.9-2.4.9-.9 2.4-.9-2.4-2.4-.9 2.4-.9.9-2.4z" opacity=".85"/><path d="m5.2 15.5.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7.7-1.8z" opacity=".7"/></svg>',
     info: svg('<circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/>', 14),
     cart: svg('<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/>'),
     user: svg('<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>'),
@@ -76,21 +77,113 @@
     copy: svg('<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>', 15),
     link: svg('<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>', 15),
     more: svg('<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>', 16),
+    pencil: svg('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>', 14),
+    undo: svg('<path d="M9 7 4 12l5 5"/><path d="M5 12h8a6 6 0 0 1 6 6"/>', 16),
+    redo: svg('<path d="m15 7 5 5-5 5"/><path d="M19 12h-8a6 6 0 0 0-6 6"/>', 16),
     lock: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="16" r="1"/><rect x="3" y="10" width="18" height="12" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/></svg>',
     image: svg('<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/>', 14),
+    // Block-type glyphs matched to the reference picker. Same 16px slot as the tree icons.
+    text: svg('<path d="M4 7h16M4 12h16M4 17h10"/>', 16),
+    heading: svg('<path d="M4 6h16" stroke-width="2.4"/><path d="M4 12h16M4 17h9"/>', 16),
+    code: svg('<path d="m16 18 6-6-6-6M8 6 2 12l6 6M14 4l-4 16"/>', 16),
+    label: svg('<path d="M20.2 13.2 12.4 21a2 2 0 0 1-2.8 0L3 14.4V4.5A1.5 1.5 0 0 1 4.5 3H14.4l5.8 5.8a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.2"/>', 16),
+    priceTag: svg('<path d="M9 3h6l6 6v6a2 2 0 0 1-2 2h-6L4.6 8.6A2 2 0 0 1 4 7.2V5a2 2 0 0 1 2-2z"/><circle cx="8.5" cy="8.5" r="1.2"/>', 16),
+    variant: svg('<circle cx="8" cy="12" r="3.2"/><circle cx="16" cy="12" r="3.2"/>', 16),
+    doc: svg('<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M8 13h8M8 17h5"/>', 16),
+    starLine: svg('<path d="m12 3 2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.2 6.8 19l1-5.8L3.6 9.1l5.8-.8z"/>', 16),
   };
   const ICON = (n) => I[n] || I.layers;
 
   // ------------------------------------------------------------------ token / style helpers
   const FONT_SERIF = ['Playfair Display', 'DM Serif Display', 'Georgia'];
+  const GOOGLE_FONT_QUERY = {
+    'DM Sans': 'DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000',
+    'Playfair Display': 'Playfair+Display:wght@400;500;600;700',
+    'DM Serif Display': 'DM+Serif+Display:ital@0;1',
+    'Manrope': 'Manrope:wght@400;500;600;700;800',
+    'Inter': 'Inter:wght@400;500;600;700',
+    'Lato': 'Lato:wght@400;700',
+    'Source Sans 3': 'Source+Sans+3:wght@400;500;600;700',
+  };
   const fontStack = (name) => "'" + name + "', " + (FONT_SERIF.indexOf(name) >= 0 ? 'Georgia, serif' : 'system-ui, -apple-system, sans-serif');
-  const fontScale = (t) => ((t && t.typography && t.typography.base_font_size) || 16) / 16;
+  const typoOf = (t) => (t && t.typography) || {};
+  const fontScale = (t) => (typoOf(t).base_font_size || 16) / 16;
   const SCALE = { small: 0.85, medium: 1.0, large: 1.2 };
-  const headMult = (t) => SCALE[(t && t.typography && t.typography.heading_scale) || 'medium'] || 1;
+  const headMult = (t) => {
+    const v = typoOf(t).heading_scale;
+    const n = Number(v);
+    if (n > 3) return n / 100;
+    return SCALE[v] || 1;
+  };
   const fs = (t, px) => Math.max(8, Math.round(px * fontScale(t)));
-  const headingSize = (t, basePx) => Math.max(10, Math.round(basePx * headMult(t) * fontScale(t)));
-  const headingFamily = (t) => fontStack((t && t.typography && t.typography.heading_font) || 'Playfair Display');
-  const bodyFamily = (t) => fontStack((t && t.typography && t.typography.body_font) || 'Inter');
+  const headingSize = (t, basePx, mob) => {
+    const mobile = mob ? (Number(typoOf(t).heading_scale_mobile) || 80) / 100 : 1;
+    return Math.max(10, Math.round(basePx * headMult(t) * fontScale(t) * mobile));
+  };
+  const headingFamily = (t) => fontStack(typoOf(t).heading_font || 'DM Sans');
+  const bodyFamily = (t) => fontStack(typoOf(t).body_font || 'DM Sans');
+  const weightNum = (v, fb) => { const n = Number(v); return n >= 100 && n <= 900 ? n : fb; };
+  const roleFamily = (t, role) => role === 'body' ? bodyFamily(t) : headingFamily(t);
+  function loadStorefrontFonts(t) {
+    const ty = typoOf(t);
+    const names = [];
+    [ty.heading_font || 'DM Sans', ty.body_font || 'DM Sans'].forEach((n) => {
+      if (GOOGLE_FONT_QUERY[n] && names.indexOf(n) < 0) names.push(n);
+    });
+    if (!names.length) return;
+    const href = 'https://fonts.googleapis.com/css2?family=' + names.map((n) => GOOGLE_FONT_QUERY[n]).join('&family=') + '&display=swap';
+    let link = document.getElementById('os-store-fonts');
+    if (!link) {
+      link = document.createElement('link');
+      link.id = 'os-store-fonts';
+      link.rel = 'stylesheet';
+      document.head.appendChild(link);
+    }
+    if (link.dataset.href === href) return;
+    link.dataset.href = href;
+    link.href = href;
+  }
+  function typeVarString(t) {
+    const ty = typoOf(t);
+    const base = Number(ty.base_font_size || 16);
+    const pct = (v, fb) => { const n = Number(v); return (isFinite(n) ? n : fb) / 100; };
+    const em = (v, fb) => pct(v, fb) + 'em';
+    const bold = weightNum(ty.body_bold_weight, 500);
+    return [
+      '--os-body-font:' + bodyFamily(t),
+      '--os-heading-font:' + headingFamily(t),
+      '--os-body-weight:400',
+      '--os-bold-weight:' + bold,
+      '--os-heading-weight:' + bold,
+      '--os-base-size:' + base + 'px',
+      '--os-heading-tracking:' + em(ty.heading_letter_spacing, -4),
+      '--os-heading-transform:' + (ty.heading_uppercase ? 'uppercase' : 'none'),
+      '--os-sub-font:' + roleFamily(t, ty.subheading_family || 'body'),
+      '--os-sub-weight:' + weightNum(ty.subheading_weight, 500),
+      '--os-sub-size:' + Math.round(base * pct(ty.subheading_scale, 112)) + 'px',
+      '--os-sub-tracking:' + em(ty.subheading_letter_spacing, 0),
+      '--os-sub-transform:' + (ty.subheading_transform || 'capitalize'),
+      '--os-card-font:' + roleFamily(t, ty.card_title_family || 'heading'),
+      '--os-card-weight:' + weightNum(ty.card_title_weight, 500),
+      '--os-card-size:' + Math.round(base * pct(ty.card_title_scale, 112)) + 'px',
+      '--os-card-transform:' + (ty.card_title_uppercase ? 'uppercase' : 'none'),
+      '--os-nav-font:' + roleFamily(t, ty.nav_family || 'body'),
+      '--os-nav-weight:' + weightNum(ty.nav_weight, 500),
+      '--os-nav-transform:' + (ty.nav_uppercase ? 'uppercase' : 'none'),
+      '--os-btn-font:' + roleFamily(t, ty.button_font_family || 'heading'),
+      '--os-btn-weight:' + weightNum(ty.button_font_weight, 500),
+      '--os-btn-tracking:' + em(ty.button_letter_spacing, 0),
+      '--os-btn-transform:' + (ty.button_text_transform || 'capitalize'),
+    ].join(';');
+  }
+  function applyStorefrontType(fr) {
+    if (!fr || !ED) return;
+    const store = !isCheckout();
+    fr.classList.toggle('os-store', store);
+    if (!store) { fr.removeAttribute('style'); return; }
+    loadStorefrontFonts(ED.theme.settings);
+    fr.setAttribute('style', typeVarString(ED.theme.settings));
+  }
   const hexAlpha = (hex, a) => { hex = String(hex || '').replace('#', ''); if (hex.length === 3) hex = hex.split('').map((c) => c + c).join(''); const n = parseInt(hex, 16); if (isNaN(n)) return 'rgba(0,0,0,' + a + ')'; return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; };
   function btnStyle(t, opts) {
     opts = opts || {}; const b = (t && t.buttons) || {}; const sec = opts.variant === 'secondary';
@@ -100,7 +193,11 @@
     s += 'color:' + ((sec ? b.secondary_button_text : b.primary_button_text) || '#fff') + ';';
     s += 'border-width:' + bw + 'px;border-color:' + (bw > 0 ? (b.button_border_color || 'transparent') : 'transparent') + ';';
     s += 'border-radius:' + (b.button_border_radius || 0) + 'px;height:' + (b.button_height || 44) + 'px;padding:0 ' + (b.button_horizontal_padding || 24) + 'px;';
-    s += 'text-transform:' + (b.button_text_transform || 'none') + ';font-weight:600;font-size:' + fs(t, 13) + 'px;letter-spacing:.02em;';
+    const ty = typoOf(t);
+    s += 'font-family:' + roleFamily(t, ty.button_font_family || 'heading') + ';';
+    s += 'font-weight:' + weightNum(ty.button_font_weight, 500) + ';font-size:' + fs(t, 13) + 'px;';
+    s += 'letter-spacing:' + ((isFinite(Number(ty.button_letter_spacing)) ? Number(ty.button_letter_spacing) : 0) / 100) + 'em;';
+    s += 'text-transform:' + (ty.button_text_transform || 'capitalize') + ';';
     return s;
   }
   function inputStyle(t, opts) {
@@ -120,7 +217,8 @@
     const ratio = { portrait: '3/4', square: '1/1', landscape: '4/3' }[opts.ratio || pc.product_image_ratio] || '3/4';
     const fit = pc.product_image_fit || 'cover';
     const align = opts.align || pc.product_card_text_alignment || 'center';
-    const titlePx = { small: 13, medium: 14, large: 16 }[pc.product_title_size] || 14;
+    const ty = typoOf(t);
+    const titlePx = Math.round((ty.base_font_size || 16) * ((Number(ty.card_title_scale) || 112) / 100));
     const rad = layoutRadius(t, 'card');
     const sale = p.compareAt && p.compareAt > p.price, pct = sale ? Math.round((1 - p.price / p.compareAt) * 100) : 0;
     const saleColor = c.sale_price_color || '#d92d20';
@@ -130,10 +228,9 @@
     const swatches = (pick(opts.showSwatches, pc.show_color_swatches_by_default) && p.swatches) ? '<div class="oc-sw">' + p.swatches.slice(0, 5).map((s) => '<span style="background:' + s + '"></span>').join('') + '</div>' : '';
     const vendor = (pick(opts.showVendor, pc.show_vendor_by_default) && p.vendor) ? '<div class="oc-vendor" style="color:' + (c.secondary_color || '#777') + '">' + esc(p.vendor) + '</div>' : '';
     const rating = (pick(opts.showRating, pc.show_rating_by_default) && p.rating) ? '<div class="oc-rate"><span style="color:#f5b301">' + I.star + '</span>' + p.rating + (p.reviews ? ' <i>(' + p.reviews + ')</i>' : '') + '</div>' : '';
-    const price = '<div class="oc-price"><span' + (sale ? ' style="color:' + saleColor + '"' : '') + '>' + money(p.price) + '</span>' + (sale ? '<s>' + money(p.compareAt) + '</s>' : '') + '</div>';
     return '<div class="oc-card" style="text-align:' + align + ';font-family:' + bodyFamily(t) + '">' +
       '<div class="oc-img" style="aspect-ratio:' + ratio + ';border-radius:' + rad + 'px;background-image:url(' + esc(p.image) + ');background-size:' + fit + '">' + badge + quick + '</div>' +
-      swatches + vendor + '<div class="oc-title" style="font-size:' + fs(t, titlePx) + 'px;color:' + (c.text_color || '#1a1a1a') + '">' + esc(p.title) + '</div>' + rating + price + '</div>';
+      swatches + vendor + '<div class="oc-title" style="font-family:' + roleFamily(t, typoOf(t).card_title_family || 'heading') + ';font-weight:' + weightNum(typoOf(t).card_title_weight, 500) + ';font-size:' + titlePx + 'px;letter-spacing:' + ((isFinite(Number(typoOf(t).heading_letter_spacing)) ? Number(typoOf(t).heading_letter_spacing) : -4) / 100) + 'em;text-transform:' + (typoOf(t).card_title_uppercase ? 'uppercase' : 'none') + ';color:' + (c.text_color || '#1a1a1a') + '">' + esc(p.title) + '</div>' + rating + '<div class="oc-price" style="font-weight:' + weightNum(typoOf(t).body_bold_weight, 500) + '"><span' + (sale ? ' style="color:' + saleColor + '"' : '') + '>' + money(p.price) + '</span>' + (sale ? '<s>' + money(p.compareAt) + '</s>' : '') + '</div></div>';
   }
   function ckFloat(control, label, cls) {
     return '<label class="ck-float' + (cls ? ' ' + cls : '') + '">' +
@@ -165,11 +262,20 @@
     ckSet: function (id, patch) { OS.ckState[id] = Object.assign({}, OS.ckState[id], patch); },
     ckRecalc: function () { /* assigned by the editor to re-render the canvas */ },
     goCheckoutPage: function (page) { goCheckoutPage(page); },
+    goCheckout: function (handle) { goCheckout(handle || (ED && ED.meta && ED.meta.handle) || 'aura'); },
     css: function (id, text) { if (document.getElementById('oscss-' + id)) return; const st = document.createElement('style'); st.id = 'oscss-' + id; st.textContent = text; document.head.appendChild(st); },
     secSpace: (t, mob) => ((t && t.layout) ? (mob ? t.layout.section_spacing_mobile : t.layout.section_spacing_desktop) : (mob ? 40 : 64)),
     pagePad: (t, mob) => ((t && t.layout) ? (mob ? t.layout.page_horizontal_padding_mobile : t.layout.page_horizontal_padding_desktop) : (mob ? 16 : 40)),
     gridGap: (t, mob) => ((t && t.layout) ? (mob ? t.layout.grid_gap_mobile : t.layout.grid_gap_desktop) : (mob ? 16 : 24)),
-    pageWidth: (t) => ((t && t.layout && t.layout.page_width) || 1200),
+    // Horizon Default: narrow page content = 90rem (1440px). Side gutters grow outside it.
+    pageWidth: (t) => ((t && t.layout && t.layout.page_width) || 1440),
+    // Shopify page-width gutter: max(minPad, (100% - pageWidth) / 2). Matches Horizon --util-page-margin-offset.
+    pageGutter: (t, mob, opts) => {
+      opts = opts || {};
+      const minPad = opts.fullWidth ? (mob ? 16 : 24) : OS.pagePad(t, mob);
+      if (opts.fullWidth) return minPad + 'px';
+      return 'max(' + minPad + 'px,calc((100% - ' + OS.pageWidth(t) + 'px) / 2))';
+    },
     // BestCheckout page-library presets still ship older checkout-* sections that
     // read these checkout-surface tokens. Keep them on the shared OS so those
     // cards do not crash after the Theme engine overlay.
@@ -216,6 +322,7 @@
   // ==========================================================================
   let ED = null;
   const PREVIEW_STORAGE_KEY = 'bestshopio-theme-preview-snapshots-v3';
+  const TREE_EXPAND_STORAGE_KEY = 'bestshopio-theme-tree-expand-v2';
   const MERCHANT_PREVIEW_TTL_MS = 30 * 24 * 60 * 60 * 1000;
   const PREVIEW_TOMBSTONE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
   let ACTIVE_PREVIEW = null;
@@ -359,6 +466,10 @@
     if (def.blocks.kinds) return def.blocks.kinds[blockKind] || null;
     return def.blocks; // single homogeneous block type
   }
+  function blockGlyph(sec, kind) {
+    const bd = blockDef(SECTIONS[sec.kind], kind);
+    return ICON((bd && bd.icon) || 'layers');
+  }
   function matSection(seed) {
     const def = defForKind(seed.kind);
     let blocks = [];
@@ -433,11 +544,16 @@
       leftMode: 'sections',            // 'sections' | 'settings'
       selection: { kind: 'header' },   // announcement|header|footer | {kind:'section',sectionId} | {kind:'block',sectionId,blockId}
       expand: { header: true, template: true, footer: true },
-      sectionExpand: {},
+      // First enter: Header open; announcement / footer / template sections stay collapsed.
+      // sectionAccordion is restored from localStorage (multi-open + last focus for refresh).
+      sectionExpand: { announcement: false, header: true, footer: false },
+      sectionAccordion: loadTreeExpand(themeMeta.handle),
       busy: null,                      // 'saving' | 'publishing' | 'discarding' | null
       settingsExpand: settingsExpandInit(),
       exitTo: null,
+      history: null,
     };
+    ED.selection = defaultSelection();
     // Seed order + shipping discount codes so the Checkout Order Summary demonstrates
     // Shopify-style grouped discount details out of the box (buyer runtime state only).
     OS.ckState = {};
@@ -447,6 +563,7 @@
       const product = +seed.product || 0, order = +seed.order || 0, shipping = +seed.shipping || 0;
       return { code, product, order, shipping, amount: product + order + shipping };
     }).filter((item) => item.amount > 0);
+    resetHistory();
   }
   function settingsExpandInit() { const o = {}; D.SETTINGS_GROUPS.forEach((g) => { o[g.key] = !!g.open; }); (D.CHECKOUT_SETTINGS_GROUPS || []).forEach((g) => { o['ck:' + g.key] = !!g.open; }); return o; }
 
@@ -572,6 +689,66 @@
   const isDirty = () => !eq(ED.theme, ED.savedTheme);
   const hasDraft = () => !eq(ED.savedTheme, ED.publishedTheme);
   const status = () => isDirty() ? 'unsaved' : hasDraft() ? 'draft' : 'saved';
+  function editorSnapshot() {
+    return {
+      theme: clone(ED.theme),
+      surface: ED.surface,
+      checkoutPage: ED.checkoutPage,
+      currentPage: ED.currentPage,
+      tplSel: clone(ED.tplSel || {}),
+      ckTplSel: clone(ED.ckTplSel || {}),
+      previewSel: clone(ED.previewSel || {}),
+    };
+  }
+  function resetHistory() {
+    if (!ED) return;
+    ED.history = { undo: [], redo: [], present: editorSnapshot(), lastGroup: '', lastAt: 0 };
+  }
+  function recordHistory(group) {
+    if (!ED) return;
+    if (!ED.history) resetHistory();
+    const next = editorSnapshot();
+    const hist = ED.history;
+    if (eq(hist.present, next)) return;
+    const now = Date.now();
+    const merge = !!group && hist.lastGroup === group && now - hist.lastAt < 800;
+    if (!merge) {
+      hist.undo.push(clone(hist.present));
+      if (hist.undo.length > 80) hist.undo.shift();
+    }
+    hist.present = next;
+    hist.redo = [];
+    hist.lastGroup = group || '';
+    hist.lastAt = now;
+  }
+  function restoreHistorySnapshot(snapshot) {
+    if (!snapshot) return;
+    ED.theme = clone(snapshot.theme);
+    ED.surface = snapshot.surface;
+    ED.checkoutPage = snapshot.checkoutPage;
+    ED.currentPage = snapshot.currentPage;
+    ED.tplSel = clone(snapshot.tplSel || {});
+    ED.ckTplSel = clone(snapshot.ckTplSel || {});
+    ED.previewSel = clone(snapshot.previewSel || {});
+    ED.leftMode = 'sections';
+    ED.selection = defaultSelection();
+    syncSurfaceHash();
+  }
+  function historyStep(direction) {
+    const hist = ED && ED.history;
+    if (!hist) return;
+    const from = direction === 'undo' ? hist.undo : hist.redo;
+    const to = direction === 'undo' ? hist.redo : hist.undo;
+    if (!from.length) return;
+    to.push(editorSnapshot());
+    const snapshot = from.pop();
+    restoreHistorySnapshot(snapshot);
+    hist.present = editorSnapshot();
+    hist.lastGroup = '';
+    hist.lastAt = 0;
+    rerender();
+    toast(direction === 'undo' ? 'Change undone' : 'Change redone');
+  }
   // Checkout theme page types (Thank you PRD §23.1; multi-template PRD §5.2).
   const isThankyou = () => isCheckout() && ED.checkoutPage === 'thankyou';
   const isUpsell = () => isCheckout() && ED.checkoutPage === 'upsell';
@@ -695,6 +872,17 @@
       // Same surface, but the route pins a specific checkout page (#/checkout/thankyou).
       ED.checkoutPage = page; ED.leftMode = 'sections'; ED.selection = defaultSelection();
     }
+    if (surface === 'online-store') {
+      // A missing page segment is Home. This also covers the browser Back button
+      // from #/.../product back to #/online-store/edit/:handle.
+      const next = (page && (D.PAGE_OPTIONS || []).some((p) => p.value === page)) ? page : 'home';
+      if (ED.currentPage !== next) {
+        ED.currentPage = next; ED.leftMode = 'sections'; ED.selection = defaultSelection();
+      }
+    }
+    if (ED.history && !ED.history.undo.length && !ED.history.redo.length) {
+      ED.history.present = editorSnapshot();
+    }
     if (host.exitTo) ED.exitTo = host.exitTo;
     applyBcHostTemplate(host.tpl, host.saved);
     closeBuilder(); ensureStyles();
@@ -714,7 +902,7 @@
       ED._canvasScroll = null;
     } else scrollToSelected();
   }
-  function closeBuilder() { const ex = document.getElementById('os-builder'); if (ex) ex.remove(); closePops(); }
+  function closeBuilder() { const ex = document.getElementById('os-builder'); if (ex) ex.remove(); closePops(); hideEditProductTip(); closeProductEditor(true); }
 
   // -------------------------------------------------------------- TOP BAR
   function topBar() {
@@ -754,12 +942,16 @@
         '</button>' +
       '</div>' +
       '<div class="os-top-r">' +
+        '<div class="os-history" aria-label="Edit history">' +
+          '<button class="os-top-icon" id="t-undo"' + (ED.history && ED.history.undo.length && !busy ? '' : ' disabled') + ' title="Undo">' + I.undo + '</button>' +
+          '<button class="os-top-icon" id="t-redo"' + (ED.history && ED.history.redo.length && !busy ? '' : ' disabled') + ' title="Redo">' + I.redo + '</button>' +
+        '</div>' +
         '<div class="os-dev" aria-label="Preview device">' +
           '<button class="' + (ED.device === 'desktop' ? 'active' : '') + '" data-dev="desktop" title="Desktop preview">' + monitorIco + '</button>' +
           '<button class="' + (ED.device === 'mobile' ? 'active' : '') + '" data-dev="mobile" title="Mobile preview">' + phoneIco + '</button>' +
         '</div>' +
         ((ED.exitTo && /^#\/(?:pages|flows(?:\/|$)|bestcheckout)/.test(ED.exitTo)) ? '<button class="os-top-btn os-top-hidden" id="t-saveas" title="Save the current layout as a new template in the library">Save as template</button>' : '') +
-        '<button class="os-top-icon os-preview-open os-top-hidden" id="t-preview"' + (busy ? ' disabled' : '') + ' title="Preview">' + I.eye + '</button>' +
+        '<button class="os-top-icon os-preview-open" id="t-preview"' + (busy ? ' disabled' : '') + ' title="Preview saved content">' + I.eye + '</button>' +
         '<button class="os-top-btn" id="t-discard"' + (dirty && !busy ? '' : ' disabled') + '>Discard</button>' +
         '<button class="os-top-btn" id="t-save"' + (dirty && !busy ? '' : ' disabled') + '>' + (busy === 'saving' ? 'Saving…' : 'Save') + '</button>' +
         '<button class="os-top-btn primary' + (issues.length ? ' warn' : '') + '" id="t-pub"' + (((dirty || draft) && !busy) ? '' : ' disabled') + ' title="' + (issues.length ? issues.length + ' validation issue(s)' : 'Publish to storefront') + '">' +
@@ -818,6 +1010,8 @@
       rerender();
     });
     const psel = b.querySelector('#t-page'); if (psel) psel.onclick = () => openPageSelector(psel);
+    const undo = b.querySelector('#t-undo'); if (undo && !undo.disabled) undo.onclick = () => historyStep('undo');
+    const redo = b.querySelector('#t-redo'); if (redo && !redo.disabled) redo.onclick = () => historyStep('redo');
     b.querySelectorAll('[data-dev]').forEach((x) => x.onclick = () => { const d = x.getAttribute('data-dev'); if (d !== ED.device) { ED.device = d; refreshTop(); refreshCanvas(); } });
     const preview = b.querySelector('#t-preview'); if (preview && !preview.disabled) preview.onclick = requestSavedPreview;
     const exitFull = b.querySelector('[data-exit-full-preview]'); if (exitFull) exitFull.onclick = () => exitFullPreview();
@@ -857,7 +1051,10 @@
     } else if (ck) {
       left.innerHTML = '<div class="os-left-scroll os-ck-tree" id="os-tree">' + checkoutTreeHtml() + '</div>';
     } else {
-      left.innerHTML = '<div class="os-left-head">Sections</div><div class="os-left-scroll" id="os-tree">' + treeHtml() + '</div>';
+      const tpl = curTpl();
+      const templateName = (tpl && tpl.name) || pageLabel();
+      const head = isResourcePage() ? '' : '<div class="os-left-head">' + esc(templateName) + '</div>';
+      left.innerHTML = head + '<div class="os-left-scroll os-sec-tree" id="os-tree">' + treeHtml() + '</div>';
     }
     return left;
   }
@@ -894,7 +1091,7 @@
     if (ED.expand.template !== false) {
       midSecs.forEach((s) => { html += checkoutRow(s); });
       let nAdd = 0; ckCatalog().forEach((g) => nAdd += g.entries.length);
-      html += '<div class="os-tree-add" data-add-ckcomp>' + I.plusCircle + ' Add section (' + nAdd + ')</div>';
+      html += '<div class="os-tree-add" data-add-ckcomp>' + I.plusCircle + ' Add section</div>';
     }
     if (footerSecs.length) {
       html += groupHead('footer', 'Footer group');
@@ -917,6 +1114,12 @@
       ? '<span class="os-tr-grip" title="Drag to reorder block">' + I.grip + '</span>'
       : treeCaret(false, false, '');
     return '<span class="os-row-lead">' + left + '<span class="os-tr-ico">' + iconHtml + '</span></span>';
+  }
+  // Same indent + icon column as block rows so the plus lines up with block type icons.
+  function treeAddBlk(secId, label) {
+    return '<div class="os-tree-add sub" data-add-blk="' + secId + '">' +
+      '<span class="os-row-lead"><span class="os-add-slot" aria-hidden="true"></span><span class="os-tr-ico">' + I.plusCircle + '</span></span>' +
+      '<span class="os-tr-name">' + esc(label) + '</span></div>';
   }
   function checkoutRow(s) {
     const sel = ED.selection; const def = SECTIONS[s.kind];
@@ -943,14 +1146,14 @@
           const rank = (k) => { const i = def.blockTreeOrder.indexOf(k); return i < 0 ? 999 : i; };
           blist = blist.slice().sort((a, b) => rank(a.kind) - rank(b.kind));
         }
+        const bd = blockAddInfo(s);
+        if (bd) h2 += treeAddBlk(s.id, bd);
         blist.forEach((bl) => {
           const bActive = sel.kind === 'block' && sel.sectionId === s.id && sel.blockId === bl.id;
           h2 += '<div class="os-row blk' + (bActive ? ' active' : '') + (bl.hidden ? ' hid' : '') + '" draggable="true" data-sel-blk="' + s.id + ':' + bl.id + '">' +
-            treeBlkLead(ICON('layers'), true) + '<span class="os-tr-name">' + esc(blockLabel(s, bl)) + '</span>' +
+            treeBlkLead(blockGlyph(s, bl.kind), true) + '<span class="os-tr-name">' + esc(blockLabel(s, bl)) + '</span>' +
             rowActions(bl.hidden, true) + '</div>';
         });
-        const bd = blockAddInfo(s);
-        if (bd) h2 += '<div class="os-tree-add sub" data-add-blk="' + s.id + '">' + I.plus + ' ' + esc(bd) + '</div>';
       }
       return h2;
     }
@@ -966,7 +1169,7 @@
       (s.blocks || []).forEach((bl) => {
         const bActive = sel.kind === 'block' && sel.blockId === bl.id;
         html += '<div class="os-row blk locked' + (bActive ? ' active' : '') + '" data-sel-blk="' + s.id + ':' + bl.id + '">' +
-          treeBlkLead(ICON('layers')) + '<span class="os-tr-name">' + esc(blockLabel(s, bl)) + '</span>' +
+          treeBlkLead(blockGlyph(s, bl.kind)) + '<span class="os-tr-name">' + esc(blockLabel(s, bl)) + '</span>' +
           '<span class="os-tr-lock">' + I.lock + '</span></div>';
       });
     }
@@ -982,16 +1185,33 @@
       html += globalRow('announcement', 'Announcement bar', ED.theme.announcement, sel.kind === 'announcement');
       html += globalRow('header', 'Header', ED.theme.header, sel.kind === 'header');
     }
-    // Template group
+    // Template group. Page sections expand independently (multiple may stay open).
     html += groupHead('template', pageLabel().replace(/ page$/i, '') + ' Template');
     if (ED.expand.template) {
+      applyPageSectionExpand();
       pageSections().forEach((s) => { html += sectionRow(s); });
-      html += '<div class="os-tree-add" data-add-sec>' + I.plusCircle + ' Add section (' + countAvailable() + ')</div>';
+      html += '<div class="os-tree-add" data-add-sec>' + I.plusCircle + ' Add section</div>';
     }
     // Footer group
     html += groupHead('footer', 'Footer Group');
     if (ED.expand.footer) html += globalRow('footer', 'Footer', ED.theme.footer, sel.kind === 'footer');
     return html;
+  }
+  // Online products stay unmarked. Draft, archived, deactivated, and any other state show their label.
+  function previewStatusBadge(resource) {
+    if (!resource) return '';
+    const raw = String(resource.status || '').trim();
+    const key = raw.toLowerCase();
+    if (!key || key === 'active' || key === 'activated' || key === 'online' || key === 'published' || key === 'live') return '';
+    const labels = {
+      draft: 'Draft',
+      archived: 'Archived',
+      deactivated: 'Deactivated',
+      inactive: 'Inactive',
+      unpublished: 'Unpublished',
+      unlisted: 'Unlisted',
+    };
+    return '<span class="os-resource-status">' + esc(labels[key] || raw) + '</span>';
   }
   // Shopify-style Preview resource selector for Product / Collection templates. Selecting a
   // resource changes only the editor preview context; it never reassigns the template.
@@ -999,69 +1219,193 @@
     if (!isResourcePage()) return '';
     const pt = ED.currentPage; const tpl = curTpl(); const res = previewResource(pt);
     const usage = usageText(pt, tpl && tpl.assigned);
-    const thumb = res && res.image
-      ? '<span class="os-rp-thumb" style="background-image:url(' + esc(res.image) + ')"></span>'
-      : '<span class="os-rp-thumb empty">' + I.image + '</span>';
-    const status = pt === 'product' && res && res.status === 'draft'
-      ? '<span class="os-resource-status">Draft</span>' : '';
+    const status = pt === 'product' ? previewStatusBadge(res) : '';
+    const noun = pt === 'collection' ? 'collection' : 'product';
+    const onTemplate = !!(res && assignedResourceIds(pt, tpl).indexOf(res.id) >= 0);
+    const tip = onTemplate ? 'Preview only' : ('This template is not assigned to this ' + noun);
     return '<div class="os-rp-context">' +
       '<div class="os-rp-template">' + esc((tpl && tpl.name) || pageLabel()) + '</div>' +
       (usage ? '<div class="os-rp-assigned">' + esc(usage) + '</div>' : '') +
-      '<button class="os-rp-trigger" type="button" data-resource-preview>' +
-        '<span class="os-rp-copy"><span class="os-rp-label">Preview</span><span class="os-rp-name">' + thumb +
-          '<span class="os-rp-title">' + esc((res && res.title) || ('Select ' + pt)) + '</span>' + status + '</span></span>' +
-        '<span class="os-rp-chev">' + I.chev + '</span>' +
-      '</button>' +
+      '<div class="os-rp-preview">' +
+        '<div class="os-rp-card" data-resource-preview role="button" tabindex="0">' +
+          '<button type="button" class="os-rp-info" data-rp-tip data-tip="' + esc(tip) + '" aria-label="Preview info">' + I.info + '</button>' +
+          '<div class="os-rp-copy">' +
+            '<div class="os-rp-label">Preview</div>' +
+            '<div class="os-rp-product">' +
+              '<span class="os-rp-title">' + esc((res && res.title) || ('Select ' + pt)) + '</span>' + status +
+              '<span class="os-rp-swap" aria-hidden="true">' + I.chev + '</span>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        (pt === 'product'
+          ? '<button type="button" class="os-rp-edit" data-edit-product aria-label="Edit product">' + I.pencil + '</button>'
+          : '<button type="button" class="os-rp-edit" data-resource-preview aria-label="Change preview ' + noun + '">' + I.pencil + '</button>') +
+      '</div>' +
     '</div>';
   }
-  function countAvailable() { let n = 0; D.CATALOG.forEach((g) => g.entries.forEach((e) => { if (e.kind && SECTIONS[e.kind]) n++; })); return n; }
+  const COLLECTION_PAGE_KINDS = ['collection-banner', 'collection-list', 'collection-page', 'list-collections'];
+  function catalogVisible(entry) {
+    if (!entry) return false;
+    if (entry.pages && entry.pages.indexOf(ED.currentPage) < 0) return false;
+    if (ED.currentPage === 'product' && COLLECTION_PAGE_KINDS.indexOf(entry.kind) >= 0) return false;
+    return true;
+  }
+  function countAvailable() { let n = 0; D.CATALOG.forEach((g) => g.entries.forEach((e) => { if (catalogVisible(e) && e.kind && SECTIONS[e.kind]) n++; })); return n; }
   function globalRow(scope, label, inst, active) {
     const def = SECTIONS[inst.kind];
     const hasBlocks = def && def.blocks;
     const open = ED.sectionExpand[scope] !== false;
     let html = '<div class="os-row global' + (active ? ' active' : '') + (inst.hidden ? ' hid' : '') + '" data-sel-global="' + scope + '">' +
       treeLead(treeCaret(hasBlocks, open, scope), ICON(def ? def.icon : 'layers')) +
-      '<span class="os-tr-name">' + esc(label) + '</span>' +
-      rowActions(inst.hidden, false) + '<span class="os-tr-lock" title="Global section">' + I.lock + '</span></div>';
+      '<span class="os-tr-name" title="' + esc(label) + '">' + esc(label) + '</span>' +
+      rowActions(inst.hidden, false) + '</div>';
     if (hasBlocks && open) {
+      const bd = blockAddInfo(inst);
+      if (bd) html += treeAddBlk(scope, bd);
       (inst.blocks || []).forEach((bl) => {
         const bActive = ED.selection.kind === 'block' && ED.selection.sectionId === scope && ED.selection.blockId === bl.id;
         html += '<div class="os-row blk' + (bActive ? ' active' : '') + (bl.hidden ? ' hid' : '') + '" draggable="true" data-sel-blk="' + scope + ':' + bl.id + '">' +
-          treeBlkLead(ICON('layers'), true) + '<span class="os-tr-name">' + esc(blockLabel(inst, bl)) + '</span>' +
+          treeBlkLead(blockGlyph(inst, bl.kind), true) + '<span class="os-tr-name" title="' + esc(blockLabel(inst, bl)) + '">' + esc(blockLabel(inst, bl)) + '</span>' +
           rowActions(bl.hidden, true) + '</div>';
       });
-      const bd = blockAddInfo(inst);
-      if (bd) html += '<div class="os-tree-add sub" data-add-blk="' + scope + '">' + I.plus + ' ' + esc(bd) + '</div>';
     }
     return html;
+  }
+  function expandablePageSections() {
+    return pageSections().filter((s) => {
+      const def = SECTIONS[s.kind];
+      return !!(def && def.blocks);
+    });
+  }
+  function pageAccordionKey() {
+    return (ED.currentPage || '') + ':' + (curTplId() || '');
+  }
+  function pageAccordionStore() {
+    if (!ED.sectionAccordion) ED.sectionAccordion = {};
+    return ED.sectionAccordion;
+  }
+  function loadTreeExpand(handle) {
+    try {
+      let all = JSON.parse(localStorage.getItem(TREE_EXPAND_STORAGE_KEY) || '{}');
+      if (!all || typeof all !== 'object' || !all[handle]) {
+        const legacy = JSON.parse(localStorage.getItem('bestshopio-theme-tree-expand-v1') || '{}');
+        if (legacy && legacy[handle]) all = legacy;
+      }
+      const forTheme = all && all[handle];
+      return forTheme && typeof forTheme === 'object' && !Array.isArray(forTheme) ? forTheme : {};
+    } catch (e) { return {}; }
+  }
+  function persistTreeExpand() {
+    if (!ED || !ED.meta || !ED.meta.handle) return;
+    try {
+      const all = JSON.parse(localStorage.getItem(TREE_EXPAND_STORAGE_KEY) || '{}');
+      all[ED.meta.handle] = ED.sectionAccordion || {};
+      localStorage.setItem(TREE_EXPAND_STORAGE_KEY, JSON.stringify(all));
+    } catch (e) {}
+  }
+  // Persist shape per page:template — { open: { [sectionId]: true }, focus: sectionId|null }.
+  // Legacy values (string id / null) are normalized on read.
+  function normalizePageExpandEntry(raw) {
+    if (raw == null) return { open: {}, focus: null };
+    if (typeof raw === 'string') return { open: { [raw]: true }, focus: raw };
+    if (Array.isArray(raw)) {
+      const open = {};
+      raw.forEach((id) => { if (id) open[id] = true; });
+      return { open, focus: raw.length ? raw[raw.length - 1] : null };
+    }
+    if (typeof raw === 'object') {
+      const open = {};
+      const src = (raw.open && typeof raw.open === 'object' && !Array.isArray(raw.open)) ? raw.open : raw;
+      Object.keys(src).forEach((id) => {
+        if (id === 'open' || id === 'focus') return;
+        if (src[id]) open[id] = true;
+      });
+      if (raw.open && typeof raw.open === 'object' && !Array.isArray(raw.open)) {
+        Object.keys(raw.open).forEach((id) => { if (raw.open[id]) open[id] = true; });
+      }
+      const focus = (raw.focus && open[raw.focus]) ? raw.focus : null;
+      return { open, focus };
+    }
+    return { open: {}, focus: null };
+  }
+  function pageExpandEntry() {
+    const store = pageAccordionStore();
+    const key = pageAccordionKey();
+    const entry = normalizePageExpandEntry(Object.prototype.hasOwnProperty.call(store, key) ? store[key] : null);
+    store[key] = entry;
+    return entry;
+  }
+  function rememberedPageSectionId() {
+    const entry = pageExpandEntry();
+    const focus = entry.focus;
+    if (focus && pageSections().some((s) => s.id === focus)) return focus;
+    const openIds = Object.keys(entry.open || {}).filter((id) => entry.open[id] && pageSections().some((s) => s.id === id));
+    return openIds.length ? openIds[openIds.length - 1] : null;
+  }
+  // Template sections expand independently (multiple may stay open at once).
+  function applyPageSectionExpand() {
+    const secs = expandablePageSections();
+    const ids = new Set(secs.map((s) => s.id));
+    const entry = pageExpandEntry();
+    Object.keys(entry.open).forEach((id) => { if (!ids.has(id)) delete entry.open[id]; });
+    if (entry.focus && !ids.has(entry.focus)) entry.focus = null;
+    secs.forEach((s) => { ED.sectionExpand[s.id] = !!entry.open[s.id]; });
+  }
+  function setPageSectionExpanded(id, open) {
+    const entry = pageExpandEntry();
+    if (open) {
+      entry.open[id] = true;
+      entry.focus = id;
+      ED.sectionExpand[id] = true;
+    } else {
+      delete entry.open[id];
+      ED.sectionExpand[id] = false;
+      if (entry.focus === id) {
+        const left = Object.keys(entry.open).filter((k) => entry.open[k]);
+        entry.focus = left.length ? left[left.length - 1] : null;
+      }
+    }
+    persistTreeExpand();
+  }
+  function clearPageSectionFocus() {
+    const entry = pageExpandEntry();
+    entry.focus = null;
+    persistTreeExpand();
+  }
+  function revealSectionBlocks(secId) {
+    if (pageSections().some((s) => s.id === secId)) setPageSectionExpanded(secId, true);
+    else ED.sectionExpand[secId] = true;
   }
   function sectionRow(s) {
     const sel = ED.selection;
     const def = SECTIONS[s.kind];
     const active = sel.kind === 'section' && sel.sectionId === s.id;
     const hasBlocks = def && def.blocks;
-    const open = ED.sectionExpand[s.id] !== false;
+    const open = ED.sectionExpand[s.id] === true;
     const name = sectionLabel(s);
+    const required = !!(def && def.required);
     let html = '<div class="os-row sec' + (active ? ' active' : '') + (s.hidden ? ' hid' : '') + '" draggable="true" data-sel-sec="' + s.id + '">' +
       treeLead(treeCaret(hasBlocks, open, s.id), ICON(def ? def.icon : 'layers'), true) +
-      '<span class="os-tr-name">' + esc(name) + '</span>' +
-      rowActions(s.hidden, true) + '</div>';
+      '<span class="os-tr-name" title="' + esc(name) + '">' + esc(name) + '</span>' +
+      rowActions(s.hidden, !required, true) + '</div>';
     if (hasBlocks && open) {
+      const bd = blockAddInfo(s);
+      if (bd) html += treeAddBlk(s.id, bd);
       (s.blocks || []).forEach((bl) => {
         const bActive = sel.kind === 'block' && sel.blockId === bl.id;
         html += '<div class="os-row blk' + (bActive ? ' active' : '') + (bl.hidden ? ' hid' : '') + '" draggable="true" data-sel-blk="' + s.id + ':' + bl.id + '">' +
-          treeBlkLead(ICON('layers'), true) + '<span class="os-tr-name">' + esc(blockLabel(s, bl)) + '</span>' +
-          rowActions(bl.hidden, true) + '</div>';
+          treeBlkLead(blockGlyph(s, bl.kind), true) + '<span class="os-tr-name" title="' + esc(blockLabel(s, bl)) + '">' + esc(blockLabel(s, bl)) + '</span>' +
+          rowActions(bl.hidden, true, true) + '</div>';
       });
-      const bd = blockAddInfo(s);
-      if (bd) html += '<div class="os-tree-add sub" data-add-blk="' + s.id + '">' + I.plus + ' ' + esc(bd) + '</div>';
     }
     return html;
   }
-  function rowActions(hidden, canDelete) {
+  function rowActions(hidden, canDelete, canRename) {
+    const off = hidden ? ' is-off' : '';
     return '<span class="os-tr-acts">' +
-      (canDelete ? '<span class="os-tr-act danger" data-del title="Remove">' + I.trash + '</span>' : '') +
-      '<span class="os-tr-act" data-vis title="' + (hidden ? 'Show' : 'Hide') + '">' + (hidden ? I.eyeOff : I.eye) + '</span></span>';
+      (canRename ? '<button type="button" class="os-tr-act' + off + '" data-row-more title="More actions" aria-label="More actions">' + I.more + '</button>' : '') +
+      (canDelete ? '<button type="button" class="os-tr-act danger' + off + '" data-del title="Remove" aria-label="Remove">' + I.trash + '</button>' : '') +
+      '<button type="button" class="os-tr-act' + off + '" data-vis title="' + (hidden ? 'Show' : 'Hide') + '" aria-label="' + (hidden ? 'Show' : 'Hide') + '">' + (hidden ? I.eyeOff : I.eye) + '</button></span>';
   }
   function blockAddInfo(s) {
     const def = SECTIONS[s.kind]; if (!def || !def.blocks) return null;
@@ -1070,6 +1414,7 @@
     return 'Add ' + ((def.blocks.name || 'block').toLowerCase());
   }
   function sectionLabel(s) {
+    if (s.customName && String(s.customName).trim()) return String(s.customName).trim();
     const def = SECTIONS[s.kind];
     // Top recap bar label. On Checkout the full itemized Order summary also shows on
     // mobile, so the bar keeps the "(Mobile)" qualifier to stay distinguishable. On
@@ -1081,6 +1426,7 @@
     return def ? def.name : s.kind;
   }
   function blockLabel(s, bl) {
+    if (bl.customName && String(bl.customName).trim()) return String(bl.customName).trim();
     const def = SECTIONS[s.kind]; const bd = blockDef(def, bl.kind);
     const head = bl.settings && (bl.settings.heading || bl.settings.question || bl.settings.title || bl.settings.author || bl.settings.label);
     const base = bd ? bd.name : (bl.kind || 'Block');
@@ -1089,6 +1435,7 @@
   }
 
   function wireLeft() {
+    hideEditProductTip();
     const b = document.getElementById('os-builder'); const tree = b.querySelector('#os-tree');
     if (inSettings()) {
       tree.querySelectorAll('[data-sgrp]').forEach((r) => r.onclick = () => { const k = r.getAttribute('data-sgrp'); ED.settingsExpand[sExpKey(k)] = true; ED.selection = { kind: 'theme-settings' }; refreshRight(); setTimeout(() => { const el = document.querySelector('#os-set-' + k); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 30); });
@@ -1112,10 +1459,32 @@
       wireDrag(tree);
       return;
     }
-    const rp = tree.querySelector('[data-resource-preview]');
-    if (rp) rp.onclick = (e) => { e.stopPropagation(); openResourcePicker(rp); };
+    const tipBtn = tree.querySelector('[data-rp-tip]');
+    if (tipBtn) tipBtn.onclick = (e) => { e.stopPropagation(); openPreviewTip(tipBtn); };
+    tree.querySelectorAll('[data-resource-preview]').forEach((rp) => {
+      rp.onclick = (e) => { e.stopPropagation(); openResourcePicker(rp); };
+      if (rp.classList.contains('os-rp-card')) rp.onkeydown = (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        openResourcePicker(rp);
+      };
+    });
+    const editProduct = tree.querySelector('[data-edit-product]');
+    if (editProduct) {
+      editProduct.onclick = (e) => { e.stopPropagation(); hideEditProductTip(); openProductEditor(); };
+      editProduct.onmouseenter = () => showEditProductTip(editProduct);
+      editProduct.onmouseleave = hideEditProductTip;
+      editProduct.onfocus = () => showEditProductTip(editProduct);
+      editProduct.onblur = hideEditProductTip;
+    }
     tree.querySelectorAll('[data-grp]').forEach((g) => g.onclick = () => { const k = g.getAttribute('data-grp'); ED.expand[k] = !ED.expand[k]; refreshTree(); });
-    tree.querySelectorAll('[data-tog-sec]').forEach((c) => c.onclick = (e) => { e.stopPropagation(); const id = c.getAttribute('data-tog-sec'); ED.sectionExpand[id] = ED.sectionExpand[id] === false ? true : false; refreshTree(); });
+    tree.querySelectorAll('[data-tog-sec]').forEach((c) => c.onclick = (e) => {
+      e.stopPropagation();
+      const id = c.getAttribute('data-tog-sec');
+      if (pageSections().some((s) => s.id === id)) setPageSectionExpanded(id, ED.sectionExpand[id] !== true);
+      else ED.sectionExpand[id] = ED.sectionExpand[id] === false ? true : false;
+      refreshTree();
+    });
     tree.querySelectorAll('[data-sel-global]').forEach((r) => bindRow(r, () => select({ kind: r.getAttribute('data-sel-global') })));
     tree.querySelectorAll('[data-sel-sec]').forEach((r) => bindRow(r, () => select({ kind: 'section', sectionId: r.getAttribute('data-sel-sec') })));
     tree.querySelectorAll('[data-sel-blk]').forEach((r) => bindRow(r, () => { const p = r.getAttribute('data-sel-blk').split(':'); select({ kind: 'block', sectionId: p[0], blockId: p[1] }); }));
@@ -1124,19 +1493,102 @@
     wireDrag(tree);
   }
   function bindRow(r, onSel) {
-    r.onclick = (e) => { if (e.target.closest('[data-vis]') || e.target.closest('[data-del]') || e.target.closest('[data-tog-sec]')) return; onSel(); };
+    r.onclick = (e) => { if (e.target.closest('[data-vis]') || e.target.closest('[data-del]') || e.target.closest('[data-row-more]') || e.target.closest('[data-tog-sec]')) return; onSel(); };
     const vis = r.querySelector('[data-vis]'); if (vis) vis.onclick = (e) => { e.stopPropagation(); toggleHidden(r); };
     const del = r.querySelector('[data-del]'); if (del) del.onclick = (e) => { e.stopPropagation(); confirmDelete(r); };
+    const more = r.querySelector('[data-row-more]'); if (more) more.onclick = (e) => { e.stopPropagation(); openRowActions(more, r); };
+  }
+  function rowTarget(row) {
+    if (row.hasAttribute('data-sel-sec')) return pageSections().find((x) => x.id === row.getAttribute('data-sel-sec'));
+    if (row.hasAttribute('data-sel-blk')) {
+      const pair = row.getAttribute('data-sel-blk').split(':');
+      const section = pageSections().find((x) => x.id === pair[0]) || globalBySel(pair[0]);
+      return section && (section.blocks || []).find((x) => x.id === pair[1]);
+    }
+    return null;
+  }
+  function openRowActions(anchor, row) {
+    closePops();
+    const layer = h('<div class="pop-layer"></div>');
+    const pop = h('<div class="menu-pop os-row-menu"></div>');
+    pop.innerHTML = '<button type="button" class="opt" data-rename>Rename</button>' +
+      (canDuplicateRow(row) ? '<button type="button" class="opt" data-dup>Duplicate</button>' : '') +
+      (row.querySelector('[data-del]') ? '<button type="button" class="opt danger" data-delete>Remove</button>' : '');
+    layer.appendChild(pop); document.body.appendChild(layer);
+    const rect = anchor.getBoundingClientRect();
+    pop.style.left = Math.max(8, rect.right - 150) + 'px';
+    pop.style.top = Math.min(window.innerHeight - 100, rect.bottom + 4) + 'px';
+    pop.querySelector('[data-rename]').onclick = () => { closePops(); beginInlineRename(row); };
+    const dup = pop.querySelector('[data-dup]');
+    if (dup) dup.onclick = () => { closePops(); duplicateRow(row); };
+    const remove = pop.querySelector('[data-delete]');
+    if (remove) remove.onclick = () => { closePops(); confirmDelete(row); };
+    closeOnOutside(pop, anchor);
+  }
+  function canDuplicateRow(row) {
+    if (row.hasAttribute('data-sel-sec')) {
+      const s = pageSections().find((x) => x.id === row.getAttribute('data-sel-sec'));
+      const def = s && SECTIONS[s.kind];
+      return !!(s && def && !def.singleton);
+    }
+    if (row.hasAttribute('data-sel-blk')) {
+      const pair = row.getAttribute('data-sel-blk').split(':');
+      const section = pageSections().find((x) => x.id === pair[0]) || globalBySel(pair[0]);
+      const bl = section && (section.blocks || []).find((x) => x.id === pair[1]);
+      const def = section && SECTIONS[section.kind];
+      const bd = bl && def && blockDef(def, bl.kind);
+      return !!(bl && (!bd || !bd.unique));
+    }
+    return false;
+  }
+  function duplicateRow(row) {
+    if (row.hasAttribute('data-sel-sec')) duplicateSection(row.getAttribute('data-sel-sec'));
+    else if (row.hasAttribute('data-sel-blk')) {
+      const pair = row.getAttribute('data-sel-blk').split(':');
+      duplicateBlock(pair[0], pair[1]);
+    }
+  }
+  function beginInlineRename(row) {
+    const target = rowTarget(row);
+    const name = row.querySelector('.os-tr-name');
+    if (!target || !name) return;
+    const before = target.customName || name.textContent || '';
+    const input = document.createElement('input');
+    input.className = 'os-inline-rename';
+    input.value = before;
+    input.maxLength = 100;
+    name.replaceWith(input);
+    input.focus();
+    input.select();
+    let finished = false;
+    const finish = (save) => {
+      if (finished) return;
+      finished = true;
+      const value = input.value.trim();
+      if (save && value) {
+        target.customName = value;
+        markDirty();
+        refreshRight();
+        refreshCanvas();
+      }
+      refreshTree();
+    };
+    input.onkeydown = (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); finish(true); }
+      if (e.key === 'Escape') { e.preventDefault(); finish(false); }
+    };
+    input.onblur = () => finish(true);
   }
 
   // -------------------------------------------------------------- CENTER (preview canvas)
   function centerPanel() {
     const c = h('<div class="os-center"></div>');
-    const hint = ED.fullPreview ? '' : usageScopeHint();
-    c.innerHTML = '<div class="os-canvas-bar"><span data-preview-bar-text>' + esc(previewBarText()) + '</span>' +
-      (ED.fullPreview ? '<button type="button" data-exit-full-preview>Exit full-width preview <kbd>Esc</kbd></button>' : '') + '</div>' +
-      (hint ? '<div class="os-scope-hint">' + I.info + '<span>' + esc(hint) + '</span></div>' : '') +
+    const bar = ED.fullPreview
+      ? '<div class="os-canvas-bar"><span data-preview-bar-text>' + esc(previewBarText()) + '</span><button type="button" data-exit-full-preview>Exit full-width preview <kbd>Esc</kbd></button></div>'
+      : '';
+    c.innerHTML = bar +
       '<div class="os-canvas-scroll" id="os-cscroll"><div class="os-frame ' + ED.device + '" id="os-frame">' + canvasHtml() + '</div></div>';
+    applyStorefrontType(c.querySelector('#os-frame'));
     return c;
   }
   function previewBarText() {
@@ -1147,15 +1599,6 @@
     return prefix + ' · ' + pageLabel() +
       (resource ? ' · ' + resource.title : '') +
       ' · ' + (ED.device === 'desktop' ? 'Desktop' : 'Mobile');
-  }
-  // Editor-top usage-scope reminder for Online Store resource templates.
-  function usageScopeHint() {
-    let pt, t, count;
-    if (isCheckout()) return '';
-    pt = ED.currentPage; t = curTpl(); count = t && t.assigned;
-    if (!t || typeof count !== 'number' || count <= 0) return '';
-    const noun = (D.PAGE_OPTIONS.find((p) => p.value === pt) || {}).noun || 'items';
-    return 'This template is assigned to ' + count + ' ' + noun + '. Changes will apply to all assigned ' + noun + '.';
   }
   function canvasHtml() {
     if (isCheckout()) {
@@ -1492,16 +1935,39 @@
     set.push('--ck-section-gap:' + ((tk.layout || {}).section_spacing || 24) + 'px');
     return set.join(';');
   }
+  // Preview chrome tag (section + block): grip + name only — hide/delete stay in the left tree.
+  function previewChromeTag(label) {
+    return '<span class="os-sec-tag"><span class="os-chrome-grip" aria-hidden="true">' + I.menu + '</span>' + esc(label) + '</span>';
+  }
+  function resolvePreviewBlockLabel(el) {
+    const blockId = el && el.getAttribute('data-block-id'); if (!blockId) return '';
+    const sec = el.closest('[data-csel],[data-csel-global]'); if (!sec) return 'Block';
+    let inst;
+    if (sec.hasAttribute('data-csel')) inst = pageSections().find((x) => x.id === sec.getAttribute('data-csel'));
+    else inst = ED.theme[sec.getAttribute('data-csel-global')];
+    if (!inst) return 'Block';
+    const bl = (inst.blocks || []).find((b) => b.id === blockId);
+    return bl ? blockLabel(inst, bl) : 'Block';
+  }
+  function decorateBlockLabels(frame) {
+    if (!frame || ED.fullPreview || ED.previewOnly) return;
+    frame.querySelectorAll('[data-block-id]').forEach((el) => {
+      const label = resolvePreviewBlockLabel(el);
+      if (label) el.setAttribute('data-blabel', label);
+      else el.removeAttribute('data-blabel');
+    });
+  }
   function wrapGlobal(scope, inst, transHdr) {
     if (inst.hidden) return '';
     const def = SECTIONS[inst.kind]; const sel = ED.selection.kind === scope;
     const inner = def ? safeRender(def, inst, scope, inst.id, false, transHdr) : unknown(inst.kind);
-    return '<div class="os-sec' + (sel ? ' active' : '') + (transHdr ? ' os-sec-overlay' : '') + '" data-csel-global="' + scope + '"><span class="os-sec-tag">' + esc(scope === 'announcement' ? 'Announcement' : scope[0].toUpperCase() + scope.slice(1)) + '</span>' + inner + '</div>';
+    const label = scope === 'announcement' ? 'Announcement' : scope[0].toUpperCase() + scope.slice(1);
+    return '<div class="os-sec' + (sel ? ' active' : '') + (transHdr ? ' os-sec-overlay' : '') + '" data-csel-global="' + scope + '">' + previewChromeTag(label) + inner + '</div>';
   }
   function wrapSection(s, isFirst) {
     const def = SECTIONS[s.kind]; const sel = ED.selection.kind === 'section' && ED.selection.sectionId === s.id;
     const inner = def ? safeRender(def, s, 'section', s.id, isFirst) : unknown(s.kind);
-    return '<div class="os-sec' + (sel ? ' active' : '') + '" data-csel="' + s.id + '" data-preview-id="section:' + s.id + '"><span class="os-sec-tag">' + esc(sectionLabel(s)) + '</span>' + inner + '</div>';
+    return '<div class="os-sec' + (sel ? ' active' : '') + '" data-csel="' + s.id + '" data-preview-id="section:' + s.id + '">' + previewChromeTag(sectionLabel(s)) + inner + '</div>';
   }
   function safeRender(def, inst, scope, id, isFirst, transHdr) {
     try {
@@ -1594,6 +2060,12 @@
         if (blk && el.contains(blk)) { e.stopPropagation(); select({ kind: 'block', sectionId: id, blockId: blk.getAttribute('data-block-id') }); return; }
         select({ kind: 'section', sectionId: id });
       }));
+      // Keep block chrome labels fresh when carousels swap data-block-id (e.g. announcement).
+      frame.addEventListener('mouseover', (e) => {
+        const blk = e.target.closest('[data-block-id]'); if (!blk || !frame.contains(blk)) return;
+        const label = resolvePreviewBlockLabel(blk);
+        if (label) blk.setAttribute('data-blabel', label);
+      });
     }
     // hydrate each section for storefront interactivity (carousels, accordions, drag sliders…)
     frame.querySelectorAll('.os-sec').forEach((secEl) => {
@@ -1602,6 +2074,7 @@
       if (!inst) return; const def = SECTIONS[inst.kind];
       if (def && def.hydrate) { try { def.hydrate(secEl, inst.settings, inst.blocks || [], ctxFor(id ? 'section' : gscope, id || gscope, false, null)); } catch (e) { /* noop */ } }
     });
+    decorateBlockLabels(frame);
   }
 
   // -------------------------------------------------------------- RIGHT (config panel)
@@ -1623,9 +2096,9 @@
       const s = pageSections().find((x) => x.id === sel.sectionId);
       if (!s) return emptyRight('Section not found.');
       const def = SECTIONS[s.kind];
-      const rm = isCheckout() ? '' : '<button class="os-remove" data-remove-sec="' + s.id + '">' + I.trash + ' Remove section</button>';
-      return panelHead(def ? def.name : s.kind) +
-        '<div class="os-right-scroll" id="os-form">' + (def ? schemaForm(def.schema, panelSettings(s), '', schemaCtx(s.id)) : noSettings()) + rm + '</div>';
+      const rm = (isCheckout() || (def && def.required)) ? '' : '<button class="os-remove" data-remove-sec="' + s.id + '">' + I.trash + ' Remove section</button>';
+      return panelHead(sectionLabel(s), 'section') +
+        '<div class="os-right-scroll" id="os-form">' + (def ? schemaForm(def.schema, panelSettings(s), '', schemaCtx(s.id)) : noSettings()) + panelFoot(rm) + '</div>';
     }
     if (sel.kind === 'block') {
       const s = pageSections().find((x) => x.id === sel.sectionId) || globalBySel(sel.sectionId);
@@ -1633,8 +2106,8 @@
       if (!s || !bl) return emptyRight('Block not found.');
       const def = SECTIONS[s.kind]; const bd = blockDef(def, bl.kind);
       const rm = isCheckout() ? '' : '<button class="os-remove" data-remove-blk="' + sel.sectionId + ':' + bl.id + '">' + I.trash + ' Remove block</button>';
-      return panelHead(bd ? bd.name : 'Block') +
-        '<div class="os-right-scroll" id="os-form">' + (bd && bd.fields && bd.fields.length ? schemaForm(bd.fields, bl.settings, '') : noSettings()) + rm + '</div>';
+      return panelHead(blockLabel(s, bl), 'block') +
+        '<div class="os-right-scroll" id="os-form">' + (bd && bd.fields && bd.fields.length ? schemaForm(bd.fields, bl.settings, '') : noSettings()) + panelFoot(rm) + '</div>';
     }
     return emptyRight('Select a section or block to edit.');
   }
@@ -1652,8 +2125,14 @@
       sample: D.SAMPLE,
     };
   }
-  function panelHead(title) {
-    return '<div class="os-right-head"><div class="os-rh-title">' + esc(title) + '</div></div>';
+  function panelFoot(buttonHtml) {
+    return buttonHtml ? '<div class="os-right-foot">' + buttonHtml + '</div>' : '';
+  }
+  function panelHead(title, moreKind) {
+    const more = (!isCheckout() && (moreKind === 'section' || moreKind === 'block'))
+      ? '<button type="button" class="os-rh-more" data-panel-more="' + moreKind + '" title="More actions" aria-label="More actions">' + I.more + '</button>'
+      : '';
+    return '<div class="os-right-head"><div class="os-rh-title" title="' + esc(title) + '">' + esc(title) + '</div>' + more + '</div>';
   }
   function emptyRight(msg) { return panelHead('Settings') + '<div class="os-empty-right">' + esc(msg) + '</div>'; }
   function noSettings() { return '<div class="os-info">This section has no settings.</div>'; }
@@ -1667,17 +2146,42 @@
   // `ctx` (optional) carries page context to visibleWhen so a shared component can hide a
   // field per surface/page — e.g. the Header's Cart config is hidden on the Thank you page.
   function visible(f, values, ctx) { return !f.visibleWhen || !!f.visibleWhen(values, ctx); }
+  function tipHtml(f) {
+    const text = String(f.tip || f.info || '');
+    if (!text) return '';
+    const link = f.tipLink || f.link;
+    let body = esc(text);
+    if (link && link.text) {
+      const href = esc(link.href || '#');
+      const label = esc(link.text);
+      const safe = body.split(label).join('<a class="os-tip-a" href="' + href + '" target="_blank" rel="noopener noreferrer">' + label + '</a>');
+      body = safe.indexOf('<a ') >= 0 ? safe : (body + ' <a class="os-tip-a" href="' + href + '" target="_blank" rel="noopener noreferrer">' + label + '</a>');
+    }
+    return '<div class="os-tip">' + body + '</div>';
+  }
   function fieldHtml(f, values, ctx) {
     if (f.sub) return visible(f, values, ctx) ? '<div class="os-sub">' + esc(f.sub) + '</div>' : '';
+    if ((f.tip || (f.info && !f.key && f.soft)) && !f.key) return visible(f, values, ctx) ? tipHtml(f) : '';
     if (f.info && !f.key) return visible(f, values, ctx) ? '<div class="os-info">' + esc(f.info) + '</div>' : '';
     if (!visible(f, values, ctx)) return '';
     if (!f.key && typeof f.render === 'function') return f.render(values, ctx);
     const val = values[f.key];
     const hint = f.info ? '<div class="os-fhint">' + esc(f.info) + '</div>' : '';
-    if (f.control === 'toggle') {
-      return '<div class="os-fld os-fld-row"><label class="os-flabel">' + esc(f.label) + req(f) + '</label>' + control(f, val, values, ctx) + '</div>' + hint;
+    const label = '<label class="os-flabel">' + esc(f.label) + req(f) + '</label>';
+    const oneLine = (cls) => '<div class="os-fld ' + cls + '">' + label + control(f, val, values, ctx) + (hint || '') + '</div>';
+    if (f.control === 'custom_css') {
+      const open = !!(val && String(val).trim());
+      return '<details class="os-css-fold"' + (open ? ' open' : '') + '><summary>Custom CSS</summary>' + control(f, val, values, ctx) + hint + '</details>';
     }
-    return '<div class="os-fld"><label class="os-flabel">' + esc(f.label) + req(f) + '</label>' + control(f, val, values, ctx) + hint + '</div>';
+    // Compact controls: label + control on one row (Shopify theme editor)
+    if (!f.stack) {
+      if (f.control === 'toggle') return oneLine('os-fld-row');
+      if (f.control === 'segmented') return oneLine('os-fld-seg');
+      if (f.control === 'range') return oneLine('os-fld-range');
+      if (f.control === 'select' || f.control === 'number' || f.control === 'numberInherit' || f.control === 'color' || f.control === 'image') return oneLine('os-fld-pair');
+      if (f.control === 'product' || f.control === 'collection' || f.control === 'menu' || f.control === 'blog' || f.control === 'page') return oneLine('os-fld-pair');
+    }
+    return '<div class="os-fld">' + label + control(f, val, values, ctx) + hint + '</div>';
   }
   function req(f) { return f.required ? '<span class="os-req">*</span>' : ''; }
   function fmtRange(f, v) { v = (v == null ? f.default : v); return v + (f.unit || ''); }
@@ -1691,7 +2195,7 @@
     const opts = typeof f.options === 'function' ? (f.options(values, ctx) || []) : (f.options || []);
     switch (f.control) {
       case 'text': case 'url':
-        return '<input class="os-input" ' + dk + (f.maxlength ? ' maxlength="' + f.maxlength + '"' : '') + ' type="text" value="' + esc(val) + '" placeholder="' + esc(f.placeholder || 'Please enter') + '">';
+        return '<input class="os-input" ' + dk + (f.maxlength ? ' maxlength="' + f.maxlength + '"' : '') + ' type="text" value="' + esc(val) + '" placeholder="' + esc(f.placeholder == null ? 'Please enter' : f.placeholder) + '">';
       case 'textarea': case 'custom_css': case 'richtext':
         return '<textarea class="os-input os-ta' + (f.control === 'custom_css' ? ' mono' : '') + '" ' + dk + (f.maxlength ? ' maxlength="' + f.maxlength + '"' : '') + ' rows="' + (f.control === 'custom_css' ? 4 : 3) + '" placeholder="' + esc(f.placeholder || '') + '">' + esc(val) + '</textarea>' + (f.control === 'richtext' ? '<div class="os-fhint">Rich text — basic HTML allowed.' + (f.maxlength ? ' Max ' + f.maxlength + ' characters.' : '') + '</div>' : (f.maxlength ? '<div class="os-fhint">Max ' + f.maxlength + ' characters.</div>' : ''));
       case 'select':
@@ -1701,7 +2205,9 @@
       case 'toggle':
         return '<span class="os-tg' + (val ? ' on' : '') + '" ' + dk + '><i></i></span>';
       case 'range': {
-        const cur = (val == null ? f.default : val);
+        let cur = (val == null ? f.default : val);
+        if (f.max != null && Number(cur) > Number(f.max)) cur = Number(f.max);
+        if (f.min != null && Number(cur) < Number(f.min)) cur = Number(f.min);
         const pct = rangePct(f.min, f.max, cur);
         return '<div class="os-range-row" ' + dk + '>' +
           '<input type="range" class="os-range" min="' + f.min + '" max="' + f.max + '" step="' + (f.step || 1) + '" value="' + cur + '" style="--os-range-percent:' + pct + '%">' +
@@ -1722,10 +2228,20 @@
       case 'image':
         return '<div class="os-imgf" ' + dk + ' data-img-url="' + esc(val || '') + '">' +
           (val
-            ? '<div class="os-imgset"><button type="button" class="os-imgset-pick" data-img-pick><span class="os-imgset-prev" style="background-image:url(' + esc(val) + ')"></span>' +
-              '<span class="os-imgset-meta"><strong title="' + esc(val) + '">' + esc(mediaFileName(val, 'Selected image')) + '</strong><span>Replace</span></span></button>' +
-              '<button type="button" class="os-imglink danger" data-img-remove>Remove</button></div>'
-            : '<button type="button" class="os-imgdrop" data-img-pick>' + mediaImageIcon() + '<span><strong>Select image</strong><em>jpg / png / webp - drag &amp; drop supported</em></span></button>') +
+            ? '<div class="os-imgbox on">' +
+                '<button type="button" class="os-img-thumb" data-img-pick style="background-image:url(' + esc(val) + ')" title="' + esc(mediaFileName(val, 'Selected image')) + '" aria-label="Change image"></button>' +
+                '<div class="os-img-actions">' +
+                  '<button type="button" class="os-img-select" data-img-pick>Change</button>' +
+                  '<button type="button" class="os-img-lib" data-img-pick title="Browse files" aria-label="Browse files">' + mediaLibIcon() + '</button>' +
+                '</div>' +
+                '<button type="button" class="os-img-remove" data-img-remove>Remove</button>' +
+              '</div>'
+            : '<div class="os-imgbox">' +
+                '<div class="os-img-actions">' +
+                  '<button type="button" class="os-img-select" data-img-pick>Select</button>' +
+                  '<button type="button" class="os-img-lib" data-img-pick title="Browse files" aria-label="Browse files">' + mediaLibIcon() + '</button>' +
+                '</div>' +
+              '</div>') +
           '</div>';
       case 'collections':
         return collectionsControl(f, val, dk);
@@ -1746,8 +2262,7 @@
     const hex = (typeof val === 'string' && /^#/.test(val)) ? val : '#000000';
     return '<div class="os-color" ' + dk + '>' +
       '<label class="os-sw' + (isT ? ' tsp' : '') + '" style="' + (isT ? '' : 'background:' + esc(val)) + '"><input type="color" value="' + esc(hex) + '"></label>' +
-      '<input class="os-hex" value="' + esc(val == null ? '' : val) + '">' +
-      (f.allowTransparent ? '<button class="os-tbtn' + (isT ? ' on' : '') + '" data-tsp title="Transparent">T</button>' : '') + '</div>';
+      '<input class="os-hex" value="' + esc(val == null ? '' : val) + '"></div>';
   }
   function pickerControl(f, val, dk) {
     const label = pickerLabel(f.control, val, f.pickFrom);
@@ -1758,6 +2273,9 @@
     const raw = String(url || '').split('?')[0].split('#')[0];
     const name = raw.split('/').pop();
     try { return decodeURIComponent(name || '') || fallback; } catch (_) { return name || fallback; }
+  }
+  function mediaLibIcon() {
+    return '<svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M4.5 3.75A1.75 1.75 0 0 1 6.25 2h7.5A1.75 1.75 0 0 1 15.5 3.75v.5A1.75 1.75 0 0 1 13.75 6h-7.5A1.75 1.75 0 0 1 4.5 4.25v-.5zm0 5.5A1.75 1.75 0 0 1 6.25 7.5h7.5a1.75 1.75 0 0 1 1.75 1.75v.5A1.75 1.75 0 0 1 13.75 11.5h-7.5A1.75 1.75 0 0 1 4.5 9.75v-.5zm0 5.5A1.75 1.75 0 0 1 6.25 13h7.5a1.75 1.75 0 0 1 1.75 1.75v.5A1.75 1.75 0 0 1 13.75 17h-7.5A1.75 1.75 0 0 1 4.5 15.25v-.5z"/></svg>';
   }
   function mediaImageIcon() {
     return '<span class="os-imgdrop-ico" aria-hidden="true"><svg viewBox="20 58 24 20" width="24" height="20"><path d="M42.5 60.125C42.5 60.0829 42.4564 60 42.3418 60H22.6582C22.5436 60 22.5 60.0829 22.5 60.125V75.875C22.5 75.9171 22.5436 76 22.6582 76H42.3418C42.4564 76 42.5 75.9171 42.5 75.875V60.125ZM44.5 75.875C44.5 77.0756 43.5062 78 42.3418 78H22.6582C21.4938 78 20.5 77.0756 20.5 75.875V60.125C20.5 58.9244 21.4938 58 22.6582 58H42.3418C43.5062 58 44.5 58.9244 44.5 60.125V75.875Z" fill="currentColor"/><path d="M27.75 63.5C27.75 63.0858 27.4142 62.75 27 62.75C26.5858 62.75 26.25 63.0858 26.25 63.5C26.25 63.9142 26.5858 64.25 27 64.25C27.4142 64.25 27.75 63.9142 27.75 63.5ZM29.25 63.5C29.25 64.7426 28.2426 65.75 27 65.75C25.7574 65.75 24.75 64.7426 24.75 63.5C24.75 62.2574 25.7574 61.25 27 61.25C28.2426 61.25 29.25 62.2574 29.25 63.5Z" fill="currentColor"/><path d="M42.5 74.1113L33.8828 69.2734L30.9434 72.7031C30.5926 73.1124 29.9805 73.1705 29.5596 72.834L27.2305 70.9697L22.5 74.0664V75.8418C22.5 75.929 22.571 76 22.6582 76H42.3418C42.429 76 42.5 75.929 42.5 75.8418V74.1113ZM44.5 75.8418C44.5 77.0336 43.5336 78 42.3418 78H22.6582C21.4664 78 20.5 77.0336 20.5 75.8418V73.5264C20.5 73.189 20.6699 72.8742 20.9521 72.6895L26.7422 68.9004L26.8818 68.8232C27.2194 68.6725 27.6186 68.7197 27.9141 68.9561L30.0537 70.667L32.8984 67.3496C33.2087 66.9876 33.7317 66.8945 34.1475 67.1279L43.9893 72.6543C44.3045 72.8313 44.5 73.1648 44.5 73.5264V75.8418Z" fill="currentColor"/></svg></span>';
@@ -1911,16 +2429,15 @@
   }
   function wireImageField(el, onChange) {
     const k = el.getAttribute('data-fkey');
-    el.querySelectorAll('[data-img-pick]').forEach((b) => b.onclick = () => {
-      openSelectFileModal(el.getAttribute('data-img-url') || '', (url) => onChange(k, url, true));
-    });
+    const openLib = () => openSelectFileModal(el.getAttribute('data-img-url') || '', (url) => onChange(k, url, true));
+    el.querySelectorAll('[data-img-pick]').forEach((b) => b.onclick = openLib);
     const rm = el.querySelector('[data-img-remove]'); if (rm) rm.onclick = () => onChange(k, '', true);
-    const drop = el.querySelector('.os-imgdrop');
-    if (drop) {
-      drop.ondragover = (e) => { e.preventDefault(); drop.classList.add('drag'); };
-      drop.ondragleave = () => drop.classList.remove('drag');
-      drop.ondrop = (e) => {
-        e.preventDefault(); drop.classList.remove('drag');
+    const box = el.querySelector('.os-imgbox');
+    if (box) {
+      box.ondragover = (e) => { e.preventDefault(); box.classList.add('drag'); };
+      box.ondragleave = () => box.classList.remove('drag');
+      box.ondrop = (e) => {
+        e.preventDefault(); box.classList.remove('drag');
         readLocalMedia(e.dataTransfer.files, (added) => { if (added[0]) onChange(k, added[0].url, true); });
       };
     }
@@ -2058,7 +2575,7 @@
     const form = document.querySelector('#os-form'); if (!form) return;
     const target = currentSettings(); if (!target) { wireRemove(form); return; }
     const onChange = (k, v, rerenderPanel) => {
-      target[k] = v; markDirty(); refreshAffectedCanvas(); if (rerenderPanel) refreshRight();
+      target[k] = v; markDirty('field:' + ED.selection.kind + ':' + k); refreshAffectedCanvas(); if (rerenderPanel) refreshRight();
     };
     form.querySelectorAll('[data-control]').forEach((el) => {
       const k = el.getAttribute('data-fkey'); const ctl = el.getAttribute('data-control');
@@ -2077,10 +2594,9 @@
       } else if (ctl === 'segmented') {
         el.querySelectorAll('button').forEach((bn) => bn.onclick = () => { el.querySelectorAll('button').forEach((x) => x.classList.remove('on')); bn.classList.add('on'); onChange(k, coerce(bn.getAttribute('data-v')), true); });
       } else if (ctl === 'color') {
-        const cp = el.querySelector('input[type=color]'); const hx = el.querySelector('.os-hex'); const sw = el.querySelector('.os-sw'); const tb = el.querySelector('[data-tsp]');
-        cp.oninput = () => { hx.value = cp.value; sw.style.background = cp.value; sw.classList.remove('tsp'); if (tb) tb.classList.remove('on'); onChange(k, cp.value, false); };
+        const cp = el.querySelector('input[type=color]'); const hx = el.querySelector('.os-hex'); const sw = el.querySelector('.os-sw');
+        cp.oninput = () => { hx.value = cp.value; sw.style.background = cp.value; sw.classList.remove('tsp'); onChange(k, cp.value, false); };
         hx.onchange = () => { const v = hx.value.trim(); sw.style.background = v === 'transparent' ? '' : v; sw.classList.toggle('tsp', v === 'transparent'); onChange(k, v, false); };
-        if (tb) tb.onclick = () => { const on = !tb.classList.contains('on'); tb.classList.toggle('on', on); sw.classList.toggle('tsp', on); if (on) { sw.style.background = ''; hx.value = 'transparent'; onChange(k, 'transparent', false); } else { sw.style.background = '#ffffff'; hx.value = '#FFFFFF'; onChange(k, '#FFFFFF', false); } };
       } else if (ctl === 'numberInherit') {
         const numEl = el.querySelector('[data-ninh-num]'); const autoBtn = el.querySelector('[data-ninh-auto]'); const f = fieldByEl(el) || {};
         numEl.oninput = () => onChange(k, clamp(numEl.value, f.min == null ? -1e9 : f.min, f.max == null ? 1e9 : f.max, f.min || 0), false);
@@ -2234,6 +2750,113 @@
     const rs = form.querySelector('[data-remove-sec]'); if (rs) rs.onclick = () => removeSection(rs.getAttribute('data-remove-sec'));
     const rb = form.querySelector('[data-remove-blk]'); if (rb) rb.onclick = () => { const p = rb.getAttribute('data-remove-blk').split(':'); removeBlock(p[0], p[1]); };
     const hv = document.querySelector('[data-head-vis]'); if (hv) hv.onclick = () => { const p = hv.getAttribute('data-head-vis').split(':'); toggleHiddenBySel(p[0], p[1]); };
+    const more = document.querySelector('[data-panel-more]');
+    if (more) more.onclick = (e) => { e.stopPropagation(); openPanelMore(more, more.getAttribute('data-panel-more')); };
+  }
+  function canDuplicateSelected(kind) {
+    const sel = ED.selection;
+    if (kind === 'section' && sel.kind === 'section') {
+      const s = pageSections().find((x) => x.id === sel.sectionId);
+      const def = s && SECTIONS[s.kind];
+      return !!(s && def && !def.singleton);
+    }
+    if (kind === 'block' && sel.kind === 'block') {
+      const s = pageSections().find((x) => x.id === sel.sectionId) || globalBySel(sel.sectionId);
+      const bl = s && (s.blocks || []).find((x) => x.id === sel.blockId);
+      const def = s && SECTIONS[s.kind];
+      const bd = bl && def && blockDef(def, bl.kind);
+      return !!(bl && (!bd || !bd.unique));
+    }
+    return false;
+  }
+  function openPanelMore(anchor, kind) {
+    closePops();
+    const layer = h('<div class="pop-layer"></div>');
+    const pop = h('<div class="menu-pop os-row-menu"></div>');
+    pop.innerHTML = '<button type="button" class="opt" data-rename>Rename</button>' +
+      (canDuplicateSelected(kind) ? '<button type="button" class="opt" data-dup>Duplicate</button>' : '');
+    layer.appendChild(pop); document.body.appendChild(layer);
+    const rect = anchor.getBoundingClientRect();
+    pop.style.left = Math.max(8, rect.right - 150) + 'px';
+    pop.style.top = Math.min(window.innerHeight - 100, rect.bottom + 4) + 'px';
+    pop.querySelector('[data-rename]').onclick = () => { closePops(); beginPanelRename(); };
+    const dup = pop.querySelector('[data-dup]');
+    if (dup) dup.onclick = () => {
+      closePops();
+      if (kind === 'section') duplicateSection(ED.selection.sectionId);
+      else duplicateBlock(ED.selection.sectionId, ED.selection.blockId);
+    };
+    closeOnOutside(pop, anchor);
+  }
+  function beginPanelRename() {
+    const title = document.querySelector('.os-rh-title');
+    const sel = ED.selection;
+    let target = null;
+    if (sel.kind === 'section') target = pageSections().find((x) => x.id === sel.sectionId);
+    else if (sel.kind === 'block') {
+      const s = pageSections().find((x) => x.id === sel.sectionId) || globalBySel(sel.sectionId);
+      target = s && (s.blocks || []).find((x) => x.id === sel.blockId);
+    }
+    if (!target || !title) return;
+    const before = target.customName || title.textContent || '';
+    const input = document.createElement('input');
+    input.className = 'os-inline-rename';
+    input.value = before;
+    input.maxLength = 100;
+    title.replaceWith(input);
+    input.focus();
+    input.select();
+    let finished = false;
+    const finish = (save) => {
+      if (finished) return;
+      finished = true;
+      const value = input.value.trim();
+      if (save && value) {
+        target.customName = value;
+        markDirty();
+      }
+      refreshRight();
+      refreshTree();
+      refreshCanvas();
+    };
+    input.onkeydown = (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); finish(true); }
+      if (e.key === 'Escape') { e.preventDefault(); finish(false); }
+    };
+    input.onblur = () => finish(true);
+  }
+  function duplicateSection(id) {
+    const arr = pageSections();
+    const i = arr.findIndex((x) => x.id === id);
+    if (i < 0) return;
+    const def = SECTIONS[arr[i].kind];
+    if (def && def.singleton) { toast('Only one ' + def.name + ' can be on this page', 'err'); return; }
+    const copy = cloneSectionInstance(arr[i]);
+    if (copy.customName) copy.customName = copy.customName + ' copy';
+    arr.splice(i + 1, 0, copy);
+    ED.selection = { kind: 'section', sectionId: copy.id };
+    if (def && def.blocks) setPageSectionExpanded(copy.id, true);
+    markDirty(); refreshTree(); refreshRight(); refreshCanvas();
+    toast('Section duplicated');
+  }
+  function duplicateBlock(secId, blkId) {
+    const s = pageSections().find((x) => x.id === secId) || globalBySel(secId);
+    if (!s) return;
+    const i = (s.blocks || []).findIndex((x) => x.id === blkId);
+    if (i < 0) return;
+    const bl = s.blocks[i];
+    const def = SECTIONS[s.kind];
+    const bd = blockDef(def, bl.kind);
+    if (bd && bd.unique) { toast('Only one ' + (bd.name || bl.kind) + ' can be added', 'err'); return; }
+    const max = (def && def.blocks && def.blocks.max) || 99;
+    if (s.blocks.length >= max) { toast('Max ' + max + ' blocks', 'err'); return; }
+    const copy = clone(bl); copy.id = uid('blk');
+    if (copy.customName) copy.customName = copy.customName + ' copy';
+    s.blocks.splice(i + 1, 0, copy);
+    ED.selection = { kind: 'block', sectionId: s.id, blockId: copy.id };
+    revealSectionBlocks(s.id);
+    markDirty(); refreshTree(); refreshRight(); refreshCanvas();
+    toast('Block duplicated');
   }
   function clampNum(el) { const f = fieldByEl(el); let v = num(el.value); if (f) { if (f.min != null) v = Math.max(f.min, v); if (f.max != null) v = Math.min(f.max, v); } return v; }
   function rangeUnit(el) { const f = fieldByEl(el); return f ? f.unit : ''; }
@@ -2325,10 +2948,9 @@
       else if (ctl === 'toggle') el.onclick = () => { const nv = !el.classList.contains('on'); el.classList.toggle('on', nv); change(k, nv, true); };
       else if (ctl === 'segmented') el.querySelectorAll('button').forEach((bn) => bn.onclick = () => { el.querySelectorAll('button').forEach((x) => x.classList.remove('on')); bn.classList.add('on'); change(k, coerce(bn.getAttribute('data-v')), true); });
       else if (ctl === 'color') {
-        const cp = el.querySelector('input[type=color]'); const hx = el.querySelector('.os-hex'); const sw = el.querySelector('.os-sw'); const tb = el.querySelector('[data-tsp]');
-        cp.oninput = () => { hx.value = cp.value; sw.style.background = cp.value; sw.classList.remove('tsp'); if (tb) tb.classList.remove('on'); change(k, cp.value, false); };
+        const cp = el.querySelector('input[type=color]'); const hx = el.querySelector('.os-hex'); const sw = el.querySelector('.os-sw');
+        cp.oninput = () => { hx.value = cp.value; sw.style.background = cp.value; sw.classList.remove('tsp'); change(k, cp.value, false); };
         hx.onchange = () => { const v = hx.value.trim(); sw.style.background = v === 'transparent' ? '' : v; sw.classList.toggle('tsp', v === 'transparent'); change(k, v, false); };
-        if (tb) tb.onclick = () => { const on = !tb.classList.contains('on'); tb.classList.toggle('on', on); sw.classList.toggle('tsp', on); if (on) { sw.style.background = ''; hx.value = 'transparent'; change(k, 'transparent', false); } else { sw.style.background = '#ffffff'; hx.value = '#FFFFFF'; change(k, '#FFFFFF', false); } };
       } else if (ctl === 'image') {
         wireImageField(el, change);
       } else if (ctl === 'product' || ctl === 'collection' || ctl === 'menu' || ctl === 'blog' || ctl === 'page') {
@@ -2343,8 +2965,49 @@
   // ==========================================================================
   //  ACTIONS
   // ==========================================================================
-  function select(sel) { ED.selection = sel; if (sel.kind !== 'theme-settings') ED.leftMode = 'sections'; refreshTree(); refreshRight(); applyHighlight(); scrollToSelected(); }
-  function markDirty() { refreshTop(); }
+  // Keep left tree / center preview / right inspector in sync when a section or block is chosen.
+  function ensureSelectionVisibleInTree(sel) {
+    if (!sel || !sel.kind) return;
+    if (sel.kind === 'announcement' || sel.kind === 'header') {
+      ED.expand.header = true;
+      ED.sectionExpand[sel.kind] = true;
+      clearPageSectionFocus();
+      return;
+    }
+    if (sel.kind === 'footer') {
+      ED.expand.footer = true;
+      ED.sectionExpand.footer = true;
+      clearPageSectionFocus();
+      return;
+    }
+    if (sel.kind === 'section' && sel.sectionId) {
+      ED.expand.template = true;
+      revealSectionBlocks(sel.sectionId);
+      return;
+    }
+    if (sel.kind === 'block' && sel.sectionId) {
+      if (sel.sectionId === 'announcement' || sel.sectionId === 'header') {
+        ED.expand.header = true;
+        ED.sectionExpand[sel.sectionId] = true;
+      } else if (sel.sectionId === 'footer') {
+        ED.expand.footer = true;
+        ED.sectionExpand.footer = true;
+      } else {
+        ED.expand.template = true;
+        revealSectionBlocks(sel.sectionId);
+      }
+    }
+  }
+  function select(sel) {
+    ED.selection = sel;
+    if (sel.kind !== 'theme-settings') ED.leftMode = 'sections';
+    ensureSelectionVisibleInTree(sel);
+    refreshTree();
+    refreshRight();
+    applyHighlight();
+    scrollToSelected();
+  }
+  function markDirty(group) { recordHistory(group); refreshTop(); }
 
   function toggleHidden(rowEl) {
     if (rowEl.hasAttribute('data-sel-global')) { const k = rowEl.getAttribute('data-sel-global'); ED.theme[k].hidden = !ED.theme[k].hidden; }
@@ -2359,14 +3022,15 @@
     markDirty(); refreshTree(); refreshRight(); refreshCanvas();
   }
   function confirmDelete(rowEl) {
-    let what = 'section', go;
-    if (rowEl.hasAttribute('data-sel-sec')) { const id = rowEl.getAttribute('data-sel-sec'); go = () => removeSection(id); }
-    else if (rowEl.hasAttribute('data-sel-blk')) { what = 'block'; const p = rowEl.getAttribute('data-sel-blk').split(':'); go = () => removeBlock(p[0], p[1]); }
-    else return;
-    openConfirm({ title: 'Delete ' + what + '?', body: 'This ' + what + ' and its settings will be removed from the page. This can be undone with Discard before you save.', okText: 'Delete', danger: true, onOk: go });
+    if (rowEl.hasAttribute('data-sel-sec')) { removeSection(rowEl.getAttribute('data-sel-sec')); return; }
+    if (!rowEl.hasAttribute('data-sel-blk')) return;
+    const p = rowEl.getAttribute('data-sel-blk').split(':');
+    removeBlock(p[0], p[1]);
   }
   function removeSection(id) {
     const arr = pageSections(); const i = arr.findIndex((x) => x.id === id); if (i < 0) return;
+    const def = SECTIONS[arr[i].kind];
+    if (def && def.required) { toast(def.name + ' stays on this page', 'err'); return; }
     arr.splice(i, 1); if (ED.selection.kind === 'section' && ED.selection.sectionId === id) ED.selection = { kind: 'header' };
     markDirty(); refreshTree(); refreshRight(); refreshCanvas(); toast('Section removed');
   }
@@ -2383,36 +3047,154 @@
     if (def.blocks.kinds) { openBlockKindMenu(anchor, s, def); return; }
     const max = def.blocks.max || 99; if (s.blocks.length >= max) { toast('Max ' + max + ' blocks', 'err'); return; }
     const nb = { id: uid('blk'), kind: def.blocks.kind || 'item', hidden: false, settings: blockDefaults(def.blocks) };
-    s.blocks.push(nb); ED.selection = { kind: 'block', sectionId: secId, blockId: nb.id }; ED.sectionExpand[secId] = true;
+    // Insert under the Add block control (top of the list), not at the end.
+    if (!s.blocks) s.blocks = [];
+    s.blocks.unshift(nb); ED.selection = { kind: 'block', sectionId: secId, blockId: nb.id }; revealSectionBlocks(secId);
     markDirty(); refreshTree(); refreshRight(); refreshCanvas();
   }
-  function openBlockKindMenu(anchor, s, def) {
-    closePops(); const layer = h('<div class="pop-layer"></div>'); const pop = h('<div class="menu-pop" style="min-width:200px"></div>');
-    pop.innerHTML = Object.keys(def.blocks.kinds).map((bk) => '<div class="opt" data-bk="' + bk + '">' + esc(def.blocks.kinds[bk].name) + '</div>').join('');
-    layer.appendChild(pop); document.body.appendChild(layer);
-    // Keep the menu on-screen: the anchor (e.g. Footer's "Add block") often sits at the very
-    // bottom of a long tree, so flip the menu above the anchor when it wouldn't fit below.
-    const r = anchor.getBoundingClientRect(); const w = 200;
-    pop.style.left = Math.max(8, Math.min(r.left, window.innerWidth - w - 12)) + 'px';
-    pop.style.maxHeight = Math.max(160, window.innerHeight - 16) + 'px';
-    const ph = pop.offsetHeight || 200;
-    let top;
-    if (r.bottom + 6 + ph <= window.innerHeight - 8) top = r.bottom + 6;      // below the anchor
-    else if (r.top - 6 - ph >= 8) top = r.top - 6 - ph;                       // flip above
-    else top = Math.max(8, window.innerHeight - ph - 8);                      // clamp to bottom
-    pop.style.top = top + 'px';
-    pop.querySelectorAll('[data-bk]').forEach((o) => o.onclick = () => {
-      const bk = o.getAttribute('data-bk'); const bd = def.blocks.kinds[bk];
-      const max = def.blocks.max || 99; if (s.blocks.length >= max) { toast('Max ' + max + ' blocks', 'err'); closePops(); return; }
-      const nb = { id: uid('blk'), kind: bk, hidden: false, settings: blockDefaults(bd) }; s.blocks.push(nb);
-      ED.selection = { kind: 'block', sectionId: s.id, blockId: nb.id }; closePops(); markDirty(); refreshTree(); refreshRight(); refreshCanvas();
+  function blockKindPreviewHtml(def, blockKind) {
+    if (!def) return '';
+    if (typeof def.blockPreview === 'function') {
+      try {
+        const html = def.blockPreview(blockKind);
+        if (html) return String(html);
+      } catch (e) {}
+    }
+    const bd = def.blocks && def.blocks.kinds && def.blocks.kinds[blockKind];
+    if (!bd || bd.preview == null || bd.preview === false || bd.preview === '') return '';
+    if (typeof bd.preview === 'function') {
+      try { return String(bd.preview() || ''); } catch (e) { return ''; }
+    }
+    return String(bd.preview);
+  }
+  // Shopify add-section / add-block chrome: search + tabs + optional Generate + list | preview.
+  function addPopShellHtml(opts) {
+    const gen = opts.generate
+      ? '<button type="button" class="os-add-gen" data-add-gen><span class="os-add-gen-ico">' + I.sparkles + '</span><span>Generate</span></button>'
+      : '';
+    return '<div class="os-addpop-body">' +
+      '<div class="os-addpop-col">' +
+        '<div class="os-addpop-search"><span class="os-add-search-ico" aria-hidden="true">' + I.search + '</span>' +
+          '<input class="os-input" id="' + opts.searchId + '" placeholder="' + esc(opts.searchPh) + '" autocomplete="off"></div>' +
+        '<div class="os-add-tabs" role="tablist">' +
+          '<button type="button" class="os-add-tab on" role="tab" aria-selected="true" data-add-tab="main">' + esc(opts.tabMain) + '</button>' +
+          '<button type="button" class="os-add-tab" role="tab" aria-selected="false" data-add-tab="apps">' + esc(opts.tabApps || 'Apps') + '</button>' +
+        '</div>' +
+        gen +
+        '<div class="os-addpop-list" id="' + opts.listId + '" data-add-pane="main"></div>' +
+        '<div class="os-addpop-list os-add-apps" id="' + opts.listId + '-apps" data-add-pane="apps" hidden>' +
+          '<div class="os-add-apps-empty">No apps available yet.</div></div>' +
+      '</div>' +
+      '<div class="os-addpop-prev' + (opts.prevClass ? ' ' + opts.prevClass : '') + '" id="' + opts.prevId + '">' +
+        '<div class="os-addprev-wrap">' + addIdeaPreviewHtml() + '</div></div>' +
+    '</div>';
+  }
+  function addIdeaPreviewHtml() {
+    return '<div class="os-addprev-idea">' +
+      '<div class="os-addprev-idea-title">Have an idea? Let\'s bring it to life</div>' +
+      '<div class="os-addprev-idea-art" aria-hidden="true"></div>' +
+      '<div class="os-addprev-idea-cap">Large text filled with an image</div>' +
+      '<div class="os-addprev-dots" aria-hidden="true"><span class="on"></span><span></span><span></span></div>' +
+    '</div>';
+  }
+  function wireAddPopChrome(pop) {
+    pop.querySelectorAll('[data-add-tab]').forEach((tab) => {
+      tab.onclick = () => {
+        const key = tab.getAttribute('data-add-tab');
+        pop.querySelectorAll('[data-add-tab]').forEach((t) => {
+          const on = t === tab;
+          t.classList.toggle('on', on);
+          t.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+        pop.querySelectorAll('[data-add-pane]').forEach((pane) => {
+          pane.hidden = pane.getAttribute('data-add-pane') !== key;
+        });
+      };
     });
+    const gen = pop.querySelector('[data-add-gen]');
+    if (gen) gen.onclick = () => toast('Generate is coming soon');
+  }
+  function openBlockKindMenu(anchor, s, def) {
+    closePops();
+    const layer = h('<div class="pop-layer" style="z-index:250"></div>');
+    // Keep block type names in English (match PRD); do not run ZH overlay on this popover.
+    const pop = h('<div class="os-addpop os-blkpop i18n-skip"></div>');
+    const used = {};
+    (s.blocks || []).forEach((b) => { used[b.kind] = true; });
+    const kinds = Object.keys(def.blocks.kinds || {});
+    const showIco = kinds.some((bk) => {
+      const bd = def.blocks.kinds[bk];
+      return bd && bd.icon && bd.picker !== false;
+    });
+    pop.innerHTML = addPopShellHtml({
+      searchId: 'os-blksearch', listId: 'os-blklist', prevId: 'os-blkprev',
+      searchPh: 'Search blocks', tabMain: 'Blocks', generate: false, prevClass: 'os-blkprev',
+    });
+    layer.appendChild(pop); document.body.appendChild(layer);
+    positionPop(pop, anchor, 677, 570);
+    wireAddPopChrome(pop);
+
+    const commit = (bk) => {
+      const bd = def.blocks.kinds[bk]; if (!bd || bd.picker === false) return;
+      if (bd.unique && (s.blocks || []).some((b) => b.kind === bk)) { toast('Only one ' + bd.name + ' can be added', 'err'); return; }
+      const max = def.blocks.max || 99; if ((s.blocks || []).length >= max) { toast('Max ' + max + ' blocks', 'err'); return; }
+      const nb = { id: uid('blk'), kind: bk, hidden: false, settings: blockDefaults(bd) };
+      // Insert under the Add block control (top of the list), not at the end.
+      if (!s.blocks) s.blocks = [];
+      s.blocks.unshift(nb);
+      ED.selection = { kind: 'block', sectionId: s.id, blockId: nb.id };
+      revealSectionBlocks(s.id);
+      closePops(); markDirty(); refreshTree(); refreshRight(); refreshCanvas();
+    };
+
+    const showPreview = (rw) => {
+      pop.querySelectorAll('.os-addrow').forEach((x) => x.classList.remove('hover'));
+      if (rw) rw.classList.add('hover');
+      const wrap = pop.querySelector('#os-blkprev .os-addprev-wrap');
+      if (!wrap) return;
+      const bk = rw && rw.getAttribute('data-bk');
+      const html = bk ? blockKindPreviewHtml(def, bk) : '';
+      wrap.innerHTML = html
+        ? '<div class="os-blkprev-stage"><div class="os-blkprev-card">' + html + '</div></div>'
+        : '<div class="os-addprev-blank"></div>';
+    };
+
+    // Catalog = all kinds; omit picker:false; omit unique kinds already on the section; multi always stay.
+    const renderList = (q) => {
+      q = (q || '').toLowerCase();
+      let html = '';
+      kinds.forEach((bk) => {
+        const bd = def.blocks.kinds[bk];
+        if (!bd || bd.picker === false) return;
+        if (bd.unique && used[bk]) return;
+        if (q && String(bd.name || bk).toLowerCase().indexOf(q) < 0) return;
+        const ico = showIco ? '<div class="os-add-ico">' + (bd.icon ? ICON(bd.icon) : ICON('layers')) + '</div>' : '<div class="os-add-ico">' + ICON('layers') + '</div>';
+        html += '<div class="os-addrow" data-bk="' + esc(bk) + '">' +
+          ico + '<div class="os-add-name">' + esc(bd.name || bk) + '</div></div>';
+      });
+      const list = pop.querySelector('#os-blklist');
+      list.innerHTML = html || '<div class="os-info" style="padding:12px">No blocks match.</div>';
+      list.querySelectorAll('.os-addrow').forEach((rw) => {
+        rw.onmouseenter = () => showPreview(rw);
+        rw.onclick = () => commit(rw.getAttribute('data-bk'));
+      });
+      const first = list.querySelector('.os-addrow');
+      if (first) showPreview(first);
+      else showPreview(null);
+    };
+
+    renderList('');
+    const si = pop.querySelector('#os-blksearch');
+    si.oninput = () => renderList(si.value);
+    setTimeout(() => si.focus(), 20);
     closeOnOutside(pop, anchor);
   }
   function addSectionKind(kind) {
     const def = SECTIONS[kind]; if (!def) { toast('“' + kind + '” isn’t available yet', 'err'); return; }
+    if (def.singleton && pageSections().some((s) => s.kind === kind)) { toast('Only one ' + def.name + ' can be on this page', 'err'); return; }
     const inst = matSection({ kind: kind });
     pageSections().push(inst); ED.selection = { kind: 'section', sectionId: inst.id }; ED.expand.template = true;
+    if (def.blocks) setPageSectionExpanded(inst.id, true);
     markDirty(); refreshTree(); refreshRight(); refreshCanvas();
     const sc = document.getElementById('os-cscroll'); if (sc) sc.scrollTop = sc.scrollHeight;
     toast('Added ' + def.name);
@@ -2431,49 +3213,50 @@
     closePops();
     // z-index 250 lifts the layer above the editor chrome (.os-builder is z-index 140); the
     // modal is centered over the canvas, so without this it renders behind the preview column.
-    const layer = h('<div class="pop-layer" style="z-index:250"></div>'); const pop = h('<div class="os-addpop"></div>');
-    pop.innerHTML =
-      '<div class="os-addpop-search"><input class="os-input" id="os-ckaddsearch" placeholder="Search sections"></div>' +
-      '<div class="os-addpop-body"><div class="os-addpop-list" id="os-ckaddlist"></div>' +
-      '<div class="os-addpop-prev" id="os-ckaddprev"></div></div>' +
-      '<div class="os-addpop-foot"><span id="os-ckaddcount"></span><span>Esc to close</span></div>';
+    const layer = h('<div class="pop-layer" style="z-index:250"></div>'); const pop = h('<div class="os-addpop i18n-skip"></div>');
+    pop.innerHTML = addPopShellHtml({
+      searchId: 'os-ckaddsearch', listId: 'os-ckaddlist', prevId: 'os-ckaddprev',
+      searchPh: 'Search sections', tabMain: 'Sections', generate: true,
+    });
     layer.appendChild(pop); document.body.appendChild(layer);
     // Anchor next to the "Add section" button (same UX as the Online Store modal). positionPop
     // clamps the top so the whole modal stays on-screen even when the button sits low.
-    positionPop(pop, anchor, 640, 470);
+    positionPop(pop, anchor, 677, 570);
     pop.style.zIndex = '251'; // above the editor chrome (.os-builder z-index 140)
+    wireAddPopChrome(pop);
     const cat = ckCatalog();
     const showPrev = (rw) => {
       pop.querySelectorAll('.os-addrow').forEach((x) => x.classList.remove('hover')); rw.classList.add('hover');
       const kind = rw.getAttribute('data-add-kind'); const st = rw.getAttribute('data-status'); const name = rw.getAttribute('data-name');
-      let cta;
-      if (st === 'added') cta = '<div class="os-soon-note">Only one allowed — already added.</div>';
-      else if (st === 'soon') cta = '<div class="os-soon-note">Coming in a later release.</div>';
-      else cta = '<button class="btn btn-primary" data-add-go="' + esc(kind) + '">Add ' + esc(name) + '</button>';
-      pop.querySelector('#os-ckaddprev').innerHTML = '<div class="os-addprev-art">' + ICON(SECTIONS[kind] ? SECTIONS[kind].icon : 'image') + '</div>' +
+      const wrap = pop.querySelector('#os-ckaddprev .os-addprev-wrap');
+      if (!wrap) return;
+      let note = '';
+      if (st === 'added') note = '<div class="os-soon-note">Only one allowed — already added.</div>';
+      else if (st === 'soon') note = '<div class="os-soon-note">Coming in a later release.</div>';
+      wrap.innerHTML = '<div class="os-addprev-card">' +
+        '<div class="os-addprev-art">' + ICON(SECTIONS[kind] ? SECTIONS[kind].icon : 'image') + '</div>' +
         '<div class="os-addprev-name">' + esc(name) + '</div>' +
-        '<div class="os-addprev-desc">' + esc(rw.getAttribute('data-desc')) + '</div>' + cta;
-      const go = pop.querySelector('[data-add-go]'); if (go) go.onclick = () => { addCheckoutComponent(go.getAttribute('data-add-go')); closePops(); };
+        '<div class="os-addprev-desc">' + esc(rw.getAttribute('data-desc')) + '</div>' + note + '</div>';
     };
     const renderAdd = (q) => {
       q = (q || '').toLowerCase();
-      let html = '';
+      const flat = [];
       cat.forEach((g) => {
-        const ents = g.entries.filter((e) => !q || (e.name + ' ' + e.desc).toLowerCase().indexOf(q) >= 0);
-        if (!ents.length) return;
-        html += '<div class="os-addgrp">' + esc(g.label) + '</div>';
-        ents.forEach((e) => {
-          const st = ckComponentStatus(e.kind); const dis = st !== 'ok';
-          const badge = st === 'added' ? ' <span class="os-soon">Added</span>' : (st === 'soon' ? ' <span class="os-soon">Soon</span>' : '');
-          html += '<div class="os-addrow' + (dis ? ' soon' : '') + '" data-add-kind="' + esc(e.kind) + '" data-name="' + esc(e.name) + '" data-desc="' + esc(e.desc) + '" data-status="' + st + '">' +
-            '<div class="os-add-ico">' + ICON(SECTIONS[e.kind] ? SECTIONS[e.kind].icon : 'layers') + '</div>' +
-            '<div style="min-width:0"><div class="os-add-name">' + esc(e.name) + badge + '</div>' +
-            '<div class="os-add-desc">' + esc(e.desc) + '</div></div></div>';
+        g.entries.forEach((e) => {
+          if (q && (e.name + ' ' + e.desc).toLowerCase().indexOf(q) < 0) return;
+          flat.push(e);
         });
       });
+      flat.sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
+      let html = '';
+      flat.forEach((e) => {
+        const st = ckComponentStatus(e.kind); const dis = st !== 'ok';
+        const badge = st === 'added' ? ' <span class="os-soon">Added</span>' : (st === 'soon' ? ' <span class="os-soon">Soon</span>' : '');
+        html += '<div class="os-addrow' + (dis ? ' soon' : '') + '" data-add-kind="' + esc(e.kind) + '" data-name="' + esc(e.name) + '" data-desc="' + esc(e.desc) + '" data-status="' + st + '">' +
+          '<div class="os-add-ico">' + ICON(SECTIONS[e.kind] ? SECTIONS[e.kind].icon : 'layers') + '</div>' +
+          '<div class="os-add-name">' + esc(e.name) + badge + '</div></div>';
+      });
       const list = pop.querySelector('#os-ckaddlist'); list.innerHTML = html || '<div class="os-info" style="padding:12px">No sections match.</div>';
-      let total = 0, avail = 0; cat.forEach((g) => g.entries.forEach((e) => { total++; if (SECTIONS[e.kind]) avail++; }));
-      pop.querySelector('#os-ckaddcount').textContent = avail + ' of ' + total + ' section types available · more coming soon';
       list.querySelectorAll('.os-addrow').forEach((rw) => {
         rw.onmouseenter = () => showPrev(rw);
         rw.onclick = () => { if (rw.classList.contains('soon')) return; addCheckoutComponent(rw.getAttribute('data-add-kind')); closePops(); };
@@ -2613,51 +3396,64 @@
   // -------------------------------------------------------------- add-section popover
   function openAddSection(anchor) {
     closePops();
-    const layer = h('<div class="pop-layer"></div>'); const pop = h('<div class="os-addpop"></div>');
-    pop.innerHTML =
-      '<div class="os-addpop-search"><input class="os-input" id="os-addsearch" placeholder="Search sections"></div>' +
-      '<div class="os-addpop-body"><div class="os-addpop-list" id="os-addlist"></div>' +
-      '<div class="os-addpop-prev" id="os-addprev"></div></div>' +
-      '<div class="os-addpop-foot"><span id="os-addcount"></span><span>Esc to close</span></div>';
+    const layer = h('<div class="pop-layer"></div>'); const pop = h('<div class="os-addpop i18n-skip"></div>');
+    pop.innerHTML = addPopShellHtml({
+      searchId: 'os-addsearch', listId: 'os-addlist', prevId: 'os-addprev',
+      searchPh: 'Search sections', tabMain: 'Sections', generate: true,
+    });
     layer.appendChild(pop); document.body.appendChild(layer);
-    positionPop(pop, anchor, 640, 470);
+    positionPop(pop, anchor, 677, 570);
+    wireAddPopChrome(pop);
     const renderAdd = (q) => {
       q = (q || '').toLowerCase();
-      let total = 0, avail = 0, html = '';
+      const flat = [];
       D.CATALOG.forEach((g) => {
-        const ents = g.entries.filter((e) => !q || (e.name + ' ' + e.desc).toLowerCase().indexOf(q) >= 0);
-        if (!ents.length) return;
-        html += '<div class="os-addgrp">' + esc(g.label) + '</div>';
-        ents.forEach((e) => {
-          total++; const ok = !!SECTIONS[e.kind]; if (ok) avail++;
-          html += '<div class="os-addrow' + (ok ? '' : ' soon') + '" data-add-kind="' + esc(e.kind) + '" data-name="' + esc(e.name) + '" data-desc="' + esc(e.desc) + '">' +
-            '<div class="os-add-ico">' + ICON(ok ? SECTIONS[e.kind].icon : 'layers') + '</div>' +
-            '<div style="min-width:0"><div class="os-add-name">' + esc(e.name) + (ok ? '' : ' <span class="os-soon">Soon</span>') + '</div>' +
-            '<div class="os-add-desc">' + esc(e.desc) + '</div></div></div>';
+        g.entries.forEach((e) => {
+          if (!catalogVisible(e)) return;
+          if (q && (e.name + ' ' + e.desc).toLowerCase().indexOf(q) < 0) return;
+          flat.push(e);
         });
       });
+      flat.sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
+      let html = '';
+      flat.forEach((e) => {
+        const ok = !!SECTIONS[e.kind];
+        const added = ok && SECTIONS[e.kind].singleton && pageSections().some((s) => s.kind === e.kind);
+        html += '<div class="os-addrow' + (ok ? '' : ' soon') + (added ? ' added' : '') + '" data-add-kind="' + esc(e.kind) + '" data-name="' + esc(e.name) + '" data-desc="' + esc(e.desc) + '" data-added="' + (added ? '1' : '') + '">' +
+          '<div class="os-add-ico">' + ICON(ok ? SECTIONS[e.kind].icon : 'layers') + '</div>' +
+          '<div class="os-add-name">' + esc(e.name) + (ok ? (added ? ' <span class="os-soon">Added</span>' : '') : ' <span class="os-soon">Soon</span>') + '</div></div>';
+      });
       const list = pop.querySelector('#os-addlist'); list.innerHTML = html || '<div class="os-info" style="padding:12px">No sections match.</div>';
-      pop.querySelector('#os-addcount').textContent = countAvailable() + ' of ' + catalogTotal() + ' section types available';
       list.querySelectorAll('.os-addrow').forEach((rw) => {
         rw.onmouseenter = () => showAddPreview(rw);
-        rw.onclick = () => { if (rw.classList.contains('soon')) return; addSectionKind(rw.getAttribute('data-add-kind')); closePops(); };
+        rw.onclick = () => { if (rw.classList.contains('soon') || rw.getAttribute('data-added') === '1') return; addSectionKind(rw.getAttribute('data-add-kind')); closePops(); };
       });
-      const first = list.querySelector('.os-addrow'); if (first) showAddPreview(first);
+      const first = list.querySelector('.os-addrow');
+      if (first) showAddPreview(first);
+      else {
+        const wrap = pop.querySelector('#os-addprev .os-addprev-wrap');
+        if (wrap) wrap.innerHTML = addIdeaPreviewHtml();
+      }
     };
     const showAddPreview = (rw) => {
       pop.querySelectorAll('.os-addrow').forEach((x) => x.classList.remove('hover')); rw.classList.add('hover');
-      const ok = !rw.classList.contains('soon'); const kind = rw.getAttribute('data-add-kind');
-      pop.querySelector('#os-addprev').innerHTML = '<div class="os-addprev-art">' + ICON(ok && SECTIONS[kind] ? SECTIONS[kind].icon : 'image') + '</div>' +
+      const ok = !rw.classList.contains('soon'); const added = rw.getAttribute('data-added') === '1'; const kind = rw.getAttribute('data-add-kind');
+      const wrap = pop.querySelector('#os-addprev .os-addprev-wrap');
+      if (!wrap) return;
+      // Shopify-style large preview card; click the list row to add (no separate CTA required).
+      wrap.innerHTML = '<div class="os-addprev-card">' +
+        '<div class="os-addprev-art">' + ICON(ok && SECTIONS[kind] ? SECTIONS[kind].icon : 'image') + '</div>' +
         '<div class="os-addprev-name">' + esc(rw.getAttribute('data-name')) + '</div>' +
         '<div class="os-addprev-desc">' + esc(rw.getAttribute('data-desc')) + '</div>' +
-        (ok ? '<button class="btn btn-primary" data-add-go="' + esc(kind) + '">Add ' + esc(rw.getAttribute('data-name')) + '</button>' : '<div class="os-soon-note">Coming in a later release.</div>');
-      const go = pop.querySelector('[data-add-go]'); if (go) go.onclick = () => { addSectionKind(go.getAttribute('data-add-go')); closePops(); };
+        (added ? '<div class="os-soon-note">Only one allowed — already on this page.</div>' :
+          (ok ? '' : '<div class="os-soon-note">Coming in a later release.</div>')) +
+      '</div>';
     };
     renderAdd('');
     const si = pop.querySelector('#os-addsearch'); si.oninput = () => renderAdd(si.value); setTimeout(() => si.focus(), 20);
     closeOnOutside(pop, anchor);
   }
-  function catalogTotal() { let n = 0; D.CATALOG.forEach((g) => n += g.entries.length); return n; }
+  function catalogTotal() { let n = 0; D.CATALOG.forEach((g) => g.entries.forEach((e) => { if (catalogVisible(e)) n++; })); return n; }
 
   // -------------------------------------------------------------- inline resource picker (popover under the control)
   function openPickerPop(anchor, kind, current, onPick, single, pickFrom, maxItems) {
@@ -2818,6 +3614,160 @@
     closeOnOutside(pop, anchor);
   }
 
+  function openPreviewTip(btn) {
+    const already = document.querySelector('.os-rp-tip');
+    closePops();
+    if (already) return;
+    const layer = h('<div class="pop-layer" style="z-index:250"></div>');
+    const pop = h('<div class="os-rp-tip" role="tooltip"></div>');
+    pop.textContent = btn.getAttribute('data-tip') || 'Preview only';
+    layer.appendChild(pop);
+    document.body.appendChild(layer);
+    const rect = btn.getBoundingClientRect();
+    const width = pop.offsetWidth;
+    const height = pop.offsetHeight;
+    const panel = btn.closest('.os-left');
+    const panelRight = panel ? panel.getBoundingClientRect().right : rect.right;
+    let left = panelRight + 8;
+    let top = rect.top + rect.height / 2 - height / 2;
+    if (left + width > window.innerWidth - 8) left = Math.max(8, rect.left);
+    top = Math.max(8, Math.min(top, window.innerHeight - height - 8));
+    pop.dataset.place = 'right';
+    pop.style.left = Math.round(left) + 'px';
+    pop.style.top = Math.round(top) + 'px';
+    closeOnOutside(pop, btn);
+  }
+
+  function hideEditProductTip() {
+    const tip = document.querySelector('.os-rp-hover-tip');
+    if (tip) tip.remove();
+  }
+  function showEditProductTip(btn) {
+    if (!btn || !btn.isConnected) return;
+    hideEditProductTip();
+    const tip = h('<div class="os-rp-hover-tip" role="tooltip">Edit product</div>');
+    document.body.appendChild(tip);
+    const rect = btn.getBoundingClientRect();
+    const width = tip.offsetWidth;
+    const height = tip.offsetHeight;
+    let left = rect.right - width;
+    let top = rect.top - height - 8;
+    if (top < 8) top = rect.bottom + 8;
+    left = Math.max(8, Math.min(left, window.innerWidth - width - 8));
+    tip.style.left = Math.round(left) + 'px';
+    tip.style.top = Math.round(top) + 'px';
+  }
+  let closeProductEditorForce = null;
+  function closeProductEditor(force) {
+    if (closeProductEditorForce) closeProductEditorForce(!!force);
+  }
+  // Edit-product dialog: same Products edit layout/rules/content as #/products/:id.
+  // Only the chrome is a modal (covers the theme editor with a left/top seam).
+  function openProductEditor() {
+    if (!isResourcePage() || ED.currentPage !== 'product') return;
+    const live = previewResource('product');
+    if (!live) { toast('Select a product to edit', 'err'); return; }
+    if (document.querySelector('.os-pe')) return;
+    closePops();
+    hideEditProductTip();
+
+    const mask = h('<div class="os-pe-mask" aria-hidden="true"></div>');
+    const layer = h('<div class="os-pe i18n-skip" role="dialog" aria-modal="true" aria-label="Edit product"></div>');
+    document.body.appendChild(mask);
+    document.body.appendChild(layer);
+
+    let session = null;
+    let closing = false;
+
+    function barHtml(title) {
+      return '<div class="os-pe-bar">' +
+        '<div class="os-pe-heading"><strong>Edit product</strong><span>' + esc(title || live.title || 'Untitled') + '</span></div>' +
+        '<div class="os-pe-actions">' +
+          '<button type="button" class="os-top-btn" data-pe-discard disabled>Discard</button>' +
+          '<button type="button" class="os-top-btn primary" data-pe-save disabled>Save</button>' +
+          '<button type="button" class="os-pe-x" data-pe-close aria-label="Close"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M5.5 5.5l9 9M14.5 5.5l-9 9"/></svg></button>' +
+        '</div></div>';
+    }
+    function syncBar() {
+      const dirty = !!(session && session.isDirty && session.isDirty());
+      layer.querySelectorAll('[data-pe-save],[data-pe-discard]').forEach((btn) => { btn.disabled = !dirty; });
+    }
+    function destroy() {
+      if (closing) return;
+      closing = true;
+      document.removeEventListener('keydown', onKey, true);
+      if (session && session.destroy) session.destroy();
+      session = null;
+      hideEditProductTip();
+      mask.remove();
+      layer.remove();
+      closeProductEditorForce = null;
+    }
+    function requestClose() {
+      if (!session) { destroy(); return; }
+      session.close(false);
+    }
+    function onKey(e) {
+      if (e.key !== 'Escape' || !layer.isConnected) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const confirm = layer.querySelector('.modal-backdrop');
+      if (confirm) { confirm.remove(); return; }
+      requestClose();
+    }
+    function wireChrome() {
+      const close = layer.querySelector('[data-pe-close]');
+      if (close) close.onclick = requestClose;
+      const discard = layer.querySelector('[data-pe-discard]');
+      if (discard) discard.onclick = () => { if (session && session.discard) session.discard(); syncBar(); };
+      const save = layer.querySelector('[data-pe-save]');
+      if (save) save.onclick = () => { if (session && session.save) session.save(); };
+    }
+
+    layer.innerHTML = barHtml(live.title) + '<div class="os-pe-body"><div class="os-pe-loading muted">Loading product editor…</div></div>';
+    wireChrome();
+    document.addEventListener('keydown', onKey, true);
+    closeProductEditorForce = (force) => { if (force) destroy(); else requestClose(); };
+
+    const load = (typeof window.loadAdminModule === 'function')
+      ? window.loadAdminModule('products')
+      : Promise.reject(new Error('loadAdminModule unavailable'));
+    load.then(() => {
+      if (!layer.isConnected) return;
+      const api = window.VIEWS && window.VIEWS.products;
+      if (!api || typeof api.openEmbedded !== 'function') {
+        layer.querySelector('.os-pe-body').innerHTML = '<div class="os-pe-loading" style="color:var(--err)">Product editor failed to load.</div>';
+        return;
+      }
+      const body = layer.querySelector('.os-pe-body');
+      body.innerHTML = '';
+      session = api.openEmbedded(body, live, {
+        onTitle: (title) => {
+          const label = layer.querySelector('.os-pe-heading span');
+          if (label) label.textContent = title || 'Untitled';
+        },
+        onSaved: () => {
+          refreshTree();
+          refreshCanvas();
+        },
+        onClose: (opts) => {
+          if (opts && opts.force) destroy();
+          else requestClose();
+        },
+      });
+      // Mirror Products dirty state onto the dialog Discard/Save buttons.
+      const obs = new MutationObserver(syncBar);
+      obs.observe(body, { subtree: true, childList: true, attributes: true, characterData: true });
+      body.addEventListener('input', syncBar, true);
+      body.addEventListener('change', syncBar, true);
+      body.addEventListener('click', () => setTimeout(syncBar, 0), true);
+      syncBar();
+    }).catch(() => {
+      if (!layer.isConnected) return;
+      layer.querySelector('.os-pe-body').innerHTML = '<div class="os-pe-loading" style="color:var(--err)">Product editor failed to load.</div>';
+    });
+  }
+
   // -------------------------------------------------------------- template resource preview
   // Product / Collection templates can preview any resource, and merchants can narrow the
   // picker to resources currently assigned to the active template (Shopify parity).
@@ -2849,8 +3799,7 @@
         const thumb = r.image
           ? '<span class="os-rs-thumb" style="background-image:url(' + esc(r.image) + ')"></span>'
           : '<span class="os-rs-thumb empty">' + I.image + '</span>';
-        const status = pt === 'product' && r.status === 'draft'
-          ? '<span class="os-resource-status">Draft</span>' : '';
+        const status = pt === 'product' ? previewStatusBadge(r) : '';
         return '<button type="button" class="os-rs-row' + (on ? ' on' : '') + '" data-rs-id="' + esc(r.id) + '">' +
           thumb + '<span class="os-rs-copy"><span class="os-rs-name">' + esc(r.title) + '</span>' + status + '</span>' +
         '</button>';
@@ -2901,7 +3850,9 @@
   function openPageSelector(anchor, forceRoot, forceLevel) {
     closePops();
     const layer = h('<div class="pop-layer"></div>');
-    const pop = h('<div class="os-pkpop os-pgpop"></div>');
+    // Keep page-type labels (Home page / Products / Collections / …) in English;
+    // zh overlay would otherwise turn the first-level rows into 首页 / 商品 / 商品系列.
+    const pop = h('<div class="os-pkpop os-pgpop i18n-skip"></div>');
     layer.appendChild(pop); document.body.appendChild(layer);
     // env: which environment's menus the popover shows — always the current editor surface
     // ('os' online store / 'ck' checkout theme). Jump links actually enter the other editor
@@ -3046,7 +3997,7 @@
       ED.currentPage = pt;
       if (tplId) ED.tplSel[pt] = tplId;
       if (ED.selection.kind === 'section' || ED.selection.kind === 'block') ED.selection = { kind: 'header' };
-      ED.leftMode = 'sections'; syncSurfaceHash(); rerender();
+      ED.leftMode = 'sections'; syncSurfaceHash(); recordHistory(); rerender();
     });
   }
   // The template group for a page type. Checkout page types (checkout/upsell/downsell/
@@ -3119,6 +4070,7 @@
       const raw = nameEl.value; const name = raw.trim();
       if (!name) return { ok: false, msg: '' };
       if (raw.length > 25) return { ok: false, msg: 'Template name can\u2019t exceed 25 characters.' };
+      if (!/^[A-Za-z ]+$/.test(name)) return { ok: false, msg: 'Use English letters only.' };
       if (!tplNameFree(g, name)) return { ok: false, msg: 'A template with this name already exists.' };
       return { ok: true, msg: '' };
     };
@@ -3137,7 +4089,7 @@
       const id = uniqueTplId(g.list, name);
       g.list.push(cloneTemplate(pt, base, id, name));
       focusTemplate(pt, id);
-      close(); rerender(); toast('Template “' + name + '” created');
+      markDirty(); close(); rerender(); toast('Template “' + name + '” created');
     };
     okBtn.onclick = create;
     nameEl.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !okBtn.disabled) { e.preventDefault(); create(); } });
@@ -3151,7 +4103,7 @@
     if (same) return;
     confirmSwitchTemplate(() => {
       ED.surface = 'checkout'; ED.checkoutPage = pt; ED.ckTplSel[pt] = id;
-      ED.selection = defaultSelection(); ED.leftMode = 'sections'; syncSurfaceHash(); rerender();
+      ED.selection = defaultSelection(); ED.leftMode = 'sections'; syncSurfaceHash(); recordHistory(); rerender();
     });
   }
   // Enter the other editor environment from the page selector's jump link (§5.1/§5.2).
@@ -3168,7 +4120,7 @@
       } else {
         ED.surface = 'online-store';
       }
-      ED.selection = defaultSelection(); ED.leftMode = 'sections'; syncSurfaceHash(); rerender();
+      ED.selection = defaultSelection(); ED.leftMode = 'sections'; syncSurfaceHash(); recordHistory(); rerender();
       reopenSelectorAtRoot();
     });
   }
@@ -3182,6 +4134,17 @@
   }
   function defaultSelection() {
     if (isCheckout()) { const s = pageSections()[0]; return s ? { kind: 'section', sectionId: s.id } : { kind: 'theme-settings' }; }
+    const openId = rememberedPageSectionId();
+    if (openId) {
+      ED.expand.template = true;
+      ED.sectionExpand.announcement = false;
+      ED.sectionExpand.header = false;
+      ED.sectionExpand.footer = false;
+      return { kind: 'section', sectionId: openId };
+    }
+    ED.sectionExpand.announcement = false;
+    ED.sectionExpand.header = true;
+    ED.sectionExpand.footer = false;
     return { kind: 'header' };
   }
   // Buyer-flow simulation inside the editor preview. Keeps the current in-memory theme
@@ -3200,15 +4163,17 @@
     ED.selection = defaultSelection();
     ED.leftMode = 'sections';
     syncSurfaceHash();
+    recordHistory();
     rerender();
   }
   // Keep the URL canonical for the current surface without re-dispatching the router
   // (replaceState doesn't fire hashchange), so the Checkout editor stays bookmarkable.
   function syncSurfaceHash() {
     const handle = ED.meta.handle;
+    const pageSeg = (!isCheckout() && ED.currentPage && ED.currentPage !== 'home') ? '/' + encodeURIComponent(ED.currentPage) : '';
     const want = isCheckout()
       ? checkoutEditorHash(handle, ED.checkoutPage)
-      : '#/online-store/edit/' + encodeURIComponent(handle);
+      : '#/online-store/edit/' + encodeURIComponent(handle) + pageSeg;
     if (location.hash !== want) { try { history.replaceState(null, '', want); } catch (e) {} }
   }
 
@@ -3229,6 +4194,7 @@
       ED.savedTheme = clone(ED.theme);
       ED.meta.updated_time = nowStr();
       ED.busy = null;
+      resetHistory();
       refreshTop();
       refreshPreviewBarLabel();
       toast('Draft saved');
@@ -3250,7 +4216,7 @@
   }
   function onDiscard() {
     openConfirm({ title: 'Discard changes?', body: 'Are you sure you want to revert to the last saved state? Your unsaved changes will be lost.', okText: 'Discard', danger: true,
-      onOk: () => { ED.theme = clone(ED.savedTheme); if (!findSel()) ED.selection = { kind: 'header' }; rerender(); toast('Reverted to last saved state'); } });
+      onOk: () => { ED.theme = clone(ED.savedTheme); if (!findSel()) ED.selection = { kind: 'header' }; resetHistory(); rerender(); toast('Reverted to last saved state'); } });
   }
   function onPublish() {
     if (!isDirty() && !hasDraft()) return;
@@ -3261,6 +4227,7 @@
       if (isDirty()) ED.savedTheme = clone(ED.theme);
       ED.publishedTheme = clone(ED.savedTheme);
       ED.busy = null;
+      resetHistory();
       refreshTop();
       refreshPreviewBarLabel();
       toast('Published to storefront');
@@ -3496,6 +4463,7 @@
         : '<div class="os-preview-frame os-frame ' + ED.device + '" id="os-frame">' + canvasMarkup + '</div>') + '</main>' +
       standalonePreviewBarHtml();
     document.body.appendChild(shell);
+    applyStorefrontType(shell.querySelector('#os-frame'));
     document.body.classList.add('os-preview-active');
     document.body.classList.add('os-preview-merchant');
     if (ACTIVE_PREVIEW_BAR_HIDDEN) document.body.classList.add('os-preview-bar-hidden');
@@ -3598,7 +4566,7 @@
   }
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && ED && ED.fullPreview && document.getElementById('os-builder') &&
-        !document.querySelector('.modal-backdrop,.pop-layer')) {
+        !document.querySelector('.modal-backdrop,.pop-layer,.os-pe')) {
       exitFullPreview();
     }
   });
@@ -3630,11 +4598,11 @@
   function refreshRight() {
     const b = document.getElementById('os-builder'); if (!b) return;
     const old = b.querySelector('.os-right'); if (!old) return;
-    const oldSc = old.querySelector('.os-right-scroll'); const sy = oldSc ? oldSc.scrollTop : 0;
+    const oldSc = old.querySelector('.os-right-scroll'); const sy = old.scrollTop || (oldSc ? oldSc.scrollTop : 0);
     const sameSel = ED._rightKey === rightSelKey();
     const nw = rightPanel(); old.replaceWith(nw);
     if (ED.leftMode === 'settings' || ED.selection.kind === 'theme-settings') wireSettings(); else wireRight();
-    const newSc = nw.querySelector('.os-right-scroll'); if (newSc && sameSel) newSc.scrollTop = sy;
+    if (sameSel) nw.scrollTop = sy;
     ED._rightKey = rightSelKey();
   }
   function refreshCanvas() {
@@ -3644,6 +4612,7 @@
     catch (e) { if (ED.previewOnly) { renderStandalonePreview(); return; } throw e; }
     fr.className = (ED.previewOnly ? 'os-preview-frame ' : '') + 'os-frame ' + ED.device;
     fr.innerHTML = markup;
+    applyStorefrontType(fr);
     wireCanvas(); applyHighlight();
     const bar = document.querySelector('[data-preview-bar-text]'); if (bar) bar.textContent = previewBarText();
   }
@@ -3663,7 +4632,17 @@
     fr.querySelectorAll('.os-block-sel').forEach((x) => x.classList.remove('os-block-sel'));
     const sel = ED.selection;
     if (sel.kind === 'block') {
-      const el = fr.querySelector('[data-block-id="' + cssesc(sel.blockId) + '"]'); if (el) el.classList.add('os-block-sel');
+      const el = fr.querySelector('[data-block-id="' + cssesc(sel.blockId) + '"]');
+      if (el) {
+        el.classList.add('os-block-sel');
+        const label = resolvePreviewBlockLabel(el);
+        if (label) el.setAttribute('data-blabel', label);
+      }
+      // Keep the parent section outline visible so left/center stay aligned while a block is selected.
+      const parent = (sel.sectionId === 'header' || sel.sectionId === 'footer' || sel.sectionId === 'announcement')
+        ? fr.querySelector('[data-csel-global="' + cssesc(sel.sectionId) + '"]')
+        : fr.querySelector('[data-csel="' + cssesc(sel.sectionId) + '"]');
+      if (parent) parent.classList.add('active');
       return;
     }
     if (sel.kind === 'section') {
@@ -3675,24 +4654,69 @@
     }
   }
   function cssesc(s) { return String(s).replace(/"/g, '\\"'); }
+  function previewTargetForSelection(sc, sel) {
+    if (!sc || !sel) return null;
+    if (sel.kind === 'header' || sel.kind === 'announcement' || sel.kind === 'footer') {
+      return sc.querySelector('[data-csel-global="' + cssesc(sel.kind) + '"]');
+    }
+    if (sel.kind === 'section') {
+      return sc.querySelector('[data-preview-id="section:' + cssesc(sel.sectionId) + '"],[data-csel="' + cssesc(sel.sectionId) + '"]');
+    }
+    if (sel.kind === 'block') {
+      return sc.querySelector('[data-block-id="' + cssesc(sel.blockId) + '"]')
+        || sc.querySelector('[data-preview-id="section:' + cssesc(sel.sectionId) + '"],[data-csel="' + cssesc(sel.sectionId) + '"]');
+    }
+    return null;
+  }
+  function isPreviewTargetInView(el, sc, opts) {
+    opts = opts || {};
+    const r = el.getBoundingClientRect();
+    const sr = sc.getBoundingClientRect();
+    if (sr.height < 8) return true;
+    const visible = Math.min(r.bottom, sr.bottom) - Math.max(r.top, sr.top);
+    if (visible <= 0) return false;
+    // Blocks: require the top to sit near the upper third so nested rows aren't left buried
+    // inside a tall section that already fills the viewport.
+    if (opts.kind === 'block') {
+      const blockBand = sr.top + Math.min(sr.height * 0.4, 220);
+      return r.top >= sr.top - 4 && r.top <= blockBand && r.bottom <= sr.bottom + 4;
+    }
+    // Whole target already on screen (e.g. short footer at page end) — no scroll needed.
+    if (r.top >= sr.top - 4 && r.bottom <= sr.bottom + 4) return true;
+    // Tall sections: treat as in view when the top sits in the upper half with enough visible area.
+    const topBand = sr.top + Math.min(sr.height * 0.5, 320);
+    const fillsView = r.top <= sr.top + 4 && r.bottom >= sr.bottom - 4;
+    const topComfortable = r.top >= sr.top - 4 && r.top <= topBand;
+    const enoughVisible = visible >= Math.min(r.height, sr.height) * 0.35;
+    return fillsView || (topComfortable && enoughVisible);
+  }
   function scrollToSelected() {
-    const sc = document.getElementById('os-cscroll'); if (!sc) return; const sel = ED.selection;
+    const sc = document.getElementById('os-cscroll'); if (!sc) return;
+    const sel = ED.selection;
     setTimeout(() => {
-      if (sel.kind === 'header' || sel.kind === 'announcement') { if (sc.scrollTop > 4) sc.scrollTo({ top: 0, behavior: 'smooth' }); return; }
-      let el = null;
-      if (sel.kind === 'section') el = sc.querySelector('[data-preview-id="section:' + cssesc(sel.sectionId) + '"]');
-      else if (sel.kind === 'block') { const sEl = sc.querySelector('[data-block-id="' + cssesc(sel.blockId) + '"]'); el = sEl; }
-      else if (sel.kind === 'footer') el = sc.querySelector('[data-csel-global="footer"]');
-      if (!el) return;
-      const r = el.getBoundingClientRect(); const sr = sc.getBoundingClientRect();
-      // Skip auto-scroll when the element is already comfortably in view (e.g. clicked directly
-      // in the preview). Only scroll when its top is above the viewport or it sits below the fold —
-      // which mainly happens when selecting from the left tree.
-      const topVisible = r.top >= sr.top && r.top <= sr.bottom - 24;
-      const fillsView = r.top <= sr.top && r.bottom >= sr.bottom;
-      if (topVisible || fillsView) return;
-      sc.scrollTo({ top: sc.scrollTop + (r.top - sr.top) - 10, behavior: 'smooth' });
-    }, 30);
+      const el = previewTargetForSelection(sc, sel);
+      if (!el) {
+        if ((sel.kind === 'header' || sel.kind === 'announcement') && sc.scrollTop > 4) {
+          sc.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        return;
+      }
+      if (!isPreviewTargetInView(el, sc, { kind: sel.kind })) {
+        const r = el.getBoundingClientRect();
+        const sr = sc.getBoundingClientRect();
+        const pad = sel.kind === 'block' ? 24 : 12;
+        sc.scrollTo({ top: Math.max(0, sc.scrollTop + (r.top - sr.top) - pad), behavior: 'smooth' });
+      }
+      const tree = document.getElementById('os-tree');
+      const row = tree && tree.querySelector('.os-row.active');
+      if (row && typeof row.scrollIntoView === 'function') {
+        const tr = row.getBoundingClientRect();
+        const tsr = tree.getBoundingClientRect();
+        if (tr.top < tsr.top + 4 || tr.bottom > tsr.bottom - 4) {
+          row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }
+      }
+    }, 40);
   }
   function findSel() {
     const sel = ED.selection;
@@ -3723,10 +4747,30 @@
     document.addEventListener('keydown', kk);
     _popCleanups.push(() => { clearTimeout(t); if (added) document.removeEventListener('mousedown', hh); document.removeEventListener('keydown', kk); });
   }
+  // Add section / Add block popover (Shopify):
+  // Preview panel measured in Shopify inspector: 397 × 570, padding 16px.
+  // Pop height = 570; width = list 280 + preview 397.
+  // Top-align with the trigger; if that would clip below the window, pin bottom and raise.
   function positionPop(pop, anchor, w, hh) {
-    const r = anchor.getBoundingClientRect(); pop.style.width = w + 'px';
-    let left = Math.min(r.left, window.innerWidth - w - 16); let top = Math.min(Math.max(r.top, 64), window.innerHeight - hh - 16);
-    pop.style.left = Math.max(8, left) + 'px'; pop.style.top = top + 'px';
+    const r = anchor.getBoundingClientRect();
+    const margin = 8;
+    const winH = window.innerHeight;
+    const targetH = hh || 570;
+    const h = Math.min(targetH, winH - margin * 2);
+    pop.style.width = w + 'px';
+    const panel = anchor.closest && anchor.closest('.os-left');
+    const railRight = panel ? panel.getBoundingClientRect().right : r.right;
+    let left = railRight + 8;
+    if (left + w > window.innerWidth - margin) left = Math.max(margin, window.innerWidth - w - margin);
+    let top = Math.max(margin, r.top);
+    if (top + h > winH - margin) {
+      top = winH - margin - h;
+      if (top < margin) top = margin;
+    }
+    pop.style.height = Math.round(h) + 'px';
+    pop.style.maxHeight = Math.round(h) + 'px';
+    pop.style.left = Math.round(left) + 'px';
+    pop.style.top = Math.round(top) + 'px';
   }
   function nowStr() { const d = new Date(); const p = (n) => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds()); }
 
@@ -3839,7 +4883,7 @@
   .os-theme-actions{display:flex;align-items:center;gap:10px;flex:none}
 
   /* builder shell */
-  .os-builder{position:fixed;inset:0;z-index:140;background:var(--page);display:flex;flex-direction:column;font-size:14px;color:var(--ink)}
+  .os-builder{position:fixed;inset:0;z-index:140;background:var(--page);display:flex;flex-direction:column;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:13px;font-weight:400;line-height:1.4;color:var(--ink)}
   .os-chrome{flex-shrink:0}
   .os-appbar{box-sizing:border-box;display:flex;align-items:center;gap:8px;height:40px;padding:12px 24px;background:#0f172a;color:#b7bbbf;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:12px;line-height:1;white-space:nowrap}
   .os-appbar strong{color:#e2e8f0;font-size:12px;font-weight:700}
@@ -3849,7 +4893,7 @@
      80, which hid menus behind the tree / preview canvas. Keep below modal backdrops (240). */
   .pop-layer{z-index:200}
   body.os-preview-active .pop-layer{z-index:540}
-  .os-top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;height:56px;padding:0 14px;border-bottom:1px solid #e0e1e3;background:#fff;color:#111827;flex-shrink:0;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  .os-top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;height:56px;padding:0 14px;border-bottom:1px solid #e3e3e3;background:#fff;color:#303030;flex-shrink:0;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
   .os-top-l{display:flex;align-items:center;gap:0;min-width:0}
   .os-top-c{display:flex;align-items:center;gap:10px;justify-content:center}
   .os-top-r{display:flex;align-items:center;gap:8px;justify-self:end}
@@ -3864,8 +4908,9 @@
   .os-top-icon:hover{background:#F3F4F6}
   .os-top-icon.on{background:#F3F4F6}
   .os-top-icon:disabled{opacity:.4;cursor:not-allowed}
+  .os-history{display:inline-flex;align-items:center;gap:2px;padding-right:6px;margin-right:2px;border-right:1px solid #e5e7eb}
   .os-top-hidden{display:none!important}
-  .os-top-btn{min-width:76px;width:76px;height:32px;padding:0 12px;border:1px solid #e0e1e3;border-radius:4px;background:#fff;color:#121927;font:inherit;font-size:13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+  .os-top-btn{min-width:76px;width:76px;height:32px;padding:0 12px;border:1px solid #e3e3e3;border-radius:4px;background:#fff;color:#303030;font:inherit;font-size:13px;font-weight:550;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
   .os-top-btn:hover{background:#f3f6fb;color:#111827}
   .os-top-btn.primary{background:#111827;border-color:#111827;color:#fff}
   .os-top-btn.primary:hover{background:#020617;color:#fff}
@@ -3874,7 +4919,7 @@
   .os-top-btn.primary[disabled]{border-color:#b7bbbf;background:#b7bbbf;color:#fff}
   .os-preview-open{display:inline-flex;align-items:center;justify-content:center}
   .os-preview-open svg{flex:none}
-  .os-tname{font-size:14px;font-weight:700;color:#31353c;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}
+  .os-tname{font-size:13px;font-weight:600;color:#303030;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}
   .os-tstatus{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:700;line-height:1.3;white-space:nowrap}
   .os-tstatus::before{content:"";width:5px;height:5px;border-radius:999px;background:currentColor}
   .os-tstatus.saved{background:#d1fae5;color:#047857}
@@ -3942,9 +4987,9 @@
   .os-ct-count{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--ink-muted)}
   .os-ct-chev{position:absolute;right:11px;top:50%;transform:translateY(-50%);color:var(--ink-muted);pointer-events:none;font-size:11px}
   .os-ct-err{margin:-6px 0 14px;font-size:12.5px;line-height:1.5;color:#d92d20}
-  /* Editor-top usage-scope hint (PRD §13) */
-  .os-scope-hint{display:flex;align-items:center;gap:8px;padding:8px 16px;background:#fffaeb;border-bottom:1px solid #fde28a;color:#7a5b00;font-size:12.5px;line-height:1.45}
-  .os-scope-hint svg{flex:none;width:15px;height:15px;color:#dc9b00}
+  .os-rp-tip{position:fixed;z-index:260;max-width:220px;padding:8px 10px;background:#fff;color:#111827;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 8px 24px rgba(17,24,39,.12);font-size:12px;line-height:1.45;pointer-events:auto}
+  .os-rp-tip:after{content:'';position:absolute;left:var(--arrow,12px);width:8px;height:8px;background:#fff;transform:rotate(45deg)}
+  .os-rp-tip[data-place="right"]:after{left:-5px;top:50%;margin-top:-4px;border-right:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb}
   /* Upsell / Downsell shared post-purchase offer canvas */
   .ckoffer-wrap{width:100%;margin:0 auto;box-sizing:border-box}
   .ckoffer-main{display:flex;flex-direction:column}
@@ -3961,54 +5006,93 @@
   .os-body{flex:1;min-height:0;display:grid;grid-template-columns:300px 1fr 340px;overflow:hidden}
   .os-builder.os-full-preview .os-body{grid-template-columns:1fr}
   .os-builder.os-full-preview .os-left,.os-builder.os-full-preview .os-right{display:none}
-  .os-builder.os-full-preview .os-canvas-scroll{padding:12px}
+  .os-builder.os-full-preview .os-canvas-scroll{padding:0}
+  .os-builder.os-full-preview .os-canvas-scroll:has(> .os-frame.mobile){padding:20px}
   .os-builder.os-full-preview .os-frame.desktop{max-width:none;box-shadow:none;border-radius:0}
-  .os-builder.os-full-preview .os-frame.mobile{max-width:390px}
+  .os-builder.os-full-preview .os-frame.mobile{max-width:390px;box-shadow:0 1px 6px rgba(0,0,0,.08);border-radius:4px}
   .os-builder.os-full-preview .os-sec{cursor:default;outline-color:transparent!important}
   .os-builder.os-full-preview .os-sec-tag{display:none}
   .os-builder.os-full-preview .os-block-sel{outline:none}
+  .os-builder.os-full-preview .os-frame [data-block-id][data-blabel]{outline:none!important}
+  .os-builder.os-full-preview .os-frame [data-block-id][data-blabel]::before{display:none}
 
   /* left tree */
-  .os-left{border-right:1px solid var(--hair);display:flex;flex-direction:column;min-height:0;background:#fff;color:#111827;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;letter-spacing:0}
+  .os-left{border-right:1px solid #e3e3e3;display:flex;flex-direction:column;min-height:0;background:#fff;color:#303030;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;letter-spacing:0}
   .os-left-head{padding:12px 16px;font-size:13px;font-weight:600;color:var(--ink);border-bottom:1px solid var(--hair);flex-shrink:0}
   .os-left-scroll{flex:1;overflow:auto;padding:8px}
   .os-left-scroll.os-ck-tree{padding:0 10px 24px}
+  .os-left-scroll.os-sec-tree{padding:0 0 12px}
+  .os-sec-tree .os-rp-context{margin:0;padding:8px 12px 12px;border-bottom:1px solid #e3e3e3}
+  .os-sec-tree .os-grp-head{padding:0 12px;border-top:1px solid #e3e3e3;box-sizing:border-box}
+  .os-sec-tree .os-grp-head:first-child,.os-sec-tree .os-rp-context + .os-grp-head{border-top:0}
+  .os-sec-tree .os-row{margin:0 8px}
+  .os-sec-tree .os-tree-add{width:calc(100% - 16px);margin-left:8px;margin-right:8px}
   /* Product / Collection template context + Shopify-style preview resource selector. */
   .os-rp-context{padding:4px 4px 12px;margin-bottom:4px;border-bottom:1px solid var(--hair)}
-  .os-rp-template{font-size:14px;font-weight:650;color:var(--ink);padding:2px 4px}
-  .os-rp-assigned{font-size:12px;color:var(--ink-muted);padding:3px 4px 8px}
-  .os-rp-trigger{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 9px;background:var(--panel);border:1px solid transparent;border-radius:8px;color:var(--ink);font-family:inherit;cursor:pointer;text-align:left}
-  .os-rp-trigger:hover{border-color:var(--ctl)}
-  .os-rp-copy{display:flex;flex-direction:column;min-width:0;gap:2px}
-  .os-rp-label{font-size:11px;color:var(--ink-muted)}
-  .os-rp-name{display:flex;align-items:center;gap:7px;min-width:0;font-size:12.5px;font-weight:550}
+  .os-rp-template{font-size:13px;font-weight:600;color:var(--ink);padding:2px 4px}
+  .os-rp-assigned{font-size:12px;color:#616161;padding:2px 4px 8px}
+  .os-rp-preview{display:grid;grid-template-columns:minmax(0,1fr) 28px;align-items:center;column-gap:2px;padding:0 2px}
+  .os-rp-card{min-width:0;display:grid;grid-template-columns:20px minmax(0,1fr);column-gap:4px;align-items:center;padding:3px 6px 3px 4px;border-radius:8px;cursor:pointer}
+  .os-rp-card:hover,.os-rp-card:focus-visible{background:#f1f1f1;outline:none}
+  .os-rp-copy{min-width:0}
+  .os-rp-label{font-size:11px;line-height:14px;color:#8a8a8a;padding-left:0}
+  .os-rp-product{display:flex;align-items:center;gap:4px;min-width:0;height:16px;margin-top:1px;color:#303030;font-size:13px;font-weight:550;line-height:16px}
+  .os-rp-info{align-self:center;width:20px;height:20px;margin:0;padding:0;border:0;border-radius:6px;background:transparent;color:#616161;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex:none}
+  .os-rp-info svg{width:16px;height:16px;display:block}
+  .os-rp-info:hover,.os-rp-info:focus-visible{background:#e3e3e3;color:#303030}
+  .os-rp-swap{display:none;margin-left:auto;flex:none;color:#616161}
+  .os-rp-swap svg{width:14px;height:14px}
+  .os-rp-card:hover .os-rp-swap,.os-rp-card:focus-visible .os-rp-swap{display:inline-flex}
+  .os-rp-edit{align-self:center;width:28px;height:28px;margin:0;padding:0;border:0;background:transparent;color:#6b7280;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+  .os-rp-edit:hover{color:#303030;background:#f1f1f1}
+  .os-rp-hover-tip{position:fixed;z-index:260;padding:7px 10px;background:#fff;color:#111827;border-radius:8px;box-shadow:0 4px 16px rgba(17,24,39,.14),0 0 0 1px rgba(17,24,39,.06);font-size:13px;font-weight:500;line-height:1.2;white-space:nowrap;pointer-events:none}
+  .os-pe-mask{position:fixed;inset:0;z-index:279;background:rgba(0,0,0,.6)}
+  .os-pe{position:fixed;top:12px;left:12px;right:0;bottom:0;z-index:280;display:flex;flex-direction:column;background:#fff;color:#111827;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  .os-pe-bar{height:56px;flex:none;display:flex;align-items:center;gap:12px;padding:0 12px 0 16px;border-bottom:1px solid #e3e3e3;background:#fff}
+  .os-pe-x{width:32px;height:32px;padding:0;border:1px solid #c9cccf;border-radius:8px;background:#fff;color:#202223;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex:none}
+  .os-pe-x:hover{background:#f6f6f7;color:#202223}
+  .os-pe-heading{min-width:0;display:flex;flex-direction:column;gap:1px}
+  .os-pe-heading strong{font-size:14px;font-weight:650;line-height:1.2}
+  .os-pe-heading span{font-size:12px;color:#6b7280;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:48vw}
+  .os-pe-actions{margin-left:auto;display:flex;align-items:center;gap:8px;flex:none}
+  .os-pe-body{flex:1;min-height:0;overflow:auto;background:var(--bg,#f5f6f8)}
+  .os-pe-loading{padding:48px 24px;text-align:center;font-size:13.5px}
+  .os-pe .modal-backdrop{z-index:5}
   .os-rp-title{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .os-rp-thumb{width:22px;height:22px;flex:none;border-radius:5px;background-size:cover;background-position:center;border:1px solid var(--hair);display:inline-flex;align-items:center;justify-content:center;color:var(--ink-muted)}
   .os-rp-thumb svg{width:14px;height:14px}
   .os-rp-chev{display:inline-flex;flex:none;color:var(--ink-muted)}
   .os-tree-note{font-size:12px;color:var(--ink-muted);line-height:1.55;background:var(--panel);border-radius:8px;padding:9px 11px;margin:4px 4px 10px}
-  .os-tree-row{display:flex;align-items:center;gap:9px;padding:8px 8px;border-radius:8px;cursor:pointer;color:#111827;font-size:12px;font-weight:400;line-height:1.3}
+  .os-tree-row{display:flex;align-items:center;gap:9px;padding:8px 8px;border-radius:8px;cursor:pointer;color:#303030;font-size:13px;font-weight:400;line-height:1.3}
   .os-tree-row:hover{background:var(--panel)}
-  .os-grp-head{display:flex;align-items:center;gap:8px;height:39px;width:100%;border:0;border-top:.5px solid #e0e1e3;background:transparent;padding:0;color:#111827;font-family:inherit;font-size:13px;font-weight:700;letter-spacing:0;line-height:1.3;text-transform:none;text-align:left;cursor:pointer}
+  .os-grp-head{display:flex;align-items:center;gap:8px;height:39px;width:100%;border:0;border-top:.5px solid #e3e3e3;background:transparent;padding:0;color:#303030;font-family:inherit;font-size:13px;font-weight:650;letter-spacing:0;line-height:1.3;text-transform:none;text-align:left;cursor:pointer}
   .os-grp-head:first-child{border-top:0}
   .os-caret{display:inline-flex;color:var(--ink-muted);transition:transform .15s}.os-caret.open{transform:rotate(90deg)}
-  .os-row{display:flex;align-items:center;column-gap:8px;row-gap:4px;min-height:39px;padding:0 8px 0 4px;border-radius:4px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:400;line-height:1.3;color:#111827;position:relative;user-select:none}
-  .os-row:hover{background:#f2f2f3}
-  .os-row.active{background:#121927;color:#fff;font-weight:400}
+  .os-row{display:flex;align-items:center;column-gap:8px;row-gap:4px;min-height:39px;padding:0 8px 0 4px;border-radius:4px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:400;line-height:1.3;color:#303030;position:relative;user-select:none}
+  .os-row:hover{background:#f1f1f1}
+  .os-row.active{background:#005bd3;color:#fff;font-weight:400}
   .os-row.active .os-tr-ico,.os-row.active .os-row-caret,.os-row.active .os-tr-grip{color:#fff}
   .os-row.hid .os-tr-name{text-decoration:line-through;opacity:.7}
   .os-row.blk{padding-left:28px}
-  .os-row-lead{display:inline-flex;align-items:center;gap:4px;flex:0 0 36px;width:36px}
-  .os-lead-spacer{width:16px;height:16px;flex:0 0 16px}
-  .os-tr-ico{width:16px;height:16px;flex:0 0 16px;color:#121927;display:inline-flex;align-items:center;justify-content:center}
+  .os-row-lead{display:inline-flex;align-items:center;gap:4px;flex:0 0 34px;width:34px}
+  .os-lead-spacer{width:14px;height:14px;flex:0 0 14px}
+  .os-tr-ico{width:14px;height:14px;flex:0 0 14px;color:#303030;display:inline-flex;align-items:center;justify-content:center}
+  .os-tr-ico svg{width:14px;height:14px}
   .os-tr-name{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .os-row-caret{width:16px;height:32px;display:inline-flex;align-items:center;justify-content:center;color:#b7bbbf;transition:transform .15s;flex:0 0 16px}.os-row-caret.open{transform:rotate(90deg)}.os-row-caret.ghost{visibility:hidden}
-  .os-tr-acts{display:inline-flex;align-items:center;gap:2px;flex:0 0 46px;justify-content:flex-end;width:46px;opacity:0;pointer-events:none}
-  .os-row:hover .os-tr-acts,.os-row.hid .os-tr-acts{opacity:1;pointer-events:auto}
-  .os-tr-act{width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;color:#121927;border-radius:4px;cursor:pointer;background:transparent}
+  /* Delete / hide follow hover only; selected (blue) stays without those icons until hovered. */
+  .os-tr-acts{display:inline-flex;align-items:center;gap:1px;flex:0 0 auto;justify-content:flex-end;width:0;min-width:0;overflow:hidden;opacity:0;pointer-events:none}
+  .os-row:hover .os-tr-acts{width:auto;min-width:44px;opacity:1;pointer-events:auto}
+  .os-tr-act{width:22px;height:22px;padding:0;border:0;display:inline-flex;align-items:center;justify-content:center;color:#303030;border-radius:4px;cursor:pointer;background:transparent}
   .os-tr-act:hover{background:rgba(17,24,39,.07)}
-  .os-row.active .os-tr-acts .os-tr-act{color:#fff}
-  .os-row.active .os-tr-act:hover{background:rgba(255,255,255,.16);color:#fff}
+  .os-tr-act.is-off{color:#c5c8ce}
+  /* Selected (blue): icons stay inverse white; per-icon hover deepens background */
+  .os-row.active:hover .os-tr-acts .os-tr-act{color:#fff;background:transparent}
+  .os-row.active:hover .os-tr-acts .os-tr-act.is-off{color:rgba(255,255,255,.38)}
+  .os-row.active:hover .os-tr-acts .os-tr-act:hover,
+  .os-row.active:hover .os-tr-acts .os-tr-act:focus-visible{color:#fff;background:rgba(0,0,0,.22)}
+  .os-tr-act[data-del]{display:none}
+  .os-row:hover .os-tr-acts .os-tr-act[data-del]{display:inline-flex}
   .os-tr-drag-slot{position:relative;display:inline-flex;width:16px;height:16px;flex:0 0 16px;align-items:center;justify-content:center}
   .os-tr-drag-slot > .os-tr-grip{position:absolute;inset:0;z-index:1;width:16px;height:16px}
   .os-tr-drag-slot > .os-tr-ico{transition:opacity .12s ease}
@@ -4019,10 +5103,20 @@
   .os-tr-lock{display:inline-flex;align-items:center;justify-content:center;flex:0 0 24px;width:24px;color:#c7ccd4}
   .os-tr-lock svg{display:block;width:16px;height:16px}
   .os-row.active .os-tr-lock{color:rgba(255,255,255,.72)}
-  .os-tree-add{display:inline-flex;align-items:center;justify-content:flex-start;gap:8px;width:100%;min-height:39px;margin:0;border:0;border-radius:4px;background:transparent;color:#2563eb;padding:0 8px 0 4px;font-size:13px;font-weight:400;line-height:1;cursor:pointer}
-  .os-tree-add:hover{background:#f2f3f5;color:#2563eb}
+  .os-inline-rename{flex:1;min-width:0;height:27px;padding:0 6px;border:1px solid #005bd3;border-radius:4px;background:#fff;color:#303030;font:inherit;font-size:13px;outline:none}
+  .os-row-menu{min-width:150px}
+  .os-row-menu button.opt{display:block;width:100%;padding:8px 10px;border:0;background:transparent;text-align:left;font:inherit;cursor:pointer}
+  .os-row-menu button.opt:hover{background:#f2f2f3}
+  .os-row-menu .opt.danger{color:#d92d20}
+  .os-tree-add{display:inline-flex;align-items:center;justify-content:flex-start;gap:8px;width:100%;min-height:39px;margin:0;border:0;border-radius:4px;background:transparent;color:#005bd3;padding:0 8px 0 4px;font-size:13px;font-weight:400;line-height:1;cursor:pointer}
+  .os-tree-add:hover{background:#f1f1f1;color:#005bd3}
   .os-tree-add svg{width:16px;height:16px;flex:0 0 16px}
-  .os-tree-add.sub{margin:0;padding:0 8px 0 48px;font-size:13px}
+  /* Same inset as .os-sec-tree .os-row + blk padding/lead so plus aligns with block icons. */
+  .os-tree-add.sub{width:calc(100% - 16px);margin:0 8px;padding:0 8px 0 28px;column-gap:8px;gap:8px;font-size:13px;box-sizing:border-box}
+  .os-tree-add.sub .os-add-slot{width:16px;height:16px;flex:0 0 16px}
+  .os-tree-add.sub .os-tr-ico{color:#005bd3}
+  .os-tree-add.sub .os-tr-ico svg,.os-tree-add.sub svg{width:14px;height:14px;flex:0 0 14px}
+  .os-tree-add.sub .os-tr-name{color:#005bd3}
   .os-row.dragging{opacity:.4}
   .os-row.drop-before::before,.os-row.drop-after::before{content:'';position:absolute;left:8px;right:8px;height:2px;background:var(--brand);border-radius:2px}
   .os-row.drop-before::before{top:-1px}.os-row.drop-after::before{bottom:-1px}
@@ -4032,93 +5126,154 @@
   .os-canvas-bar{flex-shrink:0;min-height:31px;padding:6px 14px;font-size:12px;color:var(--ink-muted);background:#f7f8fa;border-bottom:1px solid var(--hair);display:flex;align-items:center;justify-content:space-between;gap:12px;box-sizing:border-box}
   .os-canvas-bar button{display:inline-flex;align-items:center;gap:7px;border:0;background:transparent;color:var(--brand);font:600 11.5px inherit;cursor:pointer;white-space:nowrap}
   .os-canvas-bar kbd{padding:1px 5px;border:1px solid var(--ctl);border-bottom-width:2px;border-radius:4px;background:#fff;color:var(--ink-muted);font:10px ui-monospace,monospace}
-  .os-canvas-scroll{flex:1;overflow:auto;padding:20px;display:flex;justify-content:center;align-items:flex-start}
-  .os-frame{width:100%;max-width:1080px;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.08);border-radius:4px;overflow:hidden;transition:max-width .2s}
-  .os-frame.mobile{max-width:390px}
+  .os-canvas-scroll{flex:1;overflow:auto;padding:0;display:flex;justify-content:center;align-items:flex-start}
+  .os-canvas-scroll:has(> .os-frame.mobile){padding:20px}
+  .os-frame{width:100%;max-width:none;min-height:100%;background:#fff;box-shadow:none;border-radius:0;overflow:hidden}
+  .os-frame.os-store{font-family:var(--os-body-font);font-weight:var(--os-body-weight,400);font-size:var(--os-base-size,16px)}
+  .os-frame.os-store h1,.os-frame.os-store h2,.os-frame.os-store h3{font-weight:var(--os-heading-weight,500);letter-spacing:var(--os-heading-tracking,-0.04em);text-transform:var(--os-heading-transform,none)}
+  .os-frame.os-store .vf-sub,.os-frame.os-store .mg-subh,.os-frame.os-store .ba-sub,.os-frame.os-store .ug-sub,.os-frame.os-store .mwt-ssub,.os-frame.os-store .mwt-bh,.os-frame.os-store .faq-sub,.os-frame.os-store .rel-sub,.os-frame.os-store .prv-sub,.os-frame.os-store .bp-sub,.os-frame.os-store .cls-sub,.os-frame.os-store .csub,.os-frame.os-store .fc-sub,.os-frame.os-store .ilb-sub,.os-frame.os-store .ss-eyebrow,.os-frame.os-store .tm-sub{font-family:var(--os-sub-font);font-weight:var(--os-sub-weight,500);font-size:var(--os-sub-size,18px);letter-spacing:var(--os-sub-tracking,0em);text-transform:var(--os-sub-transform,capitalize)}
+  .os-frame.os-store .pdp-price .now,.os-frame.os-store .fp-price .now{font-weight:var(--os-bold-weight,500)}
+  .os-frame.os-store .hd-link,.os-frame.os-store .hd-drow,.os-frame.os-store .hd-da{font-family:var(--os-nav-font,inherit);font-weight:var(--os-nav-weight,500);letter-spacing:0;text-transform:var(--os-nav-transform,none)}
+  .os-frame.os-store .hd-logo{font-family:var(--os-heading-font,inherit);font-weight:var(--os-heading-weight,500);letter-spacing:var(--os-heading-tracking,-0.04em);text-transform:var(--os-heading-transform,none)}
+  .os-frame.mobile{max-width:390px;min-height:0;box-shadow:0 1px 6px rgba(0,0,0,.08);border-radius:4px}
+  /* Selection rings match Shopify theme editor inspector: section ring on the
+     section box, block ring on the block box. Horizontal page padding keeps a
+     clear air gap on the right between the two rings (see Sleek / Silix editor). */
   .os-sec{position:relative;outline:2px solid transparent;outline-offset:-2px;cursor:pointer;transition:outline-color .12s}
   .os-sec:hover{outline-color:#b9d2ff}.os-sec.active{outline-color:var(--brand)}
-  .os-sec-tag{position:absolute;top:0;left:0;z-index:4;background:var(--brand);color:#fff;font-size:10px;font-weight:600;padding:2px 7px;border-bottom-right-radius:6px;opacity:0;pointer-events:none;transition:opacity .12s;letter-spacing:.02em}
-  .os-sec:hover .os-sec-tag,.os-sec.active .os-sec-tag{opacity:1}
-  .os-transhdr{position:relative}
+  /* Name tags sit OUTSIDE the selection ring (above the top edge) so they do not cover content. */
+  .os-sec{overflow:visible}
+  .os-sec-tag{position:absolute;top:0;left:0;z-index:8;display:inline-flex;align-items:center;gap:5px;max-width:calc(100% - 8px);box-sizing:border-box;transform:translateY(-100%);background:var(--brand);color:#fff;font-size:13px;font-weight:600;line-height:18px;padding:5px 10px 5px 7px;border-radius:4px 4px 0 0;opacity:0;pointer-events:none;transition:opacity .12s;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .os-chrome-grip{display:inline-flex;flex:none;width:12px;height:12px;align-items:center;justify-content:center;opacity:.95}
+  .os-chrome-grip svg{display:block;width:12px;height:12px}
+  .os-sec:hover > .os-sec-tag,.os-sec.active > .os-sec-tag{opacity:1}
+  /* Prefer the block label when a block is hovered or selected inside the section. */
+  .os-sec:has([data-block-id]:hover) > .os-sec-tag,
+  .os-sec:has(.os-block-sel) > .os-sec-tag{opacity:0}
+  .os-transhdr{position:relative;overflow:visible}
   .os-transhdr>.os-sec-overlay{position:absolute;top:0;left:0;right:0;z-index:6}
-  .os-block-sel{outline:2px solid var(--brand);outline-offset:-2px}
+  .os-frame [data-block-id][data-blabel]{position:relative;overflow:visible;outline:2px solid transparent;outline-offset:-2px;cursor:pointer;transition:outline-color .12s}
+  .os-frame [data-block-id][data-blabel]:hover{outline-color:#b9d2ff}
+  .os-frame [data-block-id][data-blabel]::before{content:attr(data-blabel);position:absolute;top:0;left:0;z-index:9;box-sizing:border-box;max-width:calc(100% - 8px);transform:translateY(-100%);padding:5px 10px 5px 26px;background-color:var(--brand);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M3 12h18M3 6h18M3 18h18'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:7px center;background-size:13px 13px;color:#fff;font-size:13px;font-weight:600;line-height:18px;letter-spacing:.01em;border-radius:4px 4px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;pointer-events:none;transition:opacity .12s}
+  .os-frame [data-block-id][data-blabel]:hover::before,
+  .os-frame [data-block-id][data-blabel].os-block-sel::before{opacity:1}
+  .os-block-sel{outline:2px solid var(--brand)!important;outline-offset:-2px;border-radius:0;background-color:rgba(0,102,230,.05)}
+  /* Let external chrome tags paint above neighboring blocks / past the frame edge. */
+  .os-builder:not(.os-full-preview) .os-frame{overflow:visible}
   .os-empty-canvas{padding:64px 20px;text-align:center;color:#9aa3b0;font-size:13px;line-height:1.7}
   .os-render-err{margin:8px;padding:14px;background:#fff4f2;color:#b3401f;font-size:12.5px;border:1px solid #f3c9c0;border-radius:8px}
 
   /* right panel */
-  .os-right{border-left:1px solid var(--hair);display:flex;flex-direction:column;min-height:0;background:#fff;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:12px}
-  .os-right-head{display:flex;align-items:flex-start;justify-content:space-between;gap:3px;padding:16px 0;margin:0 10px;border-bottom:1px solid #e0e1e3;background:#fff;flex-shrink:0}
-  .os-rh-title{min-width:0;color:#111827;font-size:13px;font-weight:700;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .os-right{border-left:1px solid #e3e3e3;display:flex;flex-direction:column;min-height:0;overflow-x:hidden;overflow-y:auto;background:#fff;font-family:inherit;font-size:13px;color:#303030}
+  .os-right-head{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:40px;padding:6px 16px;margin:0;border-bottom:1px solid #e3e3e3;background:#fff;flex:none;position:sticky;top:0;z-index:3;box-sizing:border-box}
+  .os-rh-title{min-width:0;flex:1;color:#303030;font-size:13px;font-weight:650;line-height:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .os-rh-more{width:28px;height:28px;flex:none;margin:0;border:0;background:transparent;color:#6b7280;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+  .os-rh-more:hover{background:#f2f3f5;color:#111827}
+  /* Mid-panel rules are inset; header / foot rules stay edge-to-edge. */
+  .os-css-fold{margin:16px 16px 4px;border:0;border-top:1px solid #e3e3e3;border-radius:0;padding:0}
+  .os-css-fold > summary{cursor:pointer;font-size:13px;font-weight:650;color:#303030;padding:16px 0 10px;list-style:none}
+  .os-css-fold > summary::-webkit-details-marker{display:none}
+  .os-css-fold[open] > summary{border-bottom:0;padding-bottom:8px}
+  .os-css-fold .os-ta,.os-css-fold .os-fhint{margin-left:0;margin-right:0}
+  .os-css-fold .os-ta{margin-top:0;margin-bottom:10px}
+  .menu-pop .opt.disabled{opacity:.45;pointer-events:none;cursor:default}
+  .menu-pop .opt:has(.os-opt-ico){display:flex;align-items:center;gap:8px}
+  .os-opt-ico{width:14px;height:14px;flex:0 0 14px;display:inline-flex;align-items:center;justify-content:center}
+  .os-opt-ico svg{display:block;width:14px;height:14px}
   .os-rh-ico{width:32px;height:32px;flex:none;border-radius:8px;background:var(--panel);display:grid;place-items:center;color:var(--ink-muted)}
   .os-rh-sub{font-size:12px;color:var(--ink-muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .os-expall{margin-left:auto;font-size:12.5px;color:var(--brand);border:0;background:none;cursor:pointer}
-  .os-right-scroll{flex:1;overflow:auto;padding:16px 10px 24px}
+  .os-right-scroll{flex:1 0 auto;overflow:visible;min-height:0;padding:8px 0 24px}
+  .os-right-scroll:has(.os-right-foot){padding-bottom:0}
+  .os-right-scroll > .os-fld,
+  .os-right-scroll > .os-info,
+  .os-right-scroll > .os-tip,
+  .os-right-scroll > .os-empty-right{padding-left:16px;padding-right:16px}
+  .os-right-foot{display:flex;justify-content:center;align-items:center;margin:16px 0 0;padding:12px 16px 16px;border-top:1px solid #e3e3e3}
   .os-empty-right{padding:28px 22px;text-align:center;color:#9aa3b0;font-size:13px;line-height:1.7}
-  .os-remove{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;height:36px;margin-top:14px;border:1px solid #f3c9c0;border-radius:8px;background:#fff;color:var(--err);font-size:13px;font-weight:500;cursor:pointer}
-  .os-remove:hover{background:#fef4f2}
+  .os-remove{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:36px;margin:0;padding:8px 12px;border:0;border-radius:8px;background:transparent;color:#8c2f2b;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:13px;font-weight:550;letter-spacing:0;line-height:1.25;cursor:pointer}
+  .os-remove svg{width:16px;height:16px;flex:none;display:block}
+  .os-remove:hover{background:#f1f1f1;color:#8c2f2b}
 
-  /* fields */
-  .os-fld{margin-bottom:12px}
-  .os-fld-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:14px;min-height:32px}
-  .os-flabel{display:flex;align-items:center;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:12px;font-weight:400;line-height:1.3;color:#111827;margin-bottom:6px}
-  .os-fld-row .os-flabel{margin-bottom:0}
+  /* fields — title / tip / content match Shopify theme editor hierarchy */
+  .os-fld{margin-bottom:0;padding:6px 16px;border-bottom:0}
+  .os-right-scroll > .os-fld{padding-left:16px;padding-right:16px}
+  /* Fixed two-column rhythm: labels left, controls right (Shopify theme editor) */
+  .os-fld-row,.os-fld-seg,.os-fld-range,.os-fld-pair,.os-fld-inline{display:grid;grid-template-columns:minmax(0,42%) minmax(0,1fr);align-items:center;column-gap:12px;row-gap:4px;min-height:28px}
+  .os-fld-row .os-fhint,.os-fld-seg .os-fhint,.os-fld-range .os-fhint,.os-fld-pair .os-fhint,.os-fld-inline .os-fhint{grid-column:1 / -1;margin-top:0}
+  .os-fld-row .os-flabel,.os-fld-seg .os-flabel,.os-fld-range .os-flabel,.os-fld-pair .os-flabel,.os-fld-inline .os-flabel{margin-bottom:0;align-self:center}
+  .os-fld-pair:has(.os-imgf){align-items:center}
+  .os-fld-pair:has(.os-imgf) .os-flabel{align-self:center}
+  .os-fld-row{grid-template-columns:minmax(0,1fr) auto}
+  .os-fld-pair .os-select,.os-fld-pair .os-input,.os-fld-pair .os-picker,.os-fld-pair .os-color,.os-fld-pair .os-ninh,.os-fld-pair .os-imgf{width:100%;min-width:0}
+  .os-fld-seg .os-seg2{width:100%;max-width:100%;justify-content:stretch}
+  .os-fld-seg .os-seg2 button{flex:1 1 0;min-width:0;padding:6px 8px}
+  .os-fld-range .os-range-row{width:100%;min-width:0}
+  /* Dense labels match Shopify theme editor (12px / #4D4D4D) */
+  .os-flabel{display:flex;align-items:center;font-family:inherit;font-size:12px;font-weight:400;line-height:1.3;color:#4d4d4d;margin-bottom:6px}
+  .os-fld-seg .os-flabel,.os-fld-range .os-flabel,.os-fld-pair .os-flabel{display:block;white-space:normal;overflow-wrap:anywhere}
   .os-req{color:var(--err);margin-left:2px}
   .os-fval{margin-left:auto;font-size:11px;color:var(--ink-muted);font-variant-numeric:tabular-nums}
-  .os-fhint{font-size:12px;color:#8a93a1;margin-top:4px;line-height:1.5}
-  .os-sub{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:11px;font-weight:700;letter-spacing:0;line-height:1.3;text-transform:uppercase;color:#9ca3af;margin:16px 0 8px;padding:0;border:0}
-  .os-right-scroll > .os-sub:first-child{margin-top:0}
-  .os-info{font-size:12px;color:#8a93a1;line-height:1.55;background:var(--panel);border-radius:8px;padding:9px 11px;margin-bottom:10px}
-  .os-input{width:100%;height:34px;padding:0 10px;border:1px solid var(--ctl);border-radius:8px;font-size:12px;color:var(--ink);background:#fff;font-family:inherit}
-  .os-input:focus{outline:none;border-color:var(--brand)}
+  .os-fhint{font-size:12px;font-weight:400;color:#616161;margin-top:4px;line-height:1.45}
+  /* Subhead rules (Colors / Advanced / …) inset 16px; not edge-to-edge like head/foot. */
+  .os-sub,.os-secpad{font-family:inherit;font-size:13px;font-weight:650;letter-spacing:0;line-height:1.3;text-transform:none;color:#303030;margin:8px 16px 0;padding:12px 0 4px;border:0;border-top:1px solid #e3e3e3}
+  .os-tip{font-size:12px;font-weight:400;color:#616161;line-height:1.45;margin:0 0 12px;padding:0}
+  .os-tip-a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+  .os-tip-a:hover{color:#303030}
+  .os-sub + .os-tip,.os-secpad + .os-tip{margin-top:0}
+  .os-right-scroll > .os-sub:first-child,.os-right-scroll > .os-secpad:first-child{margin-top:0;margin-left:16px;margin-right:16px;padding-top:0;border-top:0}
+  .os-info{font-size:12px;font-weight:400;color:#616161;line-height:1.45;background:#f7f7f7;border-radius:8px;padding:10px 12px;margin:0 16px 12px}
+  .os-input{width:100%;height:34px;padding:0 10px;border:1px solid var(--ctl);border-radius:8px;font-size:13px;color:var(--ink);background:#fff;font-family:inherit}
+  .os-input:focus{outline:none;border-color:#005bd3;box-shadow:0 0 0 1px #005bd3}
   .os-ta{height:auto;min-height:72px;padding:8px 10px;line-height:1.5;resize:vertical}.os-ta.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:13px}
-  .os-select{width:100%;height:34px;padding:0 8px;border:1px solid var(--ctl);border-radius:8px;font-size:12px;color:var(--ink);background:#fff;font-family:inherit;cursor:pointer}
-  .os-select:focus{outline:none;border-color:var(--brand)}
+  .os-select{width:100%;height:34px;padding:0 8px;border:1px solid var(--ctl);border-radius:8px;font-size:13px;color:var(--ink);background:#fff;font-family:inherit;cursor:pointer}
+  .os-select:focus{outline:none;border-color:#005bd3;box-shadow:0 0 0 1px #005bd3}
   .os-seg2{display:flex;background:var(--panel);border-radius:8px;padding:3px;gap:2px}
-  .os-seg2 button{flex:1;border:0;background:none;font-size:12px;font-weight:500;color:var(--ink-body);padding:6px 6px;border-radius:6px;cursor:pointer;font-family:inherit;white-space:nowrap}
+  .os-seg2 button{flex:1;border:0;background:none;font-size:13px;font-weight:500;color:var(--ink-body);padding:6px 6px;border-radius:6px;cursor:pointer;font-family:inherit;white-space:nowrap}
   .os-seg2 button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
-  .os-tg{width:28px;min-height:16px;height:16px;border:0;border-radius:2px;padding:2px;background:#e0e1e3;box-shadow:none;cursor:pointer;flex:none;position:relative;box-sizing:border-box}
-  .os-tg.on{background:#121927}
+  .os-tg{width:28px;min-height:16px;height:16px;border:0;border-radius:2px;padding:2px;background:#e3e3e3;box-shadow:none;cursor:pointer;flex:none;position:relative;box-sizing:border-box}
+  .os-tg.on{background:#303030}
   .os-tg i{display:block;width:12px;height:12px;border-radius:2px;background:#fff;box-shadow:none;transition:transform .14s ease}
   .os-tg.on i{transform:translateX(12px)}
   .os-range-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(64px,64px);gap:12px;align-items:center;min-height:32px}
   .os-range{appearance:none;-webkit-appearance:none;width:100%;min-height:6px;height:6px;border:0;border-radius:10px;padding:0;background:transparent;box-shadow:none;cursor:pointer}
-  .os-range::-webkit-slider-runnable-track{height:6px;border-radius:10px;background:linear-gradient(to right,#121927 0 var(--os-range-percent,0%),#f2f2f3 var(--os-range-percent,0%) 100%)}
-  .os-range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;margin-top:-5px;border:4px solid #121927;border-radius:8px;background:#fff}
-  .os-range::-moz-range-track{height:6px;border-radius:10px;background:#f2f2f3}
-  .os-range::-moz-range-progress{height:6px;border-radius:10px;background:#121927}
-  .os-range::-moz-range-thumb{width:8px;height:8px;border:4px solid #121927;border-radius:8px;background:#fff}
+  .os-range::-webkit-slider-runnable-track{height:6px;border-radius:10px;background:linear-gradient(to right,#303030 0 var(--os-range-percent,0%),#e3e3e3 var(--os-range-percent,0%) 100%)}
+  .os-range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;margin-top:-5px;border:4px solid #303030;border-radius:8px;background:#fff}
+  .os-range::-moz-range-track{height:6px;border-radius:10px;background:#e3e3e3}
+  .os-range::-moz-range-progress{height:6px;border-radius:10px;background:#303030}
+  .os-range::-moz-range-thumb{width:8px;height:8px;border:4px solid #303030;border-radius:8px;background:#fff}
   .os-range-num{display:flex;align-items:center;width:100%;min-height:32px;height:32px;overflow:hidden;border:1px solid #e0e1e3;border-radius:4px;background:#fff;padding:0 8px}
   .os-range-num:focus-within{border-color:#121927;box-shadow:0 0 0 2px rgba(18,25,39,.12)}
   .os-range-num-in{appearance:textfield;-moz-appearance:textfield;flex:1 1 auto;width:0;min-width:0;min-height:auto;height:30px;border:0;border-radius:0;background:transparent;padding:0;text-align:left;box-shadow:none;font:inherit;font-size:12px;color:#111827;outline:none}
   .os-range-num-in::-webkit-outer-spin-button,.os-range-num-in::-webkit-inner-spin-button{margin:0;-webkit-appearance:none}
   .os-range-num span{flex:0 0 auto;padding-left:6px;color:#9ca3af;font-size:11px;line-height:1}
-  .os-color{display:flex;align-items:center;gap:8px}
-  .os-sw{width:32px;height:32px;border-radius:8px;border:1px solid var(--ctl);cursor:pointer;flex:none;position:relative;overflow:hidden}
+  /* Unified swatch + hex (Shopify color field); no separate T / outer boxes */
+  .os-color{display:flex;align-items:center;gap:8px;min-width:0;max-width:100%;width:100%;height:32px;padding:4px 10px 4px 4px;border:1px solid #c9cccf;border-radius:8px;background:#fff;box-sizing:border-box}
+  .os-color:focus-within{border-color:#005bd3;box-shadow:0 0 0 1px #005bd3}
+  .os-sw{width:20px;height:20px;border-radius:6px;border:1px solid rgba(0,0,0,.12);cursor:pointer;flex:none;position:relative;overflow:hidden}
   .os-sw input[type=color]{position:absolute;inset:0;opacity:0;cursor:pointer;border:0;padding:0}
-  .os-sw.tsp{background:conic-gradient(#ccc 25%,#fff 0 50%,#ccc 0 75%,#fff 0)50%/12px 12px}
-  .os-hex{flex:1;height:32px;border:1px solid var(--ctl);border-radius:8px;padding:0 10px;font-size:12px;font-family:inherit;color:var(--ink)}
-  .os-hex:focus{outline:none;border-color:var(--brand)}
+  .os-sw.tsp{background:conic-gradient(#ccc 25%,#fff 0 50%,#ccc 0 75%,#fff 0)50%/8px 8px}
+  .os-hex{flex:1 1 0;min-width:0;width:0;height:24px;border:0;border-radius:0;padding:0;background:transparent;font-size:12px;font-family:inherit;color:#303030;box-sizing:border-box}
+  .os-hex:focus{outline:none}
   .os-tbtn{width:32px;height:32px;border:1px solid var(--ctl);border-radius:8px;background:#fff;color:var(--ink-muted);font-size:12px;font-weight:700;cursor:pointer;flex:none}
   .os-tbtn.on{border-color:var(--brand);color:var(--brand);background:var(--brand-50)}
   .os-ninh{display:flex;align-items:center;gap:8px}.os-ninh .os-input{flex:1}.os-ninh .os-tbtn{width:auto;padding:0 10px;font-size:12px;font-weight:600}
-  .os-imgdrop{display:flex;align-items:center;gap:20px;width:100%;min-height:90px;border:1px dashed #e0e1e3;border-radius:4px;background:#f2f2f3;color:#9ca3af;padding:16px 20px;text-align:left;cursor:pointer;font-family:inherit}
-  .os-imgdrop:hover,.os-imgdrop.drag{border-color:#121927;background:#f2f3f5}
+  .os-imgf{width:100%;min-width:0}
+  .os-imgbox{display:flex;flex-direction:column;align-items:stretch;gap:8px;width:100%;min-width:0;padding:8px;border:1px dashed #c9cccf;border-radius:8px;background:#fff;box-sizing:border-box}
+  .os-imgbox.drag{border-color:#303030;background:#f7f7f7}
+  .os-imgbox.on{gap:8px}
+  .os-img-actions{display:flex;align-items:stretch;width:100%;min-height:32px;overflow:hidden;border-radius:8px;background:#f1f1f1}
+  .os-img-select{flex:1 1 auto;min-width:0;height:32px;border:0;background:transparent;color:#303030;font:inherit;font-size:13px;font-weight:550;cursor:pointer;text-align:center}
+  .os-img-select:hover{background:#e8e8e8}
+  .os-img-lib{flex:none;display:inline-flex;align-items:center;justify-content:center;width:36px;height:32px;border:0;border-left:1px solid #d4d4d4;background:transparent;color:#616161;cursor:pointer}
+  .os-img-lib:hover{background:#e8e8e8;color:#303030}
+  .os-img-lib svg{display:block}
+  .os-img-thumb{display:block;width:100%;height:72px;border:0;border-radius:6px;background:#f1f1f1 center/cover no-repeat;cursor:pointer}
+  .os-img-remove{border:0;background:none;padding:0;color:#616161;font:inherit;font-size:12px;font-weight:400;text-align:center;cursor:pointer}
+  .os-img-remove:hover{color:#b3261e;text-decoration:underline;text-underline-offset:2px}
   .os-sf-backdrop{z-index:280}
   .os-imgdrop-ico{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;width:24px;height:24px;color:#9ca3af}
   .os-imgdrop-ico svg{display:block;width:24px;height:20px}
-  .os-imgdrop span{display:grid;gap:2px;min-width:0}
-  .os-imgdrop strong{color:#111827;font-size:12px;font-weight:400;line-height:1.3}
-  .os-imgdrop em{color:#9ca3af;font-size:12px;font-style:normal;font-weight:400;line-height:1}
-  .os-imgset{position:relative;display:flex;align-items:center;gap:12px;width:100%;min-width:0;height:90px;border-radius:4px;background:#f2f2f3;padding:8px}
-  .os-imgset-pick{display:flex;align-items:center;gap:8px;flex:1 1 100%;width:100%;min-width:0;height:100%;border:0;border-radius:2px;background:transparent;padding:0;text-align:left;cursor:pointer;font-family:inherit}
-  .os-imgset-prev{flex:0 0 99px;width:99px;height:74px;overflow:hidden;border-radius:2px;background:#e0e1e3;background-size:cover;background-position:center}
-  .os-imgset-meta{display:flex;flex:1 1 auto;flex-direction:column;justify-content:space-between;align-self:stretch;min-width:0;padding:2px 0}
-  .os-imgset-meta strong{width:100%;overflow:hidden;color:#111827;font-size:12px;font-weight:400;line-height:1.3;text-overflow:ellipsis;white-space:nowrap}
-  .os-imgset-meta span{color:#111827;font-size:12px;font-weight:400;line-height:1}
-  .os-imgset-pick:hover .os-imgset-meta strong,.os-imgset-pick:hover .os-imgset-meta span{color:#121927}
-  .os-imglink{border:0;background:none;padding:0;font-size:12px;font-weight:400;color:var(--brand);cursor:pointer;font-family:inherit}
-  .os-imglink.danger{position:absolute;right:8px;bottom:6px;color:#dc2626}
-  .os-imglink.danger:hover{color:#b91c1c}
   /* inline resource picker popover */
   .pop-layer .os-pkpop{pointer-events:auto}
   .os-pkpop{position:fixed;z-index:81;display:flex;flex-direction:column;background:#fff;border:1px solid var(--hair);border-radius:10px;box-shadow:var(--float-shadow);overflow:hidden;max-height:340px}
@@ -4212,17 +5367,81 @@
   .os-set-n{font-size:11px;color:var(--ink-muted);flex:none}
   .os-set-body{padding:8px 10px 10px}
 
-  /* add-section popover */
-  .os-addpop{position:fixed;z-index:61;background:#fff;border:1px solid var(--hair);border-radius:12px;box-shadow:var(--float-shadow);display:flex;flex-direction:column;overflow:hidden;pointer-events:auto;max-height:470px}
-  .os-addpop-search{padding:12px;border-bottom:1px solid var(--hair)}
-  .os-addpop-body{flex:1;min-height:0;display:grid;grid-template-columns:1fr 240px;overflow:hidden}
-  .os-addpop-list{overflow:auto;padding:8px;border-right:1px solid var(--hair)}
-  .os-addpop-prev{padding:16px;display:flex;flex-direction:column;gap:8px;overflow:auto}
+  /* add-section / add-block — Shopify inspector: preview 397×570, pad 16; list 280 */
+  .os-addpop{position:fixed;z-index:61;background:#fff;border:1px solid var(--hair);border-radius:12px;box-shadow:var(--float-shadow);display:flex;flex-direction:column;overflow:hidden;pointer-events:auto}
+  .os-addpop-body{flex:1;min-height:0;display:grid;grid-template-columns:280px 397px;overflow:hidden}
+  .os-addpop-col{display:flex;flex-direction:column;min-width:0;min-height:0;border-right:1px solid var(--hair);background:#fff}
+  .os-addpop-search{position:relative;padding:12px 12px 8px;flex:none}
+  .os-add-search-ico{position:absolute;left:22px;top:12px;bottom:8px;width:16px;color:#8c9196;pointer-events:none;display:inline-flex;align-items:center;justify-content:center}
+  .os-add-search-ico svg{width:16px;height:16px}
+  .os-addpop-search .os-input{padding-left:34px}
+  .os-add-tabs{display:flex;gap:2px;margin:0 12px 8px;padding:3px;border-radius:8px;background:#f1f1f1;flex:none}
+  .os-add-tab{flex:1;min-height:30px;border:0;border-radius:6px;background:transparent;color:#303030;font:650 12.5px inherit;cursor:pointer}
+  .os-add-tab.on{background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+  .os-add-gen{display:flex;align-items:center;gap:10px;width:calc(100% - 16px);margin:0 8px 4px;padding:9px 10px;border:0;border-radius:8px;background:transparent;color:#5c4dcc;font:650 13px inherit;cursor:pointer;text-align:left}
+  .os-add-gen:hover{background:#f4f2ff}
+  .os-add-gen-ico{display:inline-flex;color:#7c6bf0;flex:none}
+  .os-add-gen-ico svg{width:16px;height:16px}
+  .os-addpop-list{flex:1;min-height:0;overflow:auto;padding:4px 8px 12px}
+  .os-add-apps-empty{padding:28px 12px;text-align:center;font-size:13px;color:var(--ink-muted)}
+  .os-addpop-prev{padding:16px;display:flex;flex-direction:column;overflow:hidden;background:#eef1f5;min-width:0}
+  .os-blkpop .os-addpop-prev.os-blkprev{background:#eef1f5;padding:16px}
+  .os-addprev-wrap{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center;overflow:auto}
+  .os-addprev-blank{width:100%;height:100%;min-height:240px;border-radius:8px;background:#e8eef8}
+  .os-addprev-card{width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+  .os-addprev-idea{width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;padding:8px 4px}
+  .os-addprev-idea-title{font-size:18px;font-weight:650;color:#1a1a1a;letter-spacing:-.02em;line-height:1.3}
+  .os-addprev-idea-art{width:100%;aspect-ratio:4/3;border-radius:10px;background:linear-gradient(135deg,#c4b5fd 0%,#93c5fd 45%,#86efac 100%);opacity:.9}
+  .os-addprev-idea-cap{font-size:12.5px;color:#6b7280}
+  .os-addprev-dots{display:flex;gap:6px;align-items:center;justify-content:center;margin-top:4px}
+  .os-addprev-dots span{width:6px;height:6px;border-radius:50%;background:#c5c9ce}
+  .os-addprev-dots span.on{background:#5c5f62}
+  .os-blkprev-stage{width:100%;min-height:220px;display:flex;align-items:center;justify-content:center;padding:8px;box-sizing:border-box}
+  .os-blkprev-card{width:100%;max-width:100%;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;box-sizing:border-box}
+  .os-blkprev-card>*{flex:0 1 auto;max-width:100%;min-width:0;box-sizing:border-box}
+  .os-blkprev-card .pdp-tag{display:inline-flex;align-items:center;flex:none;padding:5px 10px;border-radius:4px;font-size:12px;font-weight:600;line-height:1.2;white-space:nowrap;background:#2563eb;color:#fff}
+  .os-blkprev-card .pdp-tag.sale{background:#dc2626}
+  .os-blkprev-card .pdp-tag.sold{background:#6b7280}
+  .os-blkprev-title{font-size:20px;font-weight:650;color:#111;letter-spacing:-.02em;line-height:1.25;text-align:center;max-width:280px}
+  .os-blkprev-price{display:inline-flex;align-items:baseline;flex-wrap:wrap;gap:8px;font-size:18px;font-weight:650;color:#111;line-height:1.2}
+  .os-blkprev-price s{font-size:14px;font-weight:500;color:#9ca3af}
+  .os-blkprev-price .save{display:inline-flex;align-items:center;flex:none;font-size:11px;font-weight:700;color:#fff;background:#d63a2f;padding:2px 6px;border-radius:4px;line-height:1.2}
+  .os-blkprev-rate{display:inline-flex;align-items:center;gap:4px;flex:none;line-height:0}
+  .os-blkprev-rate .st{flex:none;width:28px;height:28px;aspect-ratio:1/1;border-radius:4px;background:#2e7d32;display:inline-grid;place-items:center;box-sizing:border-box;overflow:hidden}
+  .os-blkprev-rate .st svg{width:16px;height:16px;display:block;flex:none}
+  .os-blkprev-icons{display:flex;flex-direction:column;gap:10px;align-items:flex-start;justify-content:center;font-size:13px;line-height:1.35;color:#374151;width:100%;max-width:260px}
+  .os-blkprev-icons .cell{display:flex;align-items:center;gap:8px;width:100%;text-align:left}
+  .os-blkprev-icons .ico{flex:none;width:20px;height:20px;aspect-ratio:1/1;border-radius:0;background:transparent;color:#222;display:inline-grid;place-items:center}
+  .os-blkprev-icons .ico svg{width:18px;height:18px;display:block}
+  .os-blkprev-row{width:100%;max-width:260px;border-top:1px solid #d1d5db;border-bottom:1px solid #d1d5db;padding:14px 4px;display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:14px;font-weight:650;color:#111;line-height:1.3}
+  .os-blkprev-row>span:last-child{flex:none;font-weight:500;opacity:.45}
+  .os-blkprev-btns{display:flex;flex-direction:column;gap:8px;width:100%;max-width:220px}
+  .os-blkprev-btns .b{height:40px;border-radius:6px;display:grid;place-items:center;font-size:13px;font-weight:650;line-height:1}
+  .os-blkprev-btns .b1{background:#111;color:#fff}
+  .os-blkprev-btns .b2{background:#ffc439;color:#111}
+  .os-blkprev-share{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#111;line-height:1}
+  .os-blkprev-share svg{flex:none;width:18px;height:18px;display:block}
+  .os-blkprev-ship{font-size:13px;line-height:1.45;color:#374151;text-align:left;max-width:240px}
+  .os-blkprev-line{width:100%;max-width:240px;height:1px;background:#E5E5E5;flex:none}
+  .os-blkprev-copy{font-size:13px;line-height:1.55;color:#374151;max-width:260px;text-align:left}
+  .os-blkprev-sku{font-size:13px;line-height:1.4;color:#6b7280}
+  .os-blkprev-stock{display:inline-flex;align-items:center;gap:8px;color:#10a443;font-size:14px;line-height:1.3}
+  .os-blkprev-stock i{flex:none;width:10px;height:10px;border-radius:50%;background:currentColor;display:block}
+  .os-blkprev-var{display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+  .os-blkprev-sw{display:flex;gap:8px;align-items:center}
+  .os-blkprev-sw span{flex:none;width:28px;height:28px;aspect-ratio:1/1;border-radius:50%;box-sizing:border-box}
+  .os-blkprev-sz{display:flex;gap:6px;align-items:center}
+  .os-blkprev-sz span{flex:none;min-width:36px;padding:6px 10px;border:1px solid #eee;border-radius:5px;font-size:12px;line-height:1;text-align:center;box-sizing:border-box}
+  .os-blkprev-sz span.on{border-color:#111;background:#111;color:#fff}
+  .os-blkprev-field{width:100%;max-width:220px;text-align:left}
+  .os-blkprev-field .lb{font-size:12px;font-weight:650;margin-bottom:6px;color:#374151;line-height:1.3}
+  .os-blkprev-field .inp{height:36px;border:1px solid rgba(0,0,0,.2);border-radius:7px;padding:0 10px;display:flex;align-items:center;font-size:13px;color:#9ca3af;box-sizing:border-box}
   .os-addgrp{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#9aa3b0;padding:10px 6px 4px}
-  .os-addrow{display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;cursor:pointer}
-  .os-addrow:hover,.os-addrow.hover{background:var(--panel)}.os-addrow.soon{opacity:.55;cursor:default}
-  .os-add-ico{width:30px;height:30px;flex:none;border-radius:7px;background:var(--panel);display:grid;place-items:center;color:var(--ink-muted)}
-  .os-add-name{font-size:13px;font-weight:600;color:var(--ink)}
+  .os-addrow{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer}
+  .os-addrow:hover,.os-addrow.hover{background:#f1f1f1}.os-addrow.soon,.os-addrow.added{opacity:.55;cursor:default}
+  .os-add-ico{width:20px;height:20px;flex:none;border-radius:0;background:transparent;display:grid;place-items:center;color:#303030}
+  .os-add-ico svg{width:16px;height:16px}
+  .os-add-name{flex:1;min-width:0;font-size:13px;font-weight:500;color:#303030;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .os-add-desc{font-size:11.5px;color:var(--ink-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .os-add-zone{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-muted);padding:10px 8px 4px}
   .os-add-zone:first-child{padding-top:4px}
@@ -4233,7 +5452,7 @@
   .os-addprev-desc{font-size:12.5px;color:var(--ink-body);line-height:1.5}
   .os-soon-note{font-size:12px;color:var(--ink-muted)}
   .os-addprev-hint{margin-top:auto;font-size:11px;color:var(--ink-muted);line-height:1.5;border-top:1px dashed var(--hair);padding-top:10px}
-  .os-addpop-foot{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-top:1px solid var(--hair);font-size:11.5px;color:var(--ink-muted)}
+  .os-addpop-foot{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-top:1px solid var(--hair);font-size:11.5px;color:var(--ink-muted);flex:none;background:#fff}
 
   /* resource picker rows */
   .os-pk-row{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--hair);cursor:pointer;font-size:13.5px;color:var(--ink-body)}
@@ -4254,6 +5473,10 @@
   .os-preview-shell .os-sec{cursor:default;outline:none!important}
   .os-preview-shell .os-sec-tag{display:none}
   .os-preview-shell .os-block-sel{outline:none}
+  .os-preview-shell .os-frame [data-block-id][data-blabel],
+  .os-preview-shell [data-block-id][data-blabel]{outline:none!important}
+  .os-preview-shell .os-frame [data-block-id][data-blabel]::before,
+  .os-preview-shell [data-block-id][data-blabel]::before{display:none}
   .os-preview-bar{position:relative;z-index:5;min-height:48px;padding:6px 8px;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:18px;flex:none;background:#181818;color:#f4f4f4;border-top:1px solid #2e2e2e;box-shadow:0 -2px 12px rgba(0,0,0,.12)}
   .os-preview-bar-left,.os-preview-bar-actions{display:flex;align-items:center;min-width:0}
   .os-preview-bar-left{gap:8px;overflow:hidden}

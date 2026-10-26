@@ -59,15 +59,15 @@
         { key: 'source_label', control: 'text', label: 'Source label', default: '', placeholder: 'Instagram' },
         { key: 'associated_product', control: 'product', label: 'Associated product', default: '' },
       ],
-      defaults: () => ({ image: OS.sample.IMG.cat2, social_handle: '@customer' }),
+      defaults: () => ({ image: OS.sample.IMG.ug2, social_handle: '@customer' }),
     },
     defaultBlocks: () => ([
-      { id: OS.uid('ugc'), kind: 'item', hidden: false, settings: { image: OS.sample.IMG.cat1, social_handle: '@mara_j', source_label: 'Instagram', caption: 'Obsessed with this set!', associated_product: 'p1' } },
-      { id: OS.uid('ugc'), kind: 'item', hidden: false, settings: { image: OS.sample.IMG.cat2, social_handle: '@liv.styles', source_label: 'Instagram' } },
-      { id: OS.uid('ugc'), kind: 'item', hidden: false, settings: { image: OS.sample.IMG.cat3, social_handle: '@thefitlife', source_label: 'TikTok', associated_product: 'p2' } },
-      { id: OS.uid('ugc'), kind: 'item', hidden: false, settings: { image: OS.sample.IMG.cat4, social_handle: '@daily.wear', source_label: 'Instagram' } },
-      { id: OS.uid('ugc'), kind: 'item', hidden: false, settings: { image: OS.sample.IMG.p2, social_handle: '@wellnessco', source_label: 'Instagram' } },
-      { id: OS.uid('ugc'), kind: 'item', hidden: false, settings: { image: OS.sample.IMG.p5, social_handle: '@studio.aura', source_label: 'TikTok' } },
+      { id: OS.uid('ugc'), kind: 'item', hidden: false, settings: { image: OS.sample.IMG.ug1, social_handle: '@mara_j', source_label: 'Instagram', caption: 'Obsessed with this set!', associated_product: 'p1' } },
+      { id: OS.uid('ugc'), kind: 'item', hidden: false, settings: { image: OS.sample.IMG.ug2, social_handle: '@liv.styles', source_label: 'Instagram' } },
+      { id: OS.uid('ugc'), kind: 'item', hidden: false, settings: { image: OS.sample.IMG.ug3, social_handle: '@thefitlife', source_label: 'TikTok', associated_product: 'p2' } },
+      { id: OS.uid('ugc'), kind: 'item', hidden: false, settings: { image: OS.sample.IMG.ug4, social_handle: '@daily.wear', source_label: 'Instagram' } },
+      { id: OS.uid('ugc'), kind: 'item', hidden: false, settings: { image: OS.sample.IMG.ug5, social_handle: '@wellnessco', source_label: 'Instagram' } },
+      { id: OS.uid('ugc'), kind: 'item', hidden: false, settings: { image: OS.sample.IMG.ug6, social_handle: '@studio.aura', source_label: 'TikTok' } },
     ]),
     render: function (s, blocks, ctx) {
       const t = ctx.tokens, mob = ctx.mob;

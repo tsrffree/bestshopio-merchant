@@ -85,8 +85,8 @@
 
   // ---- Theme templates (settings.tsx templateOptions) ----
   const TEMPLATES = [
-    { value: 'default', label: 'Default' },
-    { value: 'one_page_checkout', label: 'One page checkout' },
+    { value: 'default', label: 'Default product', assigned: 18 },
+    { value: 'lookbook', label: 'Lookbook', assigned: 2 },
   ];
 
   // ---- Media support text (AddImageVideo DEFAULT_SUPPORT_TEXT, utils/upload IMAGE/VIDEO_FILE_EXTENSIONS) ----

@@ -422,6 +422,9 @@
   let EDIT_ID = null;  // route id string ('0' = new)
   let ORIGIN = null;   // JSON snapshot of EDIT at load (edit.tsx hasUnsavedChanges / resetToOrigin)
   let DIRTY = false;
+  // Theme-editor modal host: same edit layout/rules, only the chrome is a dialog.
+  // { host, onClose, onSaved, onTitle, sample }
+  let EMBED = null;
 
   function blankProduct() {
     return {
@@ -430,6 +433,7 @@
       hasVariants: false, spec_type: 0, attr: [], attrValue: [],
       price: undefined, compareAtPrice: undefined, itemCost: undefined, sku: '', barcode: '', inventoryQuantity: undefined,
       params: [{ name: '', values: [], sort: 0, single: '' }],
+      tags: [],
       metafields: { custom: {}, google: {} },
       settings: { activated: false, status: 'deactivated', spu: '', weight: 0, category: 0, metaTitle: '', metaDescription: '', urlHandle: '', seoKeywords: [], homeTemplate: 'default' },
     };
@@ -439,7 +443,11 @@
     EDIT_ID = id; DIRTY = false;
     if (id === '0' || id === 'new') { EDIT = blankProduct(); EDIT_ID = '0'; return true; }
     const src = D.DETAILS[id] || D.DETAILS[Number(id)];
-    if (src) { EDIT = JSON.parse(JSON.stringify(src)); return true; }
+    if (src) {
+      EDIT = JSON.parse(JSON.stringify(src));
+      if (!Array.isArray(EDIT.tags)) EDIT.tags = [];
+      return true;
+    }
     // fallback: synthesize a minimal record from the list row so any row is openable
     const row = D.PRODUCTS.find((p) => String(p.product_id) === String(id));
     if (!row) { EDIT = null; return false; }
@@ -453,6 +461,7 @@
         ? [{ unique: 'V-' + row.product_id + '-S', detail: { Size: 'S' }, image: row.image, bar_code: (row.sku || 'SKU-' + row.product_id) + '-S', price: String(row.price_min), ot_price: String(row.price_max), cost: '0', stock: Math.round(row.on_sale_stock / 3), weight: '180', bar_code_number: '', is_show: 1, is_default_select: 1 }]
         : [{ unique: 'V-' + row.product_id, detail: { Title: 'Default' }, image: row.image, bar_code: row.sku || 'SKU-' + row.product_id, price: String(row.price_min), ot_price: String(row.price_max), cost: '0', stock: row.on_sale_stock, weight: '180', bar_code_number: '', is_show: 1, is_default_select: 1 }],
       metafields: { custom: {}, google: {} },
+      tags: [],
       settings: Object.assign(blankProduct().settings, { activated: row.is_show === 1, status: statusOf(row), category: row.cate_id || 0, spu: row.product_spu, archived: row.is_del === 1 }),
     });
     return true;
@@ -504,13 +513,19 @@
 
   function renderEdit(id) {
     if (!loadEdit(id)) { renderNotFound(id); return; }
+    paintEditForm();
+  }
+
+  function paintEditForm() {
     const isEdit = isEditMode();
     const title = isEdit ? (EDIT.name || 'Edit product') : 'Add product';
+    const backTitle = EMBED ? 'Close' : 'Back to products';
 
     root.innerHTML =
       // full-width unsaved-changes bar (UnSavedChanges.tsx) — fixed at the very TOP of the page,
       // dark, square top corners (className override !top-[0px] !rounded-tl/tr-[0px]); hidden until dirty.
       // layout: left spacer / centered alert + "You have unsaved changes" / right Discard + primary.
+      // In the theme-editor modal (.products-embedded) this becomes sticky inside the dialog body.
       '<div id="unsaved-bar" class="unsaved-bar" style="display:none">' +
         '<div style="flex:1"></div>' +
         '<div class="flex items-center gap-2"><span style="display:inline-flex">' + I.alert + '</span><span style="font-size:13.5px">You have unsaved changes</span></div>' +
@@ -523,7 +538,7 @@
       '<div class="detail-wrap">' +
         // header (edit.tsx): back button + title
         '<div class="flex items-center gap-2 mb-4">' +
-          '<button class="back-btn" data-act="back" title="Back to products">' + I.arrowLeft + '</button>' +
+          '<button class="back-btn" data-act="back" title="' + backTitle + '">' + I.arrowLeft + '</button>' +
           '<h1 class="page-title" style="min-width:0;word-break:break-word">' + esc(title) + '</h1>' +
         '</div>' +
         // two-column body: left sections (flex), right settings rail (fixed 275px)
@@ -541,6 +556,7 @@
     DIRTY = false;
     wireEdit(isEdit);
     syncUnsavedBar();
+    if (EMBED && typeof EMBED.onTitle === 'function') EMBED.onTitle(EDIT.name || 'Untitled');
     if (root.parentElement) root.parentElement.scrollTop = 0;
   }
 
@@ -554,7 +570,7 @@
       footerHtml(isEdit);
   }
   function sideHtml(isEdit) {
-    return secSettings(isEdit) + secPurchaseOptions() + secSeo() + (isEdit ? secTemplate() : '');
+    return secSettings(isEdit) + secPurchaseOptions() + secSeo() + (isEdit ? secTags() + secTemplate() : '');
   }
 
   // Read-only purchase-option list. Keep plans and bundles flat for quick scanning.
@@ -986,17 +1002,99 @@
     return card('Theme template', body, null, true);
   }
 
+  function secTags() {
+    const tags = Array.isArray(EDIT.tags) ? EDIT.tags : [];
+    const chips = tags.length
+      ? '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">' + tags.map((tag) =>
+        '<span style="display:inline-flex;align-items:center;gap:5px;min-height:26px;padding:3px 8px;border-radius:6px;background:var(--panel);font-size:12px;color:var(--ink)">' +
+          esc(tag) + '<button type="button" data-tag-remove="' + esc(tag) + '" aria-label="Remove tag" style="border:0;background:none;padding:0;color:var(--ink-muted);cursor:pointer">&times;</button></span>').join('') + '</div>'
+      : '<div class="muted" style="font-size:12px;margin-bottom:10px">No tags added</div>';
+    const body = chips + '<button type="button" class="btn btn-default" data-act="tags" style="height:32px;padding:0 12px">+ Add tags</button>';
+    return card('Tags', body, null, true);
+  }
+
+  function openTagsModal(isEdit) {
+    const known = [
+      'tag__hot_Best Seller',
+      'tag__hot_Combating Cellulite',
+      'tag__hot_End of Summer Sale',
+      'tag__hot_Halloween Sale',
+      'tag__new_NEW ARRIVAL',
+      'tag__hot_Black Friday Discounts',
+      'tag__hot_Material Safety',
+      'tag__hot_Limited Drop',
+    ];
+    const selected = new Set(Array.isArray(EDIT.tags) ? EDIT.tags : []);
+    selected.forEach((tag) => { if (known.indexOf(tag) < 0) known.push(tag); });
+    const ctrl = modal({
+      title: 'Add tags', width: 420, okText: 'Done',
+      body:
+        '<div style="position:relative;margin-bottom:12px"><input class="input" id="tag-q" placeholder="Search or add tags" autocomplete="off" />' +
+          '<div id="tag-add" style="display:none;margin-top:6px"></div></div>' +
+        '<div id="tag-list" style="max-height:360px;overflow:auto"></div>',
+      onOk: (m, close) => {
+        EDIT.tags = Array.from(selected);
+        markDirty();
+        close();
+        rerenderSide(isEdit);
+      },
+    });
+    const m = ctrl.m;
+    const query = m.querySelector('#tag-q');
+    const list = m.querySelector('#tag-list');
+    const add = m.querySelector('#tag-add');
+    const row = (tag) => '<label style="display:flex;align-items:center;gap:9px;padding:8px 4px;border-bottom:1px solid var(--hair);font-size:12.5px;cursor:pointer">' +
+      '<input type="checkbox" data-tag-value="' + esc(tag) + '"' + (selected.has(tag) ? ' checked' : '') + ' style="width:16px;height:16px;accent-color:var(--brand)" />' +
+      '<span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(tag) + '</span></label>';
+    const render = () => {
+      const q = query.value.trim().toLowerCase();
+      const filtered = known.filter((tag) => !q || tag.toLowerCase().indexOf(q) >= 0);
+      const frequent = filtered.slice(0, 5);
+      const other = filtered.slice(5);
+      list.innerHTML =
+        (frequent.length ? '<div class="ctrl-label" style="margin:4px 0">Frequently used</div>' + frequent.map(row).join('') : '') +
+        (other.length ? '<div class="ctrl-label" style="margin:14px 0 4px">Other tags</div>' + other.map(row).join('') : '') +
+        (!filtered.length ? '<div class="muted" style="padding:18px 4px;text-align:center">0 results</div>' : '');
+      list.querySelectorAll('[data-tag-value]').forEach((box) => box.onchange = () => {
+        const tag = box.getAttribute('data-tag-value');
+        if (box.checked) selected.add(tag); else selected.delete(tag);
+      });
+      const exact = known.some((tag) => tag.toLowerCase() === q);
+      add.style.display = q && !exact ? 'block' : 'none';
+      add.innerHTML = q && !exact ? '<button type="button" class="btn btn-default" data-add-new style="width:100%;justify-content:flex-start">Add "' + esc(query.value.trim()) + '"</button>' : '';
+      const addButton = add.querySelector('[data-add-new]');
+      if (addButton) addButton.onclick = () => {
+        const tag = query.value.trim();
+        if (!tag) return;
+        known.push(tag);
+        selected.add(tag);
+        query.value = '';
+        render();
+      };
+    };
+    query.oninput = render;
+    render();
+    setTimeout(() => query.focus(), 0);
+  }
+
   // ---- wire edit interactions ----
   function wireEdit(isEdit) {
     const q = (sel) => root.querySelector(sel);
     const all = (sel) => root.querySelectorAll(sel);
 
-    q('[data-act="back"]').onclick = () => maybeLeave(() => { location.hash = '#/products'; });
+    q('[data-act="back"]').onclick = () => maybeLeave(() => {
+      if (EMBED && typeof EMBED.onClose === 'function') EMBED.onClose({ force: true });
+      else location.hash = '#/products';
+    });
     const cid = q('[data-act="copy-id"]'); if (cid) cid.onclick = () => { try { navigator.clipboard.writeText(String(EDIT.product_id)); } catch (e) {} toast('Copied'); };
 
     // text fields -> state + dirty
     const bind = (sel, fn) => { const el = q(sel); if (el) { el.oninput = () => { fn(el.value); markDirty(); }; } };
-    bind('#f-name', (v) => { EDIT.name = v; });
+    bind('#f-name', (v) => {
+      EDIT.name = v;
+      const pageTitle = q('.page-title'); if (pageTitle) pageTitle.textContent = v || (isEditMode() ? 'Edit product' : 'Add product');
+      if (EMBED && typeof EMBED.onTitle === 'function') EMBED.onTitle(v || 'Untitled');
+    });
     bindCounted('#f-summary', '#f-summary-cnt', 400, (v) => { EDIT.summary = v; });
     bindCounted('#f-desc', '#f-desc-cnt', 5000, (v) => { EDIT.description = v; });
     wireRichText('f-detail', (html) => { EDIT.detail = html; });
@@ -1102,27 +1200,47 @@
     const st = q('#set-template'); if (st) st.onchange = () => { EDIT.settings.homeTemplate = st.value; markDirty(); rerenderSide(isEdit); };
     const seo = q('[data-act="seo"]'); if (seo) seo.onclick = () => openSeoDrawer(isEdit);
     const design = q('[data-act="design"]'); if (design) design.onclick = () => toast('Visual template designer opens full-screen (roadmap)');
+    const tags = q('[data-act="tags"]'); if (tags) tags.onclick = () => openTagsModal(isEdit);
+    all('[data-tag-remove]').forEach((button) => button.onclick = () => {
+      EDIT.tags = (EDIT.tags || []).filter((tag) => tag !== button.getAttribute('data-tag-remove'));
+      markDirty();
+      rerenderSide(isEdit);
+    });
 
     // footer + bar actions. Save commits the current state as the new origin (edit.tsx reloads
     // the product detail after saving, which makes hasUnsavedChanges false again).
-    const doSave = () => { ORIGIN = snapshot(); DIRTY = false; syncUnsavedBar(); toast(isEdit ? 'Product updated successfully' : 'Product created successfully'); };
+    const doSave = () => {
+      ORIGIN = snapshot(); DIRTY = false; syncUnsavedBar();
+      if (EMBED && EMBED.sample) applyEditToSample(EMBED.sample, EDIT);
+      if (EMBED && typeof EMBED.onSaved === 'function') EMBED.onSaved(EDIT);
+      toast(isEdit ? 'Product updated successfully' : 'Product created successfully');
+      if (EMBED && typeof EMBED.onClose === 'function') EMBED.onClose({ force: true, saved: true });
+    };
     const sb = q('[data-act="save"]'); if (sb) sb.onclick = doSave;
     const sbar = q('[data-act="save-bar"]'); if (sbar) sbar.onclick = doSave;
     const disc = q('[data-act="discard"]'); if (disc) disc.onclick = () => modal({
       title: 'Are you sure you want to discard changes?', width: 460, okText: 'Discard', danger: true,
       body: '<div class="muted" style="font-size:13.5px">All unsaved changes will be lost</div>',
-      onOk: (m, close) => { close(); if (isEdit) renderEdit(EDIT_ID); else location.hash = '#/products'; },
+      onOk: (m, close) => {
+        close();
+        if (EMBED) { paintEditForm(); return; }
+        if (isEdit) renderEdit(EDIT_ID); else location.hash = '#/products';
+      },
     });
     const arc = q('[data-act="archive-one"]'); if (arc) arc.onclick = () => modal({
       title: 'Archive the product', width: 460, okText: 'Confirm',
       body: '<div class="muted" style="font-size:13.5px;line-height:1.6">Archiving this product will hide it from your sales channels. You can use the status filter in the product list to find it.</div>',
-      onOk: (m, close) => { EDIT.settings.archived = true; EDIT.settings.activated = false; EDIT.settings.status = 'deactivated'; close(); toast('Product archived successfully'); renderEdit(EDIT_ID); },
+      onOk: (m, close) => { EDIT.settings.archived = true; EDIT.settings.activated = false; EDIT.settings.status = 'deactivated'; close(); toast('Product archived successfully'); paintEditForm(); },
     });
-    const un = q('[data-act="unarchive"]'); if (un) un.onclick = () => { EDIT.settings.archived = false; EDIT.settings.status = 'deactivated'; toast('Product set as unarchived successfully'); renderEdit(EDIT_ID); };
+    const un = q('[data-act="unarchive"]'); if (un) un.onclick = () => { EDIT.settings.archived = false; EDIT.settings.status = 'deactivated'; toast('Product set as unarchived successfully'); paintEditForm(); };
     const de = q('[data-act="destroy"]'); if (de) de.onclick = () => modal({
       title: 'Delete the product', width: 460, okText: 'Delete', danger: true,
       body: '<div class="muted" style="font-size:13.5px;line-height:1.6">This permanently deletes the product and cannot be undone.</div>',
-      onOk: (m, close) => { close(); toast('Product deleted successfully'); location.hash = '#/products'; },
+      onOk: (m, close) => {
+        close(); toast('Product deleted successfully');
+        if (EMBED && typeof EMBED.onClose === 'function') EMBED.onClose({ force: true });
+        else location.hash = '#/products';
+      },
     });
   }
 
@@ -1572,9 +1690,203 @@
 
   function route(rest) {
     closePops();
+    EMBED = null;
     imgGridExpanded = false;
     if (rest) renderEdit(decodeURIComponent(rest));
     else renderList();
+  }
+
+  // Theme-editor SAMPLE product → Products edit form (same sections / rules as #/products/:id).
+  function detailFromSample(sample) {
+    const p = sample || {};
+    const variants = Array.isArray(p.variants) ? p.variants : [];
+    const hasVariants = variants.length > 0;
+    const colors = [];
+    const sizes = [];
+    variants.forEach((v) => {
+      if (v.color && colors.indexOf(v.color) < 0) colors.push(v.color);
+      if (v.size && sizes.indexOf(v.size) < 0) sizes.push(v.size);
+    });
+    const attr = [];
+    if (colors.length) attr.push({ value: 'Color', detail: colors.map((value) => ({ pic: '', value })) });
+    if (sizes.length) attr.push({ value: 'Size', detail: sizes.map((value) => ({ pic: '', value })) });
+    if (hasVariants && !attr.length) {
+      attr.push({ value: 'Title', detail: variants.map((v) => ({ pic: '', value: v.title || 'Default' })) });
+    }
+    const images = (Array.isArray(p.images) && p.images.length ? p.images : (p.image ? [p.image] : []))
+      .filter(Boolean)
+      .map((url, i) => ({ uid: 's' + i, name: 'image-' + (i + 1), url: String(url) }));
+    const attrValue = hasVariants
+      ? variants.map((v, i) => {
+          const detail = {};
+          if (v.color) detail.Color = v.color;
+          if (v.size) detail.Size = v.size;
+          if (!v.color && !v.size) detail.Title = v.title || ('Variant ' + (i + 1));
+          return {
+            unique: v.id || ('V-' + (p.id || 'p') + '-' + i),
+            detail,
+            image: v.image || p.image || (images[0] && images[0].url) || '',
+            bar_code: v.sku || p.sku || '',
+            price: String(v.price != null ? v.price : (p.price != null ? p.price : '')),
+            ot_price: String(v.compareAt != null ? v.compareAt : (p.compareAt != null ? p.compareAt : '')),
+            cost: '0',
+            stock: v.inventory != null ? Number(v.inventory) : (p.inventory != null ? Number(p.inventory) : 0),
+            weight: '180',
+            bar_code_number: '',
+            is_show: v.available === false ? 0 : 1,
+            is_default_select: i === 0 ? 1 : 0,
+          };
+        })
+      : [{
+          unique: 'V-' + (p.id || 'p'),
+          detail: { Title: 'Default' },
+          image: p.image || (images[0] && images[0].url) || '',
+          bar_code: p.sku || '',
+          price: String(p.price != null ? p.price : ''),
+          ot_price: String(p.compareAt != null ? p.compareAt : ''),
+          cost: '0',
+          stock: p.inventory != null ? Number(p.inventory) : 0,
+          weight: '180',
+          bar_code_number: '',
+          is_show: 1,
+          is_default_select: 1,
+        }];
+    const activated = p.status !== 'draft' && p.status !== 'archived' && p.status !== 'deactivated';
+    const status = p.status === 'archived' ? 'archived'
+      : (p.status === 'draft' || p.status === 'deactivated' ? 'deactivated' : 'activated');
+    const numericId = Number(String(p.id || '').replace(/\D/g, '')) || Date.now() % 100000;
+    return Object.assign(blankProduct(), {
+      product_id: p.product_id || numericId,
+      name: p.title || '',
+      summary: '',
+      highlights: [''],
+      description: p.description || '',
+      detail: '',
+      vendor: p.vendor || '',
+      cate_id: 0,
+      category_label: p.category || '',
+      product_spu: p.handle || '',
+      images,
+      hasVariants,
+      spec_type: hasVariants ? 1 : 0,
+      attr,
+      attrValue,
+      price: p.price,
+      compareAtPrice: p.compareAt,
+      itemCost: undefined,
+      sku: p.sku || '',
+      barcode: '',
+      inventoryQuantity: p.inventory,
+      params: [{ name: '', values: [], sort: 0, single: '' }],
+      tags: Array.isArray(p.tags) ? p.tags.slice() : [],
+      metafields: { custom: {}, google: {} },
+      settings: Object.assign(blankProduct().settings, {
+        activated,
+        status,
+        archived: p.status === 'archived',
+        spu: p.handle || '',
+        metaTitle: p.title || '',
+        metaDescription: p.description || '',
+        urlHandle: p.handle || '',
+        homeTemplate: 'default',
+      }),
+    });
+  }
+
+  function applyEditToSample(sample, edit) {
+    if (!sample || !edit) return;
+    sample.title = edit.name || '';
+    sample.description = edit.description || '';
+    if (edit.vendor != null) sample.vendor = edit.vendor;
+    sample.tags = Array.isArray(edit.tags) ? edit.tags.slice() : [];
+    sample.images = (edit.images || []).map((im) => im.url).filter(Boolean);
+    sample.image = sample.images[0] || '';
+    if (edit.settings) {
+      if (edit.settings.archived) sample.status = 'archived';
+      else if (!edit.settings.activated) sample.status = sample.status === 'draft' ? 'draft' : 'deactivated';
+      else delete sample.status;
+      if (edit.settings.urlHandle) sample.handle = edit.settings.urlHandle;
+      if (edit.settings.spu && !sample.handle) sample.handle = edit.settings.spu;
+    }
+    if (edit.hasVariants && Array.isArray(edit.attrValue) && edit.attrValue.length) {
+      sample.variants = edit.attrValue.map((row, i) => {
+        const prev = (sample.variants && sample.variants[i]) || {};
+        const detail = row.detail || {};
+        return Object.assign({}, prev, {
+          id: row.unique || prev.id || ('v-' + i),
+          title: variantTitle(row) || prev.title || ('Variant ' + (i + 1)),
+          color: detail.Color || prev.color,
+          size: detail.Size || prev.size,
+          sku: row.bar_code || prev.sku || '',
+          price: row.price === '' || row.price == null ? prev.price : Number(row.price),
+          compareAt: row.ot_price === '' || row.ot_price == null ? prev.compareAt : Number(row.ot_price),
+          inventory: row.stock == null ? prev.inventory : Number(row.stock),
+          image: row.image || prev.image || '',
+          available: row.is_show !== 0,
+        });
+      });
+      const selected = sample.variants.find((v) => v.available !== false && Number(v.inventory || 0) > 0) || sample.variants[0];
+      if (selected) {
+        sample.price = selected.price;
+        sample.compareAt = selected.compareAt;
+        sample.sku = selected.sku;
+        sample.inventory = selected.inventory;
+      }
+    } else {
+      sample.price = edit.price == null ? sample.price : Number(edit.price);
+      sample.compareAt = edit.compareAtPrice == null ? sample.compareAt : Number(edit.compareAtPrice);
+      sample.sku = edit.sku || '';
+      sample.inventory = edit.inventoryQuantity == null ? sample.inventory : Number(edit.inventoryQuantity);
+      if (Array.isArray(sample.variants) && sample.variants.length === 1) {
+        sample.variants[0].price = sample.price;
+        sample.variants[0].compareAt = sample.compareAt;
+        sample.variants[0].sku = sample.sku;
+        sample.variants[0].inventory = sample.inventory;
+      }
+    }
+  }
+
+  function openEmbedded(hostEl, sample, hooks) {
+    hooks = hooks || {};
+    if (!hostEl) return null;
+    closePops();
+    imgGridExpanded = false;
+    EMBED = {
+      host: hostEl,
+      sample: sample || null,
+      onClose: hooks.onClose,
+      onSaved: hooks.onSaved,
+      onTitle: hooks.onTitle,
+    };
+    root = hostEl;
+    root.classList.add('products-embedded');
+    EDIT = detailFromSample(sample);
+    EDIT_ID = String(EDIT.product_id || sample && sample.id || 'embedded');
+    paintEditForm();
+    return {
+      isDirty: () => DIRTY,
+      discard: () => { paintEditForm(); },
+      save: () => {
+        const sb = root.querySelector('[data-act="save-bar"]') || root.querySelector('[data-act="save"]');
+        if (sb) sb.click();
+      },
+      close: (force) => {
+        if (force || !DIRTY) {
+          if (typeof hooks.onClose === 'function') hooks.onClose({ force: true });
+          return;
+        }
+        maybeLeave(() => { if (typeof hooks.onClose === 'function') hooks.onClose({ force: true }); });
+      },
+      destroy: () => {
+        EMBED = null;
+        DIRTY = false;
+        EDIT = null;
+        if (hostEl) {
+          hostEl.classList.remove('products-embedded');
+          hostEl.innerHTML = '';
+        }
+      },
+    };
   }
 
   // module-scoped CSS shim: on/off switch (+ Show/Hide labelled variant), danger button, helpers
@@ -1587,6 +1899,10 @@
     '.unsaved-bar .btn-primary{height:32px}' +
     '.unsaved-discard{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.55);height:32px}' +
     '.unsaved-discard:hover{background:rgba(255,255,255,.12)}' +
+    // Theme-editor Edit product dialog: keep the same form, pin the unsaved bar inside the modal.
+    '.products-embedded{position:relative;min-height:100%}' +
+    '.products-embedded .unsaved-bar{position:sticky;top:0;left:auto;right:auto;z-index:5}' +
+    '.products-embedded .detail-wrap{padding-top:16px;padding-bottom:40px}' +
     '.rt-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:2px;border-bottom:1px solid var(--hair);padding:5px 8px;background:var(--panel)}' +
     '.rt-btn{min-width:28px;height:28px;padding:0 6px;display:inline-flex;align-items:center;justify-content:center;border:1px solid transparent;border-radius:6px;background:transparent;color:var(--ink-body);font-size:13px;cursor:pointer;line-height:1}' +
     '.rt-btn:hover{background:#fff;border-color:var(--hair);color:var(--ink)}' +
@@ -1618,5 +1934,8 @@
   document.head.appendChild(style);
 
   window.VIEWS = window.VIEWS || {};
-  window.VIEWS.products = { render: function (el, rest) { root = el; route(rest || ''); } };
+  window.VIEWS.products = {
+    render: function (el, rest) { root = el; route(rest || ''); },
+    openEmbedded: openEmbedded,
+  };
 })();
