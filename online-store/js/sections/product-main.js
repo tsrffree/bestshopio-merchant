@@ -87,8 +87,12 @@
     '.pdpx .pdp-title-desc{font-size:14px;line-height:1.55}',
     '.pdpx .pdp-title-desc img{display:block;max-width:100%;margin-top:8px;border-radius:8px}',
     '.pdpx .pdp-vendor{font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.65}',
-    '.pdpx .pdp-tags{display:flex;flex-wrap:wrap;gap:6px}',
-    '.pdpx .pdp-tag{display:inline-flex;align-items:center;min-height:24px;padding:2px 8px;border-radius:5px;background:#5b3f94;color:#fff;font-size:14.4px;font-weight:700;line-height:18px;letter-spacing:normal}',
+    '.pdpx{position:relative}',
+    '.pdpx .pdp-tags{display:flex;flex-wrap:wrap;gap:8px}',
+    '.pdpx .pdp-tags.is-overlay{position:absolute;z-index:3;top:12px;left:12px;max-width:48%}',
+    '.pdpx .pdp-tags.is-overlay[data-badge-position="top-right"]{left:auto;right:12px;justify-content:flex-end}',
+    '.pdpx .pdp-tag{display:inline-flex;align-items:center;gap:4px;min-height:24px;padding:2px 8px;border-radius:5px;background:#5b3f94;color:#fff;font-size:14.4px;font-weight:700;line-height:18px;letter-spacing:normal}',
+    '.pdpx .pdp-tag svg,.pdpx .pdp-tag img{width:12px;height:12px;flex:none;object-fit:contain}',
     '.pdpx .pdp-tag.sale{background:#d63a2f}.pdpx .pdp-tag.sold{background:#4b5563}',
     '.pdpx .pdp-rate{display:flex;align-items:center;gap:6px;font-size:13px;line-height:1}',
     '.pdpx .pdp-rate-stars{display:inline-flex;align-items:center;gap:2px;flex:none}',
@@ -360,6 +364,17 @@
       { key: 'saving_type', control: 'select', label: 'Type', default: 'percentage', options: [
         { value: 'text', label: 'Sale' }, { value: 'percentage', label: 'Percentage' }, { value: 'fixed', label: 'Fixed amount' },
       ], visibleWhen: (v) => !!v.show_saving },
+      { key: 'badge_position', control: 'select', label: 'Badge position', default: 'top-left', options: [
+        { value: 'top-left', label: 'Top left' }, { value: 'top-right', label: 'Top right' },
+        { value: 'below-title', label: 'Below title' }, { value: 'above-price', label: 'Above price' },
+      ] },
+      { key: 'badge_icon', control: 'select', label: 'Badge icon', default: 'none', options: [
+        { value: 'none', label: 'None' }, { value: 'fire', label: 'Fire' }, { value: 'tag', label: 'Tag' }, { value: 'percent', label: 'Percent' },
+      ] },
+      { key: 'badge_icon_image', control: 'image', label: 'Custom badge icon', default: '', info: 'Custom image replaces the built-in icon when set.' },
+      { key: 'badge_bg', control: 'color', label: 'Badge background', default: '', info: 'Blank inherits the theme primary color.' },
+      { key: 'badge_text_color', control: 'color', label: 'Badge text color', default: '', info: 'Blank uses white.' },
+      { key: 'badge_gap', control: 'range', label: 'Badge gap', min: 0, max: 24, step: 1, unit: 'px', default: 8 },
     ] },
     title: { name: 'Title', icon: 'heading', unique: true, preview: '<div class="os-blkprev-title">Knitted Santa Wine Bottle Cover</div>', fields: [
       { key: 'title_size', control: 'range', label: 'Title font size', min: 10, max: 50, step: 1, unit: 'px', default: 24 },
@@ -559,15 +574,32 @@
     const mob = ctx.mob;
     let body = '';
     if (block.kind === 'badges') {
+      const badgeBg = b.badge_bg || c.primary_color || '#5b3f94';
+      const badgeText = b.badge_text_color || '#ffffff';
+      const badgeGap = Number(b.badge_gap == null ? 8 : b.badge_gap);
+      const position = b.badge_position || 'top-left';
+      const iconSvgs = {
+        fire: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 2.2c1.6 1.8 2.2 3.1 2.2 4.6A2.2 2.2 0 0 1 8 8.9 2.2 2.2 0 0 1 5.8 6.8C5.8 5.3 6.4 4 8 2.2z" stroke="currentColor" stroke-width="1.3"/><path d="M5.2 9.4c.7 2.4 2.1 3.6 2.8 3.6s2.1-1.2 2.8-3.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>',
+        tag: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8.2 8.2 2.5h4.3v4.3L6.8 12.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><circle cx="11" cy="5" r=".9" fill="currentColor"/></svg>',
+        percent: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4.2 4.2h7.6v7.6H4.2z" stroke="currentColor" stroke-width="1.3"/><path d="M6.2 9.8 9.8 6.2M6.5 6.5h.01M9.5 9.5h.01" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>',
+      };
+      const iconHtml = b.badge_icon_image
+        ? '<img alt="" src="' + OS.esc(b.badge_icon_image) + '">'
+        : (iconSvgs[b.badge_icon] || '');
+      const tagStyle = 'background:' + OS.esc(badgeBg) + ';color:' + OS.esc(badgeText);
+      const wrapTag = (label, extraClass) => '<span class="pdp-tag' + (extraClass ? ' ' + extraClass : '') + '" style="' + tagStyle + '">' + iconHtml + OS.esc(label) + '</span>';
       const tags = (p.tags || []).filter((tag) => /^tag__(hot|new)_/i.test(tag)).map((tag) =>
-        '<span class="pdp-tag">' + OS.esc(String(tag).replace(/^tag__(hot|new)_/i, '')) + '</span>');
-      if (b.show_sold_out && inventory <= 0) tags.push('<span class="pdp-tag sold">Sold out</span>');
+        wrapTag(String(tag).replace(/^tag__(hot|new)_/i, '')));
+      if (b.show_sold_out && inventory <= 0) tags.push(wrapTag('Sold out', 'sold'));
       if (b.show_saving && sale) {
         const label = b.saving_type === 'text' ? 'Sale'
           : (b.saving_type === 'fixed' ? 'Save ' + OS.money(compareAt - price) : 'Save ' + Math.round((1 - price / compareAt) * 100) + '%');
-        tags.push('<span class="pdp-tag sale">' + label + '</span>');
+        tags.push(wrapTag(label, 'sale'));
       }
-      body = tags.length ? '<div class="pdp-tags">' + tags.join('') + '</div>' : '';
+      const overlay = (position === 'top-left' || position === 'top-right') ? ' is-overlay' : '';
+      body = tags.length
+        ? '<div class="pdp-tags' + overlay + '" data-badge-position="' + OS.esc(position) + '" style="gap:' + badgeGap + 'px">' + tags.join('') + '</div>'
+        : '';
     } else if (block.kind === 'title') {
       const px = Number(b.title_size || 24);
       body = '<h1 class="pdp-title" style="font-family:' + OS.headingFamily(t) + ';font-size:' + OS.headingSize(t, px, mob) + 'px;color:' + OS.col(s.text, c.heading_color || '#1a1a1a') + '">' + OS.esc(p.title) + '</h1>';
@@ -827,7 +859,7 @@
     ],
     blocks: { kinds: BLOCKS, max: 24 },
     defaultBlocks: () => ([
-      ['badges', { show_sold_out: false, show_saving: false, saving_type: 'percentage' }],
+      ['badges', { show_sold_out: false, show_saving: false, saving_type: 'percentage', badge_position: 'top-left', badge_icon: 'none', badge_icon_image: '', badge_bg: '', badge_text_color: '', badge_gap: 8 }],
       ['title', { title_size: 24, description: '', description_image: '', description_color: '#000000', description_size: 14, description_top: 0, description_bottom: 0 }],
       ['price', { show_taxes: false, show_saving: true, saving_type: 'percentage', saving_position: 'right', saving_label: '', saving_bg: '', saving_text_color: '#ffffff', saving_icon: false }],
       ['rating', { show_rating: true, size: 14, show_text: false, text: '4.8 (214) 7,000+ satisfied customers' }],
