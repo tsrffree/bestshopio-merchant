@@ -434,7 +434,11 @@
       ], visibleWhen: (v) => v.picker_type === 'buttons' },
       { key: 'shape', control: 'segmented', label: 'Shape', default: 'normal', options: [
         { value: 'normal', label: 'Normal' }, { value: 'circle', label: 'Circle' }, { value: 'square', label: 'Square' },
-      ], visibleWhen: (v) => v.picker_type === 'buttons' },
+      ], visibleWhen: (v) => v.picker_type === 'buttons' && !v.nested_dropdown },
+      { key: 'nested_dropdown', control: 'toggle', label: 'Nested dropdown', default: false, info: 'Show one dropdown with combined option values.' },
+      { key: 'show_group_title', control: 'toggle', label: 'Show group title', default: false },
+      { key: 'sku_display_name', control: 'text', label: 'SKU display name', default: '', placeholder: 'Empty = original SKU', visibleWhen: (v) => !!v.show_sku_in_option },
+      { key: 'show_sku_in_option', control: 'toggle', label: 'Show SKU in option', default: false },
     ] },
     buy: { name: 'Buy buttons', icon: 'cart', unique: true, preview: '<div class="os-blkprev-btns"><div class="b b1">Add to cart</div><div class="b b2">Buy with PayPal</div></div>', fields: [
       { key: 'show_quantity', control: 'toggle', label: 'Show quantity selector', default: true },
@@ -642,43 +646,77 @@
       const colorMap = {};
       colors.forEach((color, i) => { colorMap[color] = (p.swatches || [])[i] || ['#222222', '#c8b6a6', '#94a3b8'][i % 3]; });
       const shape = b.shape === 'circle' ? ' shape-circle' : (b.shape === 'square' ? ' shape-square' : '');
-      const isDropdown = b.picker_type === 'dropdown';
+      const isDropdown = b.picker_type === 'dropdown' || !!b.nested_dropdown;
+      const showTitle = !!b.show_group_title;
+      const skuLabel = (v) => {
+        if (!b.show_sku_in_option) return '';
+        const name = String(b.sku_display_name || '').trim() || v.sku || '';
+        return name ? ' · ' + name : '';
+      };
+      const optionLabel = (kind, item) => {
+        const match = vis.find((v) => v[kind] === item) || {};
+        return item + skuLabel(match);
+      };
       const ddHtml = (kind, label, items, selectedValue) => {
         const opts = items.map((item) => {
           const sold = !vis.some((v) => v[kind] === item && inStock(v));
-          return '<button type="button" class="pdp-dd-opt' + (item === selectedValue ? ' on' : '') + (sold ? ' sold' : '') + '" role="option" data-pdp-dd-opt data-value="' + OS.esc(item) + '" aria-selected="' + (item === selectedValue ? 'true' : 'false') + '">' + OS.esc(item) + (sold ? ' — Sold out' : '') + '</button>';
+          return '<button type="button" class="pdp-dd-opt' + (item === selectedValue ? ' on' : '') + (sold ? ' sold' : '') + '" role="option" data-pdp-dd-opt data-value="' + OS.esc(item) + '" aria-selected="' + (item === selectedValue ? 'true' : 'false') + '">' + OS.esc(optionLabel(kind, item)) + (sold ? ' — Sold out' : '') + '</button>';
         }).join('');
         const selectedSold = !vis.some((v) => v[kind] === selectedValue && inStock(v));
         return '<div class="pdp-dd" data-pdp-' + kind + '-dd>' +
-          '<button type="button" class="pdp-dd-btn" data-pdp-dd-btn aria-haspopup="listbox" aria-expanded="false" aria-label="' + OS.esc(label) + '"><span data-pdp-dd-val>' + OS.esc(selectedValue) + (selectedSold ? ' — Sold out' : '') + '</span></button>' +
+          '<button type="button" class="pdp-dd-btn" data-pdp-dd-btn aria-haspopup="listbox" aria-expanded="false" aria-label="' + OS.esc(label) + '"><span data-pdp-dd-val>' + OS.esc(optionLabel(kind, selectedValue)) + (selectedSold ? ' — Sold out' : '') + '</span></button>' +
           '<div class="pdp-dd-menu" data-pdp-dd-menu hidden role="listbox" aria-label="' + OS.esc(label) + '">' + opts + '</div></div>';
       };
       const imageForColor = (color) => {
         const match = vis.find((v) => v.color === color && v.image) || vis.find((v) => v.color === color);
         return (match && match.image) || (p.images && p.images[0]) || p.image || '';
       };
-      const colorHtml = isDropdown
-        ? ddHtml('color', 'Color', colors, selectedColor)
-        : '<div class="pdp-swatches">' + colors.map((color) => {
-          const textStyle = b.swatch_style === 'text';
-          const imageStyle = b.swatch_style === 'image';
-          const sold = !vis.some((v) => v.color === color && inStock(v));
-          const img = imageStyle ? imageForColor(color) : '';
-          const bg = textStyle ? '' : (imageStyle
-            ? (img ? 'background-image:url(' + OS.esc(img) + ')' : 'background:' + colorMap[color])
-            : 'background:' + colorMap[color]);
-          return '<button type="button" class="' + (textStyle ? 'pdp-size' : 'pdp-sw') + (imageStyle ? ' pdp-sw-img' : '') + shape + (color === selectedColor ? ' on' : '') + (sold ? ' sold' : '') + '" data-pdp-color="' + OS.esc(color) + '"' +
-            (textStyle ? '' : ' aria-label="' + OS.esc(color) + '" style="' + bg + '"') + '>' + (textStyle ? OS.esc(color) : '') + '</button>';
-        }).join('') + '</div>';
-      const sizeHtml = isDropdown
-        ? ddHtml('size', 'Size', sizes, selectedSize)
-        : '<div class="pdp-sizes">' + sizes.map((z) => {
-          const sold = !vis.some((v) => v.size === z && inStock(v));
-          return '<button type="button" class="pdp-size' + shape + (z === selectedSize ? ' on' : '') + (sold ? ' sold' : '') + '" data-pdp-size="' + OS.esc(z) + '">' + OS.esc(z) + '</button>';
-        }).join('') + '</div>';
       // Keep every SKU in the data node so deep links to sold-out variants still resolve (PRD).
       const data = variants.map((v) => '<i data-pdp-variant data-id="' + OS.esc(v.id || '') + '" data-color="' + OS.esc(v.color || '') + '" data-size="' + OS.esc(v.size || '') + '" data-price="' + Number(v.price || 0) + '" data-compare="' + Number(v.compareAt || 0) + '" data-inventory="' + Number(v.inventory || 0) + '" data-image="' + OS.esc(v.image || p.image || '') + '" data-sku="' + OS.esc(v.sku || '') + '"></i>').join('');
-      body = '<div class="pdp-options"><div class="pdp-option"><div class="pdp-label">Color: <span class="pdp-opt-val" data-pdp-color-label>' + OS.esc(selectedColor) + '</span></div>' + colorHtml + '</div><div class="pdp-option"><div class="pdp-label">Size: <span class="pdp-opt-val" data-pdp-size-label>' + OS.esc(selectedSize) + '</span></div>' + sizeHtml + '</div></div><span hidden data-pdp-variant-data>' + data + '</span>';
+      if (b.nested_dropdown) {
+        const selectedId = selected.id || '';
+        const selectedCombo = [selectedSize, selectedColor].filter(Boolean).join(' / ') || 'Variant';
+        const opts = vis.map((v) => {
+          const combo = [v.size, v.color].filter(Boolean).join(' / ') || (v.title || 'Variant');
+          const sold = !inStock(v);
+          const label = combo + skuLabel(v);
+          return '<button type="button" class="pdp-dd-opt' + (v.id === selectedId ? ' on' : '') + (sold ? ' sold' : '') + '" role="option" data-pdp-dd-opt data-pdp-variant-id="' + OS.esc(v.id || '') + '" data-value="' + OS.esc(combo) + '" data-pdp-color="' + OS.esc(v.color || '') + '" data-pdp-size="' + OS.esc(v.size || '') + '" aria-selected="' + (v.id === selectedId ? 'true' : 'false') + '">' + OS.esc(label) + (sold ? ' — Sold out' : '') + '</button>';
+        }).join('');
+        const selectedSold = !inStock(selected);
+        const nestedDd = '<div class="pdp-dd" data-pdp-nested-dd>' +
+          '<button type="button" class="pdp-dd-btn" data-pdp-dd-btn aria-haspopup="listbox" aria-expanded="false" aria-label="Variant"><span data-pdp-dd-val>' + OS.esc(selectedCombo + skuLabel(selected)) + (selectedSold ? ' — Sold out' : '') + '</span></button>' +
+          '<div class="pdp-dd-menu" data-pdp-dd-menu hidden role="listbox" aria-label="Variant">' + opts + '</div></div>';
+        body = '<div class="pdp-options"><div class="pdp-option">' +
+          (showTitle ? '<div class="pdp-label">Variant: <span class="pdp-opt-val">' + OS.esc(selectedCombo) + '</span></div>' : '') +
+          nestedDd + '</div></div><span hidden data-pdp-variant-data>' + data + '</span>';
+      } else {
+        const colorHtml = isDropdown
+          ? ddHtml('color', 'Color', colors, selectedColor)
+          : '<div class="pdp-swatches">' + colors.map((color) => {
+            const textStyle = b.swatch_style === 'text';
+            const imageStyle = b.swatch_style === 'image';
+            const sold = !vis.some((v) => v.color === color && inStock(v));
+            const img = imageStyle ? imageForColor(color) : '';
+            const bg = textStyle ? '' : (imageStyle
+              ? (img ? 'background-image:url(' + OS.esc(img) + ')' : 'background:' + colorMap[color])
+              : 'background:' + colorMap[color]);
+            const match = vis.find((v) => v.color === color) || {};
+            return '<button type="button" class="' + (textStyle ? 'pdp-size' : 'pdp-sw') + (imageStyle ? ' pdp-sw-img' : '') + shape + (color === selectedColor ? ' on' : '') + (sold ? ' sold' : '') + '" data-pdp-color="' + OS.esc(color) + '"' +
+              (textStyle ? '' : ' aria-label="' + OS.esc(color) + '" style="' + bg + '"') + '>' + (textStyle ? OS.esc(color + skuLabel(match)) : '') + '</button>';
+          }).join('') + '</div>';
+        const sizeHtml = isDropdown
+          ? ddHtml('size', 'Size', sizes, selectedSize)
+          : '<div class="pdp-sizes">' + sizes.map((z) => {
+            const sold = !vis.some((v) => v.size === z && inStock(v));
+            const match = vis.find((v) => v.size === z) || {};
+            return '<button type="button" class="pdp-size' + shape + (z === selectedSize ? ' on' : '') + (sold ? ' sold' : '') + '" data-pdp-size="' + OS.esc(z) + '">' + OS.esc(z + skuLabel(match)) + '</button>';
+          }).join('') + '</div>';
+        body = '<div class="pdp-options"><div class="pdp-option">' +
+          (showTitle ? '<div class="pdp-label">Color: <span class="pdp-opt-val" data-pdp-color-label>' + OS.esc(selectedColor) + '</span></div>' : '<span hidden data-pdp-color-label>' + OS.esc(selectedColor) + '</span>') +
+          colorHtml + '</div><div class="pdp-option">' +
+          (showTitle ? '<div class="pdp-label">Size: <span class="pdp-opt-val" data-pdp-size-label>' + OS.esc(selectedSize) + '</span></div>' : '<span hidden data-pdp-size-label>' + OS.esc(selectedSize) + '</span>') +
+          sizeHtml + '</div></div><span hidden data-pdp-variant-data>' + data + '</span>';
+      }
     } else if (block.kind === 'description') {
       body = '<div class="pdp-custom-text">' + OS.esc(p.description || 'Product description will appear here.') + '</div>';
     } else if (block.kind === 'inventory') {
@@ -865,7 +903,7 @@
       ['rating', { show_rating: true, size: 14, show_text: false, text: '4.8 (214) 7,000+ satisfied customers' }],
       ['description', {}],
       ['inventory', { show_status: true, show_count: true, custom_text: '' }],
-      ['variant', { hide_sold_out: false, picker_type: 'buttons', swatch_style: 'color', shape: 'normal' }],
+      ['variant', { hide_sold_out: false, picker_type: 'buttons', swatch_style: 'color', shape: 'normal', nested_dropdown: false, show_group_title: false, sku_display_name: '', show_sku_in_option: false }],
       ['buy', { show_quantity: true, show_add: true, show_dynamic: true, show_payment_options: true, button_shape: 'normal', custom_radius: 8, button_layout: 'stacked', channels: ['shop', 'paypal', 'apple_pay', 'google_pay'], channel_logo: false }],
       ['icon_text', { layout: 'horizontal', font: 'body', size: 'base', icon_1: 'package', image_1: '', first: 'Orders over $50 ship free', icon_2: 'currency', image_2: '', second: '30 day returns', icon_3: 'star4', image_3: '', third: '' }],
       ['collapsible', { heading: 'Overview', icon: 'none', content: 'A clinically proven, non-sticky, vegan lip treatment that delivers the intense hydration of a lip mask with a sweet sheer tint using food-grade, non-artificial flavor. Designed for sensitive, irritated lips, this cushiony treatment delivers instant comfort to rescue dry, chapped lips.', custom_liquid: '', page: '', open: false }],
@@ -990,6 +1028,7 @@
       let currentSize = (root.querySelector('[data-pdp-size].on') || {}).dataset ? root.querySelector('[data-pdp-size].on').dataset.pdpSize : '';
       const colorDd = root.querySelector('[data-pdp-color-dd]');
       const sizeDd = root.querySelector('[data-pdp-size-dd]');
+      const nestedDd = root.querySelector('[data-pdp-nested-dd]');
       if (!currentColor && colorDd) {
         const on = colorDd.querySelector('.pdp-dd-opt.on');
         currentColor = on ? on.getAttribute('data-value') : '';
@@ -997,6 +1036,13 @@
       if (!currentSize && sizeDd) {
         const on = sizeDd.querySelector('.pdp-dd-opt.on');
         currentSize = on ? on.getAttribute('data-value') : '';
+      }
+      if ((!currentColor || !currentSize) && nestedDd) {
+        const on = nestedDd.querySelector('.pdp-dd-opt.on');
+        if (on) {
+          currentColor = currentColor || on.getAttribute('data-pdp-color') || '';
+          currentSize = currentSize || on.getAttribute('data-pdp-size') || '';
+        }
       }
       function variantData(el) {
         return {
@@ -1086,6 +1132,16 @@
         if (sizeLabel && currentSize) sizeLabel.textContent = currentSize;
         syncDd(colorDd, currentColor, all, 'color');
         syncDd(sizeDd, currentSize, all, 'size');
+        if (nestedDd) {
+          const label = nestedDd.querySelector('[data-pdp-dd-val]');
+          nestedDd.querySelectorAll('[data-pdp-dd-opt]').forEach((opt) => {
+            const on = (opt.getAttribute('data-pdp-color') || '') === (currentColor || '')
+              && (opt.getAttribute('data-pdp-size') || '') === (currentSize || '');
+            opt.classList.toggle('on', on);
+            opt.setAttribute('aria-selected', on ? 'true' : 'false');
+            if (on && label) label.textContent = opt.textContent || '';
+          });
+        }
         const now = root.querySelector('[data-pdp-now]');
         const compare = root.querySelector('[data-pdp-compare]');
         const save = root.querySelector('[data-pdp-save]');
@@ -1150,7 +1206,8 @@
         syncVariant('size', { writeUrl: true });
       }));
       root.querySelectorAll('.pdp-dd').forEach((dd) => {
-        const kind = dd.hasAttribute('data-pdp-color-dd') ? 'color' : 'size';
+        const kind = dd.hasAttribute('data-pdp-nested-dd') ? 'nested'
+          : (dd.hasAttribute('data-pdp-color-dd') ? 'color' : 'size');
         const btn = dd.querySelector('[data-pdp-dd-btn]');
         const menu = dd.querySelector('[data-pdp-dd-menu]');
         if (!btn || !menu) return;
@@ -1174,6 +1231,13 @@
             e.preventDefault();
             e.stopPropagation();
             if (opt.disabled) return;
+            if (kind === 'nested') {
+              currentColor = opt.getAttribute('data-pdp-color') || '';
+              currentSize = opt.getAttribute('data-pdp-size') || '';
+              closeAllDd();
+              syncVariant('nested', { writeUrl: true });
+              return;
+            }
             const value = opt.getAttribute('data-value') || '';
             if (kind === 'color') currentColor = value;
             else currentSize = value;
