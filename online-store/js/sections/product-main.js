@@ -149,6 +149,8 @@
     '.pdpx .pdp-stock.sold i::before,.pdpx .pdp-stock.sold i::after{animation:none}',
     '.pdpx .pdp-stock.low{--status-color:#f59e0b}',
     '.pdpx .pdp-stock.low i::before,.pdpx .pdp-stock.low i::after{animation:none}',
+    '.pdpx .pdp-stock.style-badge{display:inline-flex;padding:4px 10px;border-radius:999px;background:color-mix(in srgb, var(--status-color) 14%, #fff);}',
+    '.pdpx .pdp-stock.style-text i{display:none}',
     '@keyframes pdp-inventory-pulse{0%{opacity:.6}100%{transform:scale(2.5);opacity:0}}',
     '.pdpx .pdp-sku{font-size:13px;opacity:.72}',
     '.pdpx .pdp-actions{display:flex;flex-direction:column;gap:20px}',
@@ -416,6 +418,13 @@
       { key: 'show_status', control: 'toggle', label: 'Show inventory status', default: true },
       { key: 'show_count', control: 'toggle', label: 'Show inventory count', default: true },
       { key: 'custom_text', control: 'text', label: 'Custom text', default: '', placeholder: '' },
+      { key: 'low_stock_threshold', control: 'number', label: 'Low stock threshold', default: 5, min: 0, max: 999 },
+      { key: 'low_stock_text', control: 'text', label: 'Low stock text', default: 'Low stock - {n} items left', info: 'Use {n} for the remaining count.' },
+      { key: 'sold_out_text', control: 'text', label: 'Sold out text', default: 'Sold out' },
+      { key: 'status_style', control: 'segmented', label: 'Status style', default: 'dot', options: [
+        { value: 'dot', label: 'Dot' }, { value: 'badge', label: 'Badge' }, { value: 'text-only', label: 'Text only' },
+      ] },
+      { key: 'status_color', control: 'color', label: 'Status color', default: '#f59e0b' },
     ] },
     variant: { name: 'Variant picker', icon: 'variant', unique: true, preview:
       '<div class="os-blkprev-var">' +
@@ -723,10 +732,19 @@
       if (b.show_status === false) return '';
       const showCount = b.show_count !== false;
       const customText = String(b.custom_text || '');
+      const threshold = Number(b.low_stock_threshold == null ? 5 : b.low_stock_threshold);
+      const lowTextTpl = String(b.low_stock_text || 'Low stock - {n} items left');
+      const soldText = String(b.sold_out_text || 'Sold out');
+      const style = b.status_style || 'dot';
+      const statusColor = b.status_color || '#f59e0b';
+      const isLow = inventory > 0 && inventory <= threshold;
       const statusText = inventory <= 0
-        ? 'Sold out'
-        : ((showCount ? inventory + ' in stock' : 'In stock') + customText);
-      body = '<div class="pdp-stock' + (inventory <= 0 ? ' sold' : (inventory <= 5 ? ' low' : '')) + '" data-pdp-stock data-show-count="' + (showCount ? '1' : '0') + '" data-custom-text="' + OS.esc(customText) + '"><i></i><span>' +
+        ? soldText
+        : (isLow
+          ? lowTextTpl.replace(/\{n\}/g, String(inventory)) + customText
+          : ((showCount ? inventory + ' in stock' : 'In stock') + customText));
+      const styleClass = style === 'badge' ? ' style-badge' : (style === 'text-only' ? ' style-text' : '');
+      body = '<div class="pdp-stock' + (inventory <= 0 ? ' sold' : (isLow ? ' low' : '')) + styleClass + '" data-pdp-stock data-show-count="' + (showCount ? '1' : '0') + '" data-custom-text="' + OS.esc(customText) + '" data-low-threshold="' + threshold + '" data-low-text="' + OS.esc(lowTextTpl) + '" data-sold-text="' + OS.esc(soldText) + '" style="--status-color:' + OS.esc(inventory <= 0 ? '#9ca3af' : statusColor) + '"><i></i><span>' +
         OS.esc(statusText) + '</span></div>';
     } else if (block.kind === 'buy') {
       const showPayMore = b.show_payment_options !== false;
@@ -902,7 +920,7 @@
       ['price', { show_taxes: false, show_saving: true, saving_type: 'percentage', saving_position: 'right', saving_label: '', saving_bg: '', saving_text_color: '#ffffff', saving_icon: false }],
       ['rating', { show_rating: true, size: 14, show_text: false, text: '4.8 (214) 7,000+ satisfied customers' }],
       ['description', {}],
-      ['inventory', { show_status: true, show_count: true, custom_text: '' }],
+      ['inventory', { show_status: true, show_count: true, custom_text: '', low_stock_threshold: 5, low_stock_text: 'Low stock - {n} items left', sold_out_text: 'Sold out', status_style: 'dot', status_color: '#f59e0b' }],
       ['variant', { hide_sold_out: false, picker_type: 'buttons', swatch_style: 'color', shape: 'normal', nested_dropdown: false, show_group_title: false, sku_display_name: '', show_sku_in_option: false }],
       ['buy', { show_quantity: true, show_add: true, show_dynamic: true, show_payment_options: true, button_shape: 'normal', custom_radius: 8, button_layout: 'stacked', channels: ['shop', 'paypal', 'apple_pay', 'google_pay'], channel_logo: false }],
       ['icon_text', { layout: 'horizontal', font: 'body', size: 'base', icon_1: 'package', image_1: '', first: 'Orders over $50 ship free', icon_2: 'currency', image_2: '', second: '30 day returns', icon_3: 'star4', image_3: '', third: '' }],
@@ -1163,15 +1181,21 @@
           save.innerHTML = iconHtml + label;
         }
         if (stock) {
+          const threshold = Number(stock.getAttribute('data-low-threshold') || 5);
+          const isLow = match.inventory > 0 && match.inventory <= threshold;
           stock.classList.toggle('sold', match.inventory <= 0);
-          stock.classList.toggle('low', match.inventory > 0 && match.inventory <= 5);
+          stock.classList.toggle('low', isLow);
           const text = stock.querySelector('span');
           const showCount = stock.getAttribute('data-show-count') !== '0';
           const customText = stock.getAttribute('data-custom-text') || '';
+          const lowTextTpl = stock.getAttribute('data-low-text') || 'Low stock - {n} items left';
+          const soldText = stock.getAttribute('data-sold-text') || 'Sold out';
           if (text) {
             text.textContent = match.inventory <= 0
-              ? 'Sold out'
-              : ((showCount ? match.inventory + ' in stock' : 'In stock') + customText);
+              ? soldText
+              : (isLow
+                ? lowTextTpl.replace(/\{n\}/g, String(match.inventory)) + customText
+                : ((showCount ? match.inventory + ' in stock' : 'In stock') + customText));
           }
         }
         if (sku) sku.textContent = match.sku || '';
