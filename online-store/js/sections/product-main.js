@@ -185,7 +185,17 @@
     '.pdpx .pdp-link-actions{display:flex;align-items:center;flex-wrap:wrap;gap:0 24px;min-height:48px}',
     '.pdpx .pdp-link-actions button{display:inline-flex;align-items:center;gap:6px;padding:0;border:0;background:none;color:inherit;font:inherit;font-size:16px;font-weight:500;line-height:30px;text-decoration:none;cursor:pointer}',
     '.pdpx .pdp-link-actions button svg{display:block;width:20px;height:20px;flex:none}',
+    '.pdpx .pdp-share-tile{display:flex;flex-wrap:wrap;gap:10px;align-items:center}',
+    '.pdpx .pdp-share-tile a,.pdpx .pdp-share-tile button{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border:1px solid rgba(0,0,0,.12);border-radius:8px;background:#fff;color:inherit;padding:0;cursor:pointer;text-decoration:none}',
+    '.pdpx .pdp-share-tile.mono a,.pdpx .pdp-share-tile.mono button{color:#111}',
+    '.pdpx .pdp-share-tile.brand a[data-net=facebook]{color:#1877f2}',
+    '.pdpx .pdp-share-tile.brand a[data-net=x]{color:#111}',
+    '.pdpx .pdp-share-tile.brand a[data-net=pinterest]{color:#e60023}',
+    '.pdpx .pdp-share-inline{display:flex;flex-wrap:wrap;gap:16px;align-items:center}',
+    '.pdpx .pdp-share-inline a,.pdpx .pdp-share-inline button{display:inline-flex;align-items:center;gap:6px;border:0;background:none;color:inherit;font:inherit;font-size:14px;font-weight:550;cursor:pointer;text-decoration:none;padding:0}',
+    '.pdpx .pdp-share-dd{position:relative;display:inline-flex}',
     '.pdpx .pdp-popup-link{padding:0;border:0;background:none;color:inherit;font:inherit;font-size:13px;font-weight:650;text-decoration:underline;text-underline-offset:3px;cursor:pointer}',
+    '.pdpx .pdp-popup-link.hover-fx:hover{opacity:.72}',
     '.pdpx .pdp-ship{font-size:13px;line-height:1.55}',
     '.pdpx .pdp-ship strong{display:block;margin-bottom:4px}',
     '.pdpx .pdp-acc{border-bottom:1px solid rgba(0,0,0,.12)}',
@@ -535,11 +545,25 @@
     popup: { name: 'Pop-up', preview: '<button type="button" style="padding:0;border:0;background:none;color:#111;font:inherit;font-size:13px;font-weight:650;line-height:1.3;text-decoration:underline;text-underline-offset:3px;cursor:default">View size guide</button>', fields: [
       { key: 'label', control: 'text', label: 'Link label', default: 'View size guide' },
       { key: 'page', control: 'page', label: 'Page', default: '' },
+      { key: 'trigger', control: 'segmented', label: 'Trigger', default: 'click', options: [
+        { value: 'click', label: 'Click' },
+      ] },
+      { key: 'content_type', control: 'select', label: 'Content type', default: 'page', options: [
+        { value: 'page', label: 'Page' },
+      ] },
+      { key: 'hover_effect', control: 'toggle', label: 'Hover effect', default: false },
+      { key: 'popup_width', control: 'range', label: 'Popup width', min: 280, max: 900, step: 10, unit: 'px', default: 560 },
+      { key: 'popup_height', control: 'range', label: 'Popup height', min: 200, max: 800, step: 10, unit: 'px', default: 420 },
     ] },
     shipping: { name: 'Shipping', icon: 'doc', unique: true, preview: '<div class="os-blkprev-ship"><strong style="display:block;margin-bottom:4px;color:#111">Estimated delivery:</strong>Arrives by Oct 30</div>', fields: [
       { key: 'delivery_text', control: 'text', label: 'Delivery text', default: 'Estimated delivery:' },
       { key: 'days', control: 'number', label: 'Deliver in', min: 1, max: 60, default: 7 },
       { key: 'date_format', control: 'text', label: 'Date format', default: '%b %d' },
+      { key: 'timezone', control: 'select', label: 'Timezone', default: 'store', options: [
+        { value: 'store', label: 'Store' }, { value: 'utc', label: 'UTC' },
+      ] },
+      { key: 'fallback_text', control: 'text', label: 'Fallback text', default: '', placeholder: 'Shown when delivery date is unavailable' },
+      { info: 'Holiday skipping is out of scope for this pass.' },
     ] },
     // Not in PRD Product information catalog — keep render support, hide from Add block.
     line_property: { name: 'Line item property', picker: false, preview:
@@ -552,6 +576,17 @@
     ] },
     actions: { name: 'Sharing buttons', unique: true, preview: '<div class="os-blkprev-share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>Share</div>', fields: [
       { key: 'show_share', control: 'toggle', label: 'Show social sharing', default: true },
+      { key: 'layout', control: 'segmented', label: 'Layout', default: 'tile', options: [
+        { value: 'tile', label: 'Tile' }, { value: 'inline', label: 'Inline' }, { value: 'dropdown', label: 'Dropdown' },
+      ], visibleWhen: (v) => v.show_share !== false },
+      { key: 'icon_style', control: 'segmented', label: 'Icon style', default: 'brand', options: [
+        { value: 'brand', label: 'Brand' }, { value: 'mono', label: 'Mono' },
+      ], visibleWhen: (v) => v.show_share !== false },
+      { key: 'platforms', control: 'multiselect', label: 'Platforms', default: ['facebook', 'x', 'pinterest'], options: [
+        { value: 'facebook', label: 'Facebook' }, { value: 'x', label: 'X' }, { value: 'pinterest', label: 'Pinterest' },
+        { value: 'instagram', label: 'Instagram' }, { value: 'whatsapp', label: 'WhatsApp' }, { value: 'telegram', label: 'Telegram' }, { value: 'email', label: 'Email' },
+      ], visibleWhen: (v) => v.show_share !== false },
+      { key: 'show_copy', control: 'toggle', label: 'Show copy link', default: true, visibleWhen: (v) => v.show_share !== false },
     ] },
     // Products default to [] — no init data, preview stays blank.
     recommendations: { name: 'Inline recommendations', unique: true, fields: [
@@ -562,6 +597,11 @@
       { key: 'image_ratio', control: 'select', label: 'Image aspect ratio', default: 'adapt', options: [
         { value: 'adapt', label: 'Adapt to image' }, { value: 'square', label: 'Square' }, { value: 'portrait', label: 'Portrait' },
       ] },
+      { key: 'empty_behavior', control: 'select', label: 'Empty behavior', default: 'hide', options: [
+        { value: 'hide', label: 'Hide block' },
+      ] },
+      { key: 'exclude_soldout', control: 'toggle', label: 'Exclude sold out', default: false },
+      { key: 'dedupe_current', control: 'toggle', label: 'Hide current product', default: true },
     ] },
     divider: { name: 'Separator', preview: '<div class="os-blkprev-line"></div>', fields: [
       { key: 'color', control: 'color', label: 'Color', default: '#E5E5E5' },
@@ -835,26 +875,75 @@
     } else if (block.kind === 'liquid') {
       body = b.code ? '<div class="pdp-custom-text" style="font-family:ui-monospace,monospace">' + OS.esc(b.code) + '</div>' : '';
     } else if (block.kind === 'shipping') {
-      const date = new Date(Date.now() + Number(b.days || 7) * 86400000);
-      body = '<div class="pdp-ship"><strong>' + OS.esc(b.delivery_text || 'Estimated delivery:') + '</strong><div>' + date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' (+/- 2 days)</div></div>';
+      const days = Number(b.days || 7);
+      let dateLabel = '';
+      try {
+        const ms = Date.now() + days * 86400000;
+        const date = b.timezone === 'utc' ? new Date(ms) : new Date(ms);
+        dateLabel = b.timezone === 'utc'
+          ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
+          : date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      } catch (err) {
+        dateLabel = '';
+      }
+      const shipLine = dateLabel
+        ? (dateLabel + ' (+/- 2 days)')
+        : String(b.fallback_text || '');
+      body = '<div class="pdp-ship" data-ship-tz="' + OS.esc(b.timezone || 'store') + '"><strong>' + OS.esc(b.delivery_text || 'Estimated delivery:') + '</strong><div>' + OS.esc(shipLine || String(b.fallback_text || 'Delivery date unavailable')) + '</div></div>';
     } else if (block.kind === 'collapsible') {
       const isOpen = !!(b.open || b.first_open_default);
       const iconLeft = b.icon_position === 'left';
       body = '<div class="pdp-acc' + (isOpen ? ' open' : '') + (iconLeft ? ' icon-left' : '') + '" data-pdp-acc data-accordion="' + (b.accordion_mode ? '1' : '0') + '"><button type="button"><span class="pdp-acc-title">' + OS.esc(b.heading || 'Details') + '</span><span class="pdp-acc-mark">' + (isOpen ? '–' : '+') + '</span></button><div class="body">' + (b.content || '') + (b.custom_liquid ? '<pre>' + OS.esc(b.custom_liquid) + '</pre>' : '') + '</div></div>';
     } else if (block.kind === 'popup') {
-      body = '<button type="button" class="pdp-popup-link" data-pdp-popup-link>' + OS.esc(b.label || 'View details') + '</button>';
+      const w = Number(b.popup_width == null ? 560 : b.popup_width);
+      const h = Number(b.popup_height == null ? 420 : b.popup_height);
+      body = '<button type="button" class="pdp-popup-link' + (b.hover_effect ? ' hover-fx' : '') + '" data-pdp-popup-link data-popup-trigger="' + OS.esc(b.trigger || 'click') + '" data-popup-type="' + OS.esc(b.content_type || 'page') + '" data-popup-page="' + OS.esc(b.page || '') + '" data-popup-w="' + w + '" data-popup-h="' + h + '">' + OS.esc(b.label || 'View details') + '</button>';
     } else if (block.kind === 'line_property') {
       body = '<label class="pdp-property"><span class="pdp-label">' + OS.esc(b.label || 'Your label') + (b.required ? ' *' : '') + '</span><input type="' + (b.type === 'number' ? 'number' : 'text') + '" placeholder="' + OS.esc(b.placeholder || '') + '"' + (b.required ? ' required' : '') + '></label>';
     } else if (block.kind === 'actions') {
-      const shareIcon = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M2.4168 15.525C3.70274 14.1555 7.07852 11.25 11.8754 11.25V15L18.1254 8.75L11.8754 2.5V6.25C7.7504 6.25 2.46212 10.1914 1.8754 15.2766C1.86728 15.3424 1.88032 15.4091 1.91265 15.4671C1.94498 15.525 1.99491 15.5712 2.05522 15.5988C2.11552 15.6265 2.18307 15.6343 2.24807 15.621C2.31308 15.6077 2.37218 15.5741 2.4168 15.525Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-      body = b.show_share === false ? '' : '<div class="pdp-link-actions"><button type="button" data-pdp-share>' + shareIcon + '<span>Share</span></button></div>';
+      if (b.show_share === false) {
+        body = '';
+      } else {
+        const layout = b.layout || 'tile';
+        const style = b.icon_style || 'brand';
+        const platforms = Array.isArray(b.platforms) && b.platforms.length
+          ? b.platforms
+          : ['facebook', 'x', 'pinterest'];
+        const showCopy = b.show_copy !== false;
+        const icons = {
+          facebook: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M14 9h3V6h-3c-2.2 0-4 1.8-4 4v2H7v3h3v7h3v-7h3l1-3h-4v-2c0-.6.4-1 1-1z"/></svg>',
+          x: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M4 4h4.2l4 5.6L16.8 4H20l-6.2 7.2L20 20h-4.2l-4.3-6L7.2 20H4l6.4-7.5L4 4z"/></svg>',
+          pinterest: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 3a9 9 0 0 0-3.3 17.4c-.1-.7-.2-1.8 0-2.6l1.2-5s-.3-.6-.3-1.4c0-1.3.8-2.3 1.7-2.3.8 0 1.2.6 1.2 1.3 0 .8-.5 2-1 3.1-.3.9.4 1.7 1.3 1.7 1.6 0 2.7-2 2.7-4.4 0-1.8-1.2-3.2-3.4-3.2-2.5 0-4 1.7-4 3.6 0 .7.2 1.2.5 1.6l.1.2c-.1.3-.2.9-.2 1l-.3 1.2c0 .2-.2.3-.4.2-1.5-.6-2.2-2.3-2.2-4.2 0-3.1 2.6-6.8 7.7-6.8 4.1 0 6.8 3 6.8 6.2 0 4.2-2.3 7.3-5.8 7.3-1.2 0-2.3-.6-2.6-1.4l-.7 2.7c-.3 1-1 2.1-1.5 2.8A9 9 0 1 0 12 3z"/></svg>',
+          instagram: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4zm5 5.2A3.8 3.8 0 1 0 15.8 12 3.8 3.8 0 0 0 12 8.2zm6.2-.9a1 1 0 1 0-1 1 1 1 0 0 0 1-1z"/></svg>',
+          whatsapp: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.7-1.2A9 9 0 1 0 12 3zm4.9 12.8c-.2.6-1.2 1.1-1.9 1.2-.5.1-1.1.1-1.8-.1a14 14 0 0 1-6-4.3 6.8 6.8 0 0 1-1.4-3.5c0-.9.5-1.8 1.2-2 .3-.1.7-.1 1 .1l1.3 1.6c.2.2.2.5.1.8l-.4.8c-.1.2-.1.4.1.6a9.3 9.3 0 0 0 2.7 2.5c.2.1.4.1.6 0l.8-.5c.2-.1.5-.1.7.1l1.7 1.3c.3.2.4.6.2 1z"/></svg>',
+          telegram: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M21 4.5 3.8 11.2c-1.2.5-1.2 1.2-.2 1.5l4.3 1.3 1.7 5.1c.2.6.1.8.8.8.5 0 .7-.2 1-.5l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8L22.6 5.7c.3-1.2-.4-1.7-1.6-1.2z"/></svg>',
+          email: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M4 6h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2zm0 2 8 5 8-5H4zm0 2.2V16h16V10.2l-8 5-8-5z"/></svg>',
+        };
+        const labels = { facebook: 'Facebook', x: 'X', pinterest: 'Pinterest', instagram: 'Instagram', whatsapp: 'WhatsApp', telegram: 'Telegram', email: 'Email' };
+        const platHtml = platforms.map((id) => '<a href="#" data-pdp-share-net="' + OS.esc(id) + '" data-net="' + OS.esc(id) + '" aria-label="' + OS.esc(labels[id] || id) + '">' + (icons[id] || '') + (layout === 'inline' ? '<span>' + OS.esc(labels[id] || id) + '</span>' : '') + '</a>').join('');
+        const copyBtn = showCopy ? '<button type="button" data-pdp-share-copy aria-label="Copy link">' + (layout === 'inline' ? 'Copy' : '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M8 7h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm2 2v9h9V9H10zM6 5h9v2H6a2 2 0 0 0-2 2v9h2V9a2 2 0 0 1 2-2z"/></svg>') + '</button>' : '';
+        if (layout === 'dropdown') {
+          const shareIcon = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M2.4168 15.525C3.70274 14.1555 7.07852 11.25 11.8754 11.25V15L18.1254 8.75L11.8754 2.5V6.25C7.7504 6.25 2.46212 10.1914 1.8754 15.2766C1.86728 15.3424 1.88032 15.4091 1.91265 15.4671C1.94498 15.525 1.99491 15.5712 2.05522 15.5988C2.11552 15.6265 2.18307 15.6343 2.24807 15.621C2.31308 15.6077 2.37218 15.5741 2.4168 15.525Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+          body = '<div class="pdp-link-actions pdp-share-dd"><button type="button" data-pdp-share>' + shareIcon + '<span>Share</span></button></div>';
+        } else if (layout === 'inline') {
+          body = '<div class="pdp-share-inline ' + OS.esc(style) + '" data-pdp-share-bar>' + platHtml + copyBtn + '</div>';
+        } else {
+          body = '<div class="pdp-share-tile ' + OS.esc(style) + '" data-pdp-share-bar>' + platHtml + copyBtn + '</div>';
+        }
+      }
     } else if (block.kind === 'recommendations') {
-      const picked = byIds(b.products);
-      const list = picked.length ? picked : others(p, 2);
-      const cols = mob ? (b.mobile_count || 2) : (b.per_row || 2);
-      const cards = list.map((item) => '<div class="pdp-rec-card"><div class="im" style="background-image:url(' + OS.esc(item.image) + ')"></div><b>' + OS.esc(item.title) + '</b><div>' + OS.money(item.price) + '</div></div>').join('');
-      body = (b.heading ? '<h3 class="pdp-rec-h">' + OS.esc(b.heading) + '</h3>' : '') +
-        '<div class="pdp-rec-row" data-pdp-rec style="grid-template-columns:repeat(' + cols + ',minmax(0,1fr))">' + cards + '</div>';
+      let list = byIds(b.products);
+      if (!list.length) list = others(p, 4);
+      if (b.dedupe_current !== false) list = list.filter((item) => item.id !== p.id && item.handle !== p.handle);
+      if (b.exclude_soldout) list = list.filter((item) => Number(item.inventory == null ? 1 : item.inventory) > 0);
+      if (!list.length && (b.empty_behavior || 'hide') === 'hide') {
+        body = '';
+      } else {
+        const cols = mob ? (b.mobile_count || 2) : (b.per_row || 2);
+        const cards = list.map((item) => '<div class="pdp-rec-card"><div class="im" style="background-image:url(' + OS.esc(item.image) + ')"></div><b>' + OS.esc(item.title) + '</b><div>' + OS.money(item.price) + '</div></div>').join('');
+        body = (b.heading ? '<h3 class="pdp-rec-h">' + OS.esc(b.heading) + '</h3>' : '') +
+          '<div class="pdp-rec-row" data-pdp-rec style="grid-template-columns:repeat(' + cols + ',minmax(0,1fr))">' + cards + '</div>';
+      }
     }
     if (!body) return '';
     return '<div class="pdp-row pdp-kind-' + OS.esc(block.kind) + '" data-block-id="' + OS.esc(block.id) + '">' + body + '</div>';
@@ -937,7 +1026,7 @@
       ['collapsible', { heading: 'Overview', icon: 'none', content: 'A clinically proven, non-sticky, vegan lip treatment that delivers the intense hydration of a lip mask with a sweet sheer tint using food-grade, non-artificial flavor. Designed for sensitive, irritated lips, this cushiony treatment delivers instant comfort to rescue dry, chapped lips.', custom_liquid: '', page: '', open: false }],
       ['collapsible', { heading: 'How to use', icon: 'none', content: 'Apply generously to lips for hydration and comfort. Use at night for an overnight mask.', custom_liquid: '', page: '', open: false }],
       ['collapsible', { heading: 'Ingredients', icon: 'none', content: '<ul><li>Dulce De Leche</li><li>Ube vanilla</li><li>Watermelon kiwi</li><li>Blood orange vanilla</li></ul>', custom_liquid: '', page: '', open: false }],
-      ['actions', { show_share: true }],
+      ['actions', { show_share: true, layout: 'tile', icon_style: 'brand', platforms: ['facebook', 'x', 'pinterest'], show_copy: true }],
     ]).map((pair) => ({ id: OS.uid('pdp'), kind: pair[0], hidden: false, settings: pair[1] })),
     render: function (s, blocks, ctx) {
       const t = ctx.tokens || {};
