@@ -189,7 +189,9 @@
     '.pdpx .pdp-ship{font-size:13px;line-height:1.55}',
     '.pdpx .pdp-ship strong{display:block;margin-bottom:4px}',
     '.pdpx .pdp-acc{border-bottom:1px solid rgba(0,0,0,.12)}',
-    '.pdpx .pdp-acc button{width:100%;display:flex;justify-content:space-between;gap:12px;border:0;background:transparent;padding:20px 0;font:inherit;font-weight:650;text-align:left;cursor:pointer;color:inherit}',
+    '.pdpx .pdp-acc button{width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px;border:0;background:transparent;padding:20px 0;font:inherit;font-weight:650;text-align:left;cursor:pointer;color:inherit}',
+    '.pdpx .pdp-acc.icon-left button{flex-direction:row-reverse;justify-content:flex-end}',
+    '.pdpx .pdp-acc.icon-left button .pdp-acc-mark{order:-1}',
     '.pdpx .pdp-acc .body{display:none;padding:0 0 12px;font-size:14px;line-height:1.6;opacity:.85}',
     '.pdpx .pdp-acc.open .body{display:block}',
     '.pdpx .pdp-rec-h{font-size:15px;margin:0 0 4px}',
@@ -523,6 +525,12 @@
       { key: 'custom_liquid', control: 'textarea', label: 'Custom liquid', default: '' },
       { key: 'page', control: 'page', label: 'Row content from page', default: '' },
       { key: 'open', control: 'toggle', label: 'Default open', default: false },
+      { key: 'first_open_default', control: 'toggle', label: 'Open by default', default: false },
+      { key: 'accordion_mode', control: 'toggle', label: 'Accordion mode', default: false, info: 'When on, only one row stays open at a time.' },
+      { key: 'icon_position', control: 'segmented', label: 'Icon position', default: 'right', options: [
+        { value: 'left', label: 'Left' }, { value: 'right', label: 'Right' },
+      ] },
+      { info: 'Mobile order reuses the desktop block order.' },
     ] },
     popup: { name: 'Pop-up', preview: '<button type="button" style="padding:0;border:0;background:none;color:#111;font:inherit;font-size:13px;font-weight:650;line-height:1.3;text-decoration:underline;text-underline-offset:3px;cursor:default">View size guide</button>', fields: [
       { key: 'label', control: 'text', label: 'Link label', default: 'View size guide' },
@@ -830,7 +838,9 @@
       const date = new Date(Date.now() + Number(b.days || 7) * 86400000);
       body = '<div class="pdp-ship"><strong>' + OS.esc(b.delivery_text || 'Estimated delivery:') + '</strong><div>' + date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' (+/- 2 days)</div></div>';
     } else if (block.kind === 'collapsible') {
-      body = '<div class="pdp-acc' + (b.open ? ' open' : '') + '" data-pdp-acc><button type="button">' + OS.esc(b.heading || 'Details') + '<span>' + (b.open ? '-' : '+') + '</span></button><div class="body">' + (b.content || '') + (b.custom_liquid ? '<pre>' + OS.esc(b.custom_liquid) + '</pre>' : '') + '</div></div>';
+      const isOpen = !!(b.open || b.first_open_default);
+      const iconLeft = b.icon_position === 'left';
+      body = '<div class="pdp-acc' + (isOpen ? ' open' : '') + (iconLeft ? ' icon-left' : '') + '" data-pdp-acc data-accordion="' + (b.accordion_mode ? '1' : '0') + '"><button type="button"><span class="pdp-acc-title">' + OS.esc(b.heading || 'Details') + '</span><span class="pdp-acc-mark">' + (isOpen ? '–' : '+') + '</span></button><div class="body">' + (b.content || '') + (b.custom_liquid ? '<pre>' + OS.esc(b.custom_liquid) + '</pre>' : '') + '</div></div>';
     } else if (block.kind === 'popup') {
       body = '<button type="button" class="pdp-popup-link" data-pdp-popup-link>' + OS.esc(b.label || 'View details') + '</button>';
     } else if (block.kind === 'line_property') {
@@ -1309,14 +1319,15 @@
       const accordions = [...root.querySelectorAll('[data-pdp-acc]')];
       const setAcc = (box, open) => {
         box.classList.toggle('open', open);
-        const mark = box.querySelector(':scope > button span');
+        const mark = box.querySelector(':scope > button .pdp-acc-mark') || box.querySelector(':scope > button span:last-child');
         if (mark) mark.textContent = open ? '–' : '+';
       };
+      const isAccordion = (box) => box.getAttribute('data-accordion') === '1';
       let keptAcc = false;
       accordions.forEach((box) => {
         if (!box.classList.contains('open')) return;
-        if (keptAcc) setAcc(box, false);
-        else keptAcc = true;
+        if (isAccordion(box) && keptAcc) setAcc(box, false);
+        else if (isAccordion(box)) keptAcc = true;
       });
       accordions.forEach((box) => {
         const btn = box.querySelector(':scope > button');
@@ -1324,8 +1335,10 @@
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
           const open = !box.classList.contains('open');
-          accordions.forEach((other) => setAcc(other, false));
-          if (open) setAcc(box, true);
+          if (isAccordion(box) && open) {
+            accordions.forEach((other) => { if (isAccordion(other)) setAcc(other, false); });
+          }
+          setAcc(box, open);
         });
       });
       function chosenSize() {
