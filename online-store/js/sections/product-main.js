@@ -176,10 +176,14 @@
     '.pdpx .pdp-pay{font-size:10px;font-weight:800;letter-spacing:.04em;border:1px solid rgba(0,0,0,.12);border-radius:3px;padding:3px 6px;opacity:.8}',
     '.pdpx .pdp-icons{display:flex;flex-wrap:wrap;align-items:center;gap:8px 24px}',
     '.pdpx .pdp-icons.vertical{flex-direction:column;align-items:flex-start;gap:8px}',
-    '.pdpx .pdp-icon-item{display:flex;align-items:center;height:var(--pdp-icon-line,26px);gap:8px;line-height:var(--pdp-icon-line,26px);font-weight:400}',
+    '.pdpx .pdp-icons.has-bg{padding:12px 14px;background:#f6f6f6;border-radius:10px}',
+    '.pdpx .pdp-icon-item{display:flex;align-items:center;height:var(--pdp-icon-line,26px);gap:8px;line-height:var(--pdp-icon-line,26px);font-weight:400;color:inherit;text-decoration:none}',
+    '.pdpx .pdp-icon-item.card-outline{padding:10px 12px;border:1px solid rgba(0,0,0,.12);border-radius:8px;height:auto}',
+    '.pdpx .pdp-icon-item.card-filled{padding:10px 12px;background:#fff;border-radius:8px;box-shadow:0 1px 2px rgba(0,0,0,.06);height:auto}',
     '.pdpx .pdp-icon-mark{display:grid;place-items:center;width:var(--pdp-icon-size,20px);height:var(--pdp-icon-size,20px);flex:none;color:currentColor}',
     '.pdpx .pdp-icon-mark svg{display:block;width:100%;height:100%}',
     '.pdpx .pdp-icon-img{width:var(--pdp-icon-size,20px);height:var(--pdp-icon-size,20px);flex:none;object-fit:contain}',
+    '.pdpx .pdp-icon-img.logo{width:auto;max-width:88px;height:28px}',
     '.pdpx .pdp-custom-text{font-size:14px;line-height:1.6}',
     '.pdpx .pdp-property{display:grid;gap:6px}.pdpx .pdp-property input{height:40px;padding:0 10px;border:1px solid rgba(0,0,0,.2);border-radius:7px;font:inherit}',
     '.pdpx .pdp-link-actions{display:flex;align-items:center;flex-wrap:wrap;gap:0 24px;min-height:48px}',
@@ -495,21 +499,28 @@
       { key: 'size', control: 'select', label: 'Title size', default: 'base', options: [
         { value: 'small', label: 'Small' }, { value: 'base', label: 'Base size' }, { value: 'large', label: 'Large' },
       ] },
+      { key: 'background', control: 'toggle', label: 'Show background', default: false },
+      { key: 'card_style', control: 'segmented', label: 'Card style', default: 'none', options: [
+        { value: 'none', label: 'None' }, { value: 'outline', label: 'Outline' }, { value: 'filled', label: 'Filled' },
+      ] },
       { key: 'icon_1', control: 'select', label: 'First icon', default: 'package', options: [
         { value: 'package', label: 'Package' }, { value: 'truck', label: 'Truck' }, { value: 'star', label: 'Star' }, { value: 'leaf', label: 'Leaf' },
       ] },
-      { key: 'image_1', control: 'image', label: 'First image', default: '' },
+      { key: 'image_1', control: 'image', label: 'First image / logo', default: '', info: 'Use for trust logos such as BBC / Forbes.' },
       { key: 'first', control: 'richtext', label: 'First heading', default: 'Orders over $50 ship free' },
+      { key: 'link_1', control: 'text', label: 'First link', default: '', placeholder: 'https://' },
       { key: 'icon_2', control: 'select', label: 'Second icon', default: 'currency', options: [
         { value: 'currency', label: 'Currency circle dollar' }, { value: 'package', label: 'Package' }, { value: 'star', label: 'Star' }, { value: 'return', label: 'Returns' },
       ] },
-      { key: 'image_2', control: 'image', label: 'Second image', default: '' },
+      { key: 'image_2', control: 'image', label: 'Second image / logo', default: '' },
       { key: 'second', control: 'richtext', label: 'Second heading', default: '30 day returns' },
+      { key: 'link_2', control: 'text', label: 'Second link', default: '', placeholder: 'https://' },
       { key: 'icon_3', control: 'select', label: 'Third icon', default: 'star4', options: [
         { value: 'star4', label: 'Star four' }, { value: 'star', label: 'Star' }, { value: 'heart', label: 'Heart' }, { value: 'check', label: 'Check' },
       ] },
-      { key: 'image_3', control: 'image', label: 'Third image', default: '' },
+      { key: 'image_3', control: 'image', label: 'Third image / logo', default: '' },
       { key: 'third', control: 'richtext', label: 'Third heading', default: '' },
+      { key: 'link_3', control: 'text', label: 'Third link', default: '', placeholder: 'https://' },
     ] },
     sku: { name: 'SKU', unique: true, preview: '<div class="os-blkprev-sku">SKU: AURA-KNIT-01</div>', fields: [
       { key: 'text_style', control: 'select', label: 'Text style', default: 'body', options: [
@@ -859,15 +870,20 @@
         check: svg('<path d="m4.5 10.2 3.4 3.4 7.6-7.6"/>'),
       };
       const items = [
-        { icon: b.icon_1 || 'package', image: b.image_1, text: b.first },
-        { icon: b.icon_2 || 'currency', image: b.image_2, text: b.second },
-        { icon: b.icon_3 || 'star4', image: b.image_3, text: b.third },
-      ].filter((item) => String(item.text || '').trim());
+        { icon: b.icon_1 || 'package', image: b.image_1, text: b.first, link: b.link_1 },
+        { icon: b.icon_2 || 'currency', image: b.image_2, text: b.second, link: b.link_2 },
+        { icon: b.icon_3 || 'star4', image: b.image_3, text: b.third, link: b.link_3 },
+      ].filter((item) => String(item.text || '').trim() || item.image);
       const spec = { small: { text: 14, icon: 18, line: 24 }, base: { text: 16, icon: 20, line: 26 }, large: { text: 18, icon: 24, line: 30 } }[b.size] || { text: 16, icon: 20, line: 26 };
-      body = items.length ? '<div class="pdp-icons' + (b.layout === 'vertical' ? ' vertical' : '') + '" style="font-family:' + (b.font === 'heading' ? OS.headingFamily(t) : OS.bodyFamily(t)) + ';font-size:' + spec.text + 'px;--pdp-icon-size:' + spec.icon + 'px;--pdp-icon-line:' + spec.line + 'px">' +
-        items.map((item) => '<div class="pdp-icon-item">' +
-          (item.image ? '<img class="pdp-icon-img" alt="" src="' + OS.esc(item.image) + '">' : '<span class="pdp-icon-mark">' + (marks[item.icon] || marks.package) + '</span>') +
-          '<span>' + item.text + '</span></div>').join('') + '</div>' : '';
+      const cardClass = b.card_style === 'outline' ? ' card-outline' : (b.card_style === 'filled' ? ' card-filled' : '');
+      body = items.length ? '<div class="pdp-icons' + (b.layout === 'vertical' ? ' vertical' : '') + (b.background ? ' has-bg' : '') + '" style="font-family:' + (b.font === 'heading' ? OS.headingFamily(t) : OS.bodyFamily(t)) + ';font-size:' + spec.text + 'px;--pdp-icon-size:' + spec.icon + 'px;--pdp-icon-line:' + spec.line + 'px">' +
+        items.map((item) => {
+          const inner = (item.image ? '<img class="pdp-icon-img' + (String(item.text || '').trim() ? '' : ' logo') + '" alt="" src="' + OS.esc(item.image) + '">' : '<span class="pdp-icon-mark">' + (marks[item.icon] || marks.package) + '</span>') +
+            (String(item.text || '').trim() ? '<span>' + item.text + '</span>' : '');
+          const tag = item.link ? 'a' : 'div';
+          const href = item.link ? ' href="' + OS.esc(item.link) + '" target="_blank" rel="noopener"' : '';
+          return '<' + tag + ' class="pdp-icon-item' + cardClass + '"' + href + '>' + inner + '</' + tag + '>';
+        }).join('') + '</div>' : '';
     } else if (block.kind === 'sku') {
       body = '<div class="pdp-sku" style="' + (b.text_style === 'uppercase' ? 'text-transform:uppercase;letter-spacing:.06em' : '') + '">SKU: <span data-pdp-sku>' + OS.esc(selected.sku || p.sku || 'AUR-PRODUCT') + '</span></div>';
     } else if (block.kind === 'text') {
