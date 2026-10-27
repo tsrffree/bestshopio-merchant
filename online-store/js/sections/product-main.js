@@ -98,7 +98,8 @@
     '.pdpx .pdp-price{display:flex;align-items:center;gap:8px;flex-wrap:wrap}',
     '.pdpx .pdp-price .now,.os-frame.os-store .pdpx .pdp-price .now{font-size:22px;font-weight:700;line-height:32px}',
     '.pdpx .pdp-price s{font-size:16px;font-weight:400;line-height:26px;color:#666;opacity:1;text-decoration-thickness:1px}',
-    '.pdpx .pdp-price .save{display:inline-flex;align-items:center;min-height:24px;padding:2px 8px;border-radius:5px;background:#d63a2f;color:#fff;font-size:14.4px;font-weight:700;line-height:18px}',
+    '.pdpx .pdp-price .save{display:inline-flex;align-items:center;gap:4px;min-height:24px;padding:2px 8px;border-radius:5px;background:#d63a2f;color:#fff;font-size:14.4px;font-weight:700;line-height:18px}',
+    '.pdpx .pdp-price .save svg{width:12px;height:12px;flex:none}',
     '.pdpx .pdp-line{border:0;border-top:1px solid rgba(0,0,0,.12);margin:2px 0}',
     '.pdpx .pdp-label{font-size:12px;font-weight:650;letter-spacing:.02em;margin-bottom:12px;opacity:.75;line-height:26px}',
     '.pdpx .pdp-options{display:flex;flex-direction:column}',
@@ -366,6 +367,13 @@
       { key: 'saving_type', control: 'select', label: 'Type', default: 'percentage', options: [
         { value: 'percentage', label: 'Percentage' }, { value: 'fixed', label: 'Fixed amount' },
       ], visibleWhen: (v) => !!v.show_saving },
+      { key: 'saving_position', control: 'segmented', label: 'Saving position', default: 'right', options: [
+        { value: 'left', label: 'Left' }, { value: 'right', label: 'Right' },
+      ], visibleWhen: (v) => !!v.show_saving },
+      { key: 'saving_label', control: 'text', label: 'Saving label', default: '', placeholder: 'Empty = auto Save x%', visibleWhen: (v) => !!v.show_saving },
+      { key: 'saving_bg', control: 'color', label: 'Saving background', default: '', info: 'Blank inherits the theme sale price color.', visibleWhen: (v) => !!v.show_saving },
+      { key: 'saving_text_color', control: 'color', label: 'Saving text color', default: '#ffffff', visibleWhen: (v) => !!v.show_saving },
+      { key: 'saving_icon', control: 'toggle', label: 'Show saving icon', default: false, visibleWhen: (v) => !!v.show_saving },
     ] },
     rating: { name: 'Rating', icon: 'starLine', preview:
       '<div class="os-blkprev-rate">' +
@@ -550,10 +558,21 @@
       body = '<div class="pdp-rate" style="font-size:' + (b.size || 14) + 'px">' + stars(p.rating) +
         (b.show_text ? '<span>' + OS.esc(b.text || '') + '</span>' : '<b>' + p.rating + '</b><span style="opacity:.6">(' + (p.reviews || 0) + ')</span>') + '</div>';
     } else if (block.kind === 'price') {
-      const saving = b.saving_type === 'fixed' ? 'Save ' + OS.money(compareAt - price) : 'Save ' + Math.round((1 - price / compareAt) * 100) + '%';
+      const autoSaving = b.saving_type === 'fixed'
+        ? 'Save ' + OS.money(compareAt - price)
+        : 'Save ' + Math.round((1 - price / compareAt) * 100) + '%';
+      const saving = String(b.saving_label || '').trim() || autoSaving;
+      const saveBg = b.saving_bg || saleColor;
+      const saveText = b.saving_text_color || '#ffffff';
+      const saveIcon = b.saving_icon
+        ? '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4.2 4.2h7.6v7.6H4.2z" stroke="currentColor" stroke-width="1.4"/><path d="M6.2 9.8 9.8 6.2M6.5 6.5h.01M9.5 9.5h.01" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>'
+        : '';
+      const saveOrder = b.saving_position === 'left' ? 'order:-1;' : '';
       body = '<div class="pdp-price"><span class="now" data-pdp-now' + (sale ? ' style="color:' + saleColor + '"' : '') + '>' + OS.money(price) + '</span>' +
         (sale ? '<s data-pdp-compare>' + OS.money(compareAt) + '</s>' : '<s data-pdp-compare hidden></s>') +
-        (b.show_saving && sale ? '<span class="save" data-pdp-save data-save-type="' + OS.esc(b.saving_type || 'percentage') + '" style="background:' + saleColor + '">' + saving + '</span>' : '') + '</div>' +
+        (b.show_saving && sale
+          ? '<span class="save" data-pdp-save data-save-type="' + OS.esc(b.saving_type || 'percentage') + '" data-save-label="' + OS.esc(String(b.saving_label || '').trim()) + '" data-save-icon="' + (b.saving_icon ? '1' : '0') + '" style="background:' + OS.esc(saveBg) + ';color:' + OS.esc(saveText) + ';' + saveOrder + '">' + saveIcon + OS.esc(saving) + '</span>'
+          : '') + '</div>' +
         (b.show_taxes ? '<div style="font-size:12px;opacity:.62;margin-top:4px">Tax included.</div>' : '');
     } else if (block.kind === 'divider') {
       body = '<div style="padding:' + (b.padding_top || 0) + 'px 0 ' + (b.padding_bottom || 0) + 'px"><hr class="pdp-line" style="border-top-width:' + (b.thickness || 1) + 'px;border-top-color:' + OS.esc(b.color || '#E5E5E5') + '"></div>';
@@ -760,7 +779,7 @@
     defaultBlocks: () => ([
       ['badges', { show_sold_out: false, show_saving: false, saving_type: 'percentage' }],
       ['title', { title_size: 24, description: '', description_image: '', description_color: '#000000', description_size: 14, description_top: 0, description_bottom: 0 }],
-      ['price', { show_taxes: false, show_saving: true, saving_type: 'percentage' }],
+      ['price', { show_taxes: false, show_saving: true, saving_type: 'percentage', saving_position: 'right', saving_label: '', saving_bg: '', saving_text_color: '#ffffff', saving_icon: false }],
       ['rating', { show_rating: true, size: 14, show_text: false, text: '4.8 (214) 7,000+ satisfied customers' }],
       ['description', {}],
       ['inventory', { show_status: true, show_count: true, custom_text: '' }],
@@ -996,9 +1015,14 @@
           compare.textContent = match.compareAt > match.price ? OS.money(match.compareAt) : '';
         }
         if (save && match.compareAt > match.price) {
-          save.textContent = save.dataset.saveType === 'fixed'
+          const customLabel = String(save.dataset.saveLabel || '').trim();
+          const label = customLabel || (save.dataset.saveType === 'fixed'
             ? 'Save ' + OS.money(match.compareAt - match.price)
-            : 'Save ' + Math.round((1 - match.price / match.compareAt) * 100) + '%';
+            : 'Save ' + Math.round((1 - match.price / match.compareAt) * 100) + '%');
+          const iconHtml = save.dataset.saveIcon === '1'
+            ? '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4.2 4.2h7.6v7.6H4.2z" stroke="currentColor" stroke-width="1.4"/><path d="M6.2 9.8 9.8 6.2M6.5 6.5h.01M9.5 9.5h.01" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>'
+            : '';
+          save.innerHTML = iconHtml + label;
         }
         if (stock) {
           stock.classList.toggle('sold', match.inventory <= 0);
