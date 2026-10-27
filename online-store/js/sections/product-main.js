@@ -148,13 +148,22 @@
     '@keyframes pdp-inventory-pulse{0%{opacity:.6}100%{transform:scale(2.5);opacity:0}}',
     '.pdpx .pdp-sku{font-size:13px;opacity:.72}',
     '.pdpx .pdp-actions{display:flex;flex-direction:column;gap:20px}',
+    '.pdpx .pdp-actions.side{flex-direction:row;align-items:stretch;flex-wrap:wrap;gap:12px}',
+    '.pdpx .pdp-actions.side .pdp-buy-row{flex:1 1 220px}',
+    '.pdpx .pdp-actions.side .pdp-dyn{flex:1 1 160px}',
     '.pdpx .pdp-buy-row{display:flex;align-items:center;gap:12px}',
     '.pdpx .pdp-buy-row .pdp-qty{flex:none}',
     '.pdpx .pdp-atc{flex:1;width:auto;min-height:48px}',
-    '.pdpx .pdp-buy-row .pdp-atc,.pdpx .pdp-paypal{border-radius:8px}',
-    '.pdpx .pdp-paypal{display:inline-flex;align-items:center;justify-content:center;width:100%;height:48px;border:0;border-radius:8px;background:#ffc439;cursor:pointer;padding:0 16px}',
+    '.pdpx .pdp-buy-row .pdp-atc,.pdpx .pdp-paypal,.pdpx .pdp-chan{border-radius:8px}',
+    '.pdpx .pdp-paypal,.pdpx .pdp-chan{display:inline-flex;align-items:center;justify-content:center;width:100%;height:48px;border:0;border-radius:8px;cursor:pointer;padding:0 16px;font:inherit;font-weight:650}',
+    '.pdpx .pdp-paypal{background:#ffc439}',
     '.pdpx .pdp-paypal:hover{background:#f2bb31}',
-    '.pdpx .pdp-paypal svg{display:block;height:22px;width:auto}',
+    '.pdpx .pdp-paypal svg,.pdpx .pdp-chan svg{display:block;height:22px;width:auto}',
+    '.pdpx .pdp-chan.shop{background:#5a31f4;color:#fff}',
+    '.pdpx .pdp-chan.apple{background:#111;color:#fff}',
+    '.pdpx .pdp-chan.google{background:#fff;color:#202124;border:1px solid #dadce0}',
+    '.pdpx .pdp-chan.amazon{background:#ff9900;color:#111}',
+    '.pdpx .pdp-chan.card{background:#fff;color:#111;border:1px solid rgba(0,0,0,.14);font-size:12px;letter-spacing:.04em}',
     '.pdpx .pdp-dyn{display:flex;flex-direction:column;gap:8px;align-items:center;width:100%}',
     '.pdpx .pdp-pay-more{padding:0;border:0;background:none;color:inherit;font:inherit;font-size:14px;line-height:1.4;text-decoration:underline;text-underline-offset:3px;cursor:pointer}',
     '.pdpx .pdp-pays{display:flex;flex-wrap:wrap;gap:6px}',
@@ -417,6 +426,19 @@
       { key: 'show_add', control: 'toggle', label: 'Show Add-to-cart button', default: true },
       { key: 'show_dynamic', control: 'toggle', label: 'Show dynamic checkout buttons', default: true },
       { key: 'show_payment_options', control: 'toggle', label: 'Show more payment options', default: true },
+      { key: 'button_shape', control: 'segmented', label: 'Button shape', default: 'normal', options: [
+        { value: 'normal', label: 'Normal' }, { value: 'pill', label: 'Pill' }, { value: 'square', label: 'Square' }, { value: 'custom', label: 'Custom' },
+      ] },
+      { key: 'custom_radius', control: 'range', label: 'Custom radius', min: 0, max: 40, step: 1, unit: 'px', default: 8, visibleWhen: (v) => v.button_shape === 'custom' },
+      { key: 'button_layout', control: 'select', label: 'Button layout', default: 'stacked', options: [
+        { value: 'stacked', label: 'Stacked' }, { value: 'side-by-side', label: 'Side by side' },
+      ] },
+      { key: 'channels', control: 'multiselect', label: 'Channels', default: ['shop', 'paypal', 'apple_pay', 'google_pay'], options: [
+        { value: 'shop', label: 'Shop' }, { value: 'paypal', label: 'PayPal' }, { value: 'apple_pay', label: 'Apple Pay' }, { value: 'google_pay', label: 'Google Pay' },
+        { value: 'amazon', label: 'Amazon' }, { value: 'amex', label: 'Amex' }, { value: 'diners', label: 'Diners Club' },
+        { value: 'discover', label: 'Discover' }, { value: 'mastercard', label: 'Mastercard' }, { value: 'visa', label: 'Visa' },
+      ], visibleWhen: (v) => !!v.show_dynamic },
+      { key: 'channel_logo', control: 'toggle', label: 'Show channel logo', default: false, visibleWhen: (v) => !!v.show_dynamic },
     ] },
     icon_text: { name: 'Icon with text', preview:
       '<div class="os-blkprev-icons">' +
@@ -638,7 +660,15 @@
         OS.esc(statusText) + '</span></div>';
     } else if (block.kind === 'buy') {
       const showPayMore = b.show_payment_options !== false;
-      // PayPal wordmark (Wikimedia brand paths) for accelerated checkout
+      const radius = b.button_shape === 'pill' ? 999
+        : (b.button_shape === 'square' ? 0
+          : (b.button_shape === 'custom' ? Number(b.custom_radius == null ? 8 : b.custom_radius) : 8));
+      const radiusStyle = 'border-radius:' + radius + 'px';
+      const layoutSide = b.button_layout === 'side-by-side';
+      const channels = Array.isArray(b.channels) && b.channels.length
+        ? b.channels
+        : ['shop', 'paypal', 'apple_pay', 'google_pay'];
+      const useLogo = !!b.channel_logo;
       const paypalLogo = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="38 6 86 24" height="22" aria-hidden="true" focusable="false">' +
         '<path fill="#253B80" d="M46.211 6.749h-6.839c-.468 0-.866.34-.939.802l-2.766 17.537c-.055.346.213.658.564.658h3.265c.468 0 .866-.34.939-.803l.746-4.73c.072-.463.471-.803.938-.803h2.165c4.505 0 7.105-2.18 7.784-6.5.306-1.89.013-3.375-.872-4.415C50.224 7.353 48.5 6.749 46.211 6.749zm.789 6.405c-.374 2.454-2.249 2.454-4.062 2.454h-1.032l.724-4.583c.043-.277.283-.481.563-.481h.473c1.235 0 2.4 0 3.002.704.361.41.471 1.034.332 1.906z"/>' +
         '<path fill="#253B80" d="M66.654 13.075h-3.275c-.279 0-.52.204-.563.481l-.145.916-.229-.332c-.709-1.029-2.29-1.373-3.868-1.373-3.619 0-6.71 2.741-7.312 6.586-.313 1.918.132 3.752 1.22 5.031.998 1.176 2.426 1.666 4.125 1.666 2.916 0 4.533-1.875 4.533-1.875l-.146.91c-.055.348.213.66.562.66h2.95c.469 0 .865-.34.939-.803l1.77-11.209c.055-.347-.212-.66-.562-.66zm-4.565 6.374c-.316 1.871-1.801 3.127-3.695 3.127-.951 0-1.711-.305-2.199-.883-.484-.574-.668-1.391-.514-2.301.295-1.855 1.805-3.152 3.67-3.152.93 0 1.686.309 2.184.892.489.577.687 1.399.554 2.317z"/>' +
@@ -647,14 +677,34 @@
         '<path fill="#179BD7" d="M115.434 13.075h-3.273c-.281 0-.52.204-.562.481l-.145.916-.23-.332c-.709-1.029-2.289-1.373-3.867-1.373-3.619 0-6.709 2.741-7.311 6.586-.312 1.918.131 3.752 1.219 5.031 1 1.176 2.426 1.666 4.125 1.666 2.916 0 4.533-1.875 4.533-1.875l-.146.91c-.055.348.213.66.564.66h2.949c.467 0 .865-.34.938-.803l1.771-11.209c.055-.347-.213-.66-.564-.66zm-4.565 6.374c-.314 1.871-1.801 3.127-3.695 3.127-.949 0-1.711-.305-2.199-.883-.484-.574-.666-1.391-.514-2.301.297-1.855 1.805-3.152 3.67-3.152.93 0 1.686.309 2.184.892.491.577.689 1.399.554 2.317z"/>' +
         '<path fill="#179BD7" d="M119.295 7.23l-2.807 17.858c-.055.346.213.658.562.658h2.822c.469 0 .867-.34.939-.803l2.768-17.536c.055-.346-.213-.659-.562-.659h-3.16c-.279 0-.519.204-.562.482z"/>' +
       '</svg>';
-      const dyn = (b.show_dynamic || showPayMore) ? '<div class="pdp-dyn">' +
-        (b.show_dynamic ? '<button type="button" class="pdp-paypal" data-pdp-paypal aria-label="PayPal">' + paypalLogo + '</button>' : '') +
+      const channelBtn = (id) => {
+        const style = ' style="' + radiusStyle + '"';
+        if (id === 'paypal') {
+          return '<button type="button" class="pdp-paypal" data-pdp-paypal aria-label="PayPal"' + style + '>' + (useLogo ? paypalLogo : 'PayPal') + '</button>';
+        }
+        const map = {
+          shop: { cls: 'shop', label: 'Shop', logo: 'Shop' },
+          apple_pay: { cls: 'apple', label: 'Apple Pay', logo: 'Apple Pay' },
+          google_pay: { cls: 'google', label: 'Google Pay', logo: 'G Pay' },
+          amazon: { cls: 'amazon', label: 'Amazon', logo: 'Amazon' },
+          amex: { cls: 'card', label: 'Amex', logo: 'AMEX' },
+          diners: { cls: 'card', label: 'Diners Club', logo: 'DINERS' },
+          discover: { cls: 'card', label: 'Discover', logo: 'DISCOVER' },
+          mastercard: { cls: 'card', label: 'Mastercard', logo: 'MC' },
+          visa: { cls: 'card', label: 'Visa', logo: 'VISA' },
+        };
+        const m = map[id];
+        if (!m) return '';
+        return '<button type="button" class="pdp-chan ' + m.cls + '" aria-label="' + OS.esc(m.label) + '"' + style + '>' + OS.esc(useLogo ? m.logo : m.label) + '</button>';
+      };
+      const channelHtml = b.show_dynamic ? channels.map(channelBtn).join('') : '';
+      const dyn = (channelHtml || showPayMore) ? '<div class="pdp-dyn">' + channelHtml +
         (showPayMore ? '<button type="button" class="pdp-pay-more" data-pdp-pay-more>More payment options</button>' : '') +
       '</div>' : '';
-      body = '<div class="pdp-actions">' +
+      body = '<div class="pdp-actions' + (layoutSide ? ' side' : '') + '">' +
         ((b.show_quantity || b.show_add) ? '<div class="pdp-buy-row">' +
-          (b.show_quantity ? '<div class="pdp-qty"><button type="button" data-pdp-q="-">-</button><span data-pdp-qty>1</span><button type="button" data-pdp-q="+">+</button></div>' : '') +
-          (b.show_add ? '<button type="button" class="pdp-atc" data-pdp-atc style="' + OS.btnStyle(t) + ';border-radius:8px"' + (inventory <= 0 ? ' disabled' : '') + '>' + (inventory <= 0 ? 'Sold out' : 'Add to cart') + '</button>' : '') +
+          (b.show_quantity ? '<div class="pdp-qty" style="' + radiusStyle + '"><button type="button" data-pdp-q="-">-</button><span data-pdp-qty>1</span><button type="button" data-pdp-q="+">+</button></div>' : '') +
+          (b.show_add ? '<button type="button" class="pdp-atc" data-pdp-atc style="' + OS.btnStyle(t) + ';' + radiusStyle + '"' + (inventory <= 0 ? ' disabled' : '') + '>' + (inventory <= 0 ? 'Sold out' : 'Add to cart') + '</button>' : '') +
         '</div>' : '') +
         dyn + '</div>';
     } else if (block.kind === 'icon_text') {
@@ -784,7 +834,7 @@
       ['description', {}],
       ['inventory', { show_status: true, show_count: true, custom_text: '' }],
       ['variant', { hide_sold_out: false, picker_type: 'buttons', swatch_style: 'color', shape: 'normal' }],
-      ['buy', { show_quantity: true, show_add: true, show_dynamic: true, show_payment_options: true }],
+      ['buy', { show_quantity: true, show_add: true, show_dynamic: true, show_payment_options: true, button_shape: 'normal', custom_radius: 8, button_layout: 'stacked', channels: ['shop', 'paypal', 'apple_pay', 'google_pay'], channel_logo: false }],
       ['icon_text', { layout: 'horizontal', font: 'body', size: 'base', icon_1: 'package', image_1: '', first: 'Orders over $50 ship free', icon_2: 'currency', image_2: '', second: '30 day returns', icon_3: 'star4', image_3: '', third: '' }],
       ['collapsible', { heading: 'Overview', icon: 'none', content: 'A clinically proven, non-sticky, vegan lip treatment that delivers the intense hydration of a lip mask with a sweet sheer tint using food-grade, non-artificial flavor. Designed for sensitive, irritated lips, this cushiony treatment delivers instant comfort to rescue dry, chapped lips.', custom_liquid: '', page: '', open: false }],
       ['collapsible', { heading: 'How to use', icon: 'none', content: 'Apply generously to lips for hydration and comfort. Use at night for an overnight mask.', custom_liquid: '', page: '', open: false }],

@@ -2202,6 +2202,13 @@
         return '<select class="os-select" ' + dk + '>' + opts.map((o) => '<option value="' + esc(o.value) + '"' + (String(o.value) === String(val) ? ' selected' : '') + '>' + esc(o.label) + '</option>').join('') + '</select>';
       case 'segmented':
         return '<div class="os-seg2" ' + dk + '>' + opts.map((o) => '<button data-v="' + esc(o.value) + '" class="' + (String(o.value) === String(val) ? 'on' : '') + '">' + esc(o.label) + '</button>').join('') + '</div>';
+      case 'multiselect': {
+        const selected = Array.isArray(val) ? val.map(String) : [];
+        return '<div class="os-msel" ' + dk + '>' + opts.map((o) => {
+          const on = selected.indexOf(String(o.value)) >= 0;
+          return '<button type="button" class="os-msel-chip' + (on ? ' on' : '') + '" data-v="' + esc(o.value) + '">' + esc(o.label) + '</button>';
+        }).join('') + '</div>';
+      }
       case 'toggle':
         return '<span class="os-tg' + (val ? ' on' : '') + '" ' + dk + '><i></i></span>';
       case 'range': {
@@ -2593,6 +2600,11 @@
         el.onclick = () => { const nv = !el.classList.contains('on'); el.classList.toggle('on', nv); onChange(k, nv, true); };
       } else if (ctl === 'segmented') {
         el.querySelectorAll('button').forEach((bn) => bn.onclick = () => { el.querySelectorAll('button').forEach((x) => x.classList.remove('on')); bn.classList.add('on'); onChange(k, coerce(bn.getAttribute('data-v')), true); });
+      } else if (ctl === 'multiselect') {
+        el.querySelectorAll('[data-v]').forEach((bn) => bn.onclick = () => {
+          bn.classList.toggle('on');
+          onChange(k, [...el.querySelectorAll('[data-v].on')].map((x) => coerce(x.getAttribute('data-v'))), true);
+        });
       } else if (ctl === 'color') {
         const cp = el.querySelector('input[type=color]'); const hx = el.querySelector('.os-hex'); const sw = el.querySelector('.os-sw');
         cp.oninput = () => { hx.value = cp.value; sw.style.background = cp.value; sw.classList.remove('tsp'); onChange(k, cp.value, false); };
@@ -2947,6 +2959,10 @@
       else if (ctl === 'range') wireRange(el, f, change);
       else if (ctl === 'toggle') el.onclick = () => { const nv = !el.classList.contains('on'); el.classList.toggle('on', nv); change(k, nv, true); };
       else if (ctl === 'segmented') el.querySelectorAll('button').forEach((bn) => bn.onclick = () => { el.querySelectorAll('button').forEach((x) => x.classList.remove('on')); bn.classList.add('on'); change(k, coerce(bn.getAttribute('data-v')), true); });
+      else if (ctl === 'multiselect') el.querySelectorAll('[data-v]').forEach((bn) => bn.onclick = () => {
+        bn.classList.toggle('on');
+        change(k, [...el.querySelectorAll('[data-v].on')].map((x) => coerce(x.getAttribute('data-v'))), true);
+      });
       else if (ctl === 'color') {
         const cp = el.querySelector('input[type=color]'); const hx = el.querySelector('.os-hex'); const sw = el.querySelector('.os-sw');
         cp.oninput = () => { hx.value = cp.value; sw.style.background = cp.value; sw.classList.remove('tsp'); change(k, cp.value, false); };
@@ -5231,6 +5247,9 @@
   .os-seg2{display:flex;background:var(--panel);border-radius:8px;padding:3px;gap:2px}
   .os-seg2 button{flex:1;border:0;background:none;font-size:13px;font-weight:500;color:var(--ink-body);padding:6px 6px;border-radius:6px;cursor:pointer;font-family:inherit;white-space:nowrap}
   .os-seg2 button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+  .os-msel{display:flex;flex-wrap:wrap;gap:6px}
+  .os-msel-chip{border:1px solid #d4d4d4;background:#fff;color:var(--ink-body);border-radius:6px;padding:6px 10px;font:inherit;font-size:12px;font-weight:550;cursor:pointer}
+  .os-msel-chip.on{border-color:#303030;background:#303030;color:#fff}
   .os-tg{width:28px;min-height:16px;height:16px;border:0;border-radius:2px;padding:2px;background:#e3e3e3;box-shadow:none;cursor:pointer;flex:none;position:relative;box-sizing:border-box}
   .os-tg.on{background:#303030}
   .os-tg i{display:block;width:12px;height:12px;border-radius:2px;background:#fff;box-shadow:none;transition:transform .14s ease}
