@@ -23,8 +23,26 @@
     '.fpx .fp-sizes{display:flex;gap:8px;flex-wrap:wrap}.fpx .fp-size{min-width:46px;height:38px;padding:0 10px;border:1px solid rgba(0,0,0,.2);border-radius:6px;background:none;cursor:pointer;font-size:13px;font-family:inherit}.fpx .fp-size.on{border-color:currentColor;background:rgba(0,0,0,.04);font-weight:600}',
     '.fpx .fp-qty{display:inline-flex;align-items:center;border:1px solid rgba(0,0,0,.2);border-radius:8px;overflow:hidden}.fpx .fp-qty button{width:38px;height:42px;border:0;background:none;cursor:pointer;font-size:16px}.fpx .fp-qty span{min-width:40px;text-align:center;font-weight:600}',
     '.fpx .fp-buy{display:flex;flex-direction:column;gap:10px;margin-top:4px}',
-    '.fpx .fp-add{width:100%}',
-    '.fpx .fp-paypal{width:100%;height:46px;border-radius:8px;border:0;background:#ffc439;color:#003087;font-weight:800;font-style:italic;cursor:pointer}',
+    '.fpx .fp-buy.side{flex-direction:row;flex-wrap:wrap;align-items:stretch}',
+    '.fpx .fp-buy-row{display:flex;align-items:center;gap:12px;width:100%}',
+    '.fpx .fp-add{flex:1;width:100%;min-height:46px}',
+    '.fpx .fp-buynow{width:100%;min-height:46px;border:1px solid rgba(0,0,0,.2);background:#fff;cursor:pointer;font:inherit;font-weight:700}',
+    '.fpx .fp-dyn{display:flex;flex-direction:column;gap:8px;align-items:center;width:100%}',
+    '.fpx .fp-paypal,.fpx .fp-chan{display:inline-flex;align-items:center;justify-content:center;width:100%;height:46px;border:0;cursor:pointer;padding:0 16px;font:inherit;font-weight:650}',
+    '.fpx .fp-paypal{background:#ffc439;color:#003087}',
+    '.fpx .fp-chan.shop{background:#5a31f4;color:#fff}',
+    '.fpx .fp-chan.apple{background:#111;color:#fff}',
+    '.fpx .fp-chan.google{background:#fff;color:#202124;border:1px solid #dadce0}',
+    '.fpx .fp-pay-more{padding:0;border:0;background:none;color:inherit;font:inherit;font-size:13px;text-decoration:underline;cursor:pointer}',
+    '.fpx .fp-installments{margin:0;font-size:12px;line-height:1.45;opacity:.85;text-align:center}',
+    '.fpx .fp-safe{margin-top:6px;text-align:center;width:100%}',
+    '.fpx .fp-safe-label{display:flex;align-items:center;gap:8px;justify-content:center;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.8}',
+    '.fpx .fp-safe-label:before,.fpx .fp-safe-label:after{content:"";flex:1;height:1px;background:rgba(0,0,0,.18)}',
+    '.fpx .fp-safe-logos{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:8px}',
+    '.fpx .fp-safe-logo{display:inline-flex;align-items:center;justify-content:center;min-width:48px;height:26px;padding:0 6px;border:1px solid rgba(0,0,0,.12);border-radius:4px;background:#fff;font-size:9px;font-weight:700}',
+    '.fpx .fp-qty-inline{display:inline-flex;align-items:center;width:120px;height:46px;border:1px solid rgba(0,0,0,.2);overflow:hidden;flex:none}',
+    '.fpx .fp-qty-inline button{width:36px;height:100%;border:0;background:none;cursor:pointer}',
+    '.fpx .fp-qty-inline span{min-width:36px;text-align:center;font-weight:600}',
     '.fpx .fp-desc-h{font-size:13px;font-weight:700;margin-bottom:6px}',
     '.fpx .fp-rich{font-size:14px;line-height:1.65;opacity:.9}.fpx .fp-rich a{color:inherit}',
     '.fpx .fp-share{display:flex;gap:10px;align-items:center;font-size:13px}.fpx .fp-share a{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(0,0,0,.15);text-decoration:none;color:inherit}',
@@ -50,8 +68,34 @@
     ], defaults: () => ({}) },
     quantity: { name: 'Quantity selector', fields: [], defaults: () => ({}) },
     buy: { name: 'Buy buttons', icon: 'cart', fields: [
-      { key: 'button_text', control: 'text', label: 'Add to cart text', default: 'Add to cart' },
-      { key: 'show_paypal', control: 'toggle', label: 'Show PayPal button', default: true },
+      { key: 'show_quantity', control: 'toggle', label: 'Show quantity selector', default: false },
+      { key: 'show_add', control: 'toggle', label: 'Show Add-to-cart button', default: true },
+      { key: 'button_text', control: 'text', label: 'Add to cart text', default: 'Add to cart', visibleWhen: (v) => v.show_add !== false },
+      { key: 'show_buy_now', control: 'toggle', label: 'Show Buy now button', default: false },
+      { key: 'buy_now_text', control: 'text', label: 'Buy now label', default: 'Buy now', visibleWhen: (v) => !!v.show_buy_now },
+      { key: 'show_dynamic', control: 'toggle', label: 'Show dynamic checkout buttons', default: true },
+      { key: 'show_payment_options', control: 'toggle', label: 'Show more payment options', default: true },
+      { key: 'show_shop_installments', control: 'toggle', label: 'Show Shop Pay installments', default: false, visibleWhen: (v) => !!v.show_dynamic },
+      { key: 'button_shape', control: 'segmented', label: 'Button shape', default: 'normal', options: [
+        { value: 'normal', label: 'Normal' }, { value: 'pill', label: 'Pill' }, { value: 'square', label: 'Square' }, { value: 'custom', label: 'Custom' },
+      ] },
+      { key: 'custom_radius', control: 'range', label: 'Custom radius', min: 0, max: 40, step: 1, unit: 'px', default: 8, visibleWhen: (v) => v.button_shape === 'custom' },
+      { key: 'button_layout', control: 'select', label: 'Button layout', default: 'stacked', options: [
+        { value: 'stacked', label: 'Stacked' }, { value: 'side-by-side', label: 'Side by side' },
+      ] },
+      { key: 'channels', control: 'multiselect', label: 'Channels', default: ['shop', 'paypal', 'apple_pay', 'google_pay'], options: [
+        { value: 'shop', label: 'Shop' }, { value: 'paypal', label: 'PayPal' }, { value: 'apple_pay', label: 'Apple Pay' }, { value: 'google_pay', label: 'Google Pay' },
+      ], visibleWhen: (v) => !!v.show_dynamic },
+      { key: 'channel_logo', control: 'toggle', label: 'Show channel logo', default: false, visibleWhen: (v) => !!v.show_dynamic },
+      { key: 'show_safe_checkout', control: 'toggle', label: 'Show safe checkout strip', default: false },
+      { key: 'safe_checkout_label', control: 'text', label: 'Safe checkout label', default: 'GUARANTEED SAFE CHECKOUT', visibleWhen: (v) => !!v.show_safe_checkout },
+      { key: 'trust_logos', control: 'multiselect', label: 'Trust logos', default: ['norton', 'paypal', 'visa', 'mastercard', 'mcafee', 'money_back'], options: [
+        { value: 'norton', label: 'Norton' }, { value: 'mcafee', label: 'McAfee' }, { value: 'money_back', label: 'Money back' },
+        { value: 'visa', label: 'Visa' }, { value: 'mastercard', label: 'Mastercard' }, { value: 'amex', label: 'Amex' },
+        { value: 'discover', label: 'Discover' }, { value: 'diners', label: 'Diners Club' }, { value: 'amazon', label: 'Amazon' },
+        { value: 'paypal', label: 'PayPal' }, { value: 'shop', label: 'Shop' }, { value: 'apple_pay', label: 'Apple Pay' },
+        { value: 'google_pay', label: 'Google Pay' }, { value: 'venmo', label: 'Venmo' }, { value: 'bancontact', label: 'Bancontact' }, { value: 'giropay', label: 'Giropay' },
+      ], visibleWhen: (v) => !!v.show_safe_checkout },
     ], defaults: () => ({}) },
     description: { name: 'Description', icon: 'text', fields: [
       { key: 'heading', control: 'text', label: 'Heading', default: 'Details' },
@@ -78,7 +122,7 @@
       { id: OS.uid('fp'), kind: 'price', hidden: false, settings: { show_compare_at: true, show_savings: true } },
       { id: OS.uid('fp'), kind: 'variant', hidden: false, settings: { picker_type: 'buttons' } },
       { id: OS.uid('fp'), kind: 'quantity', hidden: false, settings: {} },
-      { id: OS.uid('fp'), kind: 'buy', hidden: false, settings: { button_text: 'Add to cart', show_paypal: true } },
+      { id: OS.uid('fp'), kind: 'buy', hidden: false, settings: { show_quantity: false, show_add: true, button_text: 'Add to cart', show_buy_now: false, show_dynamic: true, show_payment_options: true, show_shop_installments: false, button_shape: 'normal', button_layout: 'stacked', channels: ['paypal'], channel_logo: false, show_safe_checkout: false } },
       { id: OS.uid('fp'), kind: 'description', hidden: false, settings: { heading: 'Details', content: 'Soft, breathable linen-feel fabric with a relaxed fit. Machine washable. Designed in-house and made to last.' } },
     ]),
     render: function (s, blocks, ctx) {
@@ -107,7 +151,39 @@
           body = '<div><div class="fp-vlabel">Color</div><div class="fp-swatches">' + sw + '</div></div><div style="margin-top:12px"><div class="fp-vlabel">Size</div>' + sizeBlock + '</div>';
         }
         else if (kind === 'quantity') { body = '<div><div class="fp-vlabel">Quantity</div><div class="fp-qty"><button data-q="-">−</button><span>1</span><button data-q="+">+</button></div></div>'; }
-        else if (kind === 'buy') { body = '<div class="fp-buy"><button class="fp-add" style="' + OS.btnStyle(t) + ';width:100%">' + OS.esc(b.button_text || 'Add to cart') + '</button>' + (b.show_paypal ? '<button class="fp-paypal">Pay<span style="color:#002f86">Pal</span></button>' : '') + '</div>'; }
+        else if (kind === 'buy') {
+          const radius = b.button_shape === 'pill' ? 999 : (b.button_shape === 'square' ? 0 : (b.button_shape === 'custom' ? Number(b.custom_radius == null ? 8 : b.custom_radius) : 8));
+          const radiusStyle = 'border-radius:' + radius + 'px';
+          const expressIds = ['shop', 'paypal', 'apple_pay', 'google_pay'];
+          let channels = Array.isArray(b.channels) ? b.channels.filter((id) => expressIds.indexOf(id) >= 0) : [];
+          if (!channels.length && b.show_paypal) channels = ['paypal'];
+          if (!channels.length) channels = ['shop', 'paypal', 'apple_pay', 'google_pay'];
+          const showDyn = b.show_dynamic !== false || !!b.show_paypal;
+          const showPayMore = b.show_payment_options !== false;
+          const chanBtn = (id) => {
+            if (id === 'paypal') return '<button type="button" class="fp-paypal" style="' + radiusStyle + '">PayPal</button>';
+            const map = { shop: ['shop', 'Shop'], apple_pay: ['apple', 'Apple Pay'], google_pay: ['google', 'G Pay'] };
+            const m = map[id];
+            if (!m) return '';
+            return '<button type="button" class="fp-chan ' + m[0] + '" style="' + radiusStyle + '">' + OS.esc(m[1]) + '</button>';
+          };
+          const dynHtml = showDyn ? channels.map(chanBtn).join('') : '';
+          const installment = (showDyn && b.show_shop_installments && channels.indexOf('shop') >= 0)
+            ? '<p class="fp-installments">Pay in 2 interest-free installments of <b>' + OS.money(Math.round((p.price || 0) / 2 * 100) / 100) + '</b> with <span style="color:#5a31f4;font-weight:700">shop</span></p>'
+            : '';
+          const dyn = (dynHtml || showPayMore || installment) ? '<div class="fp-dyn">' + dynHtml + (showPayMore ? '<button type="button" class="fp-pay-more">More payment options</button>' : '') + installment + '</div>' : '';
+          const trustMap = { norton: 'Norton', mcafee: 'McAfee', money_back: '100% Money Back', paypal: 'PayPal', visa: 'VISA', mastercard: 'Mastercard', amex: 'AMEX', discover: 'Discover', diners: 'Diners', amazon: 'Amazon', shop: 'shop', apple_pay: 'Apple Pay', google_pay: 'G Pay', venmo: 'Venmo', bancontact: 'Bancontact', giropay: 'Giropay' };
+          const trustList = Array.isArray(b.trust_logos) && b.trust_logos.length ? b.trust_logos : ['norton', 'paypal', 'visa', 'mastercard', 'mcafee', 'money_back'];
+          const safe = b.show_safe_checkout
+            ? '<div class="fp-safe"><div class="fp-safe-label">' + OS.esc(b.safe_checkout_label || 'GUARANTEED SAFE CHECKOUT') + '</div><div class="fp-safe-logos">' + trustList.map((id) => '<span class="fp-safe-logo">' + OS.esc(trustMap[id] || id) + '</span>').join('') + '</div></div>'
+            : '';
+          const qty = b.show_quantity ? '<div class="fp-qty-inline" style="' + radiusStyle + '"><button type="button" data-q="-">-</button><span>1</span><button type="button" data-q="+">+</button></div>' : '';
+          const add = b.show_add !== false ? '<button class="fp-add" style="' + OS.btnStyle(t) + ';' + radiusStyle + '">' + OS.esc(b.button_text || 'Add to cart') + '</button>' : '';
+          const buyNow = b.show_buy_now ? '<button type="button" class="fp-buynow" style="' + radiusStyle + '">' + OS.esc(b.buy_now_text || 'Buy now') + '</button>' : '';
+          body = '<div class="fp-buy' + (b.button_layout === 'side-by-side' ? ' side' : '') + '">' +
+            ((qty || add) ? '<div class="fp-buy-row">' + qty + add + '</div>' : '') +
+            buyNow + dyn + safe + '</div>';
+        }
         else if (kind === 'description') { if (!b.content) return ''; body = (b.heading ? '<div class="fp-desc-h">' + OS.esc(b.heading) + '</div>' : '') + '<div class="fp-rich">' + b.content + '</div>'; }
         else if (kind === 'share') { body = '<div class="fp-share"><span style="opacity:.7">Share</span><a>f</a><a>𝕏</a><a>◎</a></div>'; }
         return '<div class="fp-row" data-block-id="' + OS.esc(b0.id) + '">' + body + '</div>';

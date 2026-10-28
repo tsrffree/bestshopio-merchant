@@ -103,7 +103,29 @@
     '.pdpx .pdp-price .now,.os-frame.os-store .pdpx .pdp-price .now{font-size:22px;font-weight:700;line-height:32px}',
     '.pdpx .pdp-price s{font-size:16px;font-weight:400;line-height:26px;color:#666;opacity:1;text-decoration-thickness:1px}',
     '.pdpx .pdp-price .save{display:inline-flex;align-items:center;gap:4px;min-height:24px;padding:2px 8px;border-radius:5px;background:#d63a2f;color:#fff;font-size:14.4px;font-weight:700;line-height:18px}',
+    '.pdpx .pdp-price .save.outline{background:rgba(214,58,47,.08);border:1px solid currentColor}',
     '.pdpx .pdp-price .save svg{width:12px;height:12px;flex:none}',
+    '.pdpx .pdp-price-prefix{margin-left:auto;font-size:13px;font-weight:500;opacity:.72}',
+    '.pdpx .pdp-safe{margin-top:14px;text-align:center}',
+    '.pdpx .pdp-safe-label{display:flex;align-items:center;gap:10px;justify-content:center;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.8}',
+    '.pdpx .pdp-safe-label:before,.pdpx .pdp-safe-label:after{content:"";flex:1;height:1px;background:rgba(0,0,0,.18)}',
+    '.pdpx .pdp-safe-logos{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:10px}',
+    '.pdpx .pdp-safe-logo{display:inline-flex;align-items:center;justify-content:center;min-width:52px;height:28px;padding:0 8px;border:1px solid rgba(0,0,0,.12);border-radius:4px;background:#fff;font-size:10px;font-weight:700;letter-spacing:.02em;color:#222}',
+    '.pdpx .pdp-safe-logo.norton{color:#1a7a3c}.pdpx .pdp-safe-logo.paypal{color:#003087;font-style:italic}.pdpx .pdp-safe-logo.visa{color:#1a1f71;font-style:italic}.pdpx .pdp-safe-logo.mc{color:#eb001b}.pdpx .pdp-safe-logo.mcafee{color:#c01818}.pdpx .pdp-safe-logo.mb{color:#b45309;min-width:72px}',
+    '.pdpx .pdp-fr{position:relative;padding:4px 0 8px}',
+    '.pdpx .pdp-fr-h{font-size:15px;font-weight:700;margin:0 0 10px}',
+    '.pdpx .pdp-fr-rail{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,100%);overflow:hidden;gap:10px}',
+    '.pdpx .pdp-fr-card{display:flex;gap:12px;align-items:flex-start;padding:14px;border:1px solid rgba(0,0,0,.08);border-radius:12px;background:#fafafa;min-width:0}',
+    '.pdpx .pdp-fr-av{width:44px;height:44px;border-radius:10px;object-fit:cover;flex:none;background:#e5e7eb}',
+    '.pdpx .pdp-fr-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}',
+    '.pdpx .pdp-fr-stars{color:#16a34a;letter-spacing:1px;font-size:12px}',
+    '.pdpx .pdp-fr-text{font-size:13px;line-height:1.5;opacity:.88}',
+    '.pdpx .pdp-fr-img{display:block;width:100%;max-height:140px;object-fit:cover;border-radius:8px;margin-top:8px}',
+    '.pdpx .pdp-fr-nav{position:absolute;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:999px;border:1px solid rgba(0,0,0,.12);background:#fff;cursor:pointer;z-index:2}',
+    '.pdpx .pdp-fr-nav.prev{left:0}.pdpx .pdp-fr-nav.next{right:0}',
+    '.pdpx .pdp-fr-all{margin-top:8px;border:0;background:none;color:inherit;font:inherit;font-size:12px;font-weight:650;text-decoration:underline;cursor:pointer}',
+    '.pdpx .pdp-acc-ic{display:inline-flex;margin-right:8px;vertical-align:-3px}',
+    '.pdpx .pdp-acc-ic svg{display:block}',
     '.pdpx .pdp-line{border:0;border-top:1px solid rgba(0,0,0,.12);margin:2px 0}',
     '.pdpx .pdp-label{font-size:12px;font-weight:650;letter-spacing:.02em;margin-bottom:12px;opacity:.75;line-height:26px}',
     '.pdpx .pdp-options{display:flex;flex-direction:column}',
@@ -168,12 +190,14 @@
     '.pdpx .pdp-chan.shop{background:#5a31f4;color:#fff}',
     '.pdpx .pdp-chan.apple{background:#111;color:#fff}',
     '.pdpx .pdp-chan.google{background:#fff;color:#202124;border:1px solid #dadce0}',
-    '.pdpx .pdp-chan.amazon{background:#ff9900;color:#111}',
-    '.pdpx .pdp-chan.card{background:#fff;color:#111;border:1px solid rgba(0,0,0,.14);font-size:12px;letter-spacing:.04em}',
+    '.pdpx .pdp-buynow{display:inline-flex;align-items:center;justify-content:center;width:100%;min-height:48px;border:1px solid rgba(0,0,0,.2);background:#fff;color:inherit;cursor:pointer;padding:0 16px;font:inherit;font-weight:700}',
     '.pdpx .pdp-dyn{display:flex;flex-direction:column;gap:8px;align-items:center;width:100%}',
     '.pdpx .pdp-pay-more{padding:0;border:0;background:none;color:inherit;font:inherit;font-size:14px;line-height:1.4;text-decoration:underline;text-underline-offset:3px;cursor:pointer}',
-    '.pdpx .pdp-pays{display:flex;flex-wrap:wrap;gap:6px}',
-    '.pdpx .pdp-pay{font-size:10px;font-weight:800;letter-spacing:.04em;border:1px solid rgba(0,0,0,.12);border-radius:3px;padding:3px 6px;opacity:.8}',
+    '.pdpx .pdp-installments{margin:0;font-size:13px;line-height:1.45;opacity:.85;text-align:center}',
+    '.pdpx .pdp-installments b{font-weight:700}',
+    '.pdpx .pdp-installments .shop{color:#5a31f4;font-weight:700}',
+    '.pdpx .pdp-safe-logo.amex{color:#2e77bc}.pdpx .pdp-safe-logo.discover{color:#ff6000}.pdpx .pdp-safe-logo.amazon{color:#111}.pdpx .pdp-safe-logo.diners{color:#0079be}',
+    '.pdpx .pdp-safe-logo.shop{color:#5a31f4}.pdpx .pdp-safe-logo.apple{color:#111}.pdpx .pdp-safe-logo.google{color:#202124}.pdpx .pdp-safe-logo.venmo{color:#008cff}.pdpx .pdp-safe-logo.bancontact{color:#005498}.pdpx .pdp-safe-logo.giropay{color:#000}',
     '.pdpx .pdp-icons{display:flex;flex-wrap:wrap;align-items:center;gap:8px 24px}',
     '.pdpx .pdp-icons.vertical{flex-direction:column;align-items:flex-start;gap:8px}',
     '.pdpx .pdp-icons.has-bg{padding:12px 14px;background:#f6f6f6;border-radius:10px}',
@@ -217,10 +241,18 @@
     '.pdpx .pdp-rec-card b{display:block;font-weight:650;line-height:1.3}',
     '.pdpx .pdp-progress{height:3px;border-radius:99px;background:rgba(0,0,0,.08);margin-top:10px;overflow:hidden}',
     '.pdpx .pdp-progress i{display:block;height:100%;width:40%;background:currentColor;opacity:.7}',
-    '.pdpx .pdp-sticky{display:flex;align-items:center;gap:12px;margin-top:18px;padding:10px 12px;border:1px solid rgba(0,0,0,.08);border-radius:12px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.06)}',
+    '.pdpx .pdp-sticky{display:flex;align-items:center;gap:12px;margin-top:18px;padding:10px 12px;border:1px solid rgba(0,0,0,.08);border-radius:12px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.06);z-index:5}',
+    '.pdpx .pdp-sticky.bottom{position:sticky;bottom:8px}',
+    '.pdpx .pdp-sticky.top{position:sticky;top:8px}',
+    '.pdpx .pdp-sticky.after-scroll{opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .2s ease,transform .2s ease}',
+    '.pdpx .pdp-sticky.after-scroll.on{opacity:1;pointer-events:auto;transform:none}',
+    '.pdpx .pdp-sticky.always{opacity:1}',
+    '.pdpx.mob .pdp-sticky.hide-mob{display:none}',
     '.pdpx .pdp-sticky img{width:46px;height:46px;object-fit:cover;border-radius:8px}',
     '.pdpx .pdp-sticky .meta{flex:1;min-width:0}',
     '.pdpx .pdp-sticky .meta b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
+    '.pdpx .pdp-sticky-bundle{display:block;font-size:11px;font-style:normal;color:#b45309;margin-top:2px}',
+    '.pdpx .pdp-sticky .sticky-qty{flex:none}',
     '.pdpx .pdp-pop,.pdpx .pdp-zoom{position:absolute;inset:0;z-index:6;background:rgba(17,24,39,.45);display:none;align-items:flex-start;justify-content:center;padding:28px 16px}',
     '.pdpx .pdp-pop.on,.pdpx .pdp-zoom.on{display:flex}',
     '.pdpx .pdp-pop-card{width:min(420px,100%);background:#fff;color:#1a1a1a;border-radius:12px;padding:20px;box-shadow:0 18px 50px rgba(0,0,0,.2)}',
@@ -386,9 +418,7 @@
         { value: 'top-left', label: 'Top left' }, { value: 'top-right', label: 'Top right' },
         { value: 'below-title', label: 'Below title' }, { value: 'above-price', label: 'Above price' },
       ] },
-      { key: 'badge_icon', control: 'select', label: 'Badge icon', default: 'none', options: [
-        { value: 'none', label: 'None' }, { value: 'fire', label: 'Fire' }, { value: 'tag', label: 'Tag' }, { value: 'percent', label: 'Percent' },
-      ] },
+      { key: 'badge_icon', control: 'select', label: 'Badge icon', default: 'none', options: ((window.OS_THEME_ICONS && window.OS_THEME_ICONS.options) ? window.OS_THEME_ICONS.options(true) : [{ value: 'none', label: 'None' }, { value: 'fire', label: 'Fire' }, { value: 'heart', label: 'Heart' }, { value: 'truck', label: 'Truck' }, { value: 'star', label: 'Star' }]) },
       { key: 'badge_icon_image', control: 'image', label: 'Custom badge icon', default: '', info: 'Custom image replaces the built-in icon when set.' },
       { key: 'badge_bg', control: 'color', label: 'Badge background', default: '', info: 'Blank inherits the theme primary color.' },
       { key: 'badge_text_color', control: 'color', label: 'Badge text color', default: '', info: 'Blank uses white.' },
@@ -405,16 +435,24 @@
     ] },
     price: { name: 'Price', icon: 'priceTag', unique: true, preview: '<div class="os-blkprev-price"><span>$24.00</span><s>$32.00</s><span class="save">-25%</span></div>', fields: [
       { key: 'show_taxes', control: 'toggle', label: 'Show taxes notice', default: false },
+      { key: 'price_prefix', control: 'text', label: 'Price prefix', default: '', placeholder: 'e.g. Set of 2' },
+      { key: 'compare_order', control: 'segmented', label: 'Compare-at order', default: 'after', options: [
+        { value: 'before', label: 'Left' }, { value: 'after', label: 'Right' },
+      ] },
       { key: 'show_saving', control: 'toggle', label: 'Show saving amount', default: true },
       { key: 'saving_type', control: 'select', label: 'Type', default: 'percentage', options: [
         { value: 'percentage', label: 'Percentage' }, { value: 'fixed', label: 'Fixed amount' },
+        { value: 'text', label: 'Sale' }, { value: 'label', label: 'Saving label' },
+      ], visibleWhen: (v) => !!v.show_saving },
+      { key: 'saving_label', control: 'text', label: 'Saving label', default: '', placeholder: 'e.g. Hot deal', visibleWhen: (v) => !!v.show_saving && v.saving_type === 'label' },
+      { key: 'saving_style', control: 'segmented', label: 'Saving style', default: 'filled', options: [
+        { value: 'filled', label: 'Filled' }, { value: 'outline', label: 'Outline' },
       ], visibleWhen: (v) => !!v.show_saving },
       { key: 'saving_position', control: 'segmented', label: 'Saving position', default: 'right', options: [
         { value: 'left', label: 'Left' }, { value: 'right', label: 'Right' },
       ], visibleWhen: (v) => !!v.show_saving },
-      { key: 'saving_label', control: 'text', label: 'Saving label', default: '', placeholder: 'Empty = auto Save x%', visibleWhen: (v) => !!v.show_saving },
-      { key: 'saving_bg', control: 'color', label: 'Saving background', default: '', info: 'Blank inherits the theme sale price color.', visibleWhen: (v) => !!v.show_saving },
-      { key: 'saving_text_color', control: 'color', label: 'Saving text color', default: '#ffffff', visibleWhen: (v) => !!v.show_saving },
+      { key: 'saving_bg', control: 'color', label: 'Saving background', default: '', info: 'Blank inherits the theme sale price color. Outline style uses this as border/text tint.', visibleWhen: (v) => !!v.show_saving },
+      { key: 'saving_text_color', control: 'color', label: 'Saving text color', default: '#ffffff', visibleWhen: (v) => !!v.show_saving && v.saving_style !== 'outline' },
       { key: 'saving_icon', control: 'toggle', label: 'Show saving icon', default: false, visibleWhen: (v) => !!v.show_saving },
     ] },
     rating: { name: 'Rating', icon: 'starLine', preview:
@@ -468,8 +506,11 @@
     buy: { name: 'Buy buttons', icon: 'cart', unique: true, preview: '<div class="os-blkprev-btns"><div class="b b1">Add to cart</div><div class="b b2">Buy with PayPal</div></div>', fields: [
       { key: 'show_quantity', control: 'toggle', label: 'Show quantity selector', default: true },
       { key: 'show_add', control: 'toggle', label: 'Show Add-to-cart button', default: true },
+      { key: 'show_buy_now', control: 'toggle', label: 'Show Buy now button', default: false },
+      { key: 'buy_now_text', control: 'text', label: 'Buy now label', default: 'Buy now', visibleWhen: (v) => !!v.show_buy_now },
       { key: 'show_dynamic', control: 'toggle', label: 'Show dynamic checkout buttons', default: true },
       { key: 'show_payment_options', control: 'toggle', label: 'Show more payment options', default: true },
+      { key: 'show_shop_installments', control: 'toggle', label: 'Show Shop Pay installments', default: false, visibleWhen: (v) => !!v.show_dynamic },
       { key: 'button_shape', control: 'segmented', label: 'Button shape', default: 'normal', options: [
         { value: 'normal', label: 'Normal' }, { value: 'pill', label: 'Pill' }, { value: 'square', label: 'Square' }, { value: 'custom', label: 'Custom' },
       ] },
@@ -477,12 +518,20 @@
       { key: 'button_layout', control: 'select', label: 'Button layout', default: 'stacked', options: [
         { value: 'stacked', label: 'Stacked' }, { value: 'side-by-side', label: 'Side by side' },
       ] },
+      // Express checkout action buttons only. Card brands belong under Trust logos (safe checkout strip).
       { key: 'channels', control: 'multiselect', label: 'Channels', default: ['shop', 'paypal', 'apple_pay', 'google_pay'], options: [
         { value: 'shop', label: 'Shop' }, { value: 'paypal', label: 'PayPal' }, { value: 'apple_pay', label: 'Apple Pay' }, { value: 'google_pay', label: 'Google Pay' },
-        { value: 'amazon', label: 'Amazon' }, { value: 'amex', label: 'Amex' }, { value: 'diners', label: 'Diners Club' },
-        { value: 'discover', label: 'Discover' }, { value: 'mastercard', label: 'Mastercard' }, { value: 'visa', label: 'Visa' },
       ], visibleWhen: (v) => !!v.show_dynamic },
       { key: 'channel_logo', control: 'toggle', label: 'Show channel logo', default: false, visibleWhen: (v) => !!v.show_dynamic },
+      { key: 'show_safe_checkout', control: 'toggle', label: 'Show safe checkout strip', default: false },
+      { key: 'safe_checkout_label', control: 'text', label: 'Safe checkout label', default: 'GUARANTEED SAFE CHECKOUT', visibleWhen: (v) => !!v.show_safe_checkout },
+      { key: 'trust_logos', control: 'multiselect', label: 'Trust logos', default: ['norton', 'paypal', 'visa', 'mastercard', 'mcafee', 'money_back'], options: [
+        { value: 'norton', label: 'Norton' }, { value: 'mcafee', label: 'McAfee' }, { value: 'money_back', label: 'Money back' },
+        { value: 'visa', label: 'Visa' }, { value: 'mastercard', label: 'Mastercard' }, { value: 'amex', label: 'Amex' },
+        { value: 'discover', label: 'Discover' }, { value: 'diners', label: 'Diners Club' }, { value: 'amazon', label: 'Amazon' },
+        { value: 'paypal', label: 'PayPal' }, { value: 'shop', label: 'Shop' }, { value: 'apple_pay', label: 'Apple Pay' },
+        { value: 'google_pay', label: 'Google Pay' }, { value: 'venmo', label: 'Venmo' }, { value: 'bancontact', label: 'Bancontact' }, { value: 'giropay', label: 'Giropay' },
+      ], visibleWhen: (v) => !!v.show_safe_checkout },
     ] },
     icon_text: { name: 'Icon with text', preview:
       '<div class="os-blkprev-icons">' +
@@ -503,21 +552,15 @@
       { key: 'card_style', control: 'segmented', label: 'Card style', default: 'none', options: [
         { value: 'none', label: 'None' }, { value: 'outline', label: 'Outline' }, { value: 'filled', label: 'Filled' },
       ] },
-      { key: 'icon_1', control: 'select', label: 'First icon', default: 'package', options: [
-        { value: 'package', label: 'Package' }, { value: 'truck', label: 'Truck' }, { value: 'star', label: 'Star' }, { value: 'leaf', label: 'Leaf' },
-      ] },
-      { key: 'image_1', control: 'image', label: 'First image / logo', default: '', info: 'Use for trust logos such as BBC / Forbes.' },
+      { key: 'icon_1', control: 'select', label: 'First icon', default: 'box', options: ((window.OS_THEME_ICONS && window.OS_THEME_ICONS.options) ? window.OS_THEME_ICONS.options(true) : [{ value: 'none', label: 'None' }, { value: 'fire', label: 'Fire' }, { value: 'heart', label: 'Heart' }, { value: 'truck', label: 'Truck' }, { value: 'star', label: 'Star' }]) },
+      { key: 'image_1', control: 'image', label: 'First image / logo', default: '', info: 'Use for trust logos such as BBC / Forbes. Custom image replaces the built-in icon.' },
       { key: 'first', control: 'richtext', label: 'First heading', default: 'Orders over $50 ship free' },
       { key: 'link_1', control: 'text', label: 'First link', default: '', placeholder: 'https://' },
-      { key: 'icon_2', control: 'select', label: 'Second icon', default: 'currency', options: [
-        { value: 'currency', label: 'Currency circle dollar' }, { value: 'package', label: 'Package' }, { value: 'star', label: 'Star' }, { value: 'return', label: 'Returns' },
-      ] },
+      { key: 'icon_2', control: 'select', label: 'Second icon', default: 'return', options: ((window.OS_THEME_ICONS && window.OS_THEME_ICONS.options) ? window.OS_THEME_ICONS.options(true) : [{ value: 'none', label: 'None' }, { value: 'fire', label: 'Fire' }, { value: 'heart', label: 'Heart' }, { value: 'truck', label: 'Truck' }, { value: 'star', label: 'Star' }]) },
       { key: 'image_2', control: 'image', label: 'Second image / logo', default: '' },
       { key: 'second', control: 'richtext', label: 'Second heading', default: '30 day returns' },
       { key: 'link_2', control: 'text', label: 'Second link', default: '', placeholder: 'https://' },
-      { key: 'icon_3', control: 'select', label: 'Third icon', default: 'star4', options: [
-        { value: 'star4', label: 'Star four' }, { value: 'star', label: 'Star' }, { value: 'heart', label: 'Heart' }, { value: 'check', label: 'Check' },
-      ] },
+      { key: 'icon_3', control: 'select', label: 'Third icon', default: 'star', options: ((window.OS_THEME_ICONS && window.OS_THEME_ICONS.options) ? window.OS_THEME_ICONS.options(true) : [{ value: 'none', label: 'None' }, { value: 'fire', label: 'Fire' }, { value: 'heart', label: 'Heart' }, { value: 'truck', label: 'Truck' }, { value: 'star', label: 'Star' }]) },
       { key: 'image_3', control: 'image', label: 'Third image / logo', default: '' },
       { key: 'third', control: 'richtext', label: 'Third heading', default: '' },
       { key: 'link_3', control: 'text', label: 'Third link', default: '', placeholder: 'https://' },
@@ -539,9 +582,7 @@
     ] },
     collapsible: { name: 'Collapsible row', preview: '<div class="os-blkprev-row"><span>Overview</span><span>+</span></div>', fields: [
       { key: 'heading', control: 'text', label: 'Heading', default: 'Overview' },
-      { key: 'icon', control: 'select', label: 'Icon', default: 'none', options: [
-        { value: 'none', label: 'None' }, { value: 'leaf', label: 'Leaf' }, { value: 'shirt', label: 'Shirt' }, { value: 'box', label: 'Package' },
-      ] },
+      { key: 'icon', control: 'select', label: 'Icon', default: 'none', options: ((window.OS_THEME_ICONS && window.OS_THEME_ICONS.options) ? window.OS_THEME_ICONS.options(true) : [{ value: 'none', label: 'None' }, { value: 'fire', label: 'Fire' }, { value: 'heart', label: 'Heart' }, { value: 'truck', label: 'Truck' }, { value: 'star', label: 'Star' }]) },
       { key: 'content', control: 'richtext', label: 'Row content', default: 'A clinically proven, non-sticky, vegan lip treatment that delivers the intense hydration of a lip mask with a sweet sheer tint using food-grade, non-artificial flavor. Designed for sensitive, irritated lips, this cushiony treatment delivers instant comfort to rescue dry, chapped lips.' },
       { key: 'custom_liquid', control: 'textarea', label: 'Custom liquid', default: '' },
       { key: 'page', control: 'page', label: 'Row content from page', default: '' },
@@ -614,6 +655,40 @@
       { key: 'exclude_soldout', control: 'toggle', label: 'Exclude sold out', default: false },
       { key: 'dedupe_current', control: 'toggle', label: 'Hide current product', default: true },
     ] },
+    featured_reviews: { name: 'Featured reviews', preview:
+      '<div class="os-blkprev-copy" style="display:flex;gap:8px;align-items:center"><span style="width:28px;height:28px;border-radius:8px;background:#ddd;display:inline-block"></span><span>Debi T. · ★★★★★</span></div>',
+      fields: [
+      { key: 'heading', control: 'text', label: 'Heading', default: 'What Our Customers Are Saying' },
+      { key: 'data_source', control: 'select', label: 'Data source', default: 'auto', options: [
+        { value: 'auto', label: 'Auto' }, { value: 'manual', label: 'Manual' }, { value: 'both', label: 'Both' },
+      ] },
+      { key: 'show_image', control: 'toggle', label: 'Show review image', default: true },
+      { key: 'show_avatar', control: 'toggle', label: 'Show avatar', default: true },
+      { key: 'scroll', control: 'toggle', label: 'Scroll / carousel', default: true },
+      { key: 'auto_play', control: 'toggle', label: 'Auto play', default: false, visibleWhen: (v) => !!v.scroll },
+      { key: 'view_all_popup', control: 'toggle', label: 'View all popup', default: true },
+      { key: 'cards_per_row', control: 'range', label: 'Cards per row', min: 1, max: 3, step: 1, default: 1 },
+      { key: 'manual_author', control: 'text', label: 'Manual author', default: 'Debi T.', visibleWhen: (v) => v.data_source !== 'auto' },
+      { key: 'manual_rating', control: 'number', label: 'Manual rating', default: 5, min: 1, max: 5, visibleWhen: (v) => v.data_source !== 'auto' },
+      { key: 'manual_text', control: 'textarea', label: 'Manual review', default: 'Very comfortable and great fit. Want to buy more. Wore them on a ten hour hike. Held up great.', visibleWhen: (v) => v.data_source !== 'auto' },
+      { key: 'manual_image', control: 'image', label: 'Manual image', default: '', visibleWhen: (v) => v.data_source !== 'auto' },
+    ] },
+    sticky: { name: 'Sticky cart', unique: true, preview: '<div class="os-blkprev-btns"><div class="b b1">Add to cart</div></div>', fields: [
+      { key: 'show_image', control: 'toggle', label: 'Show image', default: true },
+      { key: 'show_title', control: 'toggle', label: 'Show title', default: true },
+      { key: 'show_price', control: 'toggle', label: 'Show price', default: true },
+      { key: 'show_quantity', control: 'toggle', label: 'Show quantity', default: true },
+      { key: 'show_bundle', control: 'toggle', label: 'Show bundle', default: false, info: 'Bundle is handled by a separate app. Off by default.' },
+      { key: 'show_after_scroll', control: 'toggle', label: 'Show after scroll', default: true },
+      { key: 'appear_at', control: 'segmented', label: 'Appear at', default: 'scroll', options: [
+        { value: 'top', label: 'Top' }, { value: 'scroll', label: 'After scroll' },
+      ] },
+      { key: 'position', control: 'segmented', label: 'Position', default: 'bottom', options: [
+        { value: 'top', label: 'Top' }, { value: 'bottom', label: 'Bottom' },
+      ] },
+      { key: 'mobile_visible', control: 'toggle', label: 'Show on mobile', default: true },
+      { key: 'button_text', control: 'text', label: 'Button text', default: 'Add to cart' },
+    ] },
     divider: { name: 'Separator', preview: '<div class="os-blkprev-line"></div>', fields: [
       { key: 'color', control: 'color', label: 'Color', default: '#E5E5E5' },
       { key: 'thickness', control: 'range', label: 'Thickness', min: 1, max: 6, step: 1, unit: 'px', default: 1 },
@@ -650,14 +725,9 @@
       const badgeText = b.badge_text_color || '#ffffff';
       const badgeGap = Number(b.badge_gap == null ? 8 : b.badge_gap);
       const position = b.badge_position || 'top-left';
-      const iconSvgs = {
-        fire: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 2.2c1.6 1.8 2.2 3.1 2.2 4.6A2.2 2.2 0 0 1 8 8.9 2.2 2.2 0 0 1 5.8 6.8C5.8 5.3 6.4 4 8 2.2z" stroke="currentColor" stroke-width="1.3"/><path d="M5.2 9.4c.7 2.4 2.1 3.6 2.8 3.6s2.1-1.2 2.8-3.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>',
-        tag: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8.2 8.2 2.5h4.3v4.3L6.8 12.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><circle cx="11" cy="5" r=".9" fill="currentColor"/></svg>',
-        percent: '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4.2 4.2h7.6v7.6H4.2z" stroke="currentColor" stroke-width="1.3"/><path d="M6.2 9.8 9.8 6.2M6.5 6.5h.01M9.5 9.5h.01" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>',
-      };
       const iconHtml = b.badge_icon_image
         ? '<img alt="" src="' + OS.esc(b.badge_icon_image) + '">'
-        : (iconSvgs[b.badge_icon] || '');
+        : ((window.OS_THEME_ICONS && window.OS_THEME_ICONS.svg(b.badge_icon, 14)) || '');
       const tagStyle = 'background:' + OS.esc(badgeBg) + ';color:' + OS.esc(badgeText);
       const wrapTag = (label, extraClass) => '<span class="pdp-tag' + (extraClass ? ' ' + extraClass : '') + '" style="' + tagStyle + '">' + iconHtml + OS.esc(label) + '</span>';
       const tags = (p.tags || []).filter((tag) => /^tag__(hot|new)_/i.test(tag)).map((tag) =>
@@ -684,22 +754,32 @@
       body = '<div class="pdp-rate" style="font-size:' + (b.size || 14) + 'px">' + stars(p.rating) +
         (b.show_text ? '<span>' + OS.esc(b.text || '') + '</span>' : '<b>' + p.rating + '</b><span style="opacity:.6">(' + (p.reviews || 0) + ')</span>') + '</div>';
     } else if (block.kind === 'price') {
-      const autoSaving = b.saving_type === 'fixed'
-        ? 'Save ' + OS.money(compareAt - price)
-        : 'Save ' + Math.round((1 - price / compareAt) * 100) + '%';
-      const saving = String(b.saving_label || '').trim() || autoSaving;
+      const saving = b.saving_type === 'label'
+        ? (String(b.saving_label || '').trim() || 'Save')
+        : (b.saving_type === 'text' ? 'Sale'
+          : (b.saving_type === 'fixed'
+            ? 'Save ' + OS.money(compareAt - price)
+            : 'Save ' + Math.round((1 - price / compareAt) * 100) + '%'));
       const saveBg = b.saving_bg || saleColor;
-      const saveText = b.saving_text_color || '#ffffff';
+      const outline = b.saving_style === 'outline';
+      const saveText = outline ? saveBg : (b.saving_text_color || '#ffffff');
       const saveIcon = b.saving_icon
-        ? '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4.2 4.2h7.6v7.6H4.2z" stroke="currentColor" stroke-width="1.4"/><path d="M6.2 9.8 9.8 6.2M6.5 6.5h.01M9.5 9.5h.01" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>'
+        ? ((window.OS_THEME_ICONS && window.OS_THEME_ICONS.svg('percent', 12)) || '')
         : '';
       const saveOrder = b.saving_position === 'left' ? 'order:-1;' : '';
-      body = '<div class="pdp-price"><span class="now" data-pdp-now' + (sale ? ' style="color:' + saleColor + '"' : '') + '>' + OS.money(price) + '</span>' +
-        (sale ? '<s data-pdp-compare>' + OS.money(compareAt) + '</s>' : '<s data-pdp-compare hidden></s>') +
+      const saveStyle = outline
+        ? 'background:' + OS.esc((b.saving_bg && b.saving_bg !== saveBg) ? b.saving_bg : 'rgba(214,58,47,.08)') + ';color:' + OS.esc(saveText) + ';border:1px solid ' + OS.esc(saveBg) + ';' + saveOrder
+        : 'background:' + OS.esc(saveBg) + ';color:' + OS.esc(saveText) + ';' + saveOrder;
+      const prefix = String(b.price_prefix || '').trim();
+      const nowHtml = '<span class="now" data-pdp-now' + (sale ? ' style="color:' + saleColor + '"' : '') + '>' + OS.money(price) + '</span>';
+      const compareHtml = sale ? '<s data-pdp-compare>' + OS.money(compareAt) + '</s>' : '<s data-pdp-compare hidden></s>';
+      const priceRow = (b.compare_order === 'before' ? (compareHtml + nowHtml) : (nowHtml + compareHtml));
+      body = '<div class="pdp-price">' + priceRow +
+        (prefix ? '<span class="pdp-price-prefix">' + OS.esc(prefix) + '</span>' : '') +
         (b.show_saving && sale
-          ? '<span class="save" data-pdp-save data-save-type="' + OS.esc(b.saving_type || 'percentage') + '" data-save-label="' + OS.esc(String(b.saving_label || '').trim()) + '" data-save-icon="' + (b.saving_icon ? '1' : '0') + '" style="background:' + OS.esc(saveBg) + ';color:' + OS.esc(saveText) + ';' + saveOrder + '">' + saveIcon + OS.esc(saving) + '</span>'
+          ? '<span class="save' + (outline ? ' outline' : '') + '" data-pdp-save data-save-type="' + OS.esc(b.saving_type || 'percentage') + '" data-save-label="' + OS.esc(String(b.saving_label || '').trim()) + '" data-save-icon="' + (b.saving_icon ? '1' : '0') + '" style="' + saveStyle + '">' + saveIcon + OS.esc(saving) + '</span>'
           : '') + '</div>' +
-        (b.show_taxes ? '<div style="font-size:12px;opacity:.62;margin-top:4px">Tax included.</div>' : '');
+        (b.show_taxes ? '<div style="font-size:12px;opacity:.62;margin-top:4px">Tax included. Shipping calculated at checkout.</div>' : '');
     } else if (block.kind === 'divider') {
       body = '<div style="padding:' + (b.padding_top || 0) + 'px 0 ' + (b.padding_bottom || 0) + 'px"><hr class="pdp-line" style="border-top-width:' + (b.thickness || 1) + 'px;border-top-color:' + OS.esc(b.color || '#E5E5E5') + '"></div>';
     } else if (block.kind === 'variant') {
@@ -812,9 +892,10 @@
           : (b.button_shape === 'custom' ? Number(b.custom_radius == null ? 8 : b.custom_radius) : 8));
       const radiusStyle = 'border-radius:' + radius + 'px';
       const layoutSide = b.button_layout === 'side-by-side';
-      const channels = Array.isArray(b.channels) && b.channels.length
-        ? b.channels
-        : ['shop', 'paypal', 'apple_pay', 'google_pay'];
+      const expressIds = ['shop', 'paypal', 'apple_pay', 'google_pay'];
+      const rawChannels = Array.isArray(b.channels) && b.channels.length ? b.channels : expressIds;
+      // Drop legacy card brands wrongly stored as checkout channels.
+      const channels = rawChannels.filter((id) => expressIds.indexOf(id) >= 0);
       const useLogo = !!b.channel_logo;
       const paypalLogo = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="38 6 86 24" height="22" aria-hidden="true" focusable="false">' +
         '<path fill="#253B80" d="M46.211 6.749h-6.839c-.468 0-.866.34-.939.802l-2.766 17.537c-.055.346.213.658.564.658h3.265c.468 0 .866-.34.939-.803l.746-4.73c.072-.463.471-.803.938-.803h2.165c4.505 0 7.105-2.18 7.784-6.5.306-1.89.013-3.375-.872-4.415C50.224 7.353 48.5 6.749 46.211 6.749zm.789 6.405c-.374 2.454-2.249 2.454-4.062 2.454h-1.032l.724-4.583c.043-.277.283-.481.563-.481h.473c1.235 0 2.4 0 3.002.704.361.41.471 1.034.332 1.906z"/>' +
@@ -830,55 +911,60 @@
           return '<button type="button" class="pdp-paypal" data-pdp-paypal aria-label="PayPal"' + style + '>' + (useLogo ? paypalLogo : 'PayPal') + '</button>';
         }
         const map = {
-          shop: { cls: 'shop', label: 'Shop', logo: 'Shop' },
+          shop: { cls: 'shop', label: useLogo ? 'Buy with shop' : 'Shop', logo: 'Buy with shop' },
           apple_pay: { cls: 'apple', label: 'Apple Pay', logo: 'Apple Pay' },
           google_pay: { cls: 'google', label: 'Google Pay', logo: 'G Pay' },
-          amazon: { cls: 'amazon', label: 'Amazon', logo: 'Amazon' },
-          amex: { cls: 'card', label: 'Amex', logo: 'AMEX' },
-          diners: { cls: 'card', label: 'Diners Club', logo: 'DINERS' },
-          discover: { cls: 'card', label: 'Discover', logo: 'DISCOVER' },
-          mastercard: { cls: 'card', label: 'Mastercard', logo: 'MC' },
-          visa: { cls: 'card', label: 'Visa', logo: 'VISA' },
         };
         const m = map[id];
         if (!m) return '';
         return '<button type="button" class="pdp-chan ' + m.cls + '" aria-label="' + OS.esc(m.label) + '"' + style + '>' + OS.esc(useLogo ? m.logo : m.label) + '</button>';
       };
-      const channelHtml = b.show_dynamic ? channels.map(channelBtn).join('') : '';
-      const dyn = (channelHtml || showPayMore) ? '<div class="pdp-dyn">' + channelHtml +
+      const channelHtml = b.show_dynamic ? (channels.length ? channels : expressIds).map(channelBtn).join('') : '';
+      const installment = (b.show_dynamic && b.show_shop_installments && (channels.length ? channels : expressIds).indexOf('shop') >= 0)
+        ? '<p class="pdp-installments">Pay in 2 interest-free installments of <b>' + OS.money(Math.round((selected.price || p.price || 0) / 2 * 100) / 100) + '</b> with <span class="shop">shop</span></p>'
+        : '';
+      const dyn = (channelHtml || showPayMore || installment) ? '<div class="pdp-dyn">' + channelHtml +
         (showPayMore ? '<button type="button" class="pdp-pay-more" data-pdp-pay-more>More payment options</button>' : '') +
+        installment +
       '</div>' : '';
+      const trustMap = {
+        norton: { label: 'Norton', cls: 'norton' }, mcafee: { label: 'McAfee', cls: 'mcafee' }, money_back: { label: '100% Money Back', cls: 'mb' },
+        paypal: { label: 'PayPal', cls: 'paypal' }, visa: { label: 'VISA', cls: 'visa' }, mastercard: { label: 'Mastercard', cls: 'mc' },
+        amex: { label: 'AMEX', cls: 'amex' }, discover: { label: 'Discover', cls: 'discover' }, diners: { label: 'Diners', cls: 'diners' },
+        amazon: { label: 'Amazon', cls: 'amazon' }, shop: { label: 'shop', cls: 'shop' },
+        apple_pay: { label: 'Apple Pay', cls: 'apple' }, google_pay: { label: 'G Pay', cls: 'google' },
+        venmo: { label: 'Venmo', cls: 'venmo' }, bancontact: { label: 'Bancontact', cls: 'bancontact' }, giropay: { label: 'Giropay', cls: 'giropay' },
+      };
+      const trustList = Array.isArray(b.trust_logos) && b.trust_logos.length ? b.trust_logos : ['norton', 'paypal', 'visa', 'mastercard', 'mcafee', 'money_back'];
+      const safe = b.show_safe_checkout
+        ? '<div class="pdp-safe">' +
+            '<div class="pdp-safe-label">' + OS.esc(b.safe_checkout_label || 'GUARANTEED SAFE CHECKOUT') + '</div>' +
+            '<div class="pdp-safe-logos">' + trustList.map((id) => {
+              const m = trustMap[id] || { label: id, cls: 'card' };
+              return '<span class="pdp-safe-logo ' + m.cls + '">' + OS.esc(m.label) + '</span>';
+            }).join('') + '</div></div>'
+        : '';
+      const buyNow = b.show_buy_now
+        ? '<button type="button" class="pdp-buynow" data-pdp-buynow style="' + radiusStyle + '"' + (inventory <= 0 ? ' disabled' : '') + '>' + OS.esc(b.buy_now_text || 'Buy now') + '</button>'
+        : '';
       body = '<div class="pdp-actions' + (layoutSide ? ' side' : '') + '">' +
         ((b.show_quantity || b.show_add) ? '<div class="pdp-buy-row">' +
           (b.show_quantity ? '<div class="pdp-qty" style="' + radiusStyle + '"><button type="button" data-pdp-q="-">-</button><span data-pdp-qty>1</span><button type="button" data-pdp-q="+">+</button></div>' : '') +
           (b.show_add ? '<button type="button" class="pdp-atc" data-pdp-atc style="' + OS.btnStyle(t) + ';' + radiusStyle + '"' + (inventory <= 0 ? ' disabled' : '') + '>' + (inventory <= 0 ? 'Sold out' : 'Add to cart') + '</button>' : '') +
         '</div>' : '') +
-        dyn + '</div>';
+        buyNow + dyn + safe + '</div>';
     } else if (block.kind === 'icon_text') {
-      const svg = (inner) => '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + inner + '</svg>';
-      const marks = {
-        package: svg('<path d="M3.2 6.4 10 3.2l6.8 3.2v7.2L10 16.8 3.2 13.6z"/><path d="M3.2 6.4 10 9.6l6.8-3.2"/><path d="M10 9.6v7.2"/>'),
-        box: svg('<path d="M3.2 6.4 10 3.2l6.8 3.2v7.2L10 16.8 3.2 13.6z"/><path d="M3.2 6.4 10 9.6l6.8-3.2"/><path d="M10 9.6v7.2"/>'),
-        truck: svg('<path d="M2.5 6.5h9v6h-9z"/><path d="M11.5 8.5h3.2L17 11v1.5h-5.5z"/><circle cx="6" cy="14.2" r="1.2"/><circle cx="14.2" cy="14.2" r="1.2"/>'),
-        star: svg('<path d="m10 3.2 1.7 3.6 4 .5-2.9 2.7.8 3.9L10 12.1 6.4 14l.8-3.9L4.3 7.3l4-.5z"/>'),
-        star4: svg('<path d="M10 2.4 11.3 8.7 17.6 10 11.3 11.3 10 17.6 8.7 11.3 2.4 10 8.7 8.7z"/>'),
-        leaf: svg('<path d="M5 15.2C5 9 9.2 5.2 16.2 4.6 15.6 11.6 11.8 15.8 5.6 15.8"/><path d="M5.4 15.2c2.2-2.6 4.4-4.4 7.4-5.6"/>'),
-        return: svg('<path d="M4 10a6 6 0 1 0 1.8-4.3"/><path d="M4 3.5v3.2h3.2"/>'),
-        currency: svg('<circle cx="10" cy="10" r="6.4"/><path d="M10 6v8"/><path d="M12.1 8c-.3-.8-1.1-1.1-2.1-1.1-1.2 0-2 .5-2 1.3 0 2.2 4.2 1.1 4.2 3 0 .8-.8 1.4-2.1 1.4-1.1 0-1.9-.4-2.2-1.1"/>'),
-        shield: svg('<path d="M10 3.2 4.8 5.2v4.2c0 3.1 2.1 5.6 5.2 6.6 3.1-1 5.2-3.5 5.2-6.6V5.2z"/><path d="m7.6 10 1.6 1.6 3.2-3.2"/>'),
-        heart: svg('<path d="M10 16.2S4.2 12.6 3.2 9.2a3.4 3.4 0 0 1 6-2.1 3.4 3.4 0 0 1 6 2.1c-1 3.4-5.2 7-5.2 7z"/>'),
-        check: svg('<path d="m4.5 10.2 3.4 3.4 7.6-7.6"/>'),
-      };
+      const mark = (name) => (window.OS_THEME_ICONS && window.OS_THEME_ICONS.svg(name || 'box', 20)) || '';
       const items = [
-        { icon: b.icon_1 || 'package', image: b.image_1, text: b.first, link: b.link_1 },
-        { icon: b.icon_2 || 'currency', image: b.image_2, text: b.second, link: b.link_2 },
-        { icon: b.icon_3 || 'star4', image: b.image_3, text: b.third, link: b.link_3 },
+        { icon: b.icon_1 || 'box', image: b.image_1, text: b.first, link: b.link_1 },
+        { icon: b.icon_2 || 'return', image: b.image_2, text: b.second, link: b.link_2 },
+        { icon: b.icon_3 || 'star', image: b.image_3, text: b.third, link: b.link_3 },
       ].filter((item) => String(item.text || '').trim() || item.image);
       const spec = { small: { text: 14, icon: 18, line: 24 }, base: { text: 16, icon: 20, line: 26 }, large: { text: 18, icon: 24, line: 30 } }[b.size] || { text: 16, icon: 20, line: 26 };
       const cardClass = b.card_style === 'outline' ? ' card-outline' : (b.card_style === 'filled' ? ' card-filled' : '');
       body = items.length ? '<div class="pdp-icons' + (b.layout === 'vertical' ? ' vertical' : '') + (b.background ? ' has-bg' : '') + '" style="font-family:' + (b.font === 'heading' ? OS.headingFamily(t) : OS.bodyFamily(t)) + ';font-size:' + spec.text + 'px;--pdp-icon-size:' + spec.icon + 'px;--pdp-icon-line:' + spec.line + 'px">' +
         items.map((item) => {
-          const inner = (item.image ? '<img class="pdp-icon-img' + (String(item.text || '').trim() ? '' : ' logo') + '" alt="" src="' + OS.esc(item.image) + '">' : '<span class="pdp-icon-mark">' + (marks[item.icon] || marks.package) + '</span>') +
+          const inner = (item.image ? '<img class="pdp-icon-img' + (String(item.text || '').trim() ? '' : ' logo') + '" alt="" src="' + OS.esc(item.image) + '">' : '<span class="pdp-icon-mark">' + mark(item.icon) + '</span>') +
             (String(item.text || '').trim() ? '<span>' + item.text + '</span>' : '');
           const tag = item.link ? 'a' : 'div';
           const href = item.link ? ' href="' + OS.esc(item.link) + '" target="_blank" rel="noopener"' : '';
@@ -909,7 +995,8 @@
     } else if (block.kind === 'collapsible') {
       const isOpen = !!(b.open || b.first_open_default);
       const iconLeft = b.icon_position === 'left';
-      body = '<div class="pdp-acc' + (isOpen ? ' open' : '') + (iconLeft ? ' icon-left' : '') + '" data-pdp-acc data-accordion="' + (b.accordion_mode ? '1' : '0') + '"><button type="button"><span class="pdp-acc-title">' + OS.esc(b.heading || 'Details') + '</span><span class="pdp-acc-mark">' + (isOpen ? '–' : '+') + '</span></button><div class="body">' + (b.content || '') + (b.custom_liquid ? '<pre>' + OS.esc(b.custom_liquid) + '</pre>' : '') + '</div></div>';
+      const headingIcon = (b.icon && b.icon !== 'none' && window.OS_THEME_ICONS) ? ('<span class="pdp-acc-ic">' + window.OS_THEME_ICONS.svg(b.icon, 16) + '</span>') : '';
+      body = '<div class="pdp-acc' + (isOpen ? ' open' : '') + (iconLeft ? ' icon-left' : '') + '" data-pdp-acc data-accordion="' + (b.accordion_mode ? '1' : '0') + '"><button type="button"><span class="pdp-acc-title">' + headingIcon + OS.esc(b.heading || 'Details') + '</span><span class="pdp-acc-mark">' + (isOpen ? '–' : '+') + '</span></button><div class="body">' + (b.content || '') + (b.custom_liquid ? '<pre>' + OS.esc(b.custom_liquid) + '</pre>' : '') + '</div></div>';
     } else if (block.kind === 'popup') {
       const w = Number(b.popup_width == null ? 560 : b.popup_width);
       const h = Number(b.popup_height == null ? 420 : b.popup_height);
@@ -961,6 +1048,32 @@
           '<div class="pdp-rec-row" data-pdp-rec style="grid-template-columns:repeat(' + cols + ',minmax(0,1fr))">' + cards + '</div>';
       }
     }
+    if (block.kind === 'featured_reviews') {
+      const reviews = [
+        { author: b.manual_author || 'Debi T.', rating: Number(b.manual_rating || 5), text: b.manual_text || 'Very comfortable and great fit. Want to buy more. Wore them on a ten hour hike. Held up great.', image: b.manual_image || (p.image || ''), avatar: (OS.sample && OS.sample.IMG && OS.sample.IMG.av1) || p.image || '' },
+        { author: 'Emily R.', rating: 5, text: 'After 6 weeks the dark red stretch marks faded and the fine lines nearly disappeared.', image: p.image || '', avatar: (OS.sample && OS.sample.IMG && OS.sample.IMG.av2) || p.image || '' },
+        { author: 'James Carter', rating: 5, text: 'A month in and my energy is up. I recommend it to anyone who feels drained every afternoon.', image: '', avatar: (OS.sample && OS.sample.IMG && OS.sample.IMG.av3) || p.image || '' },
+      ];
+      const list = b.data_source === 'manual' ? reviews.slice(0, 1) : reviews;
+      const cols = Math.max(1, Math.min(3, Number(b.cards_per_row || 1)));
+      const cards = list.map((r, i) => {
+        const starRow = '<span class="pdp-fr-stars">' + '★'.repeat(Math.max(1, Math.min(5, Number(r.rating) || 5))) + '</span>';
+        return '<div class="pdp-fr-card" data-fr-idx="' + i + '">' +
+          (b.show_avatar !== false ? '<img class="pdp-fr-av" alt="" src="' + OS.esc(r.avatar || r.image || '') + '">' : '') +
+          '<div class="pdp-fr-body"><div class="pdp-fr-meta"><b>' + OS.esc(r.author) + '</b>' + starRow + '</div>' +
+          '<div class="pdp-fr-text">' + OS.esc(r.text) + '</div>' +
+          ((b.show_image !== false && r.image) ? '<img class="pdp-fr-img" alt="" src="' + OS.esc(r.image) + '">' : '') +
+          '</div></div>';
+      }).join('');
+      const nav = b.scroll !== false
+        ? '<button type="button" class="pdp-fr-nav prev" data-pdp-fr-prev aria-label="Previous">‹</button><button type="button" class="pdp-fr-nav next" data-pdp-fr-next aria-label="Next">›</button>'
+        : '';
+      const viewAll = b.view_all_popup !== false ? '<button type="button" class="pdp-fr-all" data-pdp-fr-all>View all</button>' : '';
+      body = '<div class="pdp-fr" data-pdp-fr data-autoplay="' + (b.auto_play ? '1' : '0') + '">' +
+        (b.heading ? '<div class="pdp-fr-h">' + OS.esc(b.heading) + '</div>' : '') +
+        '<div class="pdp-fr-rail" style="--fr-cols:' + cols + '">' + cards + '</div>' + nav + viewAll + '</div>';
+    }
+    if (block.kind === 'sticky') body = '';
     if (!body) return '';
     return '<div class="pdp-row pdp-kind-' + OS.esc(block.kind) + '" data-block-id="' + OS.esc(block.id) + '">' + body + '</div>';
   }
@@ -987,9 +1100,14 @@
   function stickyHtml(block, p, t) {
     if (!block || block.hidden) return '';
     const b = block.settings || {};
-    return '<div class="pdp-sticky" data-block-id="' + OS.esc(block.id) + '">' +
-      (b.show_image ? '<img alt="" src="' + OS.esc(p.image) + '">' : '') +
-      '<div class="meta">' + (b.show_title ? '<b>' + OS.esc(p.title) + '</b>' : '') + (b.show_price ? '<span>' + OS.money(p.price) + '</span>' : '') + '</div>' +
+    const pos = b.position === 'top' ? ' top' : ' bottom';
+    const appear = (b.appear_at === 'top' || b.show_after_scroll === false) ? ' always' : ' after-scroll';
+    const mobHide = b.mobile_visible === false ? ' hide-mob' : '';
+    return '<div class="pdp-sticky' + pos + appear + mobHide + '" data-block-id="' + OS.esc(block.id) + '" data-pdp-sticky>' +
+      (b.show_image !== false ? '<img alt="" src="' + OS.esc(p.image) + '">' : '') +
+      '<div class="meta">' + (b.show_title !== false ? '<b>' + OS.esc(p.title) + '</b>' : '') + (b.show_price !== false ? '<span data-pdp-sticky-price>' + OS.money(p.price) + '</span>' : '') +
+      (b.show_bundle ? '<em class="pdp-sticky-bundle">Bundle deal</em>' : '') + '</div>' +
+      (b.show_quantity !== false ? '<div class="pdp-qty sticky-qty"><button type="button" data-pdp-q="-">-</button><span data-pdp-qty>1</span><button type="button" data-pdp-q="+">+</button></div>' : '') +
       '<button type="button" class="pdp-atc" data-pdp-atc style="' + OS.btnStyle(t) + '">' + OS.esc(b.button_text || 'Add to cart') + '</button></div>';
   }
 
@@ -1032,18 +1150,20 @@
     defaultBlocks: () => ([
       ['badges', { show_sold_out: false, show_saving: false, saving_type: 'percentage', badge_position: 'top-left', badge_icon: 'none', badge_icon_image: '', badge_bg: '', badge_text_color: '', badge_gap: 8 }],
       ['title', { title_size: 24, description: '', description_image: '', description_color: '#000000', description_size: 14, description_top: 0, description_bottom: 0 }],
-      ['price', { show_taxes: false, show_saving: true, saving_type: 'percentage', saving_position: 'right', saving_label: '', saving_bg: '', saving_text_color: '#ffffff', saving_icon: false }],
+      ['price', { show_taxes: false, price_prefix: '', compare_order: 'after', show_saving: true, saving_type: 'percentage', saving_style: 'filled', saving_position: 'right', saving_label: '', saving_bg: '', saving_text_color: '#ffffff', saving_icon: false }],
       ['rating', { show_rating: true, size: 14, show_text: false, text: '4.8 (214) 7,000+ satisfied customers' }],
       ['description', {}],
       ['inventory', { show_status: true, show_count: true, custom_text: '', low_stock_threshold: 5, low_stock_text: 'Low stock - {n} items left', sold_out_text: 'Sold out', status_style: 'dot', status_color: '#f59e0b' }],
       ['variant', { hide_sold_out: false, picker_type: 'buttons', swatch_style: 'color', shape: 'normal', nested_dropdown: false, show_group_title: false, sku_display_name: '', show_sku_in_option: false }],
-      ['buy', { show_quantity: true, show_add: true, show_dynamic: true, show_payment_options: true, button_shape: 'normal', custom_radius: 8, button_layout: 'stacked', channels: ['shop', 'paypal', 'apple_pay', 'google_pay'], channel_logo: false }],
-      ['icon_text', { layout: 'horizontal', font: 'body', size: 'base', icon_1: 'package', image_1: '', first: 'Orders over $50 ship free', icon_2: 'currency', image_2: '', second: '30 day returns', icon_3: 'star4', image_3: '', third: '' }],
+      ['buy', { show_quantity: true, show_add: true, show_buy_now: false, buy_now_text: 'Buy now', show_dynamic: true, show_payment_options: true, show_shop_installments: false, button_shape: 'normal', custom_radius: 8, button_layout: 'stacked', channels: ['shop', 'paypal', 'apple_pay', 'google_pay'], channel_logo: false, show_safe_checkout: false, safe_checkout_label: 'GUARANTEED SAFE CHECKOUT', trust_logos: ['norton', 'paypal', 'visa', 'mastercard', 'mcafee', 'money_back'] }],
+      ['icon_text', { layout: 'horizontal', font: 'body', size: 'base', background: false, card_style: 'none', icon_1: 'box', image_1: '', first: 'Orders over $50 ship free', link_1: '', icon_2: 'return', image_2: '', second: '30 day returns', link_2: '', icon_3: 'star', image_3: '', third: '', link_3: '' }],
       ['collapsible', { heading: 'Overview', icon: 'none', content: 'A clinically proven, non-sticky, vegan lip treatment that delivers the intense hydration of a lip mask with a sweet sheer tint using food-grade, non-artificial flavor. Designed for sensitive, irritated lips, this cushiony treatment delivers instant comfort to rescue dry, chapped lips.', custom_liquid: '', page: '', open: false }],
       ['collapsible', { heading: 'How to use', icon: 'none', content: 'Apply generously to lips for hydration and comfort. Use at night for an overnight mask.', custom_liquid: '', page: '', open: false }],
       ['collapsible', { heading: 'Ingredients', icon: 'none', content: '<ul><li>Dulce De Leche</li><li>Ube vanilla</li><li>Watermelon kiwi</li><li>Blood orange vanilla</li></ul>', custom_liquid: '', page: '', open: false }],
+      ['featured_reviews', { heading: 'What Our Customers Are Saying', data_source: 'auto', show_image: true, show_avatar: true, scroll: true, auto_play: false, view_all_popup: true, cards_per_row: 1 }],
       ['actions', { show_share: true, layout: 'tile', icon_style: 'brand', platforms: ['facebook', 'x', 'pinterest'], show_copy: true }],
-    ]).map((pair) => ({ id: OS.uid('pdp'), kind: pair[0], hidden: false, settings: pair[1] })),
+      ['sticky', { show_image: true, show_title: true, show_price: true, show_quantity: true, show_bundle: false, show_after_scroll: true, appear_at: 'scroll', position: 'bottom', mobile_visible: true, button_text: 'Add to cart' }],
+    ]).map((pair) => ({ kind: pair[0], hidden: false, settings: pair[1] })),
     render: function (s, blocks, ctx) {
       const t = ctx.tokens || {};
       const mob = !!ctx.mob;
@@ -1067,8 +1187,10 @@
         '<div class="pdp-grid" style="grid-template-columns:' + size + '% minmax(0,1fr)">' +
           mediaHtml(items, s, t, mob) +
           '<div class="pdp-buy" style="background:' + bg + ';color:' + text + ';padding:' + (bg && bg !== 'transparent' ? '16px' : '0') + '">' +
-            visible.map((b) => rowHtml(b, p, s, t, ctx, selected)).join('') +
-          '</div></div></div>' + popupHtml(s, p, t) + customCss + '</div>';
+            visible.filter((b) => b.kind !== 'sticky').map((b) => rowHtml(b, p, s, t, ctx, selected)).join('') +
+          '</div></div></div>' +
+          stickyHtml(visible.find((b) => b.kind === 'sticky'), p, t) +
+          popupHtml(s, p, t) + customCss + '</div>';
     },
     hydrate: function (root, settings) {
       const pop = root.querySelector('[data-pdp-pop]');
@@ -1286,10 +1408,13 @@
           compare.textContent = match.compareAt > match.price ? OS.money(match.compareAt) : '';
         }
         if (save && match.compareAt > match.price) {
+          const saveType = save.dataset.saveType || 'percentage';
           const customLabel = String(save.dataset.saveLabel || '').trim();
-          const label = customLabel || (save.dataset.saveType === 'fixed'
-            ? 'Save ' + OS.money(match.compareAt - match.price)
-            : 'Save ' + Math.round((1 - match.price / match.compareAt) * 100) + '%');
+          const label = saveType === 'label' ? (customLabel || 'Save')
+            : (saveType === 'text' ? 'Sale'
+              : (saveType === 'fixed'
+                ? 'Save ' + OS.money(match.compareAt - match.price)
+                : 'Save ' + Math.round((1 - match.price / match.compareAt) * 100) + '%'));
           const iconHtml = save.dataset.saveIcon === '1'
             ? '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4.2 4.2h7.6v7.6H4.2z" stroke="currentColor" stroke-width="1.4"/><path d="M6.2 9.8 9.8 6.2M6.5 6.5h.01M9.5 9.5h.01" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>'
             : '';
@@ -1566,6 +1691,46 @@
         pop.querySelectorAll('[data-pdp-pop-close]').forEach((el) => el.addEventListener('click', () => pop.classList.remove('on')));
         const view = pop.querySelector('[data-pdp-view]');
         if (view) view.addEventListener('click', () => pop.classList.remove('on'));
+      }
+
+      root.querySelectorAll('[data-pdp-fr]').forEach((fr) => {
+        const cards = Array.from(fr.querySelectorAll('.pdp-fr-card'));
+        if (!cards.length) return;
+        let idx = 0;
+        const show = (n) => {
+          idx = (n + cards.length) % cards.length;
+          cards.forEach((c, i) => { c.style.display = i === idx ? '' : 'none'; });
+        };
+        show(0);
+        const prev = fr.querySelector('[data-pdp-fr-prev]');
+        const next = fr.querySelector('[data-pdp-fr-next]');
+        if (prev) prev.addEventListener('click', () => show(idx - 1));
+        if (next) next.addEventListener('click', () => show(idx + 1));
+        const all = fr.querySelector('[data-pdp-fr-all]');
+        if (all) all.addEventListener('click', () => {
+          if (pop) {
+            const head = pop.querySelector('.pdp-pop-head strong');
+            if (head) head.textContent = 'Customer reviews';
+            pop.classList.add('on');
+          }
+        });
+        if (fr.getAttribute('data-autoplay') === '1') {
+          setInterval(() => show(idx + 1), 4200);
+        }
+      });
+
+      const sticky = root.querySelector('[data-pdp-sticky]');
+      if (sticky && sticky.classList.contains('after-scroll')) {
+        const sc = document.getElementById('os-cscroll') || document.querySelector('.os-canvas-scroll') || window;
+        const buy = root.querySelector('.pdp-buy') || root;
+        const onScroll = () => {
+          const top = buy.getBoundingClientRect ? buy.getBoundingClientRect().bottom : 0;
+          const threshold = 100;
+          if (top < threshold) sticky.classList.add('on');
+          else sticky.classList.remove('on');
+        };
+        onScroll();
+        sc.addEventListener('scroll', onScroll, { passive: true });
       }
     },
   });

@@ -85,8 +85,9 @@
 
   // ---- Theme templates (settings.tsx templateOptions) ----
   const TEMPLATES = [
-    { value: 'default', label: 'Default product', assigned: 18 },
-    { value: 'lookbook', label: 'Lookbook', assigned: 2 },
+    { value: 'default', label: 'Default product', assigned: 8 },
+    { value: 'pdp-wellness', label: 'Wellness product', assigned: 6 },
+    { value: 'pdp-apparel', label: 'Apparel product', assigned: 6 },
   ];
 
   // ---- Media support text (AddImageVideo DEFAULT_SUPPORT_TEXT, utils/upload IMAGE/VIDEO_FILE_EXTENSIONS) ----

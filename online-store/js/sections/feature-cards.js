@@ -3,19 +3,20 @@
 (function () {
   const OS = window.OS;
 
-  // Inline line-icon set for the block icon picker (24x24, stroke currentColor). 'none' renders nothing.
-  const SI = (inner) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + inner + '</svg>';
-  const ICONS = {
-    none: '',
-    moon: SI('<path d="M20 14.5A8 8 0 0 1 9.5 4 7 7 0 1 0 20 14.5z"/>'),
-    fire: SI('<path d="M12 3c.5 3-2 4-2 7a2 2 0 0 0 4 0c0-.7-.2-1.2-.2-1.6 1.7 1 2.7 2.8 2.7 4.6a4.5 4.5 0 0 1-9 0C7.5 11 10 8 12 3z"/>'),
-    leaf: SI('<path d="M5 19c0-8 6-13 14-13 0 8-5 14-13 14a6 6 0 0 1-1-1z"/><path d="M5 19c2-4 5-7 9-9"/>'),
-    heart: SI('<path d="M12 20s-7-4.6-9-9a4.5 4.5 0 0 1 8-3 4.5 4.5 0 0 1 8 3c-1.9 4.4-7 9-7 9z"/>'),
-    drop: SI('<path d="M12 3c3.5 4 6 7 6 10a6 6 0 0 1-12 0c0-3 2.5-6 6-10z"/>'),
-    flask: SI('<path d="M9 3h6M10 3v6l-4.5 8A2 2 0 0 0 7.3 20h9.4a2 2 0 0 0 1.8-3L14 9V3"/><path d="M8 14h8"/>'),
-    star: SI('<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>'),
+  // Shared theme icon catalog (parity with PDP Icon with text / Badges / Collapsible).
+  const glyph = (name) => {
+    const api = window.OS_THEME_ICONS || (OS && OS.themeIcons);
+    if (api && api.svg) return api.svg(name || 'leaf', 52) || api.svg('leaf', 52);
+    return '';
   };
-  const glyph = (name) => ICONS[name] != null ? ICONS[name] : ICONS.leaf;
+  const iconOptions = () => {
+    const api = window.OS_THEME_ICONS || (OS && OS.themeIcons);
+    if (api && api.options) return api.options(true);
+    return [
+      { value: 'none', label: 'None' }, { value: 'moon', label: 'Moon' }, { value: 'fire', label: 'Fire' }, { value: 'leaf', label: 'Leaf' },
+      { value: 'heart', label: 'Heart' }, { value: 'drop', label: 'Drop' }, { value: 'flask', label: 'Flask' }, { value: 'star', label: 'Star' },
+    ];
+  };
 
   OS.css('feature-cards', [
     '.fcx{box-sizing:border-box}.fcx *{box-sizing:border-box}',
@@ -62,15 +63,13 @@
     blocks: {
       name: 'Feature card', kind: 'card', max: 18,
       fields: [
-        { key: 'icon', control: 'select', label: 'Icon', default: 'leaf', options: [
-          { value: 'none', label: 'None' }, { value: 'moon', label: 'Moon' }, { value: 'fire', label: 'Fire' }, { value: 'leaf', label: 'Leaf' },
-          { value: 'heart', label: 'Heart' }, { value: 'drop', label: 'Drop' }, { value: 'flask', label: 'Flask' }, { value: 'star', label: 'Star' },
-        ] },
+        { key: 'icon', control: 'select', label: 'Icon', default: 'leaf', options: iconOptions() },
+        { key: 'image', control: 'image', label: 'Custom image', default: '', info: 'Custom image replaces the built-in icon when set.' },
         { key: 'heading', control: 'text', label: 'Heading', default: '' },
         { key: 'content', control: 'richtext', label: 'Content', default: '' },
         { key: 'link', control: 'url', label: 'Link', default: '' },
       ],
-      defaults: () => ({ icon: 'leaf', heading: 'A key benefit', content: 'A sentence describing this benefit.' }),
+      defaults: () => ({ icon: 'leaf', image: '', heading: 'A key benefit', content: 'A sentence describing this benefit.', link: '' }),
     },
     defaultBlocks: () => ([
       { id: OS.uid('fc'), kind: 'card', hidden: false, settings: { icon: 'drop', heading: 'Deeply hydrating', content: 'Locks in moisture for 24h', link: '' } },
@@ -98,9 +97,11 @@
 
       const cards = items.map((b0) => {
         const b = b0.settings;
-        const ic = b.icon && b.icon !== 'none'
-          ? '<span class="fc-ic" style="width:' + icSize + 'px;height:' + icSize + 'px;color:' + icColor + '">' + glyph(b.icon) + '</span>'
-          : '';
+        const ic = b.image
+          ? '<span class="fc-ic" style="width:' + icSize + 'px;height:' + icSize + 'px"><img alt="" src="' + OS.esc(b.image) + '" style="width:100%;height:100%;object-fit:contain"></span>'
+          : (b.icon && b.icon !== 'none'
+            ? '<span class="fc-ic" style="width:' + icSize + 'px;height:' + icSize + 'px;color:' + icColor + '">' + glyph(b.icon) + '</span>'
+            : '');
         const link = b.link
           ? '<a class="fc-link" href="' + OS.esc(b.link) + '" style="color:' + linkColor + '">Learn more →</a>'
           : '';

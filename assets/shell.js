@@ -174,10 +174,10 @@
     // Online store is a self-contained Theme editor. Version it independently so
     // a Theme-only release cannot reuse stale app/data scripts from a prior shell release.
     var moduleV = id === 'settings' ? '20261008-ocean-note'
-      : id === 'online-store' ? '20261026-pe-embed1'
+      : id === 'online-store' ? '20261028-tpl-default-top'
       : id === 'analytics' ? '20260922-address-info1'
       : id === 'orders' ? '20261013-no-channel'
-      : id === 'products' ? '20261026-pe-embed1'
+      : id === 'products' ? '20261028-tpl-default-top'
       : id === 'vendors' ? '20261013-sort-arrow' : V;
     // Only Analytics ships a dedicated icon bundle. Avoid a noisy 404 for every
     // other lazily loaded module.

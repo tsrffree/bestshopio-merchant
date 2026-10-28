@@ -291,6 +291,9 @@
   let _sectionsP = null;
   function ensureSections() {
     if (_sectionsP) return _sectionsP;
+    const themeIconsP = loadScript(MOD_BASE + 'theme-icons.js?v=' + OS_V).then(() => {
+      if (window.OS_THEME_ICONS && window.OS) window.OS.themeIcons = window.OS_THEME_ICONS;
+    }).catch(() => {});
     const kinds = ['announcement-bar', 'header', 'footer', 'collection-banner', 'collection-list', 'collection-page', 'list-collections',
       'checkout-header', 'checkout-offer-header', 'checkout-offer-progress', 'checkout-offer-product',
       'checkout-express', 'checkout-contact', 'checkout-shipping-info', 'checkout-shipping-method',
@@ -302,7 +305,7 @@
       'checkout-urgency', 'checkout-trust', 'checkout-summary', 'checkout-postpurchase', 'checkout-tracking',
       'checkout-rating', 'checkout-confirm', 'checkout-bundle', 'checkout-endorsement', 'checkout-addon', 'checkout-guarantee'];
     D.CATALOG.forEach((g) => g.entries.forEach((e) => { if (e.kind && kinds.indexOf(e.kind) < 0) kinds.push(e.kind); }));
-    _sectionsP = Promise.all(kinds.map((k) => loadScript(MOD_BASE + 'sections/' + k + '.js?v=' + OS_V).catch(() => { /* not yet ported — skip */ })));
+    _sectionsP = themeIconsP.then(() => Promise.all(kinds.map((k) => loadScript(MOD_BASE + 'sections/' + k + '.js?v=' + OS_V).catch(() => { /* not yet ported — skip */ }))));
     return _sectionsP;
   }
   function loadScript(src) {
@@ -457,9 +460,13 @@
     if (def && def.blocks) inst.blocks = seed.blocks ? seed.blocks.map((b) => matBlock(def, b)) : (def.defaultBlocks ? def.defaultBlocks() : []);
     return inst;
   }
-  function matBlock(def, seed) {
+  function matBlock(def, seed, secId, index) {
     const bd = blockDef(def, seed.kind);
-    return { id: seed.id || uid('blk'), kind: seed.kind, hidden: !!seed.hidden, settings: Object.assign(blockDefaults(bd), seed.settings || {}) };
+    // Stable ids across refresh so remembered block selection can resolve.
+    const stable = (secId && seed.kind != null && index != null)
+      ? (String(secId) + '__' + seed.kind + '__' + index)
+      : null;
+    return { id: seed.id || stable || uid('blk'), kind: seed.kind, hidden: !!seed.hidden, settings: Object.assign(blockDefaults(bd), seed.settings || {}) };
   }
   function blockDef(def, blockKind) {
     if (!def || !def.blocks) return null;
@@ -472,10 +479,14 @@
   }
   function matSection(seed) {
     const def = defForKind(seed.kind);
+    const secId = seed.id || uid('sec');
     let blocks = [];
-    if (def && def.blocks) blocks = seed.blocks ? seed.blocks.map((b) => matBlock(def, b)) : (def.defaultBlocks ? def.defaultBlocks() : []);
+    if (def && def.blocks) {
+      const seeds = seed.blocks ? seed.blocks : (def.defaultBlocks ? def.defaultBlocks() : []);
+      blocks = seeds.map((b, i) => matBlock(def, b, secId, i));
+    }
     const settings = normalizeSectionSettings(def, Object.assign(sectionDefaults(def), seed.settings || {}));
-    const inst = { id: seed.id || uid('sec'), kind: seed.kind, hidden: !!seed.hidden, settings, blocks };
+    const inst = { id: secId, kind: seed.kind, hidden: !!seed.hidden, settings, blocks };
     if (seed.zone) inst.zone = seed.zone;
     return inst;
   }
@@ -675,7 +686,13 @@
   // content, so navigating between templates never marks the theme dirty. Falls back to
   // the default template (isDefault, else first) when the stored selection is missing.
   const CK_TYPES = ['checkout', 'upsell', 'downsell', 'thankyou'];
-  const defaultOf = (group) => (group.list.find((t) => t.isDefault) || group.list[0]);
+  const isDefaultTpl = (t) => !!(t && (t.isDefault || t.id === 'default'));
+  const defaultOf = (group) => (group.list.find(isDefaultTpl) || group.list[0]);
+  // Default-nature templates stay pinned at the top of every template picker list.
+  const sortedTplList = (list) => {
+    const items = Array.isArray(list) ? list.slice() : [];
+    return items.sort((a, b) => Number(isDefaultTpl(b)) - Number(isDefaultTpl(a)));
+  };
   const tplGroup = () => ED.theme.templates[ED.currentPage];
   const curTplId = () => { const g = tplGroup(); const id = ED.tplSel[ED.currentPage]; return (id && g.list.some((t) => t.id === id)) ? id : (defaultOf(g) || {}).id; };
   const curTpl = () => { const g = tplGroup(); return g.list.find((t) => t.id === curTplId()) || g.list[0]; };
@@ -1306,27 +1323,30 @@
   // Persist shape per page:template — { open: { [sectionId]: true }, focus: sectionId|null }.
   // Legacy values (string id / null) are normalized on read.
   function normalizePageExpandEntry(raw) {
-    if (raw == null) return { open: {}, focus: null };
-    if (typeof raw === 'string') return { open: { [raw]: true }, focus: raw };
+    if (raw == null) return { open: {}, focus: null, sel: null };
+    if (typeof raw === 'string') return { open: { [raw]: true }, focus: raw, sel: null };
     if (Array.isArray(raw)) {
       const open = {};
       raw.forEach((id) => { if (id) open[id] = true; });
-      return { open, focus: raw.length ? raw[raw.length - 1] : null };
+      return { open, focus: raw.length ? raw[raw.length - 1] : null, sel: null };
     }
     if (typeof raw === 'object') {
       const open = {};
       const src = (raw.open && typeof raw.open === 'object' && !Array.isArray(raw.open)) ? raw.open : raw;
       Object.keys(src).forEach((id) => {
-        if (id === 'open' || id === 'focus') return;
+        if (id === 'open' || id === 'focus' || id === 'sel') return;
         if (src[id]) open[id] = true;
       });
       if (raw.open && typeof raw.open === 'object' && !Array.isArray(raw.open)) {
         Object.keys(raw.open).forEach((id) => { if (raw.open[id]) open[id] = true; });
       }
       const focus = (raw.focus && open[raw.focus]) ? raw.focus : null;
-      return { open, focus };
+      const sel = (raw.sel && typeof raw.sel === 'object' && raw.sel.kind)
+        ? { kind: raw.sel.kind, sectionId: raw.sel.sectionId || null, blockId: raw.sel.blockId || null, blockKind: raw.sel.blockKind || null, blockIndex: (raw.sel.blockIndex == null ? null : raw.sel.blockIndex) }
+        : null;
+      return { open, focus, sel };
     }
-    return { open: {}, focus: null };
+    return { open: {}, focus: null, sel: null };
   }
   function pageExpandEntry() {
     const store = pageAccordionStore();
@@ -1341,6 +1361,70 @@
     if (focus && pageSections().some((s) => s.id === focus)) return focus;
     const openIds = Object.keys(entry.open || {}).filter((id) => entry.open[id] && pageSections().some((s) => s.id === id));
     return openIds.length ? openIds[openIds.length - 1] : null;
+  }
+  function blockIndexInSection(sec, blockId) {
+    if (!sec || !blockId) return null;
+    const i = (sec.blocks || []).findIndex((b) => b.id === blockId);
+    return i >= 0 ? i : null;
+  }
+  function resolveBlockInSection(sec, raw) {
+    if (!sec || !raw) return null;
+    const blocks = sec.blocks || [];
+    let bl = raw.blockId ? blocks.find((b) => b.id === raw.blockId) : null;
+    if (!bl && raw.blockKind) {
+      const matches = blocks.filter((b) => b.kind === raw.blockKind);
+      const idx = (raw.blockIndex == null || raw.blockIndex < 0) ? 0 : raw.blockIndex;
+      // Prefer same kind at the same absolute index when possible.
+      if (blocks[idx] && blocks[idx].kind === raw.blockKind) bl = blocks[idx];
+      else bl = matches[0] || null;
+    }
+    return bl || null;
+  }
+  function rememberedPageSelection() {
+    const entry = pageExpandEntry();
+    const raw = entry.sel;
+    if (!raw || !raw.kind) return null;
+    if (raw.kind === 'block') {
+      const sec = pageSections().find((x) => x.id === raw.sectionId) || globalBySel(raw.sectionId);
+      const bl = resolveBlockInSection(sec, raw);
+      const sectionId = raw.sectionId || (sec && sec.id) || null;
+      if (bl && sectionId) return { kind: 'block', sectionId: sectionId, blockId: bl.id };
+      if (sec && sectionId && pageSections().some((x) => x.id === sectionId)) return { kind: 'section', sectionId: sectionId };
+      return null;
+    }
+    if (raw.kind === 'section') {
+      if (pageSections().some((x) => x.id === raw.sectionId)) return { kind: 'section', sectionId: raw.sectionId };
+      return null;
+    }
+    if (raw.kind === 'header' || raw.kind === 'announcement' || raw.kind === 'footer') return { kind: raw.kind };
+    return null;
+  }
+  function persistPageSelection(sel) {
+    if (!ED || isCheckout()) return;
+    const entry = pageExpandEntry();
+    if (!sel || !sel.kind || sel.kind === 'theme-settings' || sel.kind === 'none') {
+      entry.sel = null;
+      persistTreeExpand();
+      return;
+    }
+    const next = { kind: sel.kind, sectionId: sel.sectionId || null, blockId: sel.blockId || null, blockKind: null, blockIndex: null };
+    if (sel.kind === 'block' && sel.sectionId && sel.blockId) {
+      const sec = pageSections().find((x) => x.id === sel.sectionId) || globalBySel(sel.sectionId);
+      const bl = sec && (sec.blocks || []).find((b) => b.id === sel.blockId);
+      if (bl) {
+        next.blockKind = bl.kind;
+        next.blockIndex = blockIndexInSection(sec, bl.id);
+      }
+      if (sec && pageSections().some((x) => x.id === sec.id)) {
+        entry.open[sec.id] = true;
+        entry.focus = sec.id;
+      }
+    } else if (sel.kind === 'section' && sel.sectionId && pageSections().some((x) => x.id === sel.sectionId)) {
+      entry.open[sel.sectionId] = true;
+      entry.focus = sel.sectionId;
+    }
+    entry.sel = next;
+    persistTreeExpand();
   }
   // Template sections expand independently (multiple may stay open at once).
   function applyPageSectionExpand() {
@@ -2300,6 +2384,8 @@
     const urls = [];
     const seen = new Set();
     const add = (url) => { if (url && !seen.has(url)) { seen.add(url); urls.push(url); } };
+    const themeFiles = (window.OS_THEME_ICONS && window.OS_THEME_ICONS.files) || [];
+    themeFiles.forEach((f) => add('online-store/assets/theme-icons/' + f.file));
     (D.SAMPLE.products || []).forEach((p) => add(p.image));
     (D.SAMPLE.collections || []).forEach((c) => add(c.image));
     (D.SAMPLE.blogs || []).forEach((b) => add(b.image));
@@ -2308,6 +2394,8 @@
     const out = urls.map((url, i) => {
       const uploaded = MEDIA_LIB_UPLOADED.find((f) => f.url === url);
       if (uploaded) return Object.assign({}, uploaded);
+      const themeHit = themeFiles.find((f) => url.endsWith('/' + f.file));
+      if (themeHit) return { id: 'ti' + i, name: themeHit.name, ext: 'SVG', kind: 'image', url: url };
       return { id: 'f' + i, name: NAMES[i % NAMES.length] + (i >= NAMES.length ? '-' + (Math.floor(i / NAMES.length) + 1) : ''), ext: EXT[i % EXT.length], kind: 'image', url: url };
     });
     if (urls[2]) out.splice(3, 0, { id: 'v1', name: 'product-demo', ext: 'WEBM', kind: 'video', url: urls[2] });
@@ -3018,6 +3106,7 @@
     ED.selection = sel;
     if (sel.kind !== 'theme-settings') ED.leftMode = 'sections';
     ensureSelectionVisibleInTree(sel);
+    persistPageSelection(sel);
     refreshTree();
     refreshRight();
     applyHighlight();
@@ -3930,7 +4019,7 @@
         const pt = p.value;
         const typeMatch = p.label.toLowerCase().indexOf(q) >= 0;
         const g = p.multi ? groupOf(pt) : null;
-        const tplMatches = g ? g.list.filter((t) => t.name.toLowerCase().indexOf(q) >= 0) : [];
+        const tplMatches = g ? sortedTplList(g.list.filter((t) => t.name.toLowerCase().indexOf(q) >= 0)) : [];
         if (!typeMatch && tplMatches.length === 0) return;
         groups += rowType(p);
         tplMatches.forEach((t) => { groups += rowTpl(pt, t, true); });
@@ -3959,7 +4048,7 @@
       // Template list for `level`. Shopify-style: no per-row edit menu — just switch/create.
       const g = groupOf(level); let html = '<div class="os-pkpop-list">';
       if (env === 'ck' && (level === 'upsell' || level === 'downsell')) html += flowControlHtml();
-      (g ? g.list : []).forEach((t) => { html += rowTpl(level, t, false); });
+      sortedTplList(g ? g.list : []).forEach((t) => { html += rowTpl(level, t, false); });
       html += '<div class="os-pg-create" data-create="' + esc(level) + '">' + I.plus + ' Create template</div>';
       html += '</div>';
       return html;
@@ -4064,7 +4153,7 @@
     const g = tplGroupOf(pt); if (!g) return;
     const back = h('<div class="modal-backdrop" style="z-index:240"></div>');
     const m = h('<div class="modal"></div>');
-    const opts = g.list.map((t) => '<option value="' + esc(t.id) + '">' + esc(t.name) + '</option>').join('');
+    const opts = sortedTplList(g.list).map((t) => '<option value="' + esc(t.id) + '">' + esc(t.name) + '</option>').join('');
     m.innerHTML =
       '<div class="modal-head">Create a template</div>' +
       '<div class="modal-body">' +
@@ -4150,6 +4239,27 @@
   }
   function defaultSelection() {
     if (isCheckout()) { const s = pageSections()[0]; return s ? { kind: 'section', sectionId: s.id } : { kind: 'theme-settings' }; }
+    const remembered = rememberedPageSelection();
+    if (remembered) {
+      if (remembered.kind === 'header' || remembered.kind === 'announcement') {
+        ED.sectionExpand.announcement = remembered.kind === 'announcement';
+        ED.sectionExpand.header = remembered.kind === 'header';
+        ED.sectionExpand.footer = false;
+        ED.expand.header = true;
+      } else if (remembered.kind === 'footer') {
+        ED.sectionExpand.announcement = false;
+        ED.sectionExpand.header = false;
+        ED.sectionExpand.footer = true;
+        ED.expand.footer = true;
+      } else {
+        ED.expand.template = true;
+        ED.sectionExpand.announcement = false;
+        ED.sectionExpand.header = false;
+        ED.sectionExpand.footer = false;
+        if (remembered.sectionId) revealSectionBlocks(remembered.sectionId);
+      }
+      return remembered;
+    }
     const openId = rememberedPageSectionId();
     if (openId) {
       ED.expand.template = true;
