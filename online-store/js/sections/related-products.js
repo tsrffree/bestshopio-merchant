@@ -20,6 +20,21 @@
     const all = (OS.sample && OS.sample.products) || [];
     return (ids || []).map((id) => all.find((p) => p.id === id)).filter(Boolean);
   }
+  function byCollection(collectionId, n) {
+    const cols = (OS.sample && OS.sample.collections) || [];
+    const col = cols.find((c) => c.id === collectionId);
+    if (!col) return [];
+    const all = (OS.sample && OS.sample.products) || [];
+    let base = byIds(Array.isArray(col.productIds) ? col.productIds : []);
+    if (!base.length) base = all.slice();
+    const want = Math.max(1, Math.min(n != null ? n : (Number(col.count) || base.length || 8), 16));
+    if (base.length >= want) return base.slice(0, want);
+    const pool = base.length ? base : all;
+    if (!pool.length) return [];
+    const out = [];
+    for (let i = 0; i < want; i++) out.push(pool[i % pool.length]);
+    return out;
+  }
   function autoList(current, n) {
     return ((OS.sample && OS.sample.products) || []).filter((p) => !current || p.id !== current.id).slice(0, n);
   }
@@ -29,7 +44,8 @@
     schema: [
       { info: 'With manual selection off, the row is filled by the store’s recommendation rule. Turning manual selection on replaces that row.' },
       { key: 'manual', control: 'toggle', label: 'Manual recommendations', default: false },
-      { key: 'products', control: 'ordered_products', label: 'Choose products', default: [], max: 12, visibleWhen: (v) => !!v.manual },
+      { key: 'products', control: 'ordered_products', label: 'Choose products', default: [], max: 12, visibleWhen: (v) => !!v.manual,
+        dynamicSource: { mode: 'collections', label: 'Products' } },
       { key: 'dynamic_count', control: 'range', label: 'Dynamic recommendations count', min: 2, max: 12, step: 1, default: 4, visibleWhen: (v) => !v.manual, info: 'How many rule-based products to show when none are picked by hand.' },
       { key: 'stack_mobile', control: 'toggle', label: 'Stack products on mobile', default: false },
       { key: 'show_wishlist', control: 'toggle', label: 'Show wishlist', default: true },
@@ -51,8 +67,16 @@
     render: function (s, blocks, ctx) {
       const t = ctx.tokens || {};
       const current = productOf(ctx);
-      const picked = s.manual ? byIds(s.products) : [];
-      const list = picked.length ? picked : autoList(current, s.dynamic_count || 4);
+      // Manual on: hand-picked → connected collection → rule fallback.
+      let list = [];
+      if (s.manual) {
+        list = byIds(s.products);
+        const src = s.products_dynamic_source;
+        if (!list.length && src && src !== true && src !== false) {
+          list = byCollection(src, s.columns_desktop ? s.columns_desktop * 2 : 8);
+        }
+      }
+      if (!list.length) list = autoList(current, s.dynamic_count || 4);
       const cols = ctx.mob ? (s.stack_mobile ? 1 : (s.columns_mobile || 2)) : (s.columns_desktop || 4);
       const bg = (s.background_end && s.background_end !== 'transparent')
         ? 'linear-gradient(180deg,' + (s.background || '#fff') + ',' + s.background_end + ')'

@@ -651,45 +651,20 @@
       '</div></div>';
   }
 
-  // RichTextEditor mock (editor.tsx). Toolbar groups mirror the real TinyMCE config:
-  //   undo redo | blocks(Paragraph) fontfamily fontsize | bold italic underline strikethrough
-  //   forecolor backcolor | link image media table | align | bullist numlist
-  // The editable area is a contenteditable div that keeps the product's HTML body intact.
+  // Shared compact rich-text editor (assets/richtext-editor.js): Paragraph | Insert icon | More.
   function richTextEditor(id, htmlValue, ph) {
-    const tb = [
-      '<button class="rt-btn" data-rt="undo" title="Undo">' + I.undo + '</button>',
-      '<button class="rt-btn" data-rt="redo" title="Redo">' + I.redo + '</button>',
-      '<span class="rt-sep"></span>',
-      '<select class="rt-select" data-rt="block" title="Paragraph format">' +
-        '<option value="P">Paragraph</option><option value="H1">Heading 1</option>' +
-        '<option value="H2">Heading 2</option><option value="H3">Heading 3</option>' +
-        '<option value="BLOCKQUOTE">Quote</option><option value="PRE">Code</option></select>',
-      '<select class="rt-select" data-rt="font" title="Font family">' +
-        '<option value="">Font</option><option value="Helvetica,Arial,sans-serif">Sans serif</option>' +
-        '<option value="Georgia,serif">Serif</option><option value="ui-monospace,Menlo,Consolas,monospace">Monospace</option></select>',
-      '<select class="rt-select" data-rt="size" title="Font size">' +
-        '<option value="">Size</option><option value="2">Small</option><option value="3">Normal</option>' +
-        '<option value="5">Large</option><option value="6">Huge</option></select>',
-      '<span class="rt-sep"></span>',
-      '<button class="rt-btn" data-rt="bold" title="Bold"><b>B</b></button>',
-      '<button class="rt-btn" data-rt="italic" title="Italic"><i>I</i></button>',
-      '<button class="rt-btn" data-rt="underline" title="Underline"><u>U</u></button>',
-      '<button class="rt-btn" data-rt="strikeThrough" title="Strikethrough"><s>S</s></button>',
-      '<span class="rt-sep"></span>',
-      '<button class="rt-btn" data-rt="forecolor" title="Text color">' + I.palette + '</button>',
-      '<button class="rt-btn" data-rt="backcolor" title="Highlight">' + I.highlighter + '</button>',
-      '<span class="rt-sep"></span>',
-      '<button class="rt-btn" data-rt="link" title="Insert link">' + I.link + '</button>',
-      '<button class="rt-btn" data-rt="image" title="Insert image">' + I.image + '</button>',
-      '<button class="rt-btn" data-rt="video" title="Insert video">' + I.video + '</button>',
-      '<button class="rt-btn" data-rt="table" title="Insert table">' + I.table + '</button>',
-      '<span class="rt-sep"></span>',
-      '<button class="rt-btn" data-rt="align" title="Align">' + I.alignLeft + '</button>',
-      '<button class="rt-btn" data-rt="bullist" title="Bulleted list">&#8226; List</button>',
-      '<button class="rt-btn" data-rt="numlist" title="Numbered list">1. List</button>',
-    ].join('');
+    if (window.BSRichText && typeof window.BSRichText.render === 'function') {
+      window.BSRichText.ensureStyles();
+      return '<div class="rich-text-editor" style="margin-top:4px" id="' + id + '-wrap" data-fkey="' + id + '">' +
+        window.BSRichText.render({
+          id: id,
+          html: htmlValue || '',
+          placeholder: ph || 'Add description...',
+          attrs: 'data-fkey="' + id + '" data-control="richtext"',
+        }).replace('data-rt-editor', 'id="' + id + '" data-rt-editor') +
+      '</div>';
+    }
     return '<div class="rich-text-editor" style="margin-top:4px;border:1px solid var(--ctl);border-radius:8px;overflow:hidden">' +
-      '<div class="rt-toolbar">' + tb + '</div>' +
       '<div class="rt-editor" id="' + id + '" contenteditable="true" data-ph="' + esc(ph) + '">' + (htmlValue || '') + '</div>' +
     '</div>';
   }
@@ -1244,45 +1219,18 @@
     });
   }
 
-  // RichTextEditor wiring (editor.tsx) — contenteditable + execCommand-driven toolbar mock.
+  // Shared compact rich-text wiring (assets/richtext-editor.js).
   function wireRichText(id, fn) {
+    const wrap = root.querySelector('#' + id + '-wrap');
+    const rootEl = wrap && (wrap.querySelector('[data-rt-root]') || wrap);
+    if (window.BSRichText && rootEl && typeof window.BSRichText.wire === 'function') {
+      window.BSRichText.ensureStyles();
+      window.BSRichText.wire(rootEl, (k, v) => { fn(v); markDirty(); }, {});
+      return;
+    }
     const ed = root.querySelector('#' + id);
     if (!ed) return;
-    const sync = () => { fn(ed.innerHTML); markDirty(); };
-    ed.addEventListener('input', sync);
-    const exec = (cmd, val) => { ed.focus(); try { document.execCommand(cmd, false, val); } catch (e) {} sync(); };
-    const toolbar = ed.parentElement.querySelector('.rt-toolbar');
-    if (!toolbar) return;
-    toolbar.querySelectorAll('[data-rt]').forEach((btn) => {
-      const cmd = btn.getAttribute('data-rt');
-      if (btn.tagName === 'SELECT') {
-        btn.onchange = () => {
-          const v = btn.value;
-          if (cmd === 'block') exec('formatBlock', v ? '<' + v + '>' : '<P>');
-          else if (cmd === 'font') { if (v) exec('fontName', v); }
-          else if (cmd === 'size') { if (v) exec('fontSize', v); }
-          btn.selectedIndex = 0;
-        };
-        return;
-      }
-      btn.onmousedown = (e) => e.preventDefault(); // keep selection while clicking the button
-      btn.onclick = () => {
-        switch (cmd) {
-          case 'undo': case 'redo':
-          case 'bold': case 'italic': case 'underline': case 'strikeThrough':
-            exec(cmd); break;
-          case 'forecolor': exec('foreColor', '#0066e6'); break;
-          case 'backcolor': exec('hiliteColor', '#fff3bf'); break;
-          case 'align': exec('justifyLeft'); break;
-          case 'bullist': exec('insertUnorderedList'); break;
-          case 'numlist': exec('insertOrderedList'); break;
-          case 'link': { const u = prompt('Link URL', 'https://'); if (u) exec('createLink', u); break; }
-          case 'image': { const u = prompt('Image URL', 'https://'); if (u) exec('insertImage', u); break; }
-          case 'video': { const u = prompt('Video URL (mp4)', 'https://'); if (u) exec('insertHTML', '<video controls src="' + u.replace(/"/g, '&quot;') + '" style="max-width:100%"></video>'); break; }
-          case 'table': exec('insertHTML', '<table><tr><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td>&nbsp;</td><td>&nbsp;</td></tr></table>'); break;
-        }
-      };
-    });
+    ed.addEventListener('input', () => { fn(ed.innerHTML); markDirty(); });
   }
 
   // counted textarea binder (updates the counter)

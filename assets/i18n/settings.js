@@ -87,6 +87,19 @@ window.I18N.extend({
   "Order Auto-Receive Time": "订单自动收货时间",
   "Days": "天",
   "Orders are auto-Receive after a set number of days from shipping (e.g., 10 days).": "订单在发货后达到设定天数将自动收货（例如 10 天）。",
+  // ---- Product URL (store-level, not PDP) ----
+  "Product URL": "商品链接",
+  "Store-level rules for SPU IDs and product / variant storefront links. Separate from product detail page theme settings.": "店铺级 SPU ID 与商品 / 变体前台链接规则。与商品详情页主题设置分开。",
+  "SPU custom field prefix": "SPU 自定义字段前缀",
+  "Numbers only. Prepended to the auto sequence that starts at 1001. Takes effect only when enabled.": "仅支持数字。拼在默认从 1001 开始的序号前面。开启后才生效。",
+  // Keep this hint in English (matches e.g. products/50001001).
+  "SPU ID will be displayed as": "SPU ID will be displayed as",
+  "Enable SEO title": "启用 SEO 标题",
+  "When enabled, the product SEO title replaces the handle in the path, and variant option values are appended as query parameters.": "启用后, 商品 SEO 标题会替换路径中的 handle, 变体规格值以查询参数拼到链接上。",
+  "URL structure after enabling:": "启用后的 URL 结构:",
+  "SPU URL": "SPU URL",
+  "Variant URL": "变体 URL",
+  "Opening an SPU link selects the first available variant and its options by default.": "访问 SPU 链接时, 默认选中该 SPU 下第一个可用变体及其规格。",
   // ---- Bestfulfill ERP ----
   "Bestfulfill ERP": "Bestfulfill ERP",
   "Enter the ERP identifiers Bestfulfill uses when processing fulfillment for this store.": "填写 Bestfulfill 为此店铺处理发货时使用的 ERP 标识。",

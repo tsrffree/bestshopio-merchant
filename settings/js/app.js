@@ -464,6 +464,50 @@
         '</div>' +
       '</div>';
 
+    // Product URL — store-level SPU prefix + SEO-title path. Separate from PDP theme.
+    const productUrl = b.productUrl || { spuPrefixEnabled: false, spuPrefix: '', seoTitleEnabled: false };
+    const spuOn = !!productUrl.spuPrefixEnabled;
+    const spuPrefixVal = String(productUrl.spuPrefix || '');
+    const seoOn = !!productUrl.seoTitleEnabled;
+    const effectiveSpuPrefix = () => {
+      const sw = root.querySelector('[data-toggle="spu-prefix"]');
+      const on = sw ? sw.classList.contains('on') : spuOn;
+      if (!on) return '';
+      const inp = root.querySelector('#spu-prefix');
+      return inp ? String(inp.value || '').replace(/\D/g, '') : spuPrefixVal;
+    };
+    const spuIdEg = (pfx) => {
+      const p = String(pfx || '');
+      return p + '1001, ' + p + '1002';
+    };
+    const spuPathEg = (pfx) => '/products/' + (pfx || '') + '1001/girl-winter-ankle-boot-cute-bunny-fashion-footwear';
+    const variantPathEg = (pfx) => spuPathEg(pfx) + '?Color=Khaki&ShoeSize=25';
+    const productUrlCard =
+      '<div class="panel card-pad mb-4">' + sectionTitle('Product URL', 'Store-level rules for SPU IDs and product / variant storefront links. Separate from product detail page theme settings.') +
+        '<div class="mt-4 flex flex-col gap-4">' +
+          block(
+            '<div class="flex items-center gap-3 mb-1"><span class="text-sm" style="font-weight:600;color:var(--ink)">SPU custom field prefix</span>' + toggle(spuOn, 'SPU custom field prefix', 'spu-prefix') + '</div>' +
+            '<div class="muted" style="font-size:12.5px">Numbers only. Prepended to the auto sequence that starts at 1001. Takes effect only when enabled.</div>' +
+            '<div id="spu-prefix-cascade" style="margin-top:12px' + (spuOn ? '' : ';display:none') + '">' +
+              '<input class="input" id="spu-prefix" inputmode="numeric" pattern="[0-9]*" maxlength="12" placeholder="e.g. 5000" value="' + esc(spuPrefixVal) + '" style="width:300px" />' +
+              '<div class="muted" style="font-size:12.5px;margin-top:6px">SPU ID will be displayed as <span class="subtle" id="spu-prefix-eg">' + esc(spuIdEg(spuPrefixVal)) + '</span>. e.g. <span class="subtle" id="spu-path-eg">products/' + esc((spuPrefixVal || '') + '1001') + '</span></div>' +
+            '</div>'
+          ) +
+          block(
+            '<div class="flex items-center gap-3 mb-1"><span class="text-sm" style="font-weight:600;color:var(--ink)">Enable SEO title</span>' + toggle(seoOn, 'Enable SEO title', 'seo-title') + '</div>' +
+            '<div class="muted" style="font-size:12.5px">When enabled, the product SEO title replaces the handle in the path, and variant option values are appended as query parameters.</div>' +
+            '<div id="seo-url-rules" style="margin-top:12px' + (seoOn ? '' : ';display:none') + '">' +
+              '<div class="muted" style="font-size:12.5px;margin-bottom:8px">URL structure after enabling:</div>' +
+              '<div style="font-size:12.5px;line-height:1.55;color:var(--ink);background:#fff;border:1px solid var(--line,#e5e7eb);border-radius:8px;padding:10px 12px">' +
+                '<div style="margin-bottom:8px"><span class="muted">SPU URL</span><br><code id="spu-url-eg" style="font-size:12px;word-break:break-all">' + esc(spuPathEg(spuOn ? spuPrefixVal : '')) + '</code></div>' +
+                '<div style="margin-bottom:8px"><span class="muted">Variant URL</span><br><code id="variant-url-eg" style="font-size:12px;word-break:break-all">' + esc(variantPathEg(spuOn ? spuPrefixVal : '')) + '</code></div>' +
+                '<div class="muted" style="font-size:12px">Opening an SPU link selects the first available variant and its options by default.</div>' +
+              '</div>' +
+            '</div>'
+          ) +
+        '</div>' +
+      '</div>';
+
     const bestfulfill = b.bestfulfill || { omsStoreId: '', omsIdentifier: '' };
     const bestfulfillCard =
       '<div class="panel card-pad mb-4">' + sectionTitle('Bestfulfill ERP', 'Enter the ERP identifiers Bestfulfill uses when processing fulfillment for this store.') +
@@ -495,7 +539,7 @@
 
     paint(
       pageHead('Basic settings') +
-      storeCard + productCard + orderCard + bestfulfillCard + socialCard +
+      storeCard + productCard + orderCard + productUrlCard + bestfulfillCard + socialCard +
       '<div class="flex justify-end">' + updateBtn + '</div>',
       true
     );
@@ -507,6 +551,13 @@
       const omsIdentifier = root.querySelector('#bestfulfill-oms-identifier');
       b.bestfulfill.omsStoreId = omsStoreId ? omsStoreId.value.trim() : '';
       b.bestfulfill.omsIdentifier = omsIdentifier ? omsIdentifier.value.trim() : '';
+      b.productUrl = b.productUrl || {};
+      const spuSw = root.querySelector('[data-toggle="spu-prefix"]');
+      const spuIn = root.querySelector('#spu-prefix');
+      const seoSw = root.querySelector('[data-toggle="seo-title"]');
+      b.productUrl.spuPrefixEnabled = !!(spuSw && spuSw.classList.contains('on'));
+      b.productUrl.spuPrefix = spuIn ? String(spuIn.value || '').replace(/\D/g, '') : '';
+      b.productUrl.seoTitleEnabled = !!(seoSw && seoSw.classList.contains('on'));
       toast('Settings updated successfully');
     });
     root.querySelectorAll('[data-preview]').forEach((b2) => b2.onclick = () => openPreviewModal(b2.getAttribute('data-preview')));
@@ -515,6 +566,42 @@
     root.querySelectorAll('[data-social]').forEach((b2) => b2.onclick = () => openLoginModal(b2.getAttribute('data-social')));
     const pfx = root.querySelector('#ord-prefix');
     if (pfx) pfx.oninput = () => { const v = pfx.value || ''; const eg = root.querySelector('#ord-prefix-eg'); if (eg) eg.textContent = v + '1001, ' + v + '1002, ' + v + '1003...'; };
+    const spuPfx = root.querySelector('#spu-prefix');
+    const refreshSpuExamples = () => {
+      const v = spuPfx ? String(spuPfx.value || '').replace(/\D/g, '') : '';
+      if (spuPfx && spuPfx.value !== v) spuPfx.value = v;
+      const eg = root.querySelector('#spu-prefix-eg');
+      if (eg) eg.textContent = spuIdEg(v);
+      const pathEg = root.querySelector('#spu-path-eg');
+      if (pathEg) pathEg.textContent = 'products/' + v + '1001';
+      const activePfx = effectiveSpuPrefix();
+      const spuEg = root.querySelector('#spu-url-eg');
+      if (spuEg) spuEg.textContent = spuPathEg(activePfx);
+      const varEg = root.querySelector('#variant-url-eg');
+      if (varEg) varEg.textContent = variantPathEg(activePfx);
+    };
+    if (spuPfx) spuPfx.oninput = refreshSpuExamples;
+    const spuToggle = root.querySelector('[data-toggle="spu-prefix"]');
+    const spuCascade = root.querySelector('#spu-prefix-cascade');
+    if (spuToggle && spuCascade) {
+      spuToggle.addEventListener('click', () => {
+        setTimeout(() => {
+          spuCascade.style.display = spuToggle.classList.contains('on') ? '' : 'none';
+          refreshSpuExamples();
+        }, 0);
+      });
+    }
+    const seoToggle = root.querySelector('[data-toggle="seo-title"]');
+    const seoRules = root.querySelector('#seo-url-rules');
+    if (seoToggle && seoRules) {
+      seoToggle.addEventListener('click', () => {
+        // paint() already toggles .on; sync visibility on next tick
+        setTimeout(() => {
+          seoRules.style.display = seoToggle.classList.contains('on') ? '' : 'none';
+          refreshSpuExamples();
+        }, 0);
+      });
+    }
     const bindNumberField = (id, errId, min, max, emptyMsg, rangeMsg, onOk) => {
       const input = root.querySelector('#' + id);
       const err = root.querySelector('#' + errId);

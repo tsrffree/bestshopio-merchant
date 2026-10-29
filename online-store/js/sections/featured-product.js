@@ -23,23 +23,29 @@
     '.fpx .fp-sizes{display:flex;gap:8px;flex-wrap:wrap}.fpx .fp-size{min-width:46px;height:38px;padding:0 10px;border:1px solid rgba(0,0,0,.2);border-radius:6px;background:none;cursor:pointer;font-size:13px;font-family:inherit}.fpx .fp-size.on{border-color:currentColor;background:rgba(0,0,0,.04);font-weight:600}',
     '.fpx .fp-qty{display:inline-flex;align-items:center;border:1px solid rgba(0,0,0,.2);border-radius:8px;overflow:hidden}.fpx .fp-qty button{width:38px;height:42px;border:0;background:none;cursor:pointer;font-size:16px}.fpx .fp-qty span{min-width:40px;text-align:center;font-weight:600}',
     '.fpx .fp-buy{display:flex;flex-direction:column;gap:10px;margin-top:4px}',
-    '.fpx .fp-buy.side{flex-direction:row;flex-wrap:wrap;align-items:stretch}',
     '.fpx .fp-buy-row{display:flex;align-items:center;gap:12px;width:100%}',
-    '.fpx .fp-add{flex:1;width:100%;min-height:46px}',
+    '.fpx .fp-add.full{width:100%;flex:none}',
+    '.fpx .fp-add{flex:1;width:100%;min-height:46px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font:inherit;font-weight:700}',
+    '.fpx .fp-atc-ic{display:inline-flex;align-items:center;justify-content:center;flex:none;line-height:0}',
+    '.fpx .fp-atc-ic svg{display:block;width:20px;height:20px}',
+    '.fpx .fp-atc-label{line-height:1;font:inherit;font-size:inherit;font-weight:inherit}',
     '.fpx .fp-buynow{width:100%;min-height:46px;border:1px solid rgba(0,0,0,.2);background:#fff;cursor:pointer;font:inherit;font-weight:700}',
     '.fpx .fp-dyn{display:flex;flex-direction:column;gap:8px;align-items:center;width:100%}',
     '.fpx .fp-paypal,.fpx .fp-chan{display:inline-flex;align-items:center;justify-content:center;width:100%;height:46px;border:0;cursor:pointer;padding:0 16px;font:inherit;font-weight:650}',
     '.fpx .fp-paypal{background:#ffc439;color:#003087}',
-    '.fpx .fp-chan.shop{background:#5a31f4;color:#fff}',
     '.fpx .fp-chan.apple{background:#111;color:#fff}',
     '.fpx .fp-chan.google{background:#fff;color:#202124;border:1px solid #dadce0}',
     '.fpx .fp-pay-more{padding:0;border:0;background:none;color:inherit;font:inherit;font-size:13px;text-decoration:underline;cursor:pointer}',
-    '.fpx .fp-installments{margin:0;font-size:12px;line-height:1.45;opacity:.85;text-align:center}',
     '.fpx .fp-safe{margin-top:6px;text-align:center;width:100%}',
+    /* Divider label always stays centered; Layout only moves the logo row */
     '.fpx .fp-safe-label{display:flex;align-items:center;gap:8px;justify-content:center;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.8}',
     '.fpx .fp-safe-label:before,.fpx .fp-safe-label:after{content:"";flex:1;height:1px;background:rgba(0,0,0,.18)}',
-    '.fpx .fp-safe-logos{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:8px}',
-    '.fpx .fp-safe-logo{display:inline-flex;align-items:center;justify-content:center;min-width:48px;height:26px;padding:0 6px;border:1px solid rgba(0,0,0,.12);border-radius:4px;background:#fff;font-size:9px;font-weight:700}',
+    '.fpx .fp-safe-logos{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px;margin-top:8px}',
+    '.fpx .fp-safe.align-left .fp-safe-logos{justify-content:flex-start}',
+    '.fpx .fp-safe.align-right .fp-safe-logos{justify-content:flex-end}',
+    '.fpx .fp-safe-logo{display:inline-flex;align-items:center;justify-content:center;height:var(--fp-safe-h,26px);min-width:calc(var(--fp-safe-h,26px) * 1.55);padding:0 6px;border:1px solid rgba(0,0,0,.12);border-radius:4px;background:#fff;font-size:9px;font-weight:700;box-sizing:border-box}',
+    '.fpx .fp-safe-logo.is-img{min-width:0;padding:0;border:0;background:transparent}',
+    '.fpx .fp-safe-logo img{display:block;height:var(--fp-safe-h,26px);width:auto;max-width:calc(var(--fp-safe-h,26px) * 2.4);object-fit:contain}',
     '.fpx .fp-qty-inline{display:inline-flex;align-items:center;width:120px;height:46px;border:1px solid rgba(0,0,0,.2);overflow:hidden;flex:none}',
     '.fpx .fp-qty-inline button{width:36px;height:100%;border:0;background:none;cursor:pointer}',
     '.fpx .fp-qty-inline span{min-width:36px;text-align:center;font-weight:600}',
@@ -68,34 +74,47 @@
     ], defaults: () => ({}) },
     quantity: { name: 'Quantity selector', fields: [], defaults: () => ({}) },
     buy: { name: 'Buy buttons', icon: 'cart', fields: [
+      { sub: 'Add to cart' },
       { key: 'show_quantity', control: 'toggle', label: 'Show quantity selector', default: false },
       { key: 'show_add', control: 'toggle', label: 'Show Add-to-cart button', default: true },
       { key: 'button_text', control: 'text', label: 'Add to cart text', default: 'Add to cart', visibleWhen: (v) => v.show_add !== false },
-      { key: 'show_buy_now', control: 'toggle', label: 'Show Buy now button', default: false },
-      { key: 'buy_now_text', control: 'text', label: 'Buy now label', default: 'Buy now', visibleWhen: (v) => !!v.show_buy_now },
-      { key: 'show_dynamic', control: 'toggle', label: 'Show dynamic checkout buttons', default: true },
-      { key: 'show_payment_options', control: 'toggle', label: 'Show more payment options', default: true },
-      { key: 'show_shop_installments', control: 'toggle', label: 'Show Shop Pay installments', default: false, visibleWhen: (v) => !!v.show_dynamic },
-      { key: 'button_shape', control: 'segmented', label: 'Button shape', default: 'normal', options: [
+      { key: 'atc_layout', control: 'segmented', label: 'Add to cart style', default: 'with-quantity', options: [
+        { value: 'with-quantity', label: 'With quantity' }, { value: 'full-width', label: 'Full width' },
+      ], visibleWhen: (v) => v.show_add !== false },
+      { key: 'atc_icon', control: 'select', label: 'Add to cart icon', default: 'bag-plus', options: ((window.OS_THEME_ICONS && window.OS_THEME_ICONS.options) ? window.OS_THEME_ICONS.options(true) : [{ value: 'none', label: 'None' }, { value: 'bag-plus', label: 'Bag plus' }, { value: 'gift', label: 'Gift' }, { value: 'heart', label: 'Heart' }, { value: 'star', label: 'Star' }]), visibleWhen: (v) => v.show_add !== false, info: 'Default is shopping bag with plus. Pick None to hide, or any icon from the theme library.' },
+      { key: 'atc_background', control: 'color', label: 'Add to cart background', default: '#FFC439', allowTransparent: true, blankValue: () => '#FFC439', info: 'Defaults to PayPal yellow. T = transparent.', visibleWhen: (v) => v.show_add !== false },
+      { key: 'atc_text_color', control: 'color', label: 'Add to cart text', default: '#FFFFFF', allowTransparent: true, blankValue: () => '#FFFFFF', info: 'Defaults to white. T = transparent.', visibleWhen: (v) => v.show_add !== false },
+      { key: 'atc_shape', control: 'segmented', label: 'Button shape', default: 'pill', options: [
         { value: 'normal', label: 'Normal' }, { value: 'pill', label: 'Pill' }, { value: 'square', label: 'Square' }, { value: 'custom', label: 'Custom' },
       ] },
-      { key: 'custom_radius', control: 'range', label: 'Custom radius', min: 0, max: 40, step: 1, unit: 'px', default: 8, visibleWhen: (v) => v.button_shape === 'custom' },
-      { key: 'button_layout', control: 'select', label: 'Button layout', default: 'stacked', options: [
-        { value: 'stacked', label: 'Stacked' }, { value: 'side-by-side', label: 'Side by side' },
-      ] },
-      { key: 'channels', control: 'multiselect', label: 'Channels', default: ['shop', 'paypal', 'apple_pay', 'google_pay'], options: [
-        { value: 'shop', label: 'Shop' }, { value: 'paypal', label: 'PayPal' }, { value: 'apple_pay', label: 'Apple Pay' }, { value: 'google_pay', label: 'Google Pay' },
+      { key: 'atc_custom_radius', control: 'range', label: 'Custom radius', min: 0, max: 40, step: 1, unit: 'px', default: 8, visibleWhen: (v) => (v.atc_shape || v.button_shape) === 'custom' },
+      { sub: 'Dynamic checkout' },
+      { key: 'show_dynamic', control: 'toggle', label: 'Show dynamic checkout buttons', default: true },
+      { key: 'channels', control: 'multiselect', label: 'Channels', default: ['buy_now', 'paypal'], options: [
+        { value: 'buy_now', label: 'Buy now' }, { value: 'paypal', label: 'PayPal' }, { value: 'apple_pay', label: 'Apple Pay' }, { value: 'google_pay', label: 'Google Pay' },
       ], visibleWhen: (v) => !!v.show_dynamic },
-      { key: 'channel_logo', control: 'toggle', label: 'Show channel logo', default: false, visibleWhen: (v) => !!v.show_dynamic },
-      { key: 'show_safe_checkout', control: 'toggle', label: 'Show safe checkout strip', default: false },
-      { key: 'safe_checkout_label', control: 'text', label: 'Safe checkout label', default: 'GUARANTEED SAFE CHECKOUT', visibleWhen: (v) => !!v.show_safe_checkout },
-      { key: 'trust_logos', control: 'multiselect', label: 'Trust logos', default: ['norton', 'paypal', 'visa', 'mastercard', 'mcafee', 'money_back'], options: [
+      { key: 'buy_now_text', control: 'text', label: 'Buy now label', default: 'Buy now', visibleWhen: (v) => !!v.show_dynamic && Array.isArray(v.channels) && v.channels.indexOf('buy_now') >= 0 },
+      { key: 'buy_now_background', control: 'color', label: 'Buy now background', default: '#000000', allowTransparent: true, blankValue: () => '#000000', info: 'Defaults to black. T = transparent.', visibleWhen: (v) => !!v.show_dynamic && Array.isArray(v.channels) && v.channels.indexOf('buy_now') >= 0 },
+      { key: 'buy_now_text_color', control: 'color', label: 'Buy now text', default: '#FFFFFF', allowTransparent: true, blankValue: () => '#FFFFFF', info: 'Defaults to white. T = transparent.', visibleWhen: (v) => !!v.show_dynamic && Array.isArray(v.channels) && v.channels.indexOf('buy_now') >= 0 },
+      { key: 'dyn_shape', control: 'segmented', label: 'Button shape', default: 'normal', options: [
+        { value: 'normal', label: 'Normal' }, { value: 'pill', label: 'Pill' }, { value: 'square', label: 'Square' }, { value: 'custom', label: 'Custom' },
+      ], visibleWhen: (v) => !!v.show_dynamic },
+      { key: 'dyn_custom_radius', control: 'range', label: 'Custom radius', min: 0, max: 40, step: 1, unit: 'px', default: 8, visibleWhen: (v) => !!v.show_dynamic && (v.dyn_shape || v.button_shape) === 'custom' },
+      { key: 'show_payment_options', control: 'toggle', label: 'Show more payment options', default: true, visibleWhen: (v) => !!v.show_dynamic && Array.isArray(v.channels) && v.channels.length > 0 },
+      { key: 'channel_logo', control: 'toggle', label: 'Show channel logo', default: true, visibleWhen: (v) => !!v.show_dynamic },
+      { key: 'show_safe_checkout', control: 'toggle', label: 'Show safe checkout strip', default: true, visibleWhen: (v) => !!v.show_dynamic },
+      { key: 'safe_checkout_align', control: 'segmented', label: 'Layout', default: 'center', options: [
+        { value: 'left', label: 'Left' }, { value: 'center', label: 'Center' }, { value: 'right', label: 'Right' },
+      ], visibleWhen: (v) => !!v.show_dynamic && !!v.show_safe_checkout },
+      { key: 'safe_checkout_label', control: 'text', label: 'Safe checkout label', default: 'GUARANTEED SAFE CHECKOUT', visibleWhen: (v) => !!v.show_dynamic && !!v.show_safe_checkout },
+      { key: 'trust_logos', control: 'multiselect', label: 'Trust logos', default: ['visa', 'mastercard', 'amex', 'paypal', 'apple_pay', 'google_pay'], options: [
         { value: 'norton', label: 'Norton' }, { value: 'mcafee', label: 'McAfee' }, { value: 'money_back', label: 'Money back' },
         { value: 'visa', label: 'Visa' }, { value: 'mastercard', label: 'Mastercard' }, { value: 'amex', label: 'Amex' },
         { value: 'discover', label: 'Discover' }, { value: 'diners', label: 'Diners Club' }, { value: 'amazon', label: 'Amazon' },
-        { value: 'paypal', label: 'PayPal' }, { value: 'shop', label: 'Shop' }, { value: 'apple_pay', label: 'Apple Pay' },
+        { value: 'paypal', label: 'PayPal' }, { value: 'apple_pay', label: 'Apple Pay' },
         { value: 'google_pay', label: 'Google Pay' }, { value: 'venmo', label: 'Venmo' }, { value: 'bancontact', label: 'Bancontact' }, { value: 'giropay', label: 'Giropay' },
-      ], visibleWhen: (v) => !!v.show_safe_checkout },
+      ], visibleWhen: (v) => !!v.show_dynamic && !!v.show_safe_checkout },
+      { key: 'trust_logo_size', control: 'range', label: 'Logo size', min: 20, max: 56, step: 1, unit: 'px', default: 28, visibleWhen: (v) => !!v.show_dynamic && !!v.show_safe_checkout },
     ], defaults: () => ({}) },
     description: { name: 'Description', icon: 'text', fields: [
       { key: 'heading', control: 'text', label: 'Heading', default: 'Details' },
@@ -122,7 +141,7 @@
       { id: OS.uid('fp'), kind: 'price', hidden: false, settings: { show_compare_at: true, show_savings: true } },
       { id: OS.uid('fp'), kind: 'variant', hidden: false, settings: { picker_type: 'buttons' } },
       { id: OS.uid('fp'), kind: 'quantity', hidden: false, settings: {} },
-      { id: OS.uid('fp'), kind: 'buy', hidden: false, settings: { show_quantity: false, show_add: true, button_text: 'Add to cart', show_buy_now: false, show_dynamic: true, show_payment_options: true, show_shop_installments: false, button_shape: 'normal', button_layout: 'stacked', channels: ['paypal'], channel_logo: false, show_safe_checkout: false } },
+      { id: OS.uid('fp'), kind: 'buy', hidden: false, settings: { show_quantity: false, show_add: true, button_text: 'Add to cart', atc_layout: 'with-quantity', atc_icon: 'bag-plus', atc_background: '#FFC439', atc_text_color: '#FFFFFF', atc_shape: 'pill', atc_custom_radius: 8, show_dynamic: true, channels: ['buy_now', 'paypal'], buy_now_text: 'Buy now', buy_now_background: '#000000', buy_now_text_color: '#FFFFFF', dyn_shape: 'normal', dyn_custom_radius: 8, show_payment_options: true, channel_logo: true, show_safe_checkout: true, safe_checkout_align: 'center', safe_checkout_label: 'GUARANTEED SAFE CHECKOUT', trust_logos: ['visa', 'mastercard', 'amex', 'paypal', 'apple_pay', 'google_pay'], trust_logo_size: 28 } },
       { id: OS.uid('fp'), kind: 'description', hidden: false, settings: { heading: 'Details', content: 'Soft, breathable linen-feel fabric with a relaxed fit. Machine washable. Designed in-house and made to last.' } },
     ]),
     render: function (s, blocks, ctx) {
@@ -152,37 +171,63 @@
         }
         else if (kind === 'quantity') { body = '<div><div class="fp-vlabel">Quantity</div><div class="fp-qty"><button data-q="-">−</button><span>1</span><button data-q="+">+</button></div></div>'; }
         else if (kind === 'buy') {
-          const radius = b.button_shape === 'pill' ? 999 : (b.button_shape === 'square' ? 0 : (b.button_shape === 'custom' ? Number(b.custom_radius == null ? 8 : b.custom_radius) : 8));
-          const radiusStyle = 'border-radius:' + radius + 'px';
-          const expressIds = ['shop', 'paypal', 'apple_pay', 'google_pay'];
-          let channels = Array.isArray(b.channels) ? b.channels.filter((id) => expressIds.indexOf(id) >= 0) : [];
+          const shapeRadius = (shape, custom) => (shape === 'pill' ? 999 : (shape === 'square' ? 0 : (shape === 'custom' ? Number(custom == null ? 8 : custom) : 8)));
+          const atcShape = b.atc_shape || b.button_shape || 'normal';
+          const dynShape = b.dyn_shape || b.button_shape || 'normal';
+          const atcRadiusStyle = 'border-radius:' + shapeRadius(atcShape, b.atc_custom_radius != null ? b.atc_custom_radius : b.custom_radius) + 'px';
+          const dynRadiusStyle = 'border-radius:' + shapeRadius(dynShape, b.dyn_custom_radius != null ? b.dyn_custom_radius : b.custom_radius) + 'px';
+          const atcFull = b.atc_layout === 'full-width';
+          const allowed = ['buy_now', 'paypal', 'apple_pay', 'google_pay'];
+          let channels = Array.isArray(b.channels) ? b.channels.filter((id) => allowed.indexOf(id) >= 0) : null;
+          if (channels == null) channels = ['buy_now', 'paypal'];
+          if (b.show_buy_now && channels.indexOf('buy_now') < 0) channels = ['buy_now'].concat(channels);
           if (!channels.length && b.show_paypal) channels = ['paypal'];
-          if (!channels.length) channels = ['shop', 'paypal', 'apple_pay', 'google_pay'];
           const showDyn = b.show_dynamic !== false || !!b.show_paypal;
-          const showPayMore = b.show_payment_options !== false;
+          const showPayMore = showDyn && channels.length > 0 && b.show_payment_options !== false;
+          const buyNowLabel = b.buy_now_text || 'Buy now';
+          const atcColorStyle = (b.atc_background ? ';background:' + b.atc_background : '') + (b.atc_text_color ? ';color:' + b.atc_text_color : '') + ';border:0;font:inherit;font-weight:700';
+          const buyNowColorStyle = ';background:' + (b.buy_now_background || '#fff') + ';color:' + (b.buy_now_text_color || 'inherit') + ';border:0';
+          const paySrc = {
+            visa: 'settings/assets/payments/visa.svg', mastercard: 'settings/assets/payments/mastercard.svg', amex: 'settings/assets/payments/amex.svg',
+            discover: 'settings/assets/payments/discover.svg', diners: 'settings/assets/payments/diners.svg', paypal: 'settings/assets/payments/paypal-logo.svg',
+            apple_pay: 'settings/assets/payments/applepay.svg', google_pay: 'settings/assets/payments/googlepay.svg', amazon: 'settings/assets/payments/amazonpay.svg',
+          };
+          const trustMap = { norton: 'Norton', mcafee: 'McAfee', money_back: '100% Money Back', paypal: 'PayPal', visa: 'Visa', mastercard: 'Mastercard', amex: 'Amex', discover: 'Discover', diners: 'Diners Club', amazon: 'Amazon', apple_pay: 'Apple Pay', google_pay: 'Google Pay', venmo: 'Venmo', bancontact: 'Bancontact', giropay: 'Giropay' };
           const chanBtn = (id) => {
-            if (id === 'paypal') return '<button type="button" class="fp-paypal" style="' + radiusStyle + '">PayPal</button>';
-            const map = { shop: ['shop', 'Shop'], apple_pay: ['apple', 'Apple Pay'], google_pay: ['google', 'G Pay'] };
+            if (id === 'buy_now') return '<button type="button" class="fp-buynow" style="' + dynRadiusStyle + buyNowColorStyle + '">' + OS.esc(buyNowLabel) + '</button>';
+            if (id === 'paypal') return '<button type="button" class="fp-paypal" style="' + dynRadiusStyle + '">PayPal</button>';
+            const map = { apple_pay: ['apple', 'Apple Pay'], google_pay: ['google', 'G Pay'] };
             const m = map[id];
             if (!m) return '';
-            return '<button type="button" class="fp-chan ' + m[0] + '" style="' + radiusStyle + '">' + OS.esc(m[1]) + '</button>';
+            return '<button type="button" class="fp-chan ' + m[0] + '" style="' + dynRadiusStyle + '">' + OS.esc(m[1]) + '</button>';
           };
           const dynHtml = showDyn ? channels.map(chanBtn).join('') : '';
-          const installment = (showDyn && b.show_shop_installments && channels.indexOf('shop') >= 0)
-            ? '<p class="fp-installments">Pay in 2 interest-free installments of <b>' + OS.money(Math.round((p.price || 0) / 2 * 100) / 100) + '</b> with <span style="color:#5a31f4;font-weight:700">shop</span></p>'
+          const dyn = (dynHtml || showPayMore) ? '<div class="fp-dyn">' + dynHtml + (showPayMore ? '<button type="button" class="fp-pay-more">More payment options</button>' : '') + '</div>' : '';
+          const trustList = (Array.isArray(b.trust_logos) && b.trust_logos.length ? b.trust_logos : ['norton', 'paypal', 'visa', 'mastercard', 'mcafee', 'money_back']).filter((id) => id && id !== 'shop');
+          const logoSize = Math.max(20, Math.min(56, Number(b.trust_logo_size == null ? 28 : b.trust_logo_size)));
+          const safeAlign = ({ left: 'left', right: 'right' }[b.safe_checkout_align] || 'center');
+          const safe = (showDyn && b.show_safe_checkout)
+            ? '<div class="fp-safe align-' + safeAlign + '" style="--fp-safe-h:' + logoSize + 'px"><div class="fp-safe-label">' + OS.esc(b.safe_checkout_label || 'GUARANTEED SAFE CHECKOUT') + '</div><div class="fp-safe-logos">' + trustList.map((id) => {
+              const label = trustMap[id] || id;
+              if (paySrc[id]) return '<span class="fp-safe-logo is-img" title="' + OS.esc(label) + '"><img src="' + OS.esc(paySrc[id]) + '" alt="' + OS.esc(label) + '"></span>';
+              return '<span class="fp-safe-logo">' + OS.esc(label) + '</span>';
+            }).join('') + '</div></div>'
             : '';
-          const dyn = (dynHtml || showPayMore || installment) ? '<div class="fp-dyn">' + dynHtml + (showPayMore ? '<button type="button" class="fp-pay-more">More payment options</button>' : '') + installment + '</div>' : '';
-          const trustMap = { norton: 'Norton', mcafee: 'McAfee', money_back: '100% Money Back', paypal: 'PayPal', visa: 'VISA', mastercard: 'Mastercard', amex: 'AMEX', discover: 'Discover', diners: 'Diners', amazon: 'Amazon', shop: 'shop', apple_pay: 'Apple Pay', google_pay: 'G Pay', venmo: 'Venmo', bancontact: 'Bancontact', giropay: 'Giropay' };
-          const trustList = Array.isArray(b.trust_logos) && b.trust_logos.length ? b.trust_logos : ['norton', 'paypal', 'visa', 'mastercard', 'mcafee', 'money_back'];
-          const safe = b.show_safe_checkout
-            ? '<div class="fp-safe"><div class="fp-safe-label">' + OS.esc(b.safe_checkout_label || 'GUARANTEED SAFE CHECKOUT') + '</div><div class="fp-safe-logos">' + trustList.map((id) => '<span class="fp-safe-logo">' + OS.esc(trustMap[id] || id) + '</span>').join('') + '</div></div>'
+          const qty = b.show_quantity ? '<div class="fp-qty-inline" style="' + atcRadiusStyle + '"><button type="button" data-q="-">-</button><span>1</span><button type="button" data-q="+">+</button></div>' : '';
+          const atcIcon = b.atc_icon == null ? 'bag-plus' : b.atc_icon;
+          const atcIconHtml = (atcIcon && atcIcon !== 'none' && window.OS_THEME_ICONS)
+            ? '<span class="fp-atc-ic" aria-hidden="true">' + window.OS_THEME_ICONS.svg(atcIcon, 20) + '</span>'
             : '';
-          const qty = b.show_quantity ? '<div class="fp-qty-inline" style="' + radiusStyle + '"><button type="button" data-q="-">-</button><span>1</span><button type="button" data-q="+">+</button></div>' : '';
-          const add = b.show_add !== false ? '<button class="fp-add" style="' + OS.btnStyle(t) + ';' + radiusStyle + '">' + OS.esc(b.button_text || 'Add to cart') + '</button>' : '';
-          const buyNow = b.show_buy_now ? '<button type="button" class="fp-buynow" style="' + radiusStyle + '">' + OS.esc(b.buy_now_text || 'Buy now') + '</button>' : '';
-          body = '<div class="fp-buy' + (b.button_layout === 'side-by-side' ? ' side' : '') + '">' +
-            ((qty || add) ? '<div class="fp-buy-row">' + qty + add + '</div>' : '') +
-            buyNow + dyn + safe + '</div>';
+          const add = b.show_add !== false
+            ? '<button class="fp-add' + (atcFull ? ' full' : '') + '" style="' + OS.btnStyle(t) + ';' + atcRadiusStyle + atcColorStyle + '">' + atcIconHtml + '<span class="fp-atc-label">' + OS.esc(b.button_text || 'Add to cart') + '</span></button>'
+            : '';
+          let primary = '';
+          if (qty || add) {
+            primary = atcFull
+              ? ((qty ? '<div class="fp-buy-row">' + qty + '</div>' : '') + add)
+              : '<div class="fp-buy-row">' + qty + add + '</div>';
+          }
+          body = '<div class="fp-buy">' + primary + dyn + safe + '</div>';
         }
         else if (kind === 'description') { if (!b.content) return ''; body = (b.heading ? '<div class="fp-desc-h">' + OS.esc(b.heading) + '</div>' : '') + '<div class="fp-rich">' + b.content + '</div>'; }
         else if (kind === 'share') { body = '<div class="fp-share"><span style="opacity:.7">Share</span><a>f</a><a>𝕏</a><a>◎</a></div>'; }

@@ -59,6 +59,7 @@
     eyeOff: svg('<path d="M9.9 4.24A9 9 0 0 1 12 4c6 0 10 7 10 7a13 13 0 0 1-1.67 2.18M6.6 6.6A13 13 0 0 0 2 11s4 7 10 7a9 9 0 0 0 4.5-1.2"/><path d="m2 2 20 20"/>', 14),
     clock: svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', 15),
     trash: svg('<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>', 14),
+    database: svg('<ellipse cx="12" cy="5" rx="7" ry="3"/><path d="M5 5v7c0 1.7 3.1 3 7 3s7-1.3 7-3V5"/><path d="M5 12v7c0 1.7 3.1 3 7 3s7-1.3 7-3v-7"/>', 14),
     grip: svg('<circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/>', 16),
     plus: svg('<path d="M12 5v14M5 12h14"/>', 14),
     plusCircle: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg>',
@@ -82,6 +83,11 @@
     redo: svg('<path d="m15 7 5 5-5 5"/><path d="M19 12h-8a6 6 0 0 0-6 6"/>', 16),
     lock: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="16" r="1"/><rect x="3" y="10" width="18" height="12" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/></svg>',
     image: svg('<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/>', 14),
+    video: svg('<rect x="2" y="6" width="14" height="12" rx="2"/><path d="m22 8-6 4 6 4z"/>', 16),
+    table: svg('<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>', 16),
+    palette: svg('<circle cx="13.5" cy="6.5" r="1"/><circle cx="17.5" cy="10.5" r="1"/><circle cx="8.5" cy="7.5" r="1"/><circle cx="6.5" cy="12.5" r="1"/><path d="M12 2a10 10 0 1 0 0 20 2.5 2.5 0 0 0 2-4 2.5 2.5 0 0 1 2-4h2a4 4 0 0 0 4-4 10 10 0 0 0-10-8z"/>', 16),
+    highlighter: svg('<path d="m9 11-6 6v3h3l6-6"/><path d="M14 4l6 6-7 7-6-6z"/>', 16),
+    alignLeft: svg('<path d="M3 6h18M3 12h12M3 18h15"/>', 16),
     // Block-type glyphs matched to the reference picker. Same 16px slot as the tree icons.
     text: svg('<path d="M4 7h16M4 12h16M4 17h10"/>', 16),
     heading: svg('<path d="M4 6h16" stroke-width="2.4"/><path d="M4 12h16M4 17h9"/>', 16),
@@ -263,7 +269,14 @@
     ckRecalc: function () { /* assigned by the editor to re-render the canvas */ },
     goCheckoutPage: function (page) { goCheckoutPage(page); },
     goCheckout: function (handle) { goCheckout(handle || (ED && ED.meta && ED.meta.handle) || 'aura'); },
-    css: function (id, text) { if (document.getElementById('oscss-' + id)) return; const st = document.createElement('style'); st.id = 'oscss-' + id; st.textContent = text; document.head.appendChild(st); },
+    // Preview cart (theme editor). ATC drops the current variant in; no live checkout.
+    cart: null,
+    css: function (id, text) {
+      // Always refresh so section CSS edits apply after a soft reload of the module.
+      let st = document.getElementById('oscss-' + id);
+      if (!st) { st = document.createElement('style'); st.id = 'oscss-' + id; document.head.appendChild(st); }
+      st.textContent = Array.isArray(text) ? text.join('') : String(text || '');
+    },
     secSpace: (t, mob) => ((t && t.layout) ? (mob ? t.layout.section_spacing_mobile : t.layout.section_spacing_desktop) : (mob ? 40 : 64)),
     pagePad: (t, mob) => ((t && t.layout) ? (mob ? t.layout.page_horizontal_padding_mobile : t.layout.page_horizontal_padding_desktop) : (mob ? 16 : 40)),
     gridGap: (t, mob) => ((t && t.layout) ? (mob ? t.layout.grid_gap_mobile : t.layout.grid_gap_desktop) : (mob ? 16 : 24)),
@@ -275,6 +288,14 @@
       const minPad = opts.fullWidth ? (mob ? 16 : 24) : OS.pagePad(t, mob);
       if (opts.fullWidth) return minPad + 'px';
       return 'max(' + minPad + 'px,calc((100% - ' + OS.pageWidth(t) + 'px) / 2))';
+    },
+    // Live theme tokens for schema blankValue (Buy buttons inherit primary button colors).
+    themeTokens: () => (ED && ED.theme ? (isCheckout() ? ED.theme.checkout.settings : ED.theme.settings) : null),
+    // Resolve a Colors-group token for color-field blankValue (OOB reveal).
+    themeColor: (key, fb) => {
+      const t = ED && ED.theme ? (isCheckout() ? ED.theme.checkout.settings : ED.theme.settings) : null;
+      const c = (t && t.colors) || t || {};
+      return (c && c[key]) || fb || '';
     },
     // BestCheckout page-library presets still ship older checkout-* sections that
     // read these checkout-surface tokens. Keep them on the shared OS so those
@@ -319,6 +340,151 @@
     t.innerHTML = '<i></i>' + esc(msg);
     document.body.appendChild(t); setTimeout(() => t.remove(), 2400);
   }
+
+  // ------------------------------------------------------------------ preview cart (Shopify-like ATC feedback)
+  (function initPreviewCart() {
+    const CART_KEY = 'os_preview_cart_v1';
+    const reduceMotion = () => !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    function load() {
+      try { return JSON.parse(sessionStorage.getItem(CART_KEY) || '{"lines":[]}'); }
+      catch (e) { return { lines: [] }; }
+    }
+    function save(state) {
+      try { sessionStorage.setItem(CART_KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
+    }
+    let state = load();
+    if (!Array.isArray(state.lines)) state = { lines: [] };
+    const listeners = [];
+    function count() {
+      return state.lines.reduce((n, line) => n + Math.max(0, Number(line.qty) || 0), 0);
+    }
+    function paintBadges(bump) {
+      const n = count();
+      document.querySelectorAll('[data-os-cart-count]').forEach((el) => {
+        el.hidden = n <= 0;
+        el.textContent = n > 99 ? '99+' : String(n);
+        if (bump && n > 0) {
+          el.classList.remove('is-bump');
+          void el.offsetWidth;
+          el.classList.add('is-bump');
+        }
+      });
+      document.querySelectorAll('[data-os-cart-btn]').forEach((el) => {
+        if (!bump) return;
+        el.classList.remove('is-cart-bump');
+        void el.offsetWidth;
+        el.classList.add('is-cart-bump');
+      });
+    }
+    function emit() {
+      listeners.forEach((fn) => { try { fn(state); } catch (e) { /* ignore */ } });
+      paintBadges(true);
+    }
+    function flyToCart(opts) {
+      opts = opts || {};
+      if (reduceMotion()) return;
+      const fromEl = opts.fromEl;
+      const image = opts.image || '';
+      const cartBtn = document.querySelector('.os-frame [data-os-cart-btn], #os-frame [data-os-cart-btn], [data-os-cart-btn]');
+      if (!fromEl || !cartBtn) return;
+      const a = fromEl.getBoundingClientRect();
+      const b = cartBtn.getBoundingClientRect();
+      if (!a.width || !b.width) return;
+      const size = 56;
+      const startX = a.left + a.width / 2 - size / 2;
+      const startY = a.top + a.height / 2 - size / 2;
+      const endX = b.left + b.width / 2 - size / 2;
+      const endY = b.top + b.height / 2 - size / 2;
+      const dx = endX - startX;
+      const dy = endY - startY;
+      const arc = Math.max(72, Math.min(140, Math.abs(dx) * 0.28 + 56));
+      const midX = dx * 0.45;
+      const midY = Math.min(dy * 0.35, dy) - arc;
+      const ghost = document.createElement('div');
+      ghost.className = 'os-atc-fly';
+      if (image) ghost.style.backgroundImage = 'url("' + String(image).replace(/"/g, '\\"') + '")';
+      else ghost.classList.add('os-atc-fly--plain');
+      ghost.style.left = Math.round(startX) + 'px';
+      ghost.style.top = Math.round(startY) + 'px';
+      document.body.appendChild(ghost);
+      const finish = () => {
+        if (ghost.parentNode) ghost.parentNode.removeChild(ghost);
+        cartBtn.classList.remove('is-cart-bump');
+        void cartBtn.offsetWidth;
+        cartBtn.classList.add('is-cart-bump');
+        const badge = cartBtn.querySelector('[data-os-cart-count]');
+        if (badge) {
+          badge.classList.remove('is-bump');
+          void badge.offsetWidth;
+          badge.classList.add('is-bump');
+        }
+      };
+      if (typeof ghost.animate === 'function') {
+        const anim = ghost.animate([
+          { transform: 'translate(0px,0px) scale(1) rotate(-6deg)', opacity: 1, offset: 0 },
+          { transform: 'translate(' + Math.round(midX) + 'px,' + Math.round(midY) + 'px) scale(.72) rotate(8deg)', opacity: 1, offset: 0.55 },
+          { transform: 'translate(' + Math.round(dx) + 'px,' + Math.round(dy) + 'px) scale(.18) rotate(0deg)', opacity: 0.2, offset: 1 },
+        ], { duration: 720, easing: 'cubic-bezier(.22,.7,.2,1)', fill: 'forwards' });
+        anim.onfinish = finish;
+        anim.oncancel = finish;
+      } else {
+        void ghost.offsetWidth;
+        ghost.style.transform = 'translate(' + Math.round(dx) + 'px,' + Math.round(dy) + 'px) scale(.22)';
+        ghost.style.opacity = '0.15';
+        setTimeout(finish, 620);
+      }
+    }
+    OS.cart = {
+      get: function () { return state; },
+      count: count,
+      paintBadges: paintBadges,
+      flyToCart: flyToCart,
+      onChange: function (fn) {
+        if (typeof fn !== 'function') return function () {};
+        listeners.push(fn);
+        return function () {
+          const i = listeners.indexOf(fn);
+          if (i >= 0) listeners.splice(i, 1);
+        };
+      },
+      add: function (item) {
+        item = item || {};
+        const qty = Math.max(1, Number(item.qty) || 1);
+        const variantId = item.variantId != null ? String(item.variantId) : '';
+        const lines = state.lines.slice();
+        const idx = variantId ? lines.findIndex((line) => String(line.variantId) === variantId) : -1;
+        if (idx >= 0) {
+          lines[idx] = Object.assign({}, lines[idx], { qty: (Number(lines[idx].qty) || 0) + qty });
+        } else {
+          lines.push({
+            id: uid('line'),
+            variantId: variantId,
+            productId: item.productId || '',
+            title: item.title || 'Product',
+            image: item.image || '',
+            price: Number(item.price) || 0,
+            options: item.options || '',
+            qty: qty,
+          });
+        }
+        state = { lines: lines };
+        save(state);
+        emit();
+        return state;
+      },
+    };
+    OS.css('preview-cart', [
+      '.hd-ic[data-os-cart-btn]{position:relative}',
+      '.hd-cart-count{position:absolute;top:2px;right:2px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:#111;color:#fff;font-size:10px;font-weight:700;line-height:16px;text-align:center;box-sizing:border-box;pointer-events:none}',
+      '.hd-cart-count.is-bump,.hd-ic[data-os-cart-btn].is-cart-bump{animation:os-cart-bump .45s cubic-bezier(.2,.8,.2,1)}',
+      '@keyframes os-cart-bump{0%{transform:scale(1)}35%{transform:scale(1.28)}70%{transform:scale(.92)}100%{transform:scale(1)}}',
+      '.os-atc-fly{position:fixed;z-index:99999;width:56px;height:56px;border-radius:12px;background:#103635 center/cover no-repeat;box-shadow:0 12px 32px rgba(0,0,0,.28);pointer-events:none;will-change:transform,opacity;transition:transform .55s cubic-bezier(.22,.7,.2,1),opacity .55s ease}',
+      '.os-atc-fly--plain{background-image:none;background-color:#103635}',
+      '@media (prefers-reduced-motion:reduce){.hd-cart-count.is-bump,.hd-ic[data-os-cart-btn].is-cart-bump{animation:none}.os-atc-fly{display:none}}',
+    ].join(''));
+    // Paint after header hydrate on first canvas paint.
+    setTimeout(function () { paintBadges(false); }, 0);
+  })();
 
   // ==========================================================================
   //  STATE  (3 snapshots + UI state, mirrors theme-editor.canvas)
@@ -550,6 +716,7 @@
       ckTplSel: {},                    // { checkout|upsell|downsell|thankyou: templateId } — active checkout template per type
       previewSel: {},                  // { product|collection: resourceId } — preview only; never persisted
       device: 'desktop',
+      previewControls: true,           // Shopify-style inspector affordances over the live preview
       fullPreview: false,              // editor chrome collapsed; canvas still reflects unsaved working state
       previewOnly: false,              // buyer-only snapshot route; disables editor selection affordances
       leftMode: 'sections',            // 'sections' | 'settings'
@@ -903,7 +1070,7 @@
     if (host.exitTo) ED.exitTo = host.exitTo;
     applyBcHostTemplate(host.tpl, host.saved);
     closeBuilder(); ensureStyles();
-    const b = h('<div class="os-builder i18n-skip' + (ED.fullPreview ? ' os-full-preview' : '') + '" id="os-builder"></div>');
+    const b = h('<div class="os-builder i18n-skip' + (ED.fullPreview ? ' os-full-preview' : '') + (!ED.previewControls ? ' os-controls-off' : '') + '" id="os-builder"></div>');
     b.appendChild(topBar());
     const body = h('<div class="os-body"></div>');
     body.appendChild(leftPanel());
@@ -938,6 +1105,9 @@
     const modeSettings = '<img alt="" aria-hidden="true" width="24" height="24" src="data:image/svg+xml,%3csvg%20width=\'24\'%20height=\'24\'%20viewBox=\'0%200%2024%2024\'%20fill=\'none\'%20xmlns=\'http://www.w3.org/2000/svg\'%3e%3cpath%20d=\'M16.125%207.33897C16.125%207.05836%2016.1619%206.78572%2016.2305%206.52598C15.6606%206.04629%2015.0161%205.66242%2014.3188%205.39585C13.7732%206.08084%2012.9432%206.52891%2012%206.52891C11.0566%206.52891%2010.2261%206.08104%209.68042%205.39585C8.98323%205.66248%208.33859%206.04627%207.7688%206.52598C7.83744%206.78577%207.87499%207.0583%207.875%207.33897C7.875%208.82654%206.8419%2010.1038%205.43457%2010.3756C5.31406%2010.9027%205.25001%2011.4534%205.25%2012.0206C5.25%2012.3057%205.26772%2012.5864%205.29907%2012.8622C6.77517%2013.0757%207.875%2014.3873%207.875%2015.9222C7.87498%2016.4242%207.75562%2016.899%207.54761%2017.3204C8.11326%2017.8397%208.76112%2018.2607%209.46729%2018.5597C9.99479%2017.7043%2010.9227%2017.1227%2012%2017.1227C13.0772%2017.1227%2014.0044%2017.7045%2014.532%2018.5597C15.2382%2018.2607%2015.8859%2017.8397%2016.4517%2017.3204C16.2437%2016.899%2016.125%2016.4241%2016.125%2015.9222C16.125%2014.3875%2017.2245%2013.076%2018.7002%2012.8622C18.7316%2012.5864%2018.75%2012.3057%2018.75%2012.0206C18.75%2011.4533%2018.6852%2010.9027%2018.5647%2010.3756C17.1577%2010.1035%2016.125%208.82629%2016.125%207.33897ZM17.625%207.33897C17.625%208.24579%2018.3243%208.92979%2019.125%208.92979H19.1455L19.2686%208.93784C19.5513%208.98041%2019.7895%209.18238%2019.8743%209.46299C20.1184%2010.2717%2020.25%2011.131%2020.25%2012.0206C20.25%2012.6078%2020.1929%2013.1822%2020.0837%2013.7374C20.009%2014.1175%2019.6569%2014.3781%2019.2715%2014.3387C19.2233%2014.3338%2019.1745%2014.3314%2019.125%2014.3314C18.3243%2014.3314%2017.625%2015.0154%2017.625%2015.9222C17.625%2016.3216%2017.7627%2016.6822%2017.9868%2016.9586C18.2216%2017.2482%2018.2085%2017.6663%2017.9553%2017.94C16.9839%2018.9902%2015.7532%2019.7866%2014.3657%2020.2164C14.1754%2020.2753%2013.9691%2020.256%2013.793%2020.1629C13.617%2020.0699%2013.4853%2019.9108%2013.4268%2019.7206C13.2257%2019.0662%2012.6484%2018.6227%2012%2018.6227C11.3516%2018.6227%2010.7743%2019.0662%2010.5732%2019.7206C10.5147%2019.9108%2010.383%2020.0699%2010.207%2020.1629C10.0309%2020.256%209.82456%2020.2753%209.63428%2020.2164C8.24678%2019.7866%207.01611%2018.9902%206.04468%2017.94C5.79151%2017.6663%205.77835%2017.2482%206.01318%2016.9586C6.23733%2016.6822%206.37497%2016.3216%206.375%2015.9222C6.375%2015.0154%205.67573%2014.3314%204.875%2014.3314C4.82555%2014.3314%204.77669%2014.3338%204.72852%2014.3387C4.34311%2014.3781%203.99103%2014.1175%203.91626%2013.7374C3.80711%2013.1822%203.75%2012.6078%203.75%2012.0206C3.75001%2011.131%203.88156%2010.2717%204.12573%209.46299L4.17114%209.348C4.29748%209.09166%204.56154%208.92546%204.85449%208.92979C4.86125%208.92989%204.86813%208.92979%204.875%208.92979C5.67573%208.92979%206.375%208.24579%206.375%207.33897C6.37498%207.0806%206.31764%206.83915%206.2168%206.62632C6.07911%206.33577%206.14177%205.99004%206.3728%205.76646C7.32472%204.84561%208.48985%204.15291%209.78662%203.7794C10.136%203.67876%2010.5076%203.84335%2010.6677%204.16978C10.924%204.69246%2011.4336%205.02891%2012%205.02891C12.5664%205.02891%2013.076%204.69246%2013.3323%204.16978L13.3645%204.11045C13.5385%203.82373%2013.8858%203.68505%2014.2134%203.7794C15.5102%204.15291%2016.6753%204.84561%2017.6272%205.76646C17.8582%205.99004%2017.9209%206.33577%2017.7832%206.62632C17.6824%206.83915%2017.625%207.0806%2017.625%207.33897Z\'%20fill=\'%23121927\'/%3e%3cpath%20d=\'M13.875%2012.0001C13.875%2010.9646%2013.0355%2010.1251%2012%2010.1251C10.9645%2010.1251%2010.125%2010.9646%2010.125%2012.0001C10.125%2013.0356%2010.9645%2013.8751%2012%2013.8751C13.0355%2013.8751%2013.875%2013.0356%2013.875%2012.0001ZM15.375%2012.0001C15.375%2013.8641%2013.864%2015.3751%2012%2015.3751C10.136%2015.3751%208.625%2013.8641%208.625%2012.0001C8.625%2010.1361%2010.136%208.6251%2012%208.6251C13.864%208.6251%2015.375%2010.1361%2015.375%2012.0001Z\'%20fill=\'%23121927\'/%3e%3c/svg%3e">';
     const monitorIco = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>';
     const phoneIco = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>';
+    // Shopify inspector: corner brackets + pointer cursor.
+    const inspectorIco = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h4M4 4v4M20 4h-4M20 4v4M4 20h4M4 20v-4M14 14l2.2 6.2 1.4-2.6 2.6-1.4L14 14z"/><path d="M14 14l4.2 4.2"/></svg>';
+    const inspectorTitle = (ED.previewControls ? 'Deactivate inspector' : 'Activate inspector') + ' (⌘⇧I)';
     const showBack = !isCheckout();
     top.innerHTML =
       '<div class="os-top-l">' +
@@ -967,6 +1137,7 @@
           '<button class="' + (ED.device === 'desktop' ? 'active' : '') + '" data-dev="desktop" title="Desktop preview">' + monitorIco + '</button>' +
           '<button class="' + (ED.device === 'mobile' ? 'active' : '') + '" data-dev="mobile" title="Mobile preview">' + phoneIco + '</button>' +
         '</div>' +
+        '<button class="os-top-icon os-inspector-toggle' + (ED.previewControls ? ' active' : '') + '" id="t-inspector" aria-pressed="' + (ED.previewControls ? 'true' : 'false') + '" aria-label="' + esc(inspectorTitle) + '" title="' + esc(inspectorTitle) + '">' + inspectorIco + '</button>' +
         ((ED.exitTo && /^#\/(?:pages|flows(?:\/|$)|bestcheckout)/.test(ED.exitTo)) ? '<button class="os-top-btn os-top-hidden" id="t-saveas" title="Save the current layout as a new template in the library">Save as template</button>' : '') +
         '<button class="os-top-icon os-preview-open" id="t-preview"' + (busy ? ' disabled' : '') + ' title="Preview saved content">' + I.eye + '</button>' +
         '<button class="os-top-btn" id="t-discard"' + (dirty && !busy ? '' : ' disabled') + '>Discard</button>' +
@@ -1030,6 +1201,8 @@
     const undo = b.querySelector('#t-undo'); if (undo && !undo.disabled) undo.onclick = () => historyStep('undo');
     const redo = b.querySelector('#t-redo'); if (redo && !redo.disabled) redo.onclick = () => historyStep('redo');
     b.querySelectorAll('[data-dev]').forEach((x) => x.onclick = () => { const d = x.getAttribute('data-dev'); if (d !== ED.device) { ED.device = d; refreshTop(); refreshCanvas(); } });
+    const inspector = b.querySelector('#t-inspector');
+    if (inspector) inspector.onclick = () => togglePreviewControls();
     const preview = b.querySelector('#t-preview'); if (preview && !preview.disabled) preview.onclick = requestSavedPreview;
     const exitFull = b.querySelector('[data-exit-full-preview]'); if (exitFull) exitFull.onclick = () => exitFullPreview();
     const dis = b.querySelector('#t-discard'); if (dis && !dis.disabled) dis.onclick = onDiscard;
@@ -1057,6 +1230,19 @@
   function exitFullPreview() {
     if (!ED || !ED.fullPreview) return;
     rememberCanvasScroll(); ED.fullPreview = false; rerender();
+  }
+  // Shopify-style inspector: hide preview hover rings, selection outlines, and name tags.
+  function togglePreviewControls(force) {
+    if (!ED || ED.previewOnly) return;
+    const next = (force == null) ? !ED.previewControls : !!force;
+    if (next === ED.previewControls) return;
+    ED.previewControls = next;
+    const b = document.getElementById('os-builder');
+    if (b) b.classList.toggle('os-controls-off', !ED.previewControls);
+    refreshTop();
+    applyHighlight();
+    const frame = document.getElementById('os-frame');
+    if (frame && ED.previewControls && !ED.fullPreview) decorateBlockLabels(frame);
   }
 
   // -------------------------------------------------------------- LEFT (tree / settings groups)
@@ -1812,7 +1998,7 @@
     if (accepted[0] && accepted[0].currency) snap.currency = accepted[0].currency;
     return scenario === 'dual' ? dualOrderPreviewSnapshot(snap) : singleOrderPreviewSnapshot(snap, scenario);
   }
-  function ctxFor(scope, id, selBool, selBlk, isFirst, transHdr) { return { mob: ED.device === 'mobile', tokens: tokens(), scope, sectionId: id, selected: selBool, selectedBlockId: selBlk, sample: D.SAMPLE, resource: isResourcePage() ? previewResource() : null, isFirst: !!isFirst, transparentHeader: !!transHdr, page: ED.currentPage, surface: ED.surface, checkoutPage: ED.checkoutPage, checkoutTemplateId: isCheckout() ? curCkTplId() : '', precedingUpsellTemplateId: isCheckout() ? ckTplIdOf('upsell') : '', checkout: D.CHECKOUT_MOCK, offer: isOfferPage() ? ((D.OFFER_MOCKS || {})[ED.checkoutPage] || null) : null, snapshot: isThankyou() ? thankyouSnapshot() : null, ckAddons: CK_ADDONS }; }
+  function ctxFor(scope, id, selBool, selBlk, isFirst, transHdr) { return { mob: ED.device === 'mobile', tokens: tokens(), scope, sectionId: id, selected: selBool, selectedBlockId: selBlk, sample: D.SAMPLE, resource: isResourcePage() ? previewResource() : null, isFirst: !!isFirst, transparentHeader: !!transHdr, page: ED.currentPage, surface: ED.surface, checkoutPage: ED.checkoutPage, checkoutTemplateId: isCheckout() ? curCkTplId() : '', precedingUpsellTemplateId: isCheckout() ? ckTplIdOf('upsell') : '', checkout: D.CHECKOUT_MOCK, offer: isOfferPage() ? ((D.OFFER_MOCKS || {})[ED.checkoutPage] || null) : null, snapshot: isThankyou() ? thankyouSnapshot() : null, ckAddons: CK_ADDONS, previewOnly: !!ED.previewOnly }; }
 
   // -------------------------------------------------------------- CHECKOUT canvas
   // Fixed two-column layout on PC (form + summary); single column on mobile with a
@@ -2133,19 +2319,23 @@
       });
     }
     if (!ED.fullPreview && !ED.previewOnly) {
+      // Gate at click/hover time so the inspector toggle can flip without rebuilding the canvas.
       frame.querySelectorAll('[data-csel-global]').forEach((el) => el.addEventListener('click', (e) => {
+        if (!ED.previewControls) return;
         const blk = e.target.closest('[data-block-id]');
         const scope = el.getAttribute('data-csel-global');
         if (blk && el.contains(blk)) { e.stopPropagation(); /* globals expose block selection too (footer) */ select({ kind: 'block', sectionId: scope, blockId: blk.getAttribute('data-block-id') }); return; }
         select({ kind: scope });
       }));
       frame.querySelectorAll('[data-csel]').forEach((el) => el.addEventListener('click', (e) => {
+        if (!ED.previewControls) return;
         const blk = e.target.closest('[data-block-id]'); const id = el.getAttribute('data-csel');
         if (blk && el.contains(blk)) { e.stopPropagation(); select({ kind: 'block', sectionId: id, blockId: blk.getAttribute('data-block-id') }); return; }
         select({ kind: 'section', sectionId: id });
       }));
       // Keep block chrome labels fresh when carousels swap data-block-id (e.g. announcement).
       frame.addEventListener('mouseover', (e) => {
+        if (!ED.previewControls) return;
         const blk = e.target.closest('[data-block-id]'); if (!blk || !frame.contains(blk)) return;
         const label = resolvePreviewBlockLabel(blk);
         if (label) blk.setAttribute('data-blabel', label);
@@ -2158,7 +2348,7 @@
       if (!inst) return; const def = SECTIONS[inst.kind];
       if (def && def.hydrate) { try { def.hydrate(secEl, inst.settings, inst.blocks || [], ctxFor(id ? 'section' : gscope, id || gscope, false, null)); } catch (e) { /* noop */ } }
     });
-    decorateBlockLabels(frame);
+    if (ED.previewControls) decorateBlockLabels(frame);
   }
 
   // -------------------------------------------------------------- RIGHT (config panel)
@@ -2251,7 +2441,17 @@
     if (!f.key && typeof f.render === 'function') return f.render(values, ctx);
     const val = values[f.key];
     const hint = f.info ? '<div class="os-fhint">' + esc(f.info) + '</div>' : '';
-    const label = '<label class="os-flabel">' + esc(f.label) + req(f) + '</label>';
+    // Shopify theme editor: richtext / explicit dynamicSource fields show the database metadata icon at the label's top-right.
+    // ordered_products + collections mode puts the icon beside Select instead (matches product-list source UX).
+    const collectionSourceOnProducts = f.control === 'ordered_products' && f.dynamicSource && f.dynamicSource.mode === 'collections';
+    const showMeta = (f.control === 'richtext' || !!f.dynamicSource) && !collectionSourceOnProducts;
+    const metaLabel = dynamicSourceLabel(f, values);
+    const metaConnected = isDynamicConnected(f, values);
+    const sourceMode = (f.dynamicSource && f.dynamicSource.mode) || 'fixed';
+    const metadata = showMeta
+      ? '<button type="button" class="os-field-meta i18n-skip' + (metaConnected ? ' is-connected' : '') + '" data-rt-source data-rt-source-label="' + esc(metaLabel) + '" data-rt-source-mode="' + esc(sourceMode) + '" aria-label="Connect dynamic source" title="Connect dynamic source">' + I.database + '</button>'
+      : '';
+    const label = '<label class="os-flabel' + (showMeta ? ' has-meta' : '') + '">' + esc(f.label) + req(f) + metadata + '</label>';
     const oneLine = (cls) => '<div class="os-fld ' + cls + '">' + label + control(f, val, values, ctx) + (hint || '') + '</div>';
     if (f.control === 'custom_css') {
       const open = !!(val && String(val).trim());
@@ -2260,7 +2460,11 @@
     // Compact controls: label + control on one row (Shopify theme editor)
     if (!f.stack) {
       if (f.control === 'toggle') return oneLine('os-fld-row');
-      if (f.control === 'segmented') return oneLine('os-fld-seg');
+      if (f.control === 'segmented') {
+        const segOpts = typeof f.options === 'function' ? (f.options(values, ctx) || []) : (f.options || []);
+        // 4+ options: dropdown (segmented gets cramped)
+        return oneLine(segOpts.length > 3 ? 'os-fld-pair' : 'os-fld-seg');
+      }
       if (f.control === 'range') return oneLine('os-fld-range');
       if (f.control === 'select' || f.control === 'number' || f.control === 'numberInherit' || f.control === 'color' || f.control === 'image') return oneLine('os-fld-pair');
       if (f.control === 'product' || f.control === 'collection' || f.control === 'menu' || f.control === 'blog' || f.control === 'page') return oneLine('os-fld-pair');
@@ -2274,14 +2478,74 @@
     const span = Math.max(hi - lo, 1);
     return Math.min(100, Math.max(0, ((n - lo) / span) * 100));
   }
+  function productMetafieldDefs() {
+    return (window.OS_DATA && window.OS_DATA.PRODUCT_METAFIELD_DEFS) || [];
+  }
+  function productMetafieldOptions() {
+    return productMetafieldDefs().map((d) => ({
+      value: d.namespace + '.' + d.key,
+      label: d.name,
+    }));
+  }
+  // Flat product dynamic-source list: optional built-in fields + all product metafield defs.
+  function productDynamicSourceOptions(includeProductFields) {
+    const list = [];
+    if (includeProductFields) list.push({ value: 'resource.description', label: 'Description' });
+    return list.concat(productMetafieldOptions());
+  }
+  function metafieldDisplayName(path) {
+    if (!path || typeof path !== 'string') return '';
+    if (path === 'resource.description' || path === 'description') return 'Description';
+    const hit = productMetafieldDefs().find((d) => (d.namespace + '.' + d.key) === path);
+    return hit ? hit.name : path;
+  }
+  function isDynamicConnected(f, values) {
+    if (!f || !f.key) return false;
+    if (!f.dynamicSource && f.control !== 'richtext') return false;
+    // Metafields mode inserts inline variable chips — never whole-field bind.
+    if (f.dynamicSource && f.dynamicSource.mode === 'metafields') return false;
+    const stored = values && values[f.key + '_dynamic_source'];
+    if (stored === false || stored == null || stored === '') {
+      return !!(f.dynamicSource && f.dynamicSource.defaultConnected);
+    }
+    return true;
+  }
+  function dynamicSourceLabel(f, values) {
+    return (f.dynamicSource && f.dynamicSource.label) || f.label || 'Value';
+  }
+  function richTextControl(f, val, dk, values) {
+    const metaLabel = dynamicSourceLabel(f, values);
+    const sourceMode = (f.dynamicSource && f.dynamicSource.mode) || 'fixed';
+    const chipMode = sourceMode === 'metafields';
+    // Only fixed-path sources blank the editor into a bound pill.
+    const connected = chipMode ? false : isDynamicConnected(f, values);
+    const attrs = dk + ' data-rt-source-mode="' + esc(sourceMode) + '"';
+    if (window.BSRichText && typeof window.BSRichText.render === 'function') {
+      window.BSRichText.ensureStyles();
+      return window.BSRichText.render({
+        html: connected ? '' : (val || ''),
+        placeholder: f.placeholder || 'Add description...',
+        connected: connected,
+        sourceLabel: metaLabel,
+        autoHeight: !!f.autoHeight,
+        attrs: attrs,
+      });
+    }
+    // Fallback if shared editor script has not loaded yet.
+    return '<div class="bs-richtext' + (f.autoHeight ? ' is-autoheight' : '') + '" ' + attrs + (f.autoHeight ? ' data-rt-autoheight="1"' : '') + '><div class="bs-rt-editor" contenteditable="true" data-rt-editor data-placeholder="' + esc(f.placeholder || 'Add description...') + '">' + (val || '') + '</div></div>';
+  }
   function control(f, val, values, ctx) {
-    const dk = 'data-fkey="' + esc(f.key) + '" data-control="' + f.control + '"';
     const opts = typeof f.options === 'function' ? (f.options(values, ctx) || []) : (f.options || []);
-    switch (f.control) {
+    // Segmented with 4+ options renders as select so binders use data-control="select"
+    const ctl = (f.control === 'segmented' && opts.length > 3) ? 'select' : f.control;
+    const dk = 'data-fkey="' + esc(f.key) + '" data-control="' + ctl + '"';
+    switch (ctl) {
       case 'text': case 'url':
         return '<input class="os-input" ' + dk + (f.maxlength ? ' maxlength="' + f.maxlength + '"' : '') + ' type="text" value="' + esc(val) + '" placeholder="' + esc(f.placeholder == null ? 'Please enter' : f.placeholder) + '">';
-      case 'textarea': case 'custom_css': case 'richtext':
-        return '<textarea class="os-input os-ta' + (f.control === 'custom_css' ? ' mono' : '') + '" ' + dk + (f.maxlength ? ' maxlength="' + f.maxlength + '"' : '') + ' rows="' + (f.control === 'custom_css' ? 4 : 3) + '" placeholder="' + esc(f.placeholder || '') + '">' + esc(val) + '</textarea>' + (f.control === 'richtext' ? '<div class="os-fhint">Rich text — basic HTML allowed.' + (f.maxlength ? ' Max ' + f.maxlength + ' characters.' : '') + '</div>' : (f.maxlength ? '<div class="os-fhint">Max ' + f.maxlength + ' characters.</div>' : ''));
+      case 'textarea': case 'custom_css':
+        return '<textarea class="os-input os-ta' + (ctl === 'custom_css' ? ' mono' : '') + '" ' + dk + (f.maxlength ? ' maxlength="' + f.maxlength + '"' : '') + ' rows="' + (ctl === 'custom_css' ? 4 : 3) + '" placeholder="' + esc(f.placeholder || '') + '">' + esc(val) + '</textarea>' + (ctl === 'richtext' ? '<div class="os-fhint">Rich text — basic HTML allowed.' + (f.maxlength ? ' Max ' + f.maxlength + ' characters.' : '') + '</div>' : (f.maxlength ? '<div class="os-fhint">Max ' + f.maxlength + ' characters.</div>' : ''));
+      case 'richtext':
+        return richTextControl(f, val, dk, values);
       case 'select':
         return '<select class="os-select" ' + dk + '>' + opts.map((o) => '<option value="' + esc(o.value) + '"' + (String(o.value) === String(val) ? ' selected' : '') + '>' + esc(o.label) + '</option>').join('') + '</select>';
       case 'segmented':
@@ -2337,23 +2601,98 @@
       case 'collections':
         return collectionsControl(f, val, dk);
       case 'ordered_products':
-        return orderedProductsControl(f, val, dk);
+        return orderedProductsControl(f, val, dk, values);
       case 'ordered_variants':
         return orderedVariantsControl(f, val, dk);
       case 'product_mappings':
         return productMappingsControl(f, val, dk);
+      case 'review_items':
+        return reviewItemsControl(f, val, dk, values);
+      case 'video_items':
+        return videoItemsControl(f, val, dk);
       case 'product': case 'collection': case 'menu': case 'blog': case 'page':
         return pickerControl(f, val, dk);
       default:
         return '<input class="os-input" ' + dk + ' value="' + esc(val) + '">';
     }
   }
-  function colorControl(f, val, dk) {
+  // Color field rules (all color controls):
+  // 1) OOB / blank / inherit must reveal blankValue or schema default in swatch + hex (never empty checkerboard when a fallback exists).
+  // 2) Always show the right-side T button (same height as the swatch+hex row), matching Star color.
+  function isBlankColor(v) { return v == null || v === '' || v === 'transparent'; }
+  function expandHex(v) {
+    const s = String(v || '').trim();
+    if (/^#[0-9a-fA-F]{3}$/.test(s)) return '#' + s[1] + s[1] + s[2] + s[2] + s[3] + s[3];
+    if (/^#[0-9a-fA-F]{6}$/.test(s)) return s.toLowerCase();
+    return '';
+  }
+  function colorBlankFallback(f) {
+    let fb = '';
+    if (f && typeof f.blankValue === 'function') {
+      try { fb = f.blankValue() || ''; } catch (_) { fb = ''; }
+    }
+    if (!fb && f && f.default != null && f.default !== '') fb = String(f.default);
+    return fb;
+  }
+  function colorDisplay(f, val) {
     const isT = val === 'transparent';
-    const hex = (typeof val === 'string' && /^#/.test(val)) ? val : '#000000';
-    return '<div class="os-color" ' + dk + '>' +
-      '<label class="os-sw' + (isT ? ' tsp' : '') + '" style="' + (isT ? '' : 'background:' + esc(val)) + '"><input type="color" value="' + esc(hex) + '"></label>' +
-      '<input class="os-hex" value="' + esc(val == null ? '' : val) + '"></div>';
+    if (isT) return { display: 'transparent', blank: true, isT: true };
+    if (val != null && val !== '') return { display: String(val), blank: false, isT: false };
+    const fb = colorBlankFallback(f);
+    if (fb === 'transparent') return { display: 'transparent', blank: true, isT: true };
+    // Reveal OOB / inherit color in the control even while the stored value stays blank.
+    if (fb) return { display: fb, blank: false, isT: false, inherited: true };
+    return { display: '', blank: true, isT: false };
+  }
+  function colorControl(f, val, dk) {
+    const d = colorDisplay(f, val);
+    const hex = expandHex(d.display) || '#000000';
+    const field = '<div class="os-color">' +
+      '<label class="os-sw' + (d.blank ? ' tsp' : '') + '" style="' + (d.blank ? '' : 'background:' + esc(d.display)) + '"><input type="color" value="' + esc(hex) + '"></label>' +
+      '<input class="os-hex" value="' + esc(d.display === 'transparent' ? 'transparent' : d.display) + '" spellcheck="false" autocomplete="off" placeholder="' + esc(f.placeholder || '') + '"></div>';
+    // T is required on every color row (height matches .os-color at 32px).
+    return '<div class="os-color-wrap" ' + dk + '>' + field +
+      '<button type="button" class="os-tbtn' + (d.isT ? ' on' : '') + '" data-tsp title="Transparent">T</button></div>';
+  }
+  function wireColorControl(el, onChange, k, field) {
+    field = field || {};
+    const cp = el.querySelector('input[type=color]');
+    const hx = el.querySelector('.os-hex');
+    const sw = el.querySelector('.os-sw');
+    const tb = el.querySelector('[data-tsp]');
+    if (!cp || !hx || !sw) return;
+    const paint = (v) => {
+      const d = colorDisplay(field, v);
+      sw.classList.toggle('tsp', d.blank);
+      sw.style.background = d.blank ? '' : d.display;
+      if (tb) tb.classList.toggle('on', d.isT);
+      const full = expandHex(d.display);
+      if (full) cp.value = full;
+      if (!hx.matches(':focus')) hx.value = d.display === 'transparent' ? 'transparent' : d.display;
+    };
+    const commit = (raw, live) => {
+      let v = String(raw == null ? '' : raw).trim();
+      if (!v) v = '';
+      else if (v.toLowerCase() === 'transparent') v = 'transparent';
+      else {
+        const full = expandHex(v.charAt(0) === '#' ? v : '#' + v);
+        if (full) { v = full; if (!live) hx.value = v; }
+      }
+      paint(v);
+      onChange(k, v, false);
+    };
+    cp.oninput = () => { hx.value = cp.value; paint(cp.value); onChange(k, cp.value, false); };
+    hx.oninput = () => commit(hx.value, true);
+    hx.onchange = () => commit(hx.value, false);
+    if (tb) tb.onclick = () => {
+      const on = !tb.classList.contains('on');
+      if (on) { hx.value = 'transparent'; paint('transparent'); onChange(k, 'transparent', false); }
+      else {
+        const fb = colorBlankFallback(field) || '#FFFFFF';
+        const restored = (fb === 'transparent') ? '#FFFFFF' : fb;
+        hx.value = restored; paint(restored); onChange(k, restored, false);
+      }
+    };
   }
   function pickerControl(f, val, dk) {
     const label = pickerLabel(f.control, val, f.pickFrom);
@@ -2386,9 +2725,18 @@
     const add = (url) => { if (url && !seen.has(url)) { seen.add(url); urls.push(url); } };
     const themeFiles = (window.OS_THEME_ICONS && window.OS_THEME_ICONS.files) || [];
     themeFiles.forEach((f) => add('online-store/assets/theme-icons/' + f.file));
-    (D.SAMPLE.products || []).forEach((p) => add(p.image));
+    (D.SAMPLE.products || []).forEach((p) => {
+      add(p.image);
+      (p.images || []).forEach(add);
+    });
     (D.SAMPLE.collections || []).forEach((c) => add(c.image));
     (D.SAMPLE.blogs || []).forEach((b) => add(b.image));
+    // Featured-review mock avatars / card images live on SAMPLE.IMG — keep them pickable in 素材.
+    const sampleImg = (D.SAMPLE && D.SAMPLE.IMG) || {};
+    Object.keys(sampleImg).forEach((k) => add(sampleImg[k]));
+    if (window.OS && typeof window.OS.featuredReviewCatalog === 'function') {
+      (window.OS.featuredReviewCatalog() || []).forEach((r) => { add(r.image); add(r.avatar); });
+    }
     MEDIA_LIB_UPLOADED.forEach((f) => add(f.url));
     add(currentUrl);
     const out = urls.map((url, i) => {
@@ -2537,6 +2885,29 @@
       };
     }
   }
+  function wireRichTextField(el, onChange, field, values) {
+    if (window.BSRichText && typeof window.BSRichText.wire === 'function') {
+      window.BSRichText.ensureStyles();
+      const f = field || {};
+      const ds = f.dynamicSource || {};
+      const mode = ds.mode || el.getAttribute('data-rt-source-mode') || 'fixed';
+      window.BSRichText.wire(el, onChange, {
+        openImagePicker: (onPick) => openSelectFileModal('', onPick),
+        toast: toast,
+        sourceMode: mode,
+        fixedSourceLabel: ds.label || f.label || 'Value',
+        sourceOptions: mode === 'metafields'
+          ? (() => productDynamicSourceOptions(!!ds.includeProductFields))
+          : null,
+        autoHeight: !!f.autoHeight || el.getAttribute('data-rt-autoheight') === '1',
+      });
+      return;
+    }
+    const key = el.getAttribute('data-fkey');
+    const editor = el.querySelector('[data-rt-editor]');
+    if (!editor) return;
+    editor.addEventListener('input', () => onChange(key, editor.innerHTML, false));
+  }
   const I_grip = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>';
   const I_coll = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>';
   function collectionsControl(f, val, dk) {
@@ -2608,12 +2979,80 @@
       const info = variantRefInfo(ref); return info && info.ref;
     }).filter(Boolean);
   }
-  function orderedProductsControl(f, val, dk) {
+  function orderedProductsControl(f, val, dk, values) {
     const ids = Array.isArray(val) ? val : [];
     const rows = ids.map((id) => productRowHtml(id, true)).join('');
-    return '<div class="os-oplist" ' + dk + ' data-max="' + (f.max || 10) + '">' +
+    const ds = f.dynamicSource || {};
+    const collectionMode = ds.mode === 'collections';
+    const srcKey = f.key + '_dynamic_source';
+    const srcVal = values && values[srcKey];
+    const connected = collectionMode && !!srcVal && srcVal !== true && srcVal !== false;
+    const col = connected ? ((D.SAMPLE.collections || []).find((c) => c.id === srcVal) || null) : null;
+    const pickBtn = '<button type="button" class="os-op-select" data-op-pick' + (connected ? ' disabled' : '') + '>' +
+      (rows ? 'Change products' : 'Select products') + '</button>';
+    const sourceBtn = collectionMode
+      ? '<button type="button" class="os-op-source i18n-skip' + (connected ? ' is-connected' : '') + '" data-op-source data-op-source-key="' + esc(srcKey) + '" aria-label="Connect dynamic source" title="Connect dynamic source">' + I.database + '</button>'
+      : '';
+    const actions = '<div class="os-op-actions">' + pickBtn + sourceBtn + '</div>';
+    if (connected) {
+      return '<div class="os-oplist" ' + dk + ' data-max="' + (f.max || 10) + '" data-op-source-mode="collections">' +
+        '<div class="os-op-bound">' +
+          '<span class="os-op-bound-ico">' + I.database + '</span>' +
+          '<span class="os-op-bound-name">' + esc((col && col.title) || String(srcVal)) + '</span>' +
+          '<button type="button" class="os-op-bound-clear" data-op-unsource aria-label="Remove dynamic source">×</button>' +
+        '</div>' +
+        actions +
+      '</div>';
+    }
+    return '<div class="os-oplist" ' + dk + ' data-max="' + (f.max || 10) + '"' + (collectionMode ? ' data-op-source-mode="collections"' : '') + '>' +
       (rows ? '<div class="os-op-rows" data-op-rows>' + rows + '</div>' : '<div class="os-op-empty">No products selected</div>') +
-      '<button type="button" class="os-op-select" data-op-pick>' + (rows ? 'Change products' : 'Select products') + '</button></div>';
+      actions +
+    '</div>';
+  }
+  function openCollectionSourcePop(anchor, currentId, onPick, onRemove) {
+    document.querySelectorAll('.os-op-source-pop').forEach((el) => el.remove());
+    const cols = D.SAMPLE.collections || [];
+    const pop = document.createElement('div');
+    pop.className = 'os-op-source-pop i18n-skip';
+    pop.setAttribute('role', 'menu');
+    const list = cols.length
+      ? '<div class="os-op-source-list">' + cols.map((c) =>
+          '<button type="button" data-op-src-col="' + esc(c.id) + '"' + (c.id === currentId ? ' class="on"' : '') + '>' +
+            '<span class="os-op-source-thumb"' + (c.image ? ' style="background-image:url(' + esc(c.image) + ')"' : '') + '></span>' +
+            '<span class="os-op-source-copy"><strong>' + esc(c.title) + '</strong>' +
+              (c.count != null ? '<small>' + esc(String(c.count)) + ' products</small>' : '') +
+            '</span>' +
+          '</button>'
+        ).join('') + '</div>'
+      : '<div class="os-op-source-empty">No collections available</div>';
+    pop.innerHTML =
+      '<div class="os-op-source-crumb">Template <span>›</span> Product collections</div>' +
+      list +
+      (currentId ? '<button type="button" class="os-op-source-remove" data-op-src-remove><span>' + I.database + '</span>Remove dynamic source</button>' : '');
+    document.body.appendChild(pop);
+    const rect = anchor.getBoundingClientRect();
+    const popW = 280;
+    pop.style.left = Math.max(8, Math.min(rect.right - popW, window.innerWidth - popW - 8)) + 'px';
+    pop.style.top = (rect.bottom + 6) + 'px';
+    pop.querySelectorAll('[data-op-src-col]').forEach((btn) => {
+      btn.onclick = () => {
+        const id = btn.getAttribute('data-op-src-col') || '';
+        pop.remove();
+        if (id && typeof onPick === 'function') onPick(id);
+      };
+    });
+    const rm = pop.querySelector('[data-op-src-remove]');
+    if (rm) rm.onclick = () => {
+      pop.remove();
+      if (typeof onRemove === 'function') onRemove();
+    };
+    const close = (e) => {
+      if (!pop.contains(e.target) && e.target !== anchor && !anchor.contains(e.target)) {
+        pop.remove();
+        document.removeEventListener('mousedown', close);
+      }
+    };
+    setTimeout(() => document.addEventListener('mousedown', close), 0);
   }
   function orderedVariantsControl(f, val, dk) {
     const refs = Array.isArray(val) ? val : [];
@@ -2621,6 +3060,267 @@
     return '<div class="os-oplist" ' + dk + ' data-max="' + (f.max || 10) + '">' +
       (rows ? '<div class="os-op-rows" data-op-rows>' + rows + '</div>' : '<div class="os-op-empty">No product variants selected</div>') +
       '<button type="button" class="os-op-select" data-op-pick>' + (rows ? 'Change variants' : 'Select variants') + '</button></div>';
+  }
+  function featuredReviewCatalog() {
+    if (window.OS && typeof window.OS.featuredReviewCatalog === 'function') return window.OS.featuredReviewCatalog() || [];
+    return [];
+  }
+  function defaultFeaturedReviewItem() {
+    if (window.OS && typeof window.OS.defaultFeaturedReviewItem === 'function') return window.OS.defaultFeaturedReviewItem();
+    return { id: uid('ri'), entry_type: 'custom', review_id: '', author: 'Debi T.', rating: 5, text: '', image: '', avatar: '' };
+  }
+  function nextFeaturedReviewItem(existing) {
+    if (window.OS && typeof window.OS.nextFeaturedReviewItem === 'function') return window.OS.nextFeaturedReviewItem(existing || []);
+    return defaultFeaturedReviewItem();
+  }
+  function reviewItemImageHtml(kind, url) {
+    const u = url || '';
+    return '<div class="os-imgf" data-ri-image="' + esc(kind) + '" data-img-url="' + esc(u) + '">' +
+      (u
+        ? '<div class="os-imgbox on">' +
+            '<button type="button" class="os-img-thumb" data-img-pick style="background-image:url(' + esc(u) + ')" title="' + esc(mediaFileName(u, 'Selected image')) + '" aria-label="Change image"></button>' +
+            '<div class="os-img-actions">' +
+              '<button type="button" class="os-img-select" data-img-pick>Change</button>' +
+              '<button type="button" class="os-img-lib" data-img-pick title="Browse files" aria-label="Browse files">' + mediaLibIcon() + '</button>' +
+            '</div>' +
+            '<button type="button" class="os-img-remove" data-img-remove>Remove</button>' +
+          '</div>'
+        : '<div class="os-imgbox">' +
+            '<div class="os-img-actions">' +
+              '<button type="button" class="os-img-select" data-img-pick>Select</button>' +
+              '<button type="button" class="os-img-lib" data-img-pick title="Browse files" aria-label="Browse files">' + mediaLibIcon() + '</button>' +
+            '</div>' +
+          '</div>') +
+    '</div>';
+  }
+  function reviewItemPair(label, controlHtml, extraCls) {
+    return '<div class="os-fld os-fld-pair' + (extraCls ? ' ' + extraCls : '') + '">' +
+      '<label class="os-flabel">' + esc(label) + '</label>' + controlHtml +
+    '</div>';
+  }
+  // Featured reviews: only Media / Navigation / Trust render a review image.
+  function featuredReviewSupportsImage(values) {
+    const layout = (values && values.layout) || 'nav';
+    if (layout !== 'media' && layout !== 'nav' && layout !== 'trust') return false;
+    if (values && values.show_image === false) return false;
+    return true;
+  }
+  function reviewItemsControl(f, val, dk, values) {
+    const max = Math.max(1, Number(f.max) || 10);
+    const catalog = featuredReviewCatalog();
+    const supportsImage = featuredReviewSupportsImage(values || {});
+    let items = Array.isArray(val) ? val.slice() : [];
+    if (!items.length) items = [defaultFeaturedReviewItem()];
+    const cards = items.map((item, index) => {
+      const row = item || {};
+      const entryType = row.entry_type === 'library' ? 'library' : 'custom';
+      const libOpts = catalog.map((r) =>
+        '<option value="' + esc(r.id) + '"' + (String(r.id) === String(row.review_id || '') ? ' selected' : '') + '>' +
+          esc((r.author || 'Review') + ' · ' + (r.text || '').slice(0, 42) + ((r.text || '').length > 42 ? '…' : '')) +
+        '</option>'
+      ).join('');
+      const entryTypeSelect =
+        '<select class="os-select" data-ri-field="entry_type">' +
+          '<option value="custom"' + (entryType === 'custom' ? ' selected' : '') + '>Manual edit</option>' +
+          '<option value="library"' + (entryType === 'library' ? ' selected' : '') + '>Select existing review</option>' +
+        '</select>';
+      // Stack each field on its own row — same label|control pattern as other block editors.
+      const customFields =
+        '<div class="os-ri-fields" data-ri-custom' + (entryType === 'custom' ? '' : ' hidden') + '>' +
+          reviewItemPair('User avatar', reviewItemImageHtml('avatar', row.avatar || ''), 'os-ri-img') +
+          reviewItemPair('Author',
+            '<input class="os-input" data-ri-field="author" value="' + esc(row.author || '') + '" placeholder="Reviewer name">') +
+          reviewItemPair('Rating',
+            '<input class="os-input" type="number" min="1" max="5" step="0.5" data-ri-field="rating" value="' + esc(row.rating == null ? 5 : row.rating) + '">') +
+          '<div class="os-fld">' +
+            '<label class="os-flabel">Review content</label>' +
+            '<textarea class="os-input os-ta" rows="4" data-ri-field="text" placeholder="Review content">' + esc(row.text || '') + '</textarea>' +
+          '</div>' +
+          (supportsImage
+            ? reviewItemPair('Review image', reviewItemImageHtml('image', row.image || ''), 'os-ri-img')
+            : '') +
+        '</div>';
+      const libraryFields =
+        '<div class="os-ri-fields" data-ri-library' + (entryType === 'library' ? '' : ' hidden') + '>' +
+          reviewItemPair('Existing review',
+            '<select class="os-select" data-ri-field="review_id">' +
+              '<option value="">Select a review</option>' + libOpts +
+            '</select>') +
+        '</div>';
+      return '<div class="os-ri-card" data-ri-id="' + esc(row.id || ('ri-' + index)) + '">' +
+        '<div class="os-ri-head"><strong>Review ' + (index + 1) + '</strong>' +
+          '<button type="button" class="os-ri-remove" data-ri-remove aria-label="Remove review">×</button></div>' +
+        reviewItemPair('Entry type', entryTypeSelect) +
+        customFields + libraryFields +
+      '</div>';
+    }).join('');
+    return '<div class="os-ri" ' + dk + ' data-max="' + max + '">' +
+      (cards || '<div class="os-op-empty">No reviews yet</div>') +
+      '<button type="button" class="os-op-select" data-ri-add' + (items.length >= max ? ' disabled' : '') + '>Add review</button></div>';
+  }
+  function hydrateFeaturedReviewMedia(row) {
+    const item = Object.assign({}, row || {});
+    const catalog = featuredReviewCatalog();
+    const hit = catalog.find((r) => r.id === item.review_id) || catalog[0] || null;
+    if (!(item.image || '').trim() && hit && hit.image) item.image = hit.image;
+    if (!(item.avatar || '').trim() && hit && hit.avatar) item.avatar = hit.avatar;
+    return item;
+  }
+  function wireReviewItems(root, getArr, setArr) {
+    const max = Math.max(1, +(root.getAttribute('data-max') || 10));
+    if (!getArr().length) setArr([defaultFeaturedReviewItem()], false);
+    else {
+      // Backfill empty Review image / avatar from catalog mock so the picker matches the canvas card.
+      const cur = getArr();
+      const next = cur.map(hydrateFeaturedReviewMedia);
+      const changed = next.some((row, i) => row.image !== (cur[i] && cur[i].image) || row.avatar !== (cur[i] && cur[i].avatar));
+      if (changed) setArr(next, true);
+    }
+    const readCard = (card) => {
+      const id = card.getAttribute('data-ri-id') || uid('ri');
+      const get = (name) => {
+        const el = card.querySelector('[data-ri-field="' + name + '"]');
+        return el ? el.value : '';
+      };
+      const entryType = get('entry_type') === 'library' ? 'library' : 'custom';
+      const imgWrap = card.querySelector('[data-ri-image="image"]');
+      const avWrap = card.querySelector('[data-ri-image="avatar"]');
+      return {
+        id: id,
+        entry_type: entryType,
+        review_id: get('review_id'),
+        author: get('author'),
+        rating: Number(get('rating')) || 5,
+        text: get('text'),
+        image: imgWrap ? (imgWrap.getAttribute('data-img-url') || '') : '',
+        avatar: avWrap ? (avWrap.getAttribute('data-img-url') || '') : '',
+      };
+    };
+    const commit = (rerender) => {
+      const next = Array.from(root.querySelectorAll('.os-ri-card')).map(readCard);
+      setArr(next, !!rerender);
+    };
+    const syncType = (card) => {
+      const type = (card.querySelector('[data-ri-field="entry_type"]') || {}).value;
+      const custom = card.querySelector('[data-ri-custom]');
+      const library = card.querySelector('[data-ri-library]');
+      if (custom) custom.hidden = type !== 'custom';
+      if (library) library.hidden = type !== 'library';
+    };
+    const wireRiImage = (card, kind) => {
+      const img = card.querySelector('[data-ri-image="' + kind + '"]');
+      if (!img) return;
+      if (!img.getAttribute('data-fkey')) img.setAttribute('data-fkey', '_ri_' + kind);
+      wireImageField(img, (_k, url) => {
+        img.setAttribute('data-img-url', url || '');
+        commit(true);
+      });
+    };
+    root.querySelectorAll('.os-ri-card').forEach((card) => {
+      syncType(card);
+      card.querySelectorAll('[data-ri-field]').forEach((el) => {
+        const evt = el.tagName === 'SELECT' ? 'change' : 'input';
+        el.addEventListener(evt, () => {
+          if (el.getAttribute('data-ri-field') === 'entry_type') syncType(card);
+          commit(false);
+        });
+      });
+      wireRiImage(card, 'image');
+      wireRiImage(card, 'avatar');
+      const rm = card.querySelector('[data-ri-remove]');
+      if (rm) rm.onclick = (e) => {
+        e.preventDefault();
+        const cards = Array.from(root.querySelectorAll('.os-ri-card'));
+        if (cards.length <= 1) {
+          setArr([defaultFeaturedReviewItem()], true);
+          return;
+        }
+        setArr(cards.filter((c) => c !== card).map(readCard), true);
+      };
+    });
+    const add = root.querySelector('[data-ri-add]');
+    if (add) add.onclick = () => {
+      const cur = getArr().slice();
+      if (cur.length >= max) return;
+      cur.push(nextFeaturedReviewItem(cur));
+      setArr(cur, true);
+    };
+  }
+  function defaultVideoItem() {
+    const IMG = (window.OS && window.OS.sample && window.OS.sample.IMG) || {};
+    return { id: uid('vi'), cover_image: IMG.ug1 || IMG.p3 || '', video_url: '', accessible_label: '' };
+  }
+  function videoItemsControl(f, val, dk) {
+    const max = Math.max(1, Number(f.max) || 12);
+    let items = Array.isArray(val) ? val.slice() : [];
+    if (!items.length) items = [defaultVideoItem()];
+    const cards = items.map((item, index) => {
+      const row = item || {};
+      const cover = row.cover_image || '';
+      return '<div class="os-ri-card" data-vi-id="' + esc(row.id || ('vi-' + index)) + '">' +
+        '<div class="os-ri-head"><strong>Video ' + (index + 1) + '</strong>' +
+          '<button type="button" class="os-ri-remove" data-vi-remove aria-label="Remove video">×</button></div>' +
+        reviewItemPair('Cover image', reviewItemImageHtml('cover', cover), 'os-ri-img') +
+        reviewItemPair('Video URL',
+          '<input class="os-input" data-vi-field="video_url" value="' + esc(row.video_url || '') + '" placeholder="https://…mp4">') +
+        reviewItemPair('Accessible label',
+          '<input class="os-input" data-vi-field="accessible_label" value="' + esc(row.accessible_label || '') + '" placeholder="Describe this video">') +
+      '</div>';
+    }).join('');
+    return '<div class="os-ri" ' + dk + ' data-max="' + max + '">' +
+      (cards || '<div class="os-op-empty">No videos yet</div>') +
+      '<button type="button" class="os-op-select" data-vi-add' + (items.length >= max ? ' disabled' : '') + '>Add video</button></div>';
+  }
+  function wireVideoItems(root, getArr, setArr) {
+    const max = Math.max(1, +(root.getAttribute('data-max') || 12));
+    if (!getArr().length) setArr([defaultVideoItem()], false);
+    const readCard = (card) => {
+      const coverWrap = card.querySelector('[data-ri-image="cover"]');
+      const urlEl = card.querySelector('[data-vi-field="video_url"]');
+      const labelEl = card.querySelector('[data-vi-field="accessible_label"]');
+      return {
+        id: card.getAttribute('data-vi-id') || uid('vi'),
+        cover_image: coverWrap ? (coverWrap.getAttribute('data-img-url') || '') : '',
+        video_url: urlEl ? urlEl.value : '',
+        accessible_label: labelEl ? labelEl.value : '',
+      };
+    };
+    const commit = (rerender) => {
+      setArr(Array.from(root.querySelectorAll('.os-ri-card')).map(readCard), !!rerender);
+    };
+    root.querySelectorAll('.os-ri-card').forEach((card) => {
+      const urlEl = card.querySelector('[data-vi-field="video_url"]');
+      if (urlEl) urlEl.addEventListener('input', () => commit(false));
+      const labelEl = card.querySelector('[data-vi-field="accessible_label"]');
+      if (labelEl) labelEl.addEventListener('input', () => commit(false));
+      const img = card.querySelector('[data-ri-image="cover"]');
+      if (img) {
+        if (!img.getAttribute('data-fkey')) img.setAttribute('data-fkey', '_vi_cover');
+        wireImageField(img, (_k, url) => {
+          img.setAttribute('data-img-url', url || '');
+          commit(true);
+        });
+      }
+      const rm = card.querySelector('[data-vi-remove]');
+      if (rm) rm.onclick = (e) => {
+        e.preventDefault();
+        const cards = Array.from(root.querySelectorAll('.os-ri-card'));
+        if (cards.length <= 1) {
+          setArr([defaultVideoItem()], true);
+          return;
+        }
+        setArr(cards.filter((c) => c !== card).map(readCard), true);
+      };
+    });
+    const add = root.querySelector('[data-vi-add]');
+    if (add) add.onclick = () => {
+      const cur = getArr().slice();
+      if (cur.length >= max) return;
+      const IMG = (window.OS && window.OS.sample && window.OS.sample.IMG) || {};
+      const covers = [IMG.ug1, IMG.ug2, IMG.ug3, IMG.ug4, IMG.ug5, IMG.ug6, IMG.p3, IMG.p4].filter(Boolean);
+      cur.push({ id: uid('vi'), cover_image: covers[cur.length % covers.length] || '', video_url: '', accessible_label: '' });
+      setArr(cur, true);
+    };
   }
   function productMappingsControl(f, val, dk) {
     const mappings = Array.isArray(val) ? val : [];
@@ -2666,11 +3366,23 @@
     return 'Select…';
   }
 
+  // Cascade mock values: when a parent control change re-shows a field that was cleared,
+  // reinject its schema default so block mock content stays part of the block.
+  function reinjectVisibleDefaults(schema, target, ctx) {
+    (schema || []).forEach((f) => {
+      if (!f || !f.key || !f.reinjectWhenVisible) return;
+      if (!visible(f, target, ctx)) return;
+      const cur = target[f.key];
+      if ((cur == null || cur === '') && f.default != null && f.default !== '') target[f.key] = f.default;
+    });
+  }
   function wireRight() {
     const form = document.querySelector('#os-form'); if (!form) return;
     const target = currentSettings(); if (!target) { wireRemove(form); return; }
     const onChange = (k, v, rerenderPanel) => {
-      target[k] = v; markDirty('field:' + ED.selection.kind + ':' + k); refreshAffectedCanvas(); if (rerenderPanel) refreshRight();
+      target[k] = v;
+      if (rerenderPanel) reinjectVisibleDefaults(currentSchema(), target, schemaCtx());
+      markDirty('field:' + ED.selection.kind + ':' + k); refreshAffectedCanvas(); if (rerenderPanel) refreshRight();
     };
     form.querySelectorAll('[data-control]').forEach((el) => {
       const k = el.getAttribute('data-fkey'); const ctl = el.getAttribute('data-control');
@@ -2678,7 +3390,7 @@
       if (ctl === 'text' || ctl === 'url' || ctl === 'number') {
         el.oninput = () => onChange(k, ctl === 'number' ? clampNum(el) : el.value, false);
         if (field.refreshPanel) el.onchange = () => refreshRight();
-      } else if (ctl === 'textarea' || ctl === 'custom_css' || ctl === 'richtext') {
+      } else if (ctl === 'textarea' || ctl === 'custom_css') {
         el.oninput = () => onChange(k, el.value, false);
       } else if (ctl === 'select') {
         el.onchange = () => onChange(k, el.value, true);
@@ -2694,24 +3406,28 @@
           onChange(k, [...el.querySelectorAll('[data-v].on')].map((x) => coerce(x.getAttribute('data-v'))), true);
         });
       } else if (ctl === 'color') {
-        const cp = el.querySelector('input[type=color]'); const hx = el.querySelector('.os-hex'); const sw = el.querySelector('.os-sw');
-        cp.oninput = () => { hx.value = cp.value; sw.style.background = cp.value; sw.classList.remove('tsp'); onChange(k, cp.value, false); };
-        hx.onchange = () => { const v = hx.value.trim(); sw.style.background = v === 'transparent' ? '' : v; sw.classList.toggle('tsp', v === 'transparent'); onChange(k, v, false); };
+        wireColorControl(el, onChange, k, field);
       } else if (ctl === 'numberInherit') {
         const numEl = el.querySelector('[data-ninh-num]'); const autoBtn = el.querySelector('[data-ninh-auto]'); const f = fieldByEl(el) || {};
         numEl.oninput = () => onChange(k, clamp(numEl.value, f.min == null ? -1e9 : f.min, f.max == null ? 1e9 : f.max, f.min || 0), false);
         autoBtn.onclick = () => { const on = !autoBtn.classList.contains('on'); autoBtn.classList.toggle('on', on); if (on) { numEl.value = ''; numEl.disabled = true; onChange(k, null, false); } else { numEl.disabled = false; const dv = (f.min != null ? f.min : 0); numEl.value = dv; onChange(k, dv, false); numEl.focus(); } };
       } else if (ctl === 'image') {
         wireImageField(el, onChange);
+      } else if (ctl === 'richtext') {
+        wireRichTextField(el, onChange, field, target);
       } else if (ctl === 'collections') {
         const pick = el.querySelector('[data-cols-pick]'); if (pick) pick.onclick = () => openPickerPop(pick, ctl, target[k], (v) => onChange(k, v, true));
         const list = el.querySelector('[data-cols-list]'); if (list) wireColsReorder(list, () => (Array.isArray(target[k]) ? target[k] : []), (arr) => onChange(k, arr, true));
       } else if (ctl === 'ordered_products') {
-        wireOrderedProducts(el, () => (Array.isArray(target[k]) ? target[k] : []), (arr) => onChange(k, arr, true));
+        wireOrderedProducts(el, () => (Array.isArray(target[k]) ? target[k] : []), (arr) => onChange(k, arr, true), onChange, target, field);
       } else if (ctl === 'ordered_variants') {
         wireOrderedVariants(el, () => (Array.isArray(target[k]) ? target[k] : []), (arr) => onChange(k, arr, true));
       } else if (ctl === 'product_mappings') {
         wireProductMappings(el, () => (Array.isArray(target[k]) ? target[k] : []), (arr) => onChange(k, arr, true));
+      } else if (ctl === 'review_items') {
+        wireReviewItems(el, () => (Array.isArray(target[k]) ? target[k] : []), (arr, rerender) => onChange(k, arr, !!rerender));
+      } else if (ctl === 'video_items') {
+        wireVideoItems(el, () => (Array.isArray(target[k]) ? target[k] : []), (arr, rerender) => onChange(k, arr, !!rerender));
       } else if (ctl === 'product' || ctl === 'collection' || ctl === 'menu' || ctl === 'blog' || ctl === 'page') {
         el.onclick = () => openPickerPop(el, ctl, target[k], (v) => onChange(k, v, true), el.getAttribute('data-single') === '1', el.getAttribute('data-pickfrom'));
       }
@@ -2757,14 +3473,41 @@
       });
     });
   }
-  function wireOrderedProducts(root, getArr, setArr) {
+  function wireOrderedProducts(root, getArr, setArr, onChange, target, field) {
     const max = Math.max(1, +(root.getAttribute('data-max') || 10));
     const pick = root.querySelector('[data-op-pick]');
-    if (pick) pick.onclick = () => openPickerPop(pick, 'product', getArr(), (v) => setArr(v), false, null, max);
+    if (pick && !pick.disabled) pick.onclick = () => openPickerPop(pick, 'product', getArr(), (v) => {
+      // Hand-picked list replaces any connected collection source.
+      if (typeof onChange === 'function' && field && field.key) onChange(field.key + '_dynamic_source', false, false);
+      setArr(v);
+    }, false, null, max);
     root.querySelectorAll('[data-op-remove]').forEach((button) => {
       button.onclick = (e) => { e.stopPropagation(); setArr(getArr().filter((id) => id !== button.getAttribute('data-op-remove'))); };
     });
     wireIdRows(root.querySelector('[data-op-rows]'), '[data-op-id]', 'data-op-id', getArr, setArr);
+    const sourceBtn = root.querySelector('[data-op-source]');
+    const unsource = root.querySelector('[data-op-unsource]');
+    const srcKey = (field && field.key ? field.key + '_dynamic_source' : (sourceBtn && sourceBtn.getAttribute('data-op-source-key'))) || '';
+    const clearSource = () => {
+      if (!srcKey || typeof onChange !== 'function') return;
+      onChange(srcKey, false, true);
+    };
+    const connectSource = (collectionId) => {
+      if (!srcKey || typeof onChange !== 'function') return;
+      // Collection source replaces hand-picked products.
+      onChange(field.key, [], false);
+      onChange(srcKey, collectionId, true);
+    };
+    if (sourceBtn && field && field.dynamicSource && field.dynamicSource.mode === 'collections') {
+      sourceBtn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const cur = target && target[srcKey];
+        const curId = (cur && cur !== true && cur !== false) ? cur : '';
+        openCollectionSourcePop(sourceBtn, curId, connectSource, clearSource);
+      };
+    }
+    if (unsource) unsource.onclick = (e) => { e.preventDefault(); e.stopPropagation(); clearSource(); };
   }
   function wireOrderedVariants(root, getArr, setArr) {
     const max = Math.max(1, +(root.getAttribute('data-max') || 10));
@@ -3041,7 +3784,7 @@
     scopeEl.querySelectorAll('[data-control]').forEach((el) => {
       const k = el.getAttribute('data-fkey'); const ctl = el.getAttribute('data-control'); const f = schema.find((x) => x.key === k) || {};
       if (ctl === 'text' || ctl === 'url') el.oninput = () => change(k, el.value, false);
-      else if (ctl === 'textarea' || ctl === 'custom_css' || ctl === 'richtext') el.oninput = () => change(k, el.value, false);
+      else if (ctl === 'textarea' || ctl === 'custom_css') el.oninput = () => change(k, el.value, false);
       else if (ctl === 'number') el.oninput = () => change(k, clamp(el.value, f.min == null ? -1e9 : f.min, f.max == null ? 1e9 : f.max, 0), false);
       else if (ctl === 'select') el.onchange = () => change(k, el.value, true);
       else if (ctl === 'range') wireRange(el, f, change);
@@ -3052,11 +3795,11 @@
         change(k, [...el.querySelectorAll('[data-v].on')].map((x) => coerce(x.getAttribute('data-v'))), true);
       });
       else if (ctl === 'color') {
-        const cp = el.querySelector('input[type=color]'); const hx = el.querySelector('.os-hex'); const sw = el.querySelector('.os-sw');
-        cp.oninput = () => { hx.value = cp.value; sw.style.background = cp.value; sw.classList.remove('tsp'); change(k, cp.value, false); };
-        hx.onchange = () => { const v = hx.value.trim(); sw.style.background = v === 'transparent' ? '' : v; sw.classList.toggle('tsp', v === 'transparent'); change(k, v, false); };
+        wireColorControl(el, change, k, f);
       } else if (ctl === 'image') {
         wireImageField(el, change);
+      } else if (ctl === 'richtext') {
+        wireRichTextField(el, change, f, target);
       } else if (ctl === 'product' || ctl === 'collection' || ctl === 'menu' || ctl === 'blog' || ctl === 'page') {
         el.onclick = () => openPickerPop(el, ctl, target[k], (v) => change(k, v, true), el.getAttribute('data-single') === '1', el.getAttribute('data-pickfrom'));
       } else if (ctl === 'collections') {
@@ -4695,6 +5438,15 @@
         !document.querySelector('.modal-backdrop,.pop-layer,.os-pe')) {
       exitFullPreview();
     }
+    // Shopify inspector shortcut: ⌘⇧I / Ctrl+Shift+I
+    if ((event.metaKey || event.ctrlKey) && event.shiftKey && String(event.key || '').toLowerCase() === 'i') {
+      if (!ED || ED.previewOnly || !document.getElementById('os-builder')) return;
+      if (document.querySelector('.modal-backdrop,.pop-layer,.os-pe')) return;
+      const t = event.target;
+      if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+      event.preventDefault();
+      togglePreviewControls();
+    }
   });
   window.addEventListener('storage', (event) => {
     if (!ACTIVE_PREVIEW || event.key !== PREVIEW_STORAGE_KEY) return;
@@ -4752,6 +5504,13 @@
   }
   function applyHighlight() {
     const fr = document.getElementById('os-frame'); if (!fr) return;
+    if (!ED.previewControls) {
+      fr.querySelectorAll('.os-sec.active,.os-block-sel,[data-blabel]').forEach((x) => {
+        x.classList.remove('active', 'os-block-sel');
+        x.removeAttribute('data-blabel');
+      });
+      return;
+    }
     // Section/global outlines are baked in at render time; selecting from the tree doesn't
     // re-render the canvas, so we must move the .active outline here too (not just blocks).
     fr.querySelectorAll('.os-sec.active').forEach((x) => x.classList.remove('active'));
@@ -4799,22 +5558,10 @@
     const r = el.getBoundingClientRect();
     const sr = sc.getBoundingClientRect();
     if (sr.height < 8) return true;
-    const visible = Math.min(r.bottom, sr.bottom) - Math.max(r.top, sr.top);
-    if (visible <= 0) return false;
-    // Blocks: require the top to sit near the upper third so nested rows aren't left buried
-    // inside a tall section that already fills the viewport.
-    if (opts.kind === 'block') {
-      const blockBand = sr.top + Math.min(sr.height * 0.4, 220);
-      return r.top >= sr.top - 4 && r.top <= blockBand && r.bottom <= sr.bottom + 4;
-    }
-    // Whole target already on screen (e.g. short footer at page end) — no scroll needed.
-    if (r.top >= sr.top - 4 && r.bottom <= sr.bottom + 4) return true;
-    // Tall sections: treat as in view when the top sits in the upper half with enough visible area.
-    const topBand = sr.top + Math.min(sr.height * 0.5, 320);
-    const fillsView = r.top <= sr.top + 4 && r.bottom >= sr.bottom - 4;
-    const topComfortable = r.top >= sr.top - 4 && r.top <= topBand;
-    const enoughVisible = visible >= Math.min(r.height, sr.height) * 0.35;
-    return fillsView || (topComfortable && enoughVisible);
+    // If the selected section or block is already fully visible, keep the preview
+    // still. This is especially important while the preview is at the top of the
+    // page: selecting a visible item in the tree should not pull the page upward.
+    return r.top >= sr.top - 4 && r.bottom <= sr.bottom + 4;
   }
   function scrollToSelected() {
     const sc = document.getElementById('os-cscroll'); if (!sc) return;
@@ -4830,8 +5577,13 @@
       if (!isPreviewTargetInView(el, sc, { kind: sel.kind })) {
         const r = el.getBoundingClientRect();
         const sr = sc.getBoundingClientRect();
-        const pad = sel.kind === 'block' ? 24 : 12;
-        sc.scrollTo({ top: Math.max(0, sc.scrollTop + (r.top - sr.top) - pad), behavior: 'smooth' });
+        // Bring the selected preview target to the vertical center instead of
+        // pinning it to the top edge. Clamp naturally at the page boundaries.
+        const targetCenter = r.top - sr.top + (r.height / 2);
+        const viewportCenter = sr.height / 2;
+        const maxScroll = Math.max(0, sc.scrollHeight - sc.clientHeight);
+        const nextTop = Math.max(0, Math.min(maxScroll, sc.scrollTop + targetCenter - viewportCenter));
+        sc.scrollTo({ top: nextTop, behavior: 'smooth' });
       }
       const tree = document.getElementById('os-tree');
       const row = tree && tree.querySelector('.os-row.active');
@@ -5126,6 +5878,9 @@
   .os-dev button{width:30px;height:28px;border:0;background:transparent;color:#31353c;border-radius:2px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
   .os-dev button:hover{color:#111827}
   .os-dev button.active{background:#fff;color:#111827}
+  .os-inspector-toggle{margin-right:4px}
+  .os-inspector-toggle.active{background:#e8f0ff;color:#005bd3}
+  .os-inspector-toggle:not(.active){color:#8a9099}
   .btn-warn{background:#f59e0b;color:#fff}.btn-warn:hover{background:#e08c08}
   .btn-danger{background:var(--err);color:#fff}.btn-danger:hover{background:#b3401f}
   .os-top .btn[disabled]{opacity:.45;cursor:not-allowed}
@@ -5286,13 +6041,23 @@
   .os-block-sel{outline:2px solid var(--brand)!important;outline-offset:-2px;border-radius:0;background-color:rgba(0,102,230,.05)}
   /* Let external chrome tags paint above neighboring blocks / past the frame edge. */
   .os-builder:not(.os-full-preview) .os-frame{overflow:visible}
+  /* Inspector off: no hover rings, selection outlines, tint, or name tags. */
+  .os-builder.os-controls-off .os-frame .os-sec,
+  .os-builder.os-controls-off .os-frame .os-sec:hover,
+  .os-builder.os-controls-off .os-frame .os-sec.active{outline-color:transparent!important;cursor:default}
+  .os-builder.os-controls-off .os-frame .os-sec-tag,
+  .os-builder.os-controls-off .os-frame [data-block-id][data-blabel]::before{display:none!important;opacity:0!important}
+  .os-builder.os-controls-off .os-frame [data-block-id][data-blabel],
+  .os-builder.os-controls-off .os-frame [data-block-id][data-blabel]:hover,
+  .os-builder.os-controls-off .os-frame .os-block-sel{outline:none!important;outline-color:transparent!important;background:transparent!important;cursor:default}
   .os-empty-canvas{padding:64px 20px;text-align:center;color:#9aa3b0;font-size:13px;line-height:1.7}
   .os-render-err{margin:8px;padding:14px;background:#fff4f2;color:#b3401f;font-size:12.5px;border:1px solid #f3c9c0;border-radius:8px}
 
   /* right panel */
-  .os-right{border-left:1px solid #e3e3e3;display:flex;flex-direction:column;min-height:0;overflow-x:hidden;overflow-y:auto;background:#fff;font-family:inherit;font-size:13px;color:#303030}
+  /* Right settings: section title 14 / block (os-sub) 13 / field content 12 */
+  .os-right{border-left:1px solid #e3e3e3;display:flex;flex-direction:column;min-height:0;overflow-x:hidden;overflow-y:auto;background:#fff;font-family:inherit;font-size:12px;color:#303030}
   .os-right-head{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:40px;padding:6px 16px;margin:0;border-bottom:1px solid #e3e3e3;background:#fff;flex:none;position:sticky;top:0;z-index:3;box-sizing:border-box}
-  .os-rh-title{min-width:0;flex:1;color:#303030;font-size:13px;font-weight:650;line-height:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .os-rh-title{min-width:0;flex:1;color:#303030;font-size:14px;font-weight:650;line-height:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .os-rh-more{width:28px;height:28px;flex:none;margin:0;border:0;background:transparent;color:#6b7280;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
   .os-rh-more:hover{background:#f2f3f5;color:#111827}
   /* Mid-panel rules are inset; header / foot rules stay edge-to-edge. */
@@ -5331,32 +6096,70 @@
   .os-fld-pair:has(.os-imgf){align-items:center}
   .os-fld-pair:has(.os-imgf) .os-flabel{align-self:center}
   .os-fld-row{grid-template-columns:minmax(0,1fr) auto}
-  .os-fld-pair .os-select,.os-fld-pair .os-input,.os-fld-pair .os-picker,.os-fld-pair .os-color,.os-fld-pair .os-ninh,.os-fld-pair .os-imgf{width:100%;min-width:0}
-  .os-fld-seg .os-seg2{width:100%;max-width:100%;justify-content:stretch}
-  .os-fld-seg .os-seg2 button{flex:1 1 0;min-width:0;padding:6px 8px}
+  .os-fld-pair .os-select,.os-fld-pair .os-input,.os-fld-pair .os-picker,.os-fld-pair .os-color-wrap,.os-fld-pair .os-color,.os-fld-pair .os-ninh,.os-fld-pair .os-imgf{width:100%;min-width:0}
+  /* Hug content + right-align in the settings grid cell (Shopify density) */
+  .os-fld-seg .os-seg2{width:max-content;max-width:100%;justify-self:end;justify-content:flex-start}
+  .os-fld-seg .os-seg2 button{flex:0 1 auto;min-width:0;padding:5px 10px}
   .os-fld-range .os-range-row{width:100%;min-width:0}
   /* Dense labels match Shopify theme editor (12px / #4D4D4D) */
-  .os-flabel{display:flex;align-items:center;font-family:inherit;font-size:12px;font-weight:400;line-height:1.3;color:#4d4d4d;margin-bottom:6px}
+  .os-flabel{display:flex;align-items:center;gap:5px;font-family:inherit;font-size:12px;font-weight:400;line-height:1.3;letter-spacing:-0.01em;color:#4d4d4d;margin-bottom:6px}
+  .os-flabel.has-meta{width:100%;justify-content:space-between}
+  .os-field-meta{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;margin-left:auto;padding:0;border:0;background:transparent;color:#8a8a8a;cursor:pointer;flex:none}
+  .os-field-meta:hover,.os-field-meta.is-connected{color:#303030}
+  .os-field-meta svg{width:14px;height:14px;display:block}
   .os-fld-seg .os-flabel,.os-fld-range .os-flabel,.os-fld-pair .os-flabel{display:block;white-space:normal;overflow-wrap:anywhere}
+  .os-fld-seg .os-flabel.has-meta,.os-fld-range .os-flabel.has-meta,.os-fld-pair .os-flabel.has-meta{display:flex}
   .os-req{color:var(--err);margin-left:2px}
   .os-fval{margin-left:auto;font-size:11px;color:var(--ink-muted);font-variant-numeric:tabular-nums}
-  .os-fhint{font-size:12px;font-weight:400;color:#616161;margin-top:4px;line-height:1.45}
+  .os-fhint{font-size:11px;font-weight:400;letter-spacing:-0.01em;color:#757575;margin-top:4px;line-height:1.45}
   /* Subhead rules (Colors / Advanced / …) inset 16px; not edge-to-edge like head/foot. */
   .os-sub,.os-secpad{font-family:inherit;font-size:13px;font-weight:650;letter-spacing:0;line-height:1.3;text-transform:none;color:#303030;margin:8px 16px 0;padding:12px 0 4px;border:0;border-top:1px solid #e3e3e3}
-  .os-tip{font-size:12px;font-weight:400;color:#616161;line-height:1.45;margin:0 0 12px;padding:0}
+  .os-tip{font-size:11px;font-weight:400;letter-spacing:-0.01em;color:#757575;line-height:1.45;margin:0 0 12px;padding:0}
   .os-tip-a{color:inherit;text-decoration:underline;text-underline-offset:2px}
   .os-tip-a:hover{color:#303030}
   .os-sub + .os-tip,.os-secpad + .os-tip{margin-top:0}
   .os-right-scroll > .os-sub:first-child,.os-right-scroll > .os-secpad:first-child{margin-top:0;margin-left:16px;margin-right:16px;padding-top:0;border-top:0}
-  .os-info{font-size:12px;font-weight:400;color:#616161;line-height:1.45;background:#f7f7f7;border-radius:8px;padding:10px 12px;margin:0 16px 12px}
-  .os-input{width:100%;height:34px;padding:0 10px;border:1px solid var(--ctl);border-radius:8px;font-size:13px;color:var(--ink);background:#fff;font-family:inherit}
+  .os-info{font-size:12px;font-weight:400;letter-spacing:-0.01em;color:#616161;line-height:1.45;background:#f7f7f7;border-radius:8px;padding:10px 12px;margin:0 16px 12px}
+  .os-input{width:100%;height:32px;padding:0 10px;border:1px solid var(--ctl);border-radius:8px;font-size:12px;color:var(--ink);background:#fff;font-family:inherit;letter-spacing:-0.01em}
   .os-input:focus{outline:none;border-color:#005bd3;box-shadow:0 0 0 1px #005bd3}
-  .os-ta{height:auto;min-height:72px;padding:8px 10px;line-height:1.5;resize:vertical}.os-ta.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:13px}
-  .os-select{width:100%;height:34px;padding:0 8px;border:1px solid var(--ctl);border-radius:8px;font-size:13px;color:var(--ink);background:#fff;font-family:inherit;cursor:pointer}
+  .os-ta{height:auto;min-height:72px;padding:8px 10px;line-height:1.5;resize:vertical}.os-ta.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px}
+  .os-richtext{width:100%;border:1px solid var(--ctl);border-radius:8px;background:#fff;overflow:hidden}
+  .os-rt-toolbar{display:flex;align-items:center;gap:2px;flex-wrap:wrap;padding:5px 8px;border-bottom:1px solid #e3e3e3;background:#f7f7f7}
+  .os-rt-sep{width:1px;height:18px;margin:0 3px;background:#d4d4d4}
+  .os-rt-btn{min-width:28px;height:28px;padding:0 6px;border:1px solid transparent;border-radius:6px;background:transparent;color:#303030;font:inherit;font-size:12px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+  .os-rt-btn:hover{background:#fff;border-color:#d4d4d4}
+  .os-rt-btn svg{width:14px;height:14px;display:block}
+  .os-rt-select{height:28px;max-width:110px;border:1px solid #d4d4d4;border-radius:6px;background:#fff;color:#303030;font:inherit;font-size:11px}
+  .os-rt-editor{min-height:140px;padding:10px 12px;color:var(--ink);font-size:13px;line-height:1.55;outline:none;overflow:auto;background:#fff}
+  .os-rt-editor:empty:before{content:attr(data-placeholder);color:#9aa3b0}
+  .os-rt-editor.is-bound{min-height:52px;display:flex;align-items:flex-start}
+  .os-rt-editor img,.os-rt-editor video{display:block;max-width:100%;height:auto;margin:8px 0;border-radius:6px}
+  .os-rt-editor a{color:#005bd3;text-decoration:underline}
+  .os-rt-editor ul,.os-rt-editor ol{padding-left:22px;margin:.4em 0}
+  .os-rt-editor p{margin:.4em 0}
+  .os-rt-editor h1,.os-rt-editor h2,.os-rt-editor h3{margin:.4em 0;font-weight:600}
+  .os-rt-editor table{border-collapse:collapse;margin:.5em 0}.os-rt-editor td{border:1px solid #d4d4d4;padding:4px 8px;min-width:48px}
+  .os-rt-editor blockquote{margin:8px 0;padding-left:10px;border-left:3px solid #d4d4d4;color:#616161}
+  .os-richtext.is-bound .os-rt-btn:disabled,.os-richtext.is-bound .os-rt-select:disabled{opacity:.45;cursor:default}
+  .os-rt-source-wrap{display:inline-flex;max-width:100%}
+  .os-rt-source{display:inline-flex;align-items:center;gap:6px;max-width:100%;padding:5px 10px 5px 8px;border:0;border-radius:8px;background:#eaf2ff;color:#005bd3;font:inherit;font-size:13px;font-weight:550;line-height:1.2;cursor:pointer}
+  .os-rt-source:hover{background:#dceaff}
+  .os-rt-source-icon{display:inline-flex;align-items:center;justify-content:center;flex:none;color:#005bd3}
+  .os-rt-source-icon svg{width:14px;height:14px;display:block}
+  .os-rt-source-pop{position:fixed;z-index:500;min-width:220px;padding:8px 0;border:1px solid #d9d9d9;border-radius:10px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.16);color:#303030}
+  .os-rt-source-crumb{padding:3px 12px 8px;color:#6b7280;font-size:12px;white-space:nowrap}
+  .os-rt-source-crumb span{padding:0 4px;color:#a0a6ad}
+  .os-rt-source-pop button{display:flex;align-items:center;gap:9px;width:100%;padding:9px 12px;border:0;background:#fff;color:#303030;text-align:left;font:inherit;font-size:13px;cursor:pointer}
+  .os-rt-source-pop button:hover{background:#f5f6f7}
+  .os-rt-source-pop button span{display:inline-flex;width:15px;color:#555}
+  .os-rt-source-pop button svg{width:15px;height:15px}
+  .os-select{width:100%;height:32px;padding:0 8px;border:1px solid var(--ctl);border-radius:8px;font-size:12px;color:var(--ink);background:#fff;font-family:inherit;cursor:pointer;letter-spacing:-0.01em}
   .os-select:focus{outline:none;border-color:#005bd3;box-shadow:0 0 0 1px #005bd3}
-  .os-seg2{display:flex;background:var(--panel);border-radius:8px;padding:3px;gap:2px}
-  .os-seg2 button{flex:1;border:0;background:none;font-size:13px;font-weight:500;color:var(--ink-body);padding:6px 6px;border-radius:6px;cursor:pointer;font-family:inherit;white-space:nowrap}
-  .os-seg2 button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+  /* Shopify-tight segmented control: 12px, compact padding, no bleed between tabs */
+  /* Hug label width; do not stretch tabs across the whole settings column */
+  .os-seg2{display:inline-flex;max-width:100%;background:#eef0f3;border-radius:8px;padding:2px;gap:1px;box-sizing:border-box}
+  .os-seg2 button{flex:0 1 auto;min-width:0;border:0;background:transparent;font-size:12px;font-weight:450;letter-spacing:-0.02em;color:#4d4d4d;padding:5px 10px;border-radius:6px;cursor:pointer;font-family:inherit;white-space:nowrap;line-height:1.2}
+  .os-seg2 button.on{background:#fff;color:#303030;font-weight:550;box-shadow:0 1px 2px rgba(0,0,0,.12),0 0 0 1px rgba(0,0,0,.04)}
   .os-msel{display:flex;flex-wrap:wrap;gap:6px}
   .os-msel-chip{border:1px solid #d4d4d4;background:#fff;color:var(--ink-body);border-radius:6px;padding:6px 10px;font:inherit;font-size:12px;font-weight:550;cursor:pointer}
   .os-msel-chip.on{border-color:#303030;background:#303030;color:#fff}
@@ -5376,15 +6179,16 @@
   .os-range-num-in{appearance:textfield;-moz-appearance:textfield;flex:1 1 auto;width:0;min-width:0;min-height:auto;height:30px;border:0;border-radius:0;background:transparent;padding:0;text-align:left;box-shadow:none;font:inherit;font-size:12px;color:#111827;outline:none}
   .os-range-num-in::-webkit-outer-spin-button,.os-range-num-in::-webkit-inner-spin-button{margin:0;-webkit-appearance:none}
   .os-range-num span{flex:0 0 auto;padding-left:6px;color:#9ca3af;font-size:11px;line-height:1}
-  /* Unified swatch + hex (Shopify color field); no separate T / outer boxes */
-  .os-color{display:flex;align-items:center;gap:8px;min-width:0;max-width:100%;width:100%;height:32px;padding:4px 10px 4px 4px;border:1px solid #c9cccf;border-radius:8px;background:#fff;box-sizing:border-box}
+  /* Color field: swatch + hex + required right-side T (same 32px height as the input). */
+  .os-color-wrap{display:flex;align-items:center;gap:8px;min-width:0;max-width:100%;width:100%}
+  .os-color{display:flex;align-items:center;gap:8px;min-width:0;flex:1 1 auto;height:32px;min-height:32px;max-height:32px;padding:4px 10px 4px 4px;border:1px solid #c9cccf;border-radius:8px;background:#fff;box-sizing:border-box}
   .os-color:focus-within{border-color:#005bd3;box-shadow:0 0 0 1px #005bd3}
   .os-sw{width:20px;height:20px;border-radius:6px;border:1px solid rgba(0,0,0,.12);cursor:pointer;flex:none;position:relative;overflow:hidden}
   .os-sw input[type=color]{position:absolute;inset:0;opacity:0;cursor:pointer;border:0;padding:0}
   .os-sw.tsp{background:conic-gradient(#ccc 25%,#fff 0 50%,#ccc 0 75%,#fff 0)50%/8px 8px}
   .os-hex{flex:1 1 0;min-width:0;width:0;height:24px;border:0;border-radius:0;padding:0;background:transparent;font-size:12px;font-family:inherit;color:#303030;box-sizing:border-box}
   .os-hex:focus{outline:none}
-  .os-tbtn{width:32px;height:32px;border:1px solid var(--ctl);border-radius:8px;background:#fff;color:var(--ink-muted);font-size:12px;font-weight:700;cursor:pointer;flex:none}
+  .os-tbtn{width:32px;height:32px;min-width:32px;min-height:32px;max-height:32px;border:1px solid #c9cccf;border-radius:8px;background:#fff;color:#616161;font-size:12px;font-weight:700;cursor:pointer;flex:none;box-sizing:border-box;padding:0;line-height:1}
   .os-tbtn.on{border-color:var(--brand);color:var(--brand);background:var(--brand-50)}
   .os-ninh{display:flex;align-items:center;gap:8px}.os-ninh .os-input{flex:1}.os-ninh .os-tbtn{width:auto;padding:0 10px;font-size:12px;font-weight:600}
   .os-imgf{width:100%;min-width:0}
@@ -5460,8 +6264,48 @@
   .os-op-remove:hover{background:#f7e9e7;color:#b3261e}
   .os-op-grip,.os-map-grip{display:inline-flex;flex:none;color:var(--ink-muted);cursor:grab}
   .os-op-empty,.os-map-empty{padding:10px;border:1px dashed var(--ctl);border-radius:8px;color:var(--ink-muted);font-size:11.5px;line-height:1.4}
+  .os-op-actions{display:flex;align-items:center;gap:8px;align-self:stretch}
   .os-op-select,.os-map-action{align-self:flex-start;height:32px;padding:0 12px;border:1px solid var(--ctl);border-radius:7px;background:#fff;color:var(--ink);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer}
   .os-op-select:hover,.os-map-action:hover{border-color:var(--brand);color:var(--brand)}
+  .os-op-select:disabled{opacity:.45;cursor:default}
+  .os-op-select:disabled:hover{border-color:var(--ctl);color:var(--ink)}
+  .os-op-source{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;padding:0;border:1px solid var(--ctl);border-radius:7px;background:#fff;color:#8a8a8a;cursor:pointer;flex:none}
+  .os-op-source:hover,.os-op-source.is-connected{border-color:var(--brand);color:#303030}
+  .os-op-source svg{width:14px;height:14px;display:block}
+  .os-op-bound{display:flex;align-items:center;gap:8px;min-height:40px;padding:6px 8px;border:1px solid var(--hair);border-radius:8px;background:#f7f7f8}
+  .os-op-bound-ico{display:inline-flex;color:#555;flex:none}
+  .os-op-bound-ico svg{width:14px;height:14px}
+  .os-op-bound-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;font-weight:600}
+  .os-op-bound-clear{width:24px;height:24px;border:0;border-radius:5px;background:transparent;color:var(--ink-muted);font-size:18px;line-height:1;cursor:pointer}
+  .os-op-bound-clear:hover{background:#f7e9e7;color:#b3261e}
+  .os-op-source-pop{position:fixed;z-index:500;width:280px;max-height:min(420px,70vh);overflow:auto;padding:8px 0;border:1px solid #d9d9d9;border-radius:10px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.16);color:#303030}
+  .os-op-source-crumb{padding:4px 12px 8px;font-size:11px;color:#6d7175;border-bottom:1px solid #eee;margin-bottom:4px}
+  .os-op-source-crumb span{margin:0 4px;opacity:.7}
+  .os-op-source-list{display:flex;flex-direction:column}
+  .os-op-source-list button{display:flex;align-items:center;gap:9px;width:100%;padding:8px 12px;border:0;background:#fff;color:#303030;text-align:left;font:inherit;font-size:13px;cursor:pointer}
+  .os-op-source-list button:hover,.os-op-source-list button.on{background:#f5f6f7}
+  .os-op-source-thumb{width:32px;height:32px;flex:none;border-radius:6px;border:1px solid #e3e3e3;background:#f1f1f1 center/cover no-repeat}
+  .os-op-source-copy{display:flex;flex-direction:column;gap:1px;min-width:0}
+  .os-op-source-copy strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;font-weight:600}
+  .os-op-source-copy small{color:#6d7175;font-size:11px}
+  .os-op-source-empty{padding:16px 12px;color:#6d7175;font-size:12px;text-align:center}
+  .os-op-source-remove{display:flex;align-items:center;gap:9px;width:100%;padding:9px 12px;border:0;border-top:1px solid #eee;background:#fff;color:#b3261e;text-align:left;font:inherit;font-size:13px;cursor:pointer;margin-top:4px}
+  .os-op-source-remove:hover{background:#faf0ef}
+  .os-op-source-remove span{display:inline-flex;width:15px;color:inherit}
+  .os-op-source-remove svg{width:15px;height:15px}
+  .os-ri{display:flex;flex-direction:column;gap:12px;width:100%}
+  .os-ri-card{border:0;border-radius:0;background:transparent;padding:0;display:flex;flex-direction:column;gap:4px}
+  .os-ri-card + .os-ri-card{padding-top:10px;border-top:1px solid #e3e3e3}
+  .os-ri-head{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:28px}
+  .os-ri-head strong{font-size:12.5px;font-weight:700;color:#303030}
+  .os-ri-remove{width:24px;height:24px;border:0;border-radius:5px;background:transparent;color:var(--ink-muted);font-size:18px;line-height:1;cursor:pointer}
+  .os-ri-remove:hover{background:#f7e9e7;color:#b3261e}
+  .os-ri-fields{display:flex;flex-direction:column;gap:4px}
+  .os-ri-fields[hidden]{display:none!important}
+  .os-ri-card > .os-fld,.os-ri-fields > .os-fld{padding-left:0;padding-right:0;margin:0}
+  .os-ri-card .os-fld-pair.os-ri-img{align-items:center}
+  .os-ri-card .os-fld-pair.os-ri-img .os-flabel{align-self:center}
+  .os-ri .os-op-select:disabled{opacity:.45;cursor:default}
   .os-map-card{display:flex;flex-direction:column;gap:7px;padding:10px;border:1px solid var(--hair);border-radius:9px;background:#fff}
   .os-map-head{display:flex;align-items:center;gap:7px;padding-bottom:7px;border-bottom:1px solid var(--hair);cursor:grab}
   .os-map-head strong{flex:1;font-size:12.5px}.os-map-head button{border:0;background:none;color:#b3261e;font-family:inherit;font-size:11px;cursor:pointer}
@@ -5536,7 +6380,7 @@
   .os-blkprev-price s{font-size:14px;font-weight:500;color:#9ca3af}
   .os-blkprev-price .save{display:inline-flex;align-items:center;flex:none;font-size:11px;font-weight:700;color:#fff;background:#d63a2f;padding:2px 6px;border-radius:4px;line-height:1.2}
   .os-blkprev-rate{display:inline-flex;align-items:center;gap:4px;flex:none;line-height:0}
-  .os-blkprev-rate .st{flex:none;width:28px;height:28px;aspect-ratio:1/1;border-radius:4px;background:#2e7d32;display:inline-grid;place-items:center;box-sizing:border-box;overflow:hidden}
+  .os-blkprev-rate .st{flex:none;width:28px;height:28px;aspect-ratio:1/1;border-radius:4px;background:#0f3636;display:inline-grid;place-items:center;box-sizing:border-box;overflow:hidden}
   .os-blkprev-rate .st svg{width:16px;height:16px;display:block;flex:none}
   .os-blkprev-icons{display:flex;flex-direction:column;gap:10px;align-items:flex-start;justify-content:center;font-size:13px;line-height:1.35;color:#374151;width:100%;max-width:260px}
   .os-blkprev-icons .cell{display:flex;align-items:center;gap:8px;width:100%;text-align:left}
@@ -5552,6 +6396,8 @@
   .os-blkprev-share svg{flex:none;width:18px;height:18px;display:block}
   .os-blkprev-ship{font-size:13px;line-height:1.45;color:#374151;text-align:left;max-width:240px}
   .os-blkprev-line{width:100%;max-width:240px;height:1px;background:#E5E5E5;flex:none}
+  .os-blkprev-vc{display:flex;gap:6px;align-items:stretch;width:100%;max-width:260px}
+  .os-blkprev-vc-cell{flex:1;min-width:0;aspect-ratio:9/16;border-radius:8px;background:#d1d5db center/cover no-repeat}
   .os-blkprev-copy{font-size:13px;line-height:1.55;color:#374151;max-width:260px;text-align:left}
   .os-blkprev-sku{font-size:13px;line-height:1.4;color:#6b7280}
   .os-blkprev-stock{display:inline-flex;align-items:center;gap:8px;color:#10a443;font-size:14px;line-height:1.3}
@@ -5565,6 +6411,18 @@
   .os-blkprev-field{width:100%;max-width:220px;text-align:left}
   .os-blkprev-field .lb{font-size:12px;font-weight:650;margin-bottom:6px;color:#374151;line-height:1.3}
   .os-blkprev-field .inp{height:36px;border:1px solid rgba(0,0,0,.2);border-radius:7px;padding:0 10px;display:flex;align-items:center;font-size:13px;color:#9ca3af;box-sizing:border-box}
+  .os-blkprev-fr{width:100%;max-width:320px;display:flex;flex-direction:column;gap:10px;align-items:stretch;text-align:left}
+  .os-blkprev-fr-h{font-size:14px;font-weight:700;color:#111;line-height:1.3;letter-spacing:-.01em}
+  .os-blkprev-fr-card{display:flex;align-items:center;gap:12px;padding:14px;border-radius:12px;background:#fff;border:1px solid rgba(0,0,0,.1);box-sizing:border-box}
+  .os-blkprev-fr-av{flex:none;width:48px;height:48px;border-radius:8px;object-fit:cover;background:#e5e7eb;display:block}
+  .os-blkprev-fr-av.is-empty{display:inline-block}
+  .os-blkprev-fr-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+  .os-blkprev-fr-text{font-size:12.5px;line-height:1.45;color:#111;font-style:italic}
+  .os-blkprev-fr-author{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12px;font-weight:650;color:#111;line-height:1.3}
+  .os-blkprev-fr-verified{display:inline-flex;align-items:center;gap:3px;color:#2563eb;font-size:11px;font-weight:650;font-style:normal}
+  .os-blkprev-fr-verified svg{flex:none;display:block}
+  .os-blkprev-fr-sub{font-size:10.5px;line-height:1.35;color:#6b7280}
+  .os-blkprev-fr-side{flex:none;width:72px;height:72px;border-radius:10px;object-fit:cover;background:#e5e7eb;display:block}
   .os-addgrp{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#9aa3b0;padding:10px 6px 4px}
   .os-addrow{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer}
   .os-addrow:hover,.os-addrow.hover{background:#f1f1f1}.os-addrow.soon,.os-addrow.added{opacity:.55;cursor:default}

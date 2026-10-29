@@ -9,6 +9,11 @@
 用线上后装修能力, 装修出线上 15 个在跑店铺的商品详情页(PDP)效果.
 线上是真相源, 本文档结论已对照: 线上案例 + pdp 文档 + 代码三源验证.
 
+## 控件约定
+
+- 色值选择器全部走 `control: 'color'` → `colorControl` / `wireColorControl` (色块 + hex; `allowTransparent` 时右侧统一带 T 透明按钮). 禁止另做第二套色板 UI.
+- 空值与 `transparent` 统一棋盘格 swatch; 留空表示继承主题色 (由字段 info 说明); T 写入 `transparent`.
+
 ## 现状基线(已核实)
 
 - 主购买区组件: `online-store/js/sections/product-main.js`, 已实现 19 个 block (PRD 的 18 个 + 1 个 line_property).
@@ -30,23 +35,25 @@
 字段格式: `字段名 / 控件类型 / 默认值 / 选项或说明`.
 
 ### 1. Badges 标签
-- badge_position: select / top-left / [top-left, top-right, below-title, above-price]
-- badge_icon: select / none / [none, fire, tag, percent]
-- badge_icon_image: image / 空 (支持上传自定义小图, 与内置图标二选一)
-- badge_bg: color / 继承主题
-- badge_text_color: color / 继承主题
+- 面板分区: Valid custom tags / Product badges (os-sub 分割线)
+- custom_tag_style: segmented / filled / [filled, outline]
+- hot_badge_bg / hot_badge_text_color: color (tag__hot_*; bg 空=主题主色, text 默认 #fff)
+- new_badge_bg / new_badge_text_color: color (tag__new_*; bg 默认 #FFC439, text 默认 #fff)
+- badge_position: segmented / left / [left, right] (购买区标签行左右对齐)
+- badge_icon / badge_icon_image: 自定义 tag 图标
 - badge_gap: range / 8 / px
+- outline: 与 filled 同外框 (height 24 / radius 5 / padding 2 8 / weight 700); 底 #f9fafb; inset 0.5px hairline (画在内侧, 外尺寸不膨胀); 深色字
 
 ### 2. Price
+- size: range / 24 / px, 10–120 (现价字号; 划线价与 Save 按比例缩放)
 - saving_position: segmented / right / [left, right]
-- saving_type: select / percentage / [Percentage, Fixed amount, Sale, Saving label]
-- saving_label: text / 空 (仅 saving_type=label 级联出现; 空则展示 Save)
+- saving_type: select / percentage / [Percentage, Fixed amount, Sale, Saving text]
+- saving_label: text / 空 (仅 saving_type=label 级联出现; placeholder: e.g. Price after 34% Off; 空则展示 Save)
 - saving_bg: color / 主题色
 - saving_text_color: color / #fff
 - saving_icon: toggle / false
 - saving_style: segmented / filled / [filled, outline] (案例镂空 Sale tag)
-- price_prefix: text / 空 (案例 Set of 2)
-- compare_order: segmented / after / [before=Left, after=Right]
+- 不做 Price prefix; 划线价固定跟在现价右侧, 不做位置配置
 
 ### 3. Inventory
 - low_stock_threshold: number / 5 (商家可自定义, 不设死)
@@ -62,32 +69,45 @@
 - show_sku_in_option: toggle / false
 
 ### 5. Buy
-- show_buy_now: toggle / false (案例 ATC + Buy now 双按钮)
-- buy_now_text: text / Buy now
-- button_shape: segmented / normal / [normal, pill, square, custom]
-- custom_radius: range / 8 / px (仅 button_shape=custom 显示)
-- button_layout: select / stacked / [stacked, side-by-side]
-- channels: multi-select / 仅动态结账钱包 [Shop, PayPal, Apple Pay, Google Pay]
+- 侧栏分两块 (os-sub 分割线): Add to cart | Dynamic checkout
+- 开箱默认 (Default product): show_quantity / show_add / show_dynamic / show_payment_options / channel_logo / show_safe_checkout = on; atc_layout = with-quantity; atc_shape = pill; dyn_shape = normal; atc_background = #FFC439; atc_text_color = #FFFFFF; buy_now_background = #000000; buy_now_text_color = #FFFFFF; channels = [Buy now, PayPal]; trust_logos = [Visa, Mastercard, Amex, PayPal, Apple Pay, Google Pay]; safe_checkout_align = center
+- show_buy_now: 已下线 (立买归入 Channels, 挂在 show_dynamic 下)
+- show_dynamic: toggle / true — 开启后出现 Channels / more payment options / safe checkout; 关闭则这些配置项与预览一并隐藏
+- buy_now_text: text / Buy now (仅 channels 含 buy_now 时显示)
+- atc_layout: segmented / with-quantity / [with-quantity, full-width] (full-width = 加购按钮单独全宽, 类似 Buy now)
+- atc_icon: select / bag-plus / theme icon 库 (含 None; 默认购物袋+加号 20px, 显示在加购文案左侧)
+- atc_background / atc_text_color: color / 开箱 #FFC439 / #FFFFFF (T = transparent)
+- buy_now_background / buy_now_text_color: color / 开箱 #000000 / #FFFFFF (仅 channels 含 buy_now)
+- channel_logo: toggle / true (开箱开; PayPal 等渠道显示品牌 logo)
+- atc_shape: segmented / pill / [normal, pill, square, custom] (加购区块; ≥4 项自动下拉)
+- atc_custom_radius: range / 8 / px (仅 atc_shape=custom)
+- dyn_shape: segmented / normal / [normal, pill, square, custom] (结账区块; ≥4 项自动下拉; visibleWhen show_dynamic)
+- dyn_custom_radius: range / 8 / px (仅 dyn_shape=custom)
+- button_shape / custom_radius: 已下线 (遗留数据仍作 atc_shape / dyn_shape 回退)
+- button_layout: 已下线, 固定 stacked (无 Side by side 配置项)
+- channels: multi-select / 默认 [Buy now, PayPal] / 可选 [Buy now, PayPal, Apple Pay, Google Pay] (visibleWhen show_dynamic; Shop 不在 Channels)
   - 注意: Visa / Amex / Mastercard / Amazon 等卡品牌不是 Channels. 案例里它们出现在 Safe checkout / Payment & Security logo 条, 走 trust_logos
-- channel_logo: toggle / false
-- show_shop_installments: toggle / false (案例 Shop Pay "Pay in 2 interest-free installments")
-- show_safe_checkout: toggle / false (案例 Guaranteed Safe Checkout)
+- show_shop_installments: 已下线 (分期能力后续再补)
+- show_safe_checkout: toggle / true (开箱 Guaranteed Safe Checkout)
 - safe_checkout_label: text / GUARANTEED SAFE CHECKOUT
-- trust_logos: multi-select / [Norton, McAfee, Money back, Visa, Mastercard, Amex, Discover, Diners, Amazon, PayPal, Shop, Apple Pay, Google Pay, Venmo, Bancontact, Giropay]
+- trust_logos: multi-select / 开箱 [Visa, Mastercard, Amex, PayPal, Apple Pay, Google Pay]; 全量可选 [Norton, McAfee, Money back, Visa, Mastercard, Amex, Discover, Diners, Amazon, PayPal, Apple Pay, Google Pay, Venmo, Bancontact, Giropay] (无 Shop; 支付渠道用官方 logo)
+- trust_logo_size: range / 28 / px (20-56, 拖动调大小; 超出一行自动换行)
 - Featured product 的 Buy buttons 与 Product information 同字段集 (默认数据可不同; Featured 另有独立 Quantity block 时 show_quantity 默认关)
 
 ### 6. Collapsible
-- first_open_default: toggle / false
+- open: toggle / false (行级 Open by default; 勾哪行展开哪行, 与顺序无关)
 - accordion_mode: toggle / false (开 = 多行互斥只开一个)
 - icon_position: segmented / right / [left, right]
 - mobile_order: 复用桌面顺序 (不单独排序)
 
 ### 7. Popup
-- trigger: segmented / click (仅点击)
-- content_type: select / page (仅关联页面)
-- hover_effect: toggle / false
-- popup_width: range / 默认
-- popup_height: range / 默认
+- Link label 默认: Pop-up link text
+- Page: page 选择器 (内容仅关联页面; 无 Content type / Trigger / Hover effect 控件)
+- popup_width: range / 560
+- popup_height: range / 420
+- 点击打开居中弹窗; 下划线左→右动效 (基于下划线本身)
+- 编辑态无 page 内容: 空白居中弹窗
+- 发布 / buyer preview: 无 page 内容则隐藏该 block
 
 ### 8. Shipping
 - timezone: select / store / [store, utc]
@@ -115,12 +135,17 @@
 
 ### 12. Featured reviews(新 block)
 - heading: text / What Our Customers Are Saying
-- data_source: select / auto / [auto, manual, both]
-- show_image: toggle / false
-- scroll: toggle / false
-- auto_play: toggle / false
-- view_all_popup: toggle / true
-- cards_per_row: range / 3
+- Content
+  - data_source: select / manual / [manual, auto]
+    - manual(默认): 逐条添加; 每条可选 Select existing review 或 Manual edit; 默认 1 条可增删
+    - auto: 自动拉取商品评论; auto_count 控制展示条数
+  - reviews: review_items (仅 manual)
+  - auto_count: range 1–8 / 3 (仅 auto)
+- Style (统一设置, 与内容源独立)
+  - layout: select / nav / [media, quote, nav, trust]
+  - show_image / show_avatar / round_avatar / star_color
+  - show_verified / verified_text / verified_subtext (空则隐藏对应区块)
+  - scroll / nav_style / auto_play / view_all_popup / cards_per_row
 
 ## 三、sticky 吸附购物车字段(已锁定)
 
@@ -128,13 +153,11 @@
 - show_title: toggle / true
 - show_price: toggle / true
 - show_quantity: toggle / true
-- show_bundle: toggle / false (Bundle 走独立应用, 先留关)
 - show_after_scroll: toggle / false (滚动后出现, 阈值默认 100px)
 - appear_at: segmented / scroll / [top, scroll]
-- position: segmented / bottom / [top, bottom]
 - mobile_visible: toggle / true
 
-交互规则: 底部固定, 滚过主购买区后出现, 含数量, 移动端显示, 不含变体选择器.
+交互规则: 固定吸附底部 (无 Position 配置), 滚过主购买区后出现, 含数量, 移动端显示, 不含变体选择器.
 
 ## 四、3 个预设模板构成 (已落地 data.js product.templates)
 

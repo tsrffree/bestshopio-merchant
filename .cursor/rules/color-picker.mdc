@@ -1,0 +1,19 @@
+---
+description: Color picker UI rules for merchant theme editor controls
+alwaysApply: true
+---
+
+# Color picker rules
+
+Any color selection control in this merchant prototype must follow both rules:
+
+1. Reveal OOB / blank / inherit colors.
+   - When the stored value is empty and the field inherits a theme or schema default, the swatch and hex input must show that fallback color.
+   - Do not leave a checkerboard empty swatch when `blankValue` or a non-empty `default` exists.
+   - Prefer `blankValue: () => OS.themeColor('primary_color', '#103635')` (or the matching token) for theme-inherited colors.
+
+2. Always include the right-side T button.
+   - Layout matches Star color: `[swatch + hex input] [T]`.
+   - T sits outside the hex field, same 32px height as the color input row.
+   - T toggles transparent; turning it off restores `blankValue` / default.
+   - Do not ship a color row without the T button.

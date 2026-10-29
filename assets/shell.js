@@ -173,11 +173,11 @@
     if (loaded[id]) return loaded[id];
     // Online store is a self-contained Theme editor. Version it independently so
     // a Theme-only release cannot reuse stale app/data scripts from a prior shell release.
-    var moduleV = id === 'settings' ? '20261008-ocean-note'
-      : id === 'online-store' ? '20261028-tpl-default-top'
+    var moduleV = id === 'settings' ? '20261029-spu-eg'
+      : id === 'online-store' ? '20261029-fr-fit1'
       : id === 'analytics' ? '20260922-address-info1'
       : id === 'orders' ? '20261013-no-channel'
-      : id === 'products' ? '20261028-tpl-default-top'
+      : id === 'products' ? '20261028-rt-unified1'
       : id === 'vendors' ? '20261013-sort-arrow' : V;
     // Only Analytics ships a dedicated icon bundle. Avoid a noisy 404 for every
     // other lazily loaded module.
@@ -192,6 +192,15 @@
     chain = chain.then(function () {
       if (id === 'online-store' && !window.POST_PURCHASE_ORDER_MOCK)
         return loadScript('assets/post-purchase-order-mock.js?v=' + moduleV);
+    });
+    // Shared compact rich-text editor (Paragraph | Icon | More) for theme editor + product detail.
+    chain = chain.then(function () {
+      if ((id === 'online-store' || id === 'products') && !window.OS_THEME_ICONS)
+        return loadScript('online-store/js/theme-icons.js?v=20261028-rt1').catch(function () {});
+    });
+    chain = chain.then(function () {
+      if ((id === 'online-store' || id === 'products') && !window.BSRichText)
+        return loadScript('assets/richtext-editor.js?v=20261028-rt6');
     });
     // Product settings and the Vendors page share one vendor list. Load it before either module,
     // and load the product catalog before Vendors so vendor products can resolve names.

@@ -1,9 +1,104 @@
 /* Product information — the required PDP buy box.
    Settings follow the Theme PDP research: breadcrumb, desktop media layout / size,
    mobile expanded vs contained, zoom, video chrome, purchase-area colors, trust badge,
-   padding, and an add-to-cart popup. Blocks are the purchase-column rows. */
+   and padding. ATC adds the selected variant with a fly-to-cart effect (no popup). */
 (function () {
   const OS = window.OS;
+
+  // Shared catalog for Featured reviews · Auto pull + Manual "select existing".
+  // Review image + avatar are real mock media URLs so the editor image picker and media library match the canvas.
+  OS.featuredReviewCatalog = function () {
+    const IMG = (OS.sample && OS.sample.IMG) || {};
+    const gallery = (a, b, c) => [a, b, c].filter(Boolean);
+    return [
+      { id: 'rv-debi', author: 'Debi T.', rating: 5, text: 'Very comfortable and great fit. Want to buy more. miss having a phone pocket. Wore them on a ten hour hike. Held up great', image: IMG.av1 || IMG.p1 || '', images: gallery(IMG.av1, IMG.p1sand, IMG.p1blk), avatar: IMG.av1 || '', item_type: 'Coffee / L' },
+      { id: 'rv-emily', author: 'Emily R.', rating: 5, text: 'After 6 weeks the dark red stretch marks faded and the fine lines nearly disappeared.', image: IMG.p1 || IMG.p1sand || '', images: gallery(IMG.p1, IMG.p1sand, IMG.p1c), avatar: IMG.av2 || '', item_type: 'Sand / M' },
+      { id: 'rv-james', author: 'James Carter', rating: 5, text: 'A month in and my energy is up. I recommend it to anyone who feels drained every afternoon.', image: IMG.p1c || IMG.p1 || '', images: gallery(IMG.p1c, IMG.p1, IMG.p1b), avatar: IMG.av3 || '', item_type: 'Cream / L' },
+      { id: 'rv-maya', author: 'Maya L.', rating: 5, text: 'Worth every penny. Soft, breathable, and looks exactly like the photos.', image: IMG.p1sand || IMG.p1 || '', images: gallery(IMG.p1sand, IMG.p1, IMG.p1d), avatar: IMG.av1 || '', item_type: 'Sand / S' },
+      { id: 'rv-jonah', author: 'Jonah P.', rating: 4, text: 'True to size and arrived faster than expected. Will order again.', image: IMG.p1b || IMG.p1 || '', images: gallery(IMG.p1b, IMG.p1blk, IMG.p1), avatar: IMG.av2 || '', item_type: 'Black / M' },
+      { id: 'rv-alicia', author: 'Alicia R.', rating: 5, text: 'Color matches the gallery and the cut is flattering. Already planning a second order.', image: IMG.p1d || IMG.p1 || '', images: gallery(IMG.p1d, IMG.p1sand, IMG.p1), avatar: IMG.av3 || '', item_type: 'Cream / S' },
+    ];
+  };
+  OS.featuredReviewItemFromCatalog = function (base) {
+    const hit = base || (OS.featuredReviewCatalog() || [])[0] || { author: 'Debi T.', rating: 5, text: '', image: '', avatar: '' };
+    const images = Array.isArray(hit.images) ? hit.images.filter(Boolean) : [];
+    return {
+      id: OS.uid('ri'),
+      entry_type: 'custom',
+      review_id: hit.id || 'rv-debi',
+      author: hit.author || 'Debi T.',
+      rating: Number(hit.rating) || 5,
+      text: hit.text || 'Very comfortable and great fit. Want to buy more. Wore them on a ten hour hike. Held up great.',
+      image: hit.image || images[0] || '',
+      images: images.length ? images : (hit.image ? [hit.image] : []),
+      avatar: hit.avatar || '',
+      item_type: hit.item_type || '',
+    };
+  };
+  OS.defaultFeaturedReviewItem = function () {
+    return OS.featuredReviewItemFromCatalog((OS.featuredReviewCatalog() || [])[0]);
+  };
+  // Prefer the next unused catalog entry so carousel slides are visibly different.
+  OS.nextFeaturedReviewItem = function (existing) {
+    const catalog = OS.featuredReviewCatalog() || [];
+    const usedIds = new Set((existing || []).map((row) => String((row && row.review_id) || '')));
+    const usedAuthors = new Set((existing || []).map((row) => String((row && row.author) || '').toLowerCase()));
+    const unused = catalog.find((row) => !usedIds.has(String(row.id || '')) && !usedAuthors.has(String(row.author || '').toLowerCase()));
+    const fallback = catalog[(existing || []).length % Math.max(catalog.length, 1)] || catalog[0];
+    return OS.featuredReviewItemFromCatalog(unused || fallback);
+  };
+  OS.resolveFeaturedReviewItems = function (settings, product) {
+    const b = settings || {};
+    const catalog = OS.featuredReviewCatalog() || [];
+    const byId = (id) => catalog.find((r) => r.id === id) || null;
+    const withProductImage = (r) => {
+      const imgs = Array.isArray(r.images) ? r.images.filter(Boolean) : [];
+      const image = r.image || imgs[0] || (product && product.image) || '';
+      const images = imgs.length ? imgs : (image ? [image] : []);
+      return Object.assign({}, r, {
+        image: image,
+        images: images,
+        avatar: r.avatar || (product && product.image) || '',
+        item_type: r.item_type || '',
+      });
+    };
+    if (b.data_source === 'auto') {
+      const n = Math.max(1, Math.min(8, Number(b.auto_count) || 3));
+      return catalog.slice(0, n).map(withProductImage);
+    }
+    const rows = Array.isArray(b.reviews) ? b.reviews : [];
+    if (!rows.length && (b.manual_author || b.manual_text)) {
+      // Legacy single-manual fields → one custom card.
+      return [withProductImage({
+        author: b.manual_author || 'Debi T.',
+        rating: Number(b.manual_rating) || 5,
+        text: b.manual_text || '',
+        image: b.manual_image || '',
+        images: b.manual_image ? [b.manual_image] : [],
+        avatar: '',
+        item_type: '',
+      })];
+    }
+    return rows.map((row) => {
+      if (!row) return null;
+      if (row.entry_type === 'library') {
+        const hit = byId(row.review_id) || catalog[0];
+        return hit ? withProductImage(hit) : null;
+      }
+      if (!(row.text || '').trim() && !(row.author || '').trim()) return null;
+      const imgs = Array.isArray(row.images) ? row.images.filter(Boolean) : [];
+      return withProductImage({
+        author: row.author || 'Customer',
+        rating: Number(row.rating) || 5,
+        text: row.text || '',
+        image: row.image || imgs[0] || '',
+        images: imgs.length ? imgs : (row.image ? [row.image] : []),
+        avatar: row.avatar || '',
+        item_type: row.item_type || '',
+      });
+    }).filter(Boolean);
+  };
+
   OS.css('product-main', [
     '.pdpx{box-sizing:border-box;position:relative}.pdpx *{box-sizing:border-box}',
     '.pdpx .pdp-crumbs{font-size:12px;letter-spacing:.04em;text-transform:uppercase;margin:0 0 16px;opacity:.7}',
@@ -86,46 +181,146 @@
     '.pdpx .pdp-title{margin:0;line-height:1.15}',
     '.pdpx .pdp-title-desc{font-size:14px;line-height:1.55}',
     '.pdpx .pdp-title-desc img{display:block;max-width:100%;margin-top:8px;border-radius:8px}',
+    '.pdpx .pdp-desc{box-sizing:border-box;color:inherit;opacity:.92}',
+    '.pdpx .pdp-desc.has-bg{background:var(--pdp-desc-bg,#f6f6f6);border-radius:var(--pdp-desc-radius,0px)}',
+    '.pdpx .pdp-desc ul,.pdpx .pdp-desc ol{padding-left:1.2em;margin:.4em 0}',
+    '.pdpx .pdp-desc p{margin:.4em 0}',
+    '.pdpx .pdp-desc img{display:block;max-width:100%;margin-top:8px;border-radius:8px}',
     '.pdpx .pdp-vendor{font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.65}',
     '.pdpx{position:relative}',
-    '.pdpx .pdp-tags{display:flex;flex-wrap:wrap;gap:8px}',
-    '.pdpx .pdp-tags.is-overlay{position:absolute;z-index:3;top:12px;left:12px;max-width:48%}',
-    '.pdpx .pdp-tags.is-overlay[data-badge-position="top-right"]{left:auto;right:12px;justify-content:flex-end}',
-    '.pdpx .pdp-tag{display:inline-flex;align-items:center;gap:4px;min-height:24px;padding:2px 8px;border-radius:5px;background:#5b3f94;color:#fff;font-size:14.4px;font-weight:700;line-height:18px;letter-spacing:normal}',
+    '.pdpx .pdp-tags{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-start}',
+    '.pdpx .pdp-tags[data-badge-position="right"]{justify-content:flex-end}',
+    '.pdpx .pdp-tag{display:inline-flex;align-items:center;gap:4px;box-sizing:border-box;height:24px;min-height:24px;max-height:24px;padding:2px 8px;border-radius:5px;background:#5b3f94;color:#fff;font-size:14.4px;font-weight:700;line-height:18px;letter-spacing:normal;border:0;box-shadow:none}',
     '.pdpx .pdp-tag svg,.pdpx .pdp-tag img{width:12px;height:12px;flex:none;object-fit:contain}',
+    '.pdpx .pdp-tag.tag-new{background:#ffc439;color:#fff}',
     '.pdpx .pdp-tag.sale{background:#d63a2f}.pdpx .pdp-tag.sold{background:#4b5563}',
+    /* Outline must share the exact 24px filled box — never grow via border/shadow. */
+    '.pdpx .pdp-tag.outline{background:#f9fafb;border:0!important;outline:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18);font-weight:700;letter-spacing:normal;height:24px;min-height:24px;max-height:24px;padding:2px 8px}',
     '.pdpx .pdp-rate{display:flex;align-items:center;gap:6px;font-size:13px;line-height:1}',
     '.pdpx .pdp-rate-stars{display:inline-flex;align-items:center;gap:2px;flex:none}',
+    '.pdpx .pdp-rate-icon,.pdpx .pdp-rate-single-star{display:inline-grid;place-items:center;width:1.15em;height:1.15em;flex:none}',
+    '.pdpx .pdp-rate-icon svg,.pdpx .pdp-rate-single-star svg{display:block;width:100%;height:100%}',
     '.pdpx .pdp-rate-st{display:inline-grid;place-items:center;width:1.15em;height:1.15em;border-radius:2px;flex:none}',
     '.pdpx .pdp-rate-st svg{display:block;width:72%;height:72%}',
     '.pdpx .pdp-rate > span:not(.pdp-rate-stars):not(.pdp-rate-st){display:inline-flex;align-items:center;line-height:1}',
     '.pdpx .pdp-price{display:flex;align-items:center;gap:8px;flex-wrap:wrap}',
-    '.pdpx .pdp-price .now,.os-frame.os-store .pdpx .pdp-price .now{font-size:22px;font-weight:700;line-height:32px}',
+    '.pdpx .pdp-price .now,.os-frame.os-store .pdpx .pdp-price .now{font-size:24px;font-weight:700;line-height:35px}',
     '.pdpx .pdp-price s{font-size:16px;font-weight:400;line-height:26px;color:#666;opacity:1;text-decoration-thickness:1px}',
-    '.pdpx .pdp-price .save{display:inline-flex;align-items:center;gap:4px;min-height:24px;padding:2px 8px;border-radius:5px;background:#d63a2f;color:#fff;font-size:14.4px;font-weight:700;line-height:18px}',
-    '.pdpx .pdp-price .save.outline{background:rgba(214,58,47,.08);border:1px solid currentColor}',
+    '.pdpx .pdp-price .save{display:inline-flex;align-items:center;gap:4px;box-sizing:border-box;min-height:24px;padding:2px 8px;border-radius:5px;background:#d63a2f;color:#fff;font-size:14.4px;font-weight:700;line-height:18px;border:0;box-shadow:none}',
+    '.pdpx .pdp-price .save.outline{background:#f9fafb;border:0!important;outline:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18);font-weight:700;letter-spacing:normal}',
     '.pdpx .pdp-price .save svg{width:12px;height:12px;flex:none}',
-    '.pdpx .pdp-price-prefix{margin-left:auto;font-size:13px;font-weight:500;opacity:.72}',
     '.pdpx .pdp-safe{margin-top:14px;text-align:center}',
+    /* Divider label always stays centered; Layout only moves the logo row */
     '.pdpx .pdp-safe-label{display:flex;align-items:center;gap:10px;justify-content:center;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.8}',
     '.pdpx .pdp-safe-label:before,.pdpx .pdp-safe-label:after{content:"";flex:1;height:1px;background:rgba(0,0,0,.18)}',
-    '.pdpx .pdp-safe-logos{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:10px}',
-    '.pdpx .pdp-safe-logo{display:inline-flex;align-items:center;justify-content:center;min-width:52px;height:28px;padding:0 8px;border:1px solid rgba(0,0,0,.12);border-radius:4px;background:#fff;font-size:10px;font-weight:700;letter-spacing:.02em;color:#222}',
-    '.pdpx .pdp-safe-logo.norton{color:#1a7a3c}.pdpx .pdp-safe-logo.paypal{color:#003087;font-style:italic}.pdpx .pdp-safe-logo.visa{color:#1a1f71;font-style:italic}.pdpx .pdp-safe-logo.mc{color:#eb001b}.pdpx .pdp-safe-logo.mcafee{color:#c01818}.pdpx .pdp-safe-logo.mb{color:#b45309;min-width:72px}',
+    '.pdpx .pdp-safe-logos{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px;margin-top:10px}',
+    '.pdpx .pdp-safe.align-left .pdp-safe-logos{justify-content:flex-start}',
+    '.pdpx .pdp-safe.align-right .pdp-safe-logos{justify-content:flex-end}',
+    '.pdpx .pdp-safe-logo{display:inline-flex;align-items:center;justify-content:center;height:var(--pdp-safe-h,28px);min-width:calc(var(--pdp-safe-h,28px) * 1.55);padding:0 6px;border:1px solid rgba(0,0,0,.12);border-radius:4px;background:#fff;font-size:10px;font-weight:700;letter-spacing:.02em;color:#222;box-sizing:border-box}',
+    '.pdpx .pdp-safe-logo.is-img{min-width:0;padding:0;border:0;background:transparent;border-radius:0}',
+    '.pdpx .pdp-safe-logo img{display:block;height:var(--pdp-safe-h,28px);width:auto;max-width:calc(var(--pdp-safe-h,28px) * 2.4);object-fit:contain}',
+    '.pdpx .pdp-safe-logo.norton{color:#1a7a3c}.pdpx .pdp-safe-logo.mcafee{color:#c01818}.pdpx .pdp-safe-logo.mb{color:#b45309;min-width:calc(var(--pdp-safe-h,28px) * 2.4)}',
     '.pdpx .pdp-fr{position:relative;padding:4px 0 8px}',
     '.pdpx .pdp-fr-h{font-size:15px;font-weight:700;margin:0 0 10px}',
-    '.pdpx .pdp-fr-rail{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,100%);overflow:hidden;gap:10px}',
-    '.pdpx .pdp-fr-card{display:flex;gap:12px;align-items:flex-start;padding:14px;border:1px solid rgba(0,0,0,.08);border-radius:12px;background:#fafafa;min-width:0}',
+    '.pdpx .pdp-fr-rail{display:grid;gap:10px}',
+    '.pdpx .pdp-fr-rail.is-carousel{display:flex;gap:10px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;scrollbar-width:none;touch-action:pan-x}',
+    '.pdpx .pdp-fr-rail.is-carousel::-webkit-scrollbar{display:none;width:0;height:0}',
+    '.pdpx .pdp-fr-rail.is-carousel .pdp-fr-card{flex:0 0 100%;width:100%;max-width:100%;scroll-snap-align:start;scroll-snap-stop:always}',
+    '.pdpx .pdp-fr-rail.is-stack{grid-template-columns:1fr}',
+    '.pdpx .pdp-fr-card{display:flex;gap:12px;align-items:flex-start;padding:14px;border:1px solid rgba(0,0,0,.08);border-radius:12px;background:#fafafa;min-width:0;color:inherit;cursor:pointer}',
+    '.pdpx .pdp-fr-card:hover{border-color:rgba(0,0,0,.16)}',
+    '.pdpx .pdp-fr-pop{position:absolute;inset:0;z-index:8;background:rgba(17,24,39,.5);display:none;align-items:center;justify-content:center;padding:24px 16px;box-sizing:border-box}',
+    '.pdpx .pdp-fr-pop.on{display:flex;animation:pdp-pop-scrim .22s ease}',
+    '.pdpx .pdp-fr-pop-card{position:relative;width:min(560px,100%);height:420px;max-height:min(72vh,640px);background:#fff;color:#1a1a1a;border-radius:12px;box-shadow:0 18px 50px rgba(0,0,0,.22);display:flex;overflow:hidden;box-sizing:border-box}',
+    '.pdpx .pdp-fr-pop.on .pdp-fr-pop-card{animation:pdp-pop-card-in .34s cubic-bezier(.2,.8,.2,1)}',
+    '.pdpx .pdp-fr-pop-card.no-media{height:auto;min-height:200px;max-height:min(72vh,640px)}',
+    '.pdpx .pdp-fr-pop-x-alt{display:none;position:absolute;top:12px;right:12px;z-index:2;width:28px;height:28px;padding:0;border:0;border-radius:6px;background:transparent;color:#111;font-size:22px;line-height:1;cursor:pointer;align-items:center;justify-content:center}',
+    '.pdpx .pdp-fr-pop-card.no-media .pdp-fr-pop-x-alt{display:inline-flex}',
+    '.pdpx .pdp-fr-pop-x-alt:hover{background:rgba(0,0,0,.06)}',
+    '.pdpx .pdp-fr-pop-media{position:relative;flex:0 0 50%;min-width:0;background:#111;color:#fff}',
+    '.pdpx .pdp-fr-pop-stage{position:absolute;inset:0;background:#1a1a1a center/cover no-repeat}',
+    '.pdpx .pdp-fr-pop-x{position:absolute;top:12px;left:12px;z-index:2;width:32px;height:32px;padding:0;border:0;border-radius:50%;background:rgba(0,0,0,.45);color:#fff;font-size:22px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}',
+    '.pdpx .pdp-fr-pop-x:hover{background:rgba(0,0,0,.62)}',
+    '.pdpx .pdp-fr-pop-nav{position:absolute;top:50%;z-index:2;transform:translateY(-50%);width:32px;height:32px;padding:0;border:0;border-radius:50%;background:rgba(0,0,0,.4);color:#fff;font-size:18px;line-height:1;cursor:pointer;display:none;align-items:center;justify-content:center}',
+    '.pdpx .pdp-fr-pop-nav.prev{left:10px}',
+    '.pdpx .pdp-fr-pop-nav.next{right:10px}',
+    '.pdpx .pdp-fr-pop-nav.on{display:inline-flex}',
+    '.pdpx .pdp-fr-pop-nav:hover{background:rgba(0,0,0,.58)}',
+    '.pdpx .pdp-fr-pop-thumbs{position:absolute;left:0;right:0;bottom:12px;z-index:2;display:none;justify-content:center;gap:8px;padding:0 12px;pointer-events:none}',
+    '.pdpx .pdp-fr-pop-thumbs.on{display:flex}',
+    '.pdpx .pdp-fr-pop-thumb{pointer-events:auto;width:44px;height:44px;padding:0;border:2px solid transparent;border-radius:6px;background:#333 center/cover no-repeat;cursor:pointer;opacity:.85}',
+    '.pdpx .pdp-fr-pop-thumb.on{border-color:#fff;opacity:1}',
+    '.pdpx .pdp-fr-pop-body{flex:1;min-width:0;padding:22px 22px 20px;display:flex;flex-direction:column;gap:10px;overflow:auto;box-sizing:border-box}',
+    '.pdpx .pdp-fr-pop-card.no-media .pdp-fr-pop-body{padding:24px 28px}',
+    '.pdpx .pdp-fr-pop-top{display:flex;align-items:center;gap:8px;min-width:0}',
+    '.pdpx .pdp-fr-pop-name{font-size:16px;font-weight:700;line-height:1.2;min-width:0}',
+    '.pdpx .pdp-fr-pop-verified{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:650;color:#16a34a;flex:none}',
+    '.pdpx .pdp-fr-pop-verified i{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#16a34a;color:#fff}',
+    '.pdpx .pdp-fr-pop-verified svg{display:block;width:10px;height:10px}',
+    '.pdpx .pdp-fr-pop-info{margin-left:auto;width:18px;height:18px;padding:0;border:1px solid rgba(0,0,0,.28);border-radius:50%;background:transparent;color:#666;font-size:11px;font-weight:700;font-style:italic;line-height:1;cursor:default;display:inline-flex;align-items:center;justify-content:center;flex:none}',
+    '.pdpx .pdp-fr-pop-stars{letter-spacing:2px;font-size:16px;line-height:1;color:#16a34a}',
+    '.pdpx .pdp-fr-pop-text{margin:2px 0 0;font-size:14px;line-height:1.55;color:#222}',
+    '.pdpx .pdp-fr-pop-meta{margin-top:auto;padding-top:12px}',
+    '.pdpx .pdp-fr-pop-meta-label{display:block;font-size:12px;color:#888;margin-bottom:2px}',
+    '.pdpx .pdp-fr-pop-meta-value{display:block;font-size:14px;font-weight:700;color:#111}',
+    '@media (prefers-reduced-motion:reduce){.pdpx .pdp-fr-pop.on,.pdpx .pdp-fr-pop.on .pdp-fr-pop-card{animation:none}}',
+    '.pdpx.mob .pdp-fr-pop-card{flex-direction:column;height:auto;max-height:min(84vh,640px)}',
+    '.pdpx.mob .pdp-fr-pop-media{flex:none;height:220px}',
+    '.pdpx.mob .pdp-fr-pop-body{flex:1}',
     '.pdpx .pdp-fr-av{width:44px;height:44px;border-radius:10px;object-fit:cover;flex:none;background:#e5e7eb}',
+    '.pdpx .pdp-fr-av.round{border-radius:50%}',
+    '.pdpx .pdp-fr-body{min-width:0;flex:1}',
     '.pdpx .pdp-fr-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}',
-    '.pdpx .pdp-fr-stars{color:#16a34a;letter-spacing:1px;font-size:12px}',
+    '.pdpx .pdp-fr-stars{letter-spacing:1px;font-size:12px;line-height:1}',
+    '.pdpx .pdp-fr-stars.boxed{letter-spacing:2px;font-size:11px}',
     '.pdpx .pdp-fr-text{font-size:13px;line-height:1.5;opacity:.88}',
-    '.pdpx .pdp-fr-img{display:block;width:100%;max-height:140px;object-fit:cover;border-radius:8px;margin-top:8px}',
-    '.pdpx .pdp-fr-nav{position:absolute;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:999px;border:1px solid rgba(0,0,0,.12);background:#fff;cursor:pointer;z-index:2}',
+    '.pdpx .pdp-fr-text.italic{font-style:italic;font-size:14px;line-height:1.55;opacity:1}',
+    /* Fixed box + contain — keep aspect ratio inside the card slot (no stretch). */
+    '.pdpx .pdp-fr-img{display:block;width:100%;height:140px;object-fit:contain;object-position:center;background:#f1f1f1;border-radius:8px;margin-top:8px}',
+    '.pdpx .pdp-fr-side{flex:none;width:88px;height:88px;border-radius:10px;object-fit:cover;background:#e5e7eb}',
+    '.pdpx .pdp-fr-check{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#3b82f6;color:#fff;flex:none}',
+    '.pdpx .pdp-fr-check svg{display:block;width:10px;height:10px}',
+    '.pdpx .pdp-fr-foot{display:flex;flex-direction:column;gap:2px;margin-top:10px}',
+    '.pdpx .pdp-fr-author{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:13px;font-weight:650}',
+    '.pdpx .pdp-fr-verified{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:#2563eb}',
+    '.pdpx .pdp-fr-verified svg{display:block;width:14px;height:14px;flex:none}',
+    '.pdpx .pdp-fr-sub{font-size:11px;opacity:.55;line-height:1.35}',
+    /* Media: text card + small avatar under text | side review image */
+    '.pdpx .pdp-fr-card.layout-media{align-items:center;gap:14px;background:#f7f7f8}',
+    '.pdpx .pdp-fr-card.layout-media .pdp-fr-person{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}',
+    '.pdpx .pdp-fr-card.layout-media .pdp-fr-av{width:32px;height:32px}',
+    '.pdpx .pdp-fr-card.layout-media .pdp-fr-side{width:100px;height:100px;border-radius:12px}',
+    /* Quote: large avatar + stacked stars / author check — no review image */
+    '.pdpx .pdp-fr-card.layout-quote{align-items:flex-start;gap:14px;background:#fff}',
+    '.pdpx .pdp-fr-card.layout-quote .pdp-fr-av{width:56px;height:56px}',
+    '.pdpx .pdp-fr-card.layout-quote .pdp-fr-text{margin-bottom:6px}',
+    /* Trust: avatar + shield verified + optional side image — no stars */
+    '.pdpx .pdp-fr-card.layout-trust{align-items:center;gap:14px;background:#fff}',
+    '.pdpx .pdp-fr-card.layout-trust .pdp-fr-av{width:56px;height:56px}',
+    '.pdpx .pdp-fr-card.layout-trust .pdp-fr-text{font-size:15px;line-height:1.45}',
+    '.pdpx .pdp-fr-card.layout-trust .pdp-fr-side{width:96px;height:96px;border-radius:12px}',
+    /* Navigation: name-first + boxed stars; optional image under text */
+    '.pdpx .pdp-fr-card.layout-nav{align-items:flex-start;gap:12px;background:#fafafa}',
+    '.pdpx .pdp-fr-card.layout-nav .pdp-fr-av{width:48px;height:48px}',
+    '.pdpx .pdp-fr-card.layout-nav .pdp-fr-img{margin-top:10px;height:160px;border-radius:10px}',
+    /* Split: avatar | divider | quote row — no review image */
+    '.pdpx .pdp-fr-card.layout-split{align-items:stretch;gap:0;padding:16px;background:#f3f4f6;border-color:transparent}',
+    '.pdpx .pdp-fr-card.layout-split .pdp-fr-av{width:72px;height:72px;align-self:center;margin-right:14px}',
+    '.pdpx .pdp-fr-card.layout-split .pdp-fr-av.is-empty{display:inline-block;background:#e5e7eb}',
+    '.pdpx .pdp-fr-card.layout-split .pdp-fr-body{padding-left:16px;border-left:1px solid rgba(0,0,0,.12);display:flex;flex-direction:column;justify-content:center;gap:10px}',
+    '.pdpx .pdp-fr-card.layout-split .pdp-fr-text{font-size:14px;line-height:1.5}',
+    '.pdpx .pdp-fr-card.layout-split .pdp-fr-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0}',
+    '.pdpx .pdp-fr-card.layout-split .pdp-fr-stars{font-size:13px;letter-spacing:1px}',
+    '.pdpx .pdp-fr-card.layout-split .pdp-fr-author{font-size:13px;font-weight:600}',
+    '.pdpx .pdp-fr-av.is-empty{display:inline-block;background:#e5e7eb}',
+    '.pdpx .pdp-fr-nav{position:absolute;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:999px;border:1px solid rgba(0,0,0,.12);background:#fff;cursor:pointer;z-index:2;display:inline-flex;align-items:center;justify-content:center;padding:0;font-size:16px;line-height:1;color:#222}',
     '.pdpx .pdp-fr-nav.prev{left:0}.pdpx .pdp-fr-nav.next{right:0}',
-    '.pdpx .pdp-fr-all{margin-top:8px;border:0;background:none;color:inherit;font:inherit;font-size:12px;font-weight:650;text-decoration:underline;cursor:pointer}',
+    '.pdpx .pdp-fr.has-arrows{padding-left:18px;padding-right:18px}',
+    '.pdpx .pdp-fr-dots{display:flex;justify-content:center;gap:6px;margin-top:10px}',
+    '.pdpx .pdp-fr-dot{width:7px;height:7px;border-radius:50%;border:0;padding:0;background:rgba(0,0,0,.2);cursor:pointer}',
+    '.pdpx .pdp-fr-dot.on{background:#222}',
     '.pdpx .pdp-acc-ic{display:inline-flex;margin-right:8px;vertical-align:-3px}',
-    '.pdpx .pdp-acc-ic svg{display:block}',
+    '.pdpx .pdp-acc-ic svg{display:block;width:20px;height:20px}',
     '.pdpx .pdp-line{border:0;border-top:1px solid rgba(0,0,0,.12);margin:2px 0}',
     '.pdpx .pdp-label{font-size:12px;font-weight:650;letter-spacing:.02em;margin-bottom:12px;opacity:.75;line-height:26px}',
     '.pdpx .pdp-options{display:flex;flex-direction:column}',
@@ -162,8 +357,8 @@
     '.pdpx .pdp-qty button{width:38px;height:100%;border:0;background:transparent;cursor:pointer;font-size:16px;color:inherit}',
     '.pdpx .pdp-qty span{min-width:36px;text-align:center;font-weight:650}',
     // Match Silix .product__inventory: #10a443, DM Sans 16/400/26, 10px pulse dot
-    '.pdpx .pdp-stock{--status-color:#10a443;display:flex;align-items:center;gap:0 8px;margin:0;font-family:inherit;font-size:16px;font-weight:400;line-height:26px;letter-spacing:normal;color:#10a443;color:var(--status-color)}',
-    '.pdpx .pdp-stock > span{font:inherit;font-size:16px;font-weight:400;line-height:26px;letter-spacing:normal;color:inherit}',
+    '.pdpx .pdp-stock{--status-color:#10a443;--pdp-stock-fs:14px;display:flex;align-items:center;gap:0 8px;margin:0;font-family:inherit;font-size:var(--pdp-stock-fs);font-weight:400;line-height:1.625;letter-spacing:normal;color:#10a443;color:var(--status-color)}',
+    '.pdpx .pdp-stock > span{font:inherit;font-size:inherit;font-weight:400;line-height:inherit;letter-spacing:normal;color:inherit}',
     '.pdpx .pdp-stock i{position:relative;width:10px;height:10px;margin:0 4px;border-radius:50%;background:var(--status-color);display:block;flex:none}',
     '.pdpx .pdp-stock i::before,.pdpx .pdp-stock i::after{position:absolute;left:0;top:0;width:100%;height:100%;content:"";background:var(--status-color);border-radius:50%;animation:pdp-inventory-pulse 2s linear infinite}',
     '.pdpx .pdp-stock i::after{animation-delay:1s}',
@@ -176,38 +371,66 @@
     '@keyframes pdp-inventory-pulse{0%{opacity:.6}100%{transform:scale(2.5);opacity:0}}',
     '.pdpx .pdp-sku{font-size:13px;opacity:.72}',
     '.pdpx .pdp-actions{display:flex;flex-direction:column;gap:20px}',
-    '.pdpx .pdp-actions.side{flex-direction:row;align-items:stretch;flex-wrap:wrap;gap:12px}',
-    '.pdpx .pdp-actions.side .pdp-buy-row{flex:1 1 220px}',
-    '.pdpx .pdp-actions.side .pdp-dyn{flex:1 1 160px}',
     '.pdpx .pdp-buy-row{display:flex;align-items:center;gap:12px}',
     '.pdpx .pdp-buy-row .pdp-qty{flex:none}',
-    '.pdpx .pdp-atc{flex:1;width:auto;min-height:48px}',
+    '.pdpx .pdp-atc{flex:1;width:auto;min-height:48px;position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;font:inherit;font-weight:700;transition:transform .18s ease,opacity .18s ease}',
+    '.pdpx .pdp-atc.full{display:inline-flex;align-items:center;justify-content:center;width:100%;flex:none}',
+    '.pdpx .pdp-atc-ic{display:inline-flex;align-items:center;justify-content:center;flex:none;line-height:0}',
+    '.pdpx .pdp-atc-ic svg{display:block;width:20px;height:20px}',
+    '.pdpx .pdp-atc-label{line-height:1;font:inherit;font-size:inherit;font-weight:inherit}',
+    '.pdpx .pdp-atc.is-adding{pointer-events:none;opacity:.88}',
+    '.pdpx .pdp-atc.is-added{transform:scale(.98)}',
+    '.pdpx .pdp-atc-spin{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.35);border-top-color:currentColor;border-radius:50%;animation:pdp-atc-spin .6s linear infinite;vertical-align:-3px}',
+    '@keyframes pdp-atc-spin{to{transform:rotate(360deg)}}',
     '.pdpx .pdp-buy-row .pdp-atc,.pdpx .pdp-paypal,.pdpx .pdp-chan{border-radius:8px}',
     '.pdpx .pdp-paypal,.pdpx .pdp-chan{display:inline-flex;align-items:center;justify-content:center;width:100%;height:48px;border:0;border-radius:8px;cursor:pointer;padding:0 16px;font:inherit;font-weight:650}',
     '.pdpx .pdp-paypal{background:#ffc439}',
     '.pdpx .pdp-paypal:hover{background:#f2bb31}',
     '.pdpx .pdp-paypal svg,.pdpx .pdp-chan svg{display:block;height:22px;width:auto}',
-    '.pdpx .pdp-chan.shop{background:#5a31f4;color:#fff}',
     '.pdpx .pdp-chan.apple{background:#111;color:#fff}',
     '.pdpx .pdp-chan.google{background:#fff;color:#202124;border:1px solid #dadce0}',
     '.pdpx .pdp-buynow{display:inline-flex;align-items:center;justify-content:center;width:100%;min-height:48px;border:1px solid rgba(0,0,0,.2);background:#fff;color:inherit;cursor:pointer;padding:0 16px;font:inherit;font-weight:700}',
     '.pdpx .pdp-dyn{display:flex;flex-direction:column;gap:8px;align-items:center;width:100%}',
     '.pdpx .pdp-pay-more{padding:0;border:0;background:none;color:inherit;font:inherit;font-size:14px;line-height:1.4;text-decoration:underline;text-underline-offset:3px;cursor:pointer}',
-    '.pdpx .pdp-installments{margin:0;font-size:13px;line-height:1.45;opacity:.85;text-align:center}',
-    '.pdpx .pdp-installments b{font-weight:700}',
-    '.pdpx .pdp-installments .shop{color:#5a31f4;font-weight:700}',
-    '.pdpx .pdp-safe-logo.amex{color:#2e77bc}.pdpx .pdp-safe-logo.discover{color:#ff6000}.pdpx .pdp-safe-logo.amazon{color:#111}.pdpx .pdp-safe-logo.diners{color:#0079be}',
-    '.pdpx .pdp-safe-logo.shop{color:#5a31f4}.pdpx .pdp-safe-logo.apple{color:#111}.pdpx .pdp-safe-logo.google{color:#202124}.pdpx .pdp-safe-logo.venmo{color:#008cff}.pdpx .pdp-safe-logo.bancontact{color:#005498}.pdpx .pdp-safe-logo.giropay{color:#000}',
-    '.pdpx .pdp-icons{display:flex;flex-wrap:wrap;align-items:center;gap:8px 24px}',
-    '.pdpx .pdp-icons.vertical{flex-direction:column;align-items:flex-start;gap:8px}',
-    '.pdpx .pdp-icons.has-bg{padding:12px 14px;background:#f6f6f6;border-radius:10px}',
-    '.pdpx .pdp-icon-item{display:flex;align-items:center;height:var(--pdp-icon-line,26px);gap:8px;line-height:var(--pdp-icon-line,26px);font-weight:400;color:inherit;text-decoration:none}',
-    '.pdpx .pdp-icon-item.card-outline{padding:10px 12px;border:1px solid rgba(0,0,0,.12);border-radius:8px;height:auto}',
-    '.pdpx .pdp-icon-item.card-filled{padding:10px 12px;background:#fff;border-radius:8px;box-shadow:0 1px 2px rgba(0,0,0,.06);height:auto}',
-    '.pdpx .pdp-icon-mark{display:grid;place-items:center;width:var(--pdp-icon-size,20px);height:var(--pdp-icon-size,20px);flex:none;color:currentColor}',
+    '.pdpx .pdp-safe-logo.venmo{color:#008cff}.pdpx .pdp-safe-logo.bancontact{color:#005498}.pdpx .pdp-safe-logo.giropay{color:#000}',
+    '.pdpx .pdp-icons{display:flex;flex-wrap:nowrap;align-items:flex-start;gap:var(--pdp-item-gap-y,8px) var(--pdp-item-gap-x,24px);width:100%;color:var(--pdp-icons-text,inherit)}',
+    '.pdpx .pdp-icons.vertical{flex-direction:column;flex-wrap:nowrap;align-items:flex-start;gap:var(--pdp-item-gap-y,8px)}',
+    '.pdpx .pdp-icons.align-center{justify-content:center}.pdpx .pdp-icons.vertical.align-center{align-items:center}',
+    '.pdpx .pdp-icons.align-right{justify-content:flex-end}.pdpx .pdp-icons.vertical.align-right{align-items:flex-end}',
+    '.pdpx .pdp-icons.has-bg{padding:12px 14px;background:var(--pdp-icons-bg,#f6f6f6);border-radius:var(--pdp-icons-radius,10px)}',
+    /* Horizontal: equal columns; long title/content wrap inside each cell. */
+    '.pdpx .pdp-icons:not(.vertical)>.pdp-icon-item{flex:1 1 0;min-width:0;max-width:100%}',
+    '.pdpx .pdp-icons.vertical>.pdp-icon-item{flex:none;max-width:100%}',
+    /* Vertical left keeps full row; center/right shrink so container align-items can place the item. */
+    '.pdpx .pdp-icons.vertical.align-left>.pdp-icon-item{width:100%}',
+    '.pdpx .pdp-icons.vertical.align-center>.pdp-icon-item,.pdpx .pdp-icons.vertical.align-right>.pdp-icon-item{width:auto}',
+    /* Icon-left: icon vertically centers against the whole text block (heading only, or heading+content). */
+    '.pdpx .pdp-icon-item{display:flex;align-items:center;height:auto;gap:var(--pdp-icon-text-gap,8px);line-height:1.35;font-weight:400;color:inherit;text-decoration:none;min-width:0;box-sizing:border-box}',
+    /* Alignment must also apply inside each cell — flex:1 equal columns make justify-content on the row a no-op for a single full-width item. */
+    '.pdpx .pdp-icons.align-left .pdp-icon-item{justify-content:flex-start;text-align:left}',
+    '.pdpx .pdp-icons.align-center .pdp-icon-item{justify-content:center;text-align:center}',
+    '.pdpx .pdp-icons.align-right .pdp-icon-item{justify-content:flex-end;text-align:right}',
+    '.pdpx .pdp-icon-item.top{flex-direction:column}',
+    '.pdpx .pdp-icons.align-left .pdp-icon-item.top{align-items:flex-start}',
+    '.pdpx .pdp-icons.align-center .pdp-icon-item.top{align-items:center}',
+    '.pdpx .pdp-icons.align-right .pdp-icon-item.top{align-items:flex-end}',
+    '.pdpx .pdp-icon-item.top .pdp-icon-mark,.pdpx .pdp-icon-item.top .pdp-icon-img{margin-bottom:2px}',
+    '.pdpx .pdp-icon-item.card-outline{padding:10px 12px;border:1px solid rgba(0,0,0,.12);border-radius:8px}',
+    '.pdpx .pdp-icon-item.card-filled{padding:10px 12px;background:#fff;border-radius:8px;box-shadow:0 1px 2px rgba(0,0,0,.06)}',
+    '.pdpx .pdp-icon-mark{display:grid;place-items:center;width:var(--pdp-icon-size,20px);height:var(--pdp-icon-size,20px);flex:none;color:var(--pdp-icons-icon,currentColor)}',
     '.pdpx .pdp-icon-mark svg{display:block;width:100%;height:100%}',
-    '.pdpx .pdp-icon-img{width:var(--pdp-icon-size,20px);height:var(--pdp-icon-size,20px);flex:none;object-fit:contain}',
-    '.pdpx .pdp-icon-img.logo{width:auto;max-width:88px;height:28px}',
+    '.pdpx .pdp-icon-img{width:var(--pdp-icon-size,20px);height:var(--pdp-icon-size,20px);flex:none;object-fit:contain;max-width:100%}',
+    '.pdpx .pdp-icon-img.logo{width:auto;max-width:min(100%,var(--pdp-logo-width,88px));height:var(--pdp-logo-height,28px)}',
+    '.pdpx .pdp-icon-body{min-width:0;display:flex;flex-direction:column;gap:2px}',
+    /* Left + icon-left: body fills leftover space. Center/right: shrink-wrap so the icon+text cluster can sit in the middle/end. */
+    '.pdpx .pdp-icons.align-left .pdp-icon-item:not(.top) .pdp-icon-body{flex:1 1 auto;width:100%}',
+    '.pdpx .pdp-icons.align-center .pdp-icon-item:not(.top) .pdp-icon-body,.pdpx .pdp-icons.align-right .pdp-icon-item:not(.top) .pdp-icon-body{flex:0 1 auto;width:auto;max-width:100%}',
+    '.pdpx .pdp-icon-item.top .pdp-icon-body{flex:none;width:100%}',
+    '.pdpx .pdp-icon-body .pdp-icon-h,.pdpx .pdp-icon-body .pdp-icon-c{max-width:100%;overflow-wrap:anywhere;word-break:break-word;white-space:normal}',
+    '.pdpx .pdp-icon-body .pdp-icon-h{font-family:var(--pdp-title-font,inherit);font-size:var(--pdp-title-size,1em);font-weight:var(--pdp-title-weight,400);letter-spacing:var(--pdp-title-tracking,normal);text-transform:var(--pdp-title-transform,none);line-height:1.35}',
+    '.pdpx .pdp-icon-body .pdp-icon-c{font-family:var(--pdp-content-font,inherit);font-size:var(--pdp-content-size,.875em);font-weight:var(--pdp-content-weight,400);letter-spacing:normal;text-transform:none;line-height:1.45;opacity:.78}',
+    '.pdpx .pdp-icon-body .pdp-icon-h p,.pdpx .pdp-icon-body .pdp-icon-c p{margin:0;overflow-wrap:anywhere;word-break:break-word}',
+    '.pdpx .pdp-icon-body .pdp-icon-c a{color:inherit}',
     '.pdpx .pdp-custom-text{font-size:14px;line-height:1.6}',
     '.pdpx .pdp-property{display:grid;gap:6px}.pdpx .pdp-property input{height:40px;padding:0 10px;border:1px solid rgba(0,0,0,.2);border-radius:7px;font:inherit}',
     '.pdpx .pdp-link-actions{display:flex;align-items:center;flex-wrap:wrap;gap:0 24px;min-height:48px}',
@@ -222,40 +445,115 @@
     '.pdpx .pdp-share-inline{display:flex;flex-wrap:wrap;gap:16px;align-items:center}',
     '.pdpx .pdp-share-inline a,.pdpx .pdp-share-inline button{display:inline-flex;align-items:center;gap:6px;border:0;background:none;color:inherit;font:inherit;font-size:14px;font-weight:550;cursor:pointer;text-decoration:none;padding:0}',
     '.pdpx .pdp-share-dd{position:relative;display:inline-flex}',
-    '.pdpx .pdp-popup-link{padding:0;border:0;background:none;color:inherit;font:inherit;font-size:13px;font-weight:650;text-decoration:underline;text-underline-offset:3px;cursor:pointer}',
-    '.pdpx .pdp-popup-link.hover-fx:hover{opacity:.72}',
-    '.pdpx .pdp-ship{font-size:13px;line-height:1.55}',
-    '.pdpx .pdp-ship strong{display:block;margin-bottom:4px}',
+    '.pdpx .pdp-popup-link{position:relative;display:inline-block;padding:0 0 3px;border:0;background:none;color:inherit;font:inherit;font-size:13px;font-weight:650;line-height:1.3;text-decoration:none;cursor:pointer}',
+    /* Underline is the ::after bar — idle full width; click replays left→right draw. */
+    '.pdpx .pdp-popup-link::after{content:"";position:absolute;left:0;bottom:0;width:100%;height:1px;background:currentColor;transform:scaleX(1);transform-origin:left center;pointer-events:none}',
+    '.pdpx .pdp-popup-link.is-anim::after{animation:pdp-popup-uline .34s ease}',
+    '@keyframes pdp-popup-uline{0%{transform:scaleX(0)}100%{transform:scaleX(1)}}',
+    '@media (prefers-reduced-motion:reduce){.pdpx .pdp-popup-link.is-anim::after{animation:none;transform:scaleX(1)}}',
+    '.pdpx .pdp-page-pop{position:absolute;inset:0;z-index:7;background:rgba(17,24,39,.45);display:none;align-items:center;justify-content:center;padding:24px 16px}',
+    '.pdpx .pdp-page-pop.on{display:flex;animation:pdp-pop-scrim .22s ease}',
+    '.pdpx .pdp-page-pop-card{position:relative;width:min(560px,100%);min-height:120px;max-height:min(72vh,640px);background:#fff;color:#1a1a1a;border-radius:12px;box-shadow:0 18px 50px rgba(0,0,0,.2);display:flex;flex-direction:column;overflow:hidden;box-sizing:border-box}',
+    '.pdpx .pdp-page-pop.on .pdp-page-pop-card{animation:pdp-pop-card-in .34s cubic-bezier(.2,.8,.2,1)}',
+    '.pdpx .pdp-page-pop-x{position:absolute;top:12px;right:12px;z-index:1;width:28px;height:28px;padding:0;border:0;border-radius:6px;background:transparent;color:#111;font-size:22px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}',
+    '.pdpx .pdp-page-pop-x:hover{background:rgba(0,0,0,.06)}',
+    '.pdpx .pdp-page-pop-body{flex:1;min-height:0;overflow:auto;padding:28px 36px 28px 28px;font-size:14px;line-height:1.6}',
+    '.pdpx .pdp-page-pop-body.is-empty{min-height:120px;padding:36px 28px}',
+    '.pdpx .pdp-page-pop-body h3{margin:0 0 12px;font-size:20px;font-weight:700;line-height:1.3}',
+    '.pdpx .pdp-page-pop-body p{margin:0 0 12px}',
+    '.pdpx .pdp-page-pop-body p:last-child{margin-bottom:0}',
+    '@media (prefers-reduced-motion:reduce){.pdpx .pdp-page-pop.on,.pdpx .pdp-page-pop.on .pdp-page-pop-card{animation:none}}',
+    '.pdpx .pdp-ship{font-size:13px;line-height:1.55;color:#303030}',
+    '.pdpx .pdp-ship>.pdp-ship-title{display:block;margin:0 0 10px;font-size:13px;font-weight:650;line-height:1.3}',
+    '.pdpx .pdp-ship--timeline{width:calc(100% - 24px);max-width:100%;margin-left:auto;margin-right:auto;box-sizing:border-box;padding:16px;border-radius:10px;background:#fff}',
+    '.pdpx .pdp-ship--timeline>.pdp-ship-title{margin-bottom:14px}',
+    '.pdpx .pdp-ship-track{display:flex;align-items:flex-start;justify-content:space-between;width:100%;min-width:0}',
+    '.pdpx .pdp-ship-step{position:relative;display:flex;min-width:20px;flex-direction:column}',
+    '.pdpx .pdp-ship-step.is-start{align-items:flex-start}',
+    '.pdpx .pdp-ship-step.is-mid{align-items:center}',
+    '.pdpx .pdp-ship-step.is-end{align-items:flex-end}',
+    '.pdpx .pdp-ship-step.is-start .pdp-ship-meta{align-items:flex-start}',
+    '.pdpx .pdp-ship-step.is-mid .pdp-ship-meta{align-items:center}',
+    '.pdpx .pdp-ship-step.is-end .pdp-ship-meta{align-items:flex-end}',
+    '.pdpx .pdp-ship-icon{display:block;width:25px;height:25px;flex:none;color:#303030}',
+    '.pdpx .pdp-ship-icon svg{display:block;width:25px;height:25px}',
+    '.pdpx .pdp-ship-meta{display:flex;max-width:25px;flex-direction:column}',
+    '.pdpx .pdp-ship-date{margin-top:5px;font-size:11px;font-weight:650;line-height:11px;color:#303030;white-space:nowrap}',
+    '.pdpx .pdp-ship-label{margin-top:5px;font-size:12px;font-weight:400;line-height:12px;color:#303030;white-space:nowrap}',
+    '.pdpx .pdp-ship-line{display:block;flex:1 1 auto;min-width:12px;margin-top:9.5px;height:6px}',
+    '.pdpx .pdp-ship-line i{display:flex;align-items:center;height:6px;margin:0 10px}',
+    '.pdpx .pdp-ship-line i:before,.pdpx .pdp-ship-line i:after{content:"";display:block;min-width:6px;min-height:6px;border-radius:50%;background:#303030;flex:none}',
+    '.pdpx .pdp-ship-line i span{display:block;height:2.25px;max-height:2.25px;margin:0 -2px;width:100%;background:#303030}',
+    '@media(max-width:600px){.pdpx .pdp-ship--timeline{padding:12px}.pdpx .pdp-ship-line i{margin:0 6px}.pdpx .pdp-ship-date{font-size:10px;line-height:10px}.pdpx .pdp-ship-label{font-size:11px;line-height:11px}}',
     '.pdpx .pdp-acc{border-bottom:1px solid rgba(0,0,0,.12)}',
     '.pdpx .pdp-acc button{width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px;border:0;background:transparent;padding:20px 0;font:inherit;font-weight:650;text-align:left;cursor:pointer;color:inherit}',
     '.pdpx .pdp-acc.icon-left button{flex-direction:row-reverse;justify-content:flex-end}',
     '.pdpx .pdp-acc.icon-left button .pdp-acc-mark{order:-1}',
     '.pdpx .pdp-acc .body{display:none;padding:0 0 12px;font-size:14px;line-height:1.6;opacity:.85}',
     '.pdpx .pdp-acc.open .body{display:block}',
-    '.pdpx .pdp-rec-h{font-size:15px;margin:0 0 4px}',
-    '.pdpx .pdp-rec-sub{font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:.6;margin-bottom:4px}',
-    '.pdpx .pdp-rec-copy{font-size:13px;opacity:.75;margin-bottom:10px}',
-    '.pdpx .pdp-rec-row{display:grid;gap:10px}',
-    '.pdpx .pdp-rec-card{text-align:left;font-size:12px}',
+    '.pdpx .pdp-rec-head{margin:0 0 10px}',
+    '.pdpx .pdp-rec-h{font-size:15px;margin:0}',
+    '.pdpx .pdp-rec-sub{font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:.6;margin:0 0 4px}',
+    '.pdpx .pdp-rec-copy{font-size:13px;line-height:1.5;opacity:.75;margin:6px 0 0}',
+    '.pdpx .pdp-rec-copy p{margin:0 0 .4em}.pdpx .pdp-rec-copy p:last-child{margin:0}',
+    // Horizontal slider: peek next card + side arrows (desktop); swipe on mobile. No scrollbar chrome.
+    '.pdpx .pdp-rec-wrap{position:relative}',
+    '.pdpx .pdp-rec-row{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:0;cursor:grab}',
+    '.pdpx .pdp-rec-row.is-dragging{cursor:grabbing;scroll-snap-type:none;scroll-behavior:auto}',
+    '.pdpx .pdp-rec-row::-webkit-scrollbar{display:none;width:0;height:0}',
+    '.pdpx .pdp-rec-card{flex:none;min-width:0;scroll-snap-align:start;text-align:left;font-size:12px;user-select:none}',
     '.pdpx .pdp-rec-card .im{aspect-ratio:3/4;background:#f1f2f4 center/cover no-repeat;border-radius:8px;margin-bottom:6px}',
     '.pdpx .pdp-rec-card b{display:block;font-weight:650;line-height:1.3}',
+    '.pdpx .pdp-rec-nav{position:absolute;top:42%;z-index:2;transform:translateY(-50%);width:32px;height:32px;margin:0;padding:0;border:1px solid rgba(0,0,0,.12);border-radius:999px;background:#fff;color:#222;box-shadow:0 2px 8px rgba(0,0,0,.08);cursor:pointer;display:inline-flex;align-items:center;justify-content:center}',
+    '.pdpx .pdp-rec-nav svg{display:block;width:14px;height:14px}',
+    '.pdpx .pdp-rec-nav.prev{left:-6px}',
+    '.pdpx .pdp-rec-nav.next{right:-6px}',
+    '.pdpx .pdp-rec-nav:hover{border-color:#111;background:#111;color:#fff}',
+    '.pdpx .pdp-rec-nav:disabled{opacity:.28;cursor:default;pointer-events:none;background:#fff;color:#222;border-color:rgba(0,0,0,.12)}',
+    // Mobile: swipe + peek only — arrows clutter small buy columns.
+    '.pdpx.mob .pdp-rec-nav{display:none}',
+    '@media (prefers-reduced-motion:reduce){.pdpx .pdp-rec-row{scroll-behavior:auto}}',
+    /* Video column — vertical UGC rail inside the buy column (same UX as Video feed section). */
+    '.pdpx .pdp-vc{min-width:0}',
+    '.pdpx .pdp-vc-head{margin:0 0 10px}',
+    '.pdpx .pdp-vc-h{margin:0;font-size:15px;font-weight:650;line-height:1.25}',
+    '.pdpx .pdp-vc-wrap{position:relative}',
+    '.pdpx .pdp-vc-rail{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;scrollbar-width:none}',
+    '.pdpx .pdp-vc-rail::-webkit-scrollbar{display:none;width:0;height:0}',
+    '.pdpx .pdp-vc-card{flex:none;min-width:0;scroll-snap-align:start}',
+    '.pdpx .pdp-vc-media{position:relative;display:block;width:100%;padding:0;border:0;overflow:hidden;background:#ddd;cursor:pointer;aspect-ratio:9/16;box-sizing:border-box}',
+    '.pdpx .pdp-vc-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}',
+    '.pdpx .pdp-vc-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,.45);color:#fff;display:grid;place-items:center;pointer-events:none}',
+    '.pdpx .pdp-vc-play svg{width:18px;height:18px;margin-left:2px}',
+    '.pdpx .pdp-vc-nav{position:absolute;top:50%;z-index:2;transform:translateY(-50%);width:32px;height:32px;margin:0;padding:0;border:1px solid rgba(0,0,0,.12);border-radius:999px;background:#fff;color:#222;box-shadow:0 2px 8px rgba(0,0,0,.08);cursor:pointer;display:inline-flex;align-items:center;justify-content:center}',
+    '.pdpx .pdp-vc-nav svg{display:block;width:14px;height:14px}',
+    '.pdpx .pdp-vc-nav.prev{left:-6px}',
+    '.pdpx .pdp-vc-nav.next{right:-6px}',
+    '.pdpx .pdp-vc-nav:hover{border-color:#111;background:#111;color:#fff}',
+    '.pdpx .pdp-vc-nav:disabled{opacity:.28;cursor:default;pointer-events:none;background:#fff;color:#222;border-color:rgba(0,0,0,.12)}',
+    '.pdpx.mob .pdp-vc-nav{display:none}',
     '.pdpx .pdp-progress{height:3px;border-radius:99px;background:rgba(0,0,0,.08);margin-top:10px;overflow:hidden}',
     '.pdpx .pdp-progress i{display:block;height:100%;width:40%;background:currentColor;opacity:.7}',
-    '.pdpx .pdp-sticky{display:flex;align-items:center;gap:12px;margin-top:18px;padding:10px 12px;border:1px solid rgba(0,0,0,.08);border-radius:12px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.06);z-index:5}',
+    '.pdpx .pdp-sticky{display:flex;align-items:center;gap:12px;margin-top:18px;padding:10px 12px;border:1px solid rgba(0,0,0,.08);border-radius:12px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:40;box-sizing:border-box}',
     '.pdpx .pdp-sticky.bottom{position:sticky;bottom:8px}',
-    '.pdpx .pdp-sticky.top{position:sticky;top:8px}',
-    '.pdpx .pdp-sticky.after-scroll{opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .2s ease,transform .2s ease}',
-    '.pdpx .pdp-sticky.after-scroll.on{opacity:1;pointer-events:auto;transform:none}',
-    '.pdpx .pdp-sticky.always{opacity:1}',
+    '.pdpx .pdp-sticky.after-scroll{opacity:0;visibility:hidden;pointer-events:none;transform:translateY(8px);transition:opacity .2s ease,transform .2s ease}',
+    '.pdpx .pdp-sticky.after-scroll.on{opacity:1;visibility:visible;pointer-events:auto;transform:none}',
+    '.pdpx .pdp-sticky.always{opacity:1;visibility:visible}',
+    '.pdpx .pdp-sticky.bottom.on,.pdpx .pdp-sticky.bottom.always{position:fixed;bottom:8px;margin-top:0}',
+    '.os-frame .pdp-sticky.bottom.on[data-block-id][data-blabel],.os-frame .pdp-sticky.bottom.always[data-block-id][data-blabel]{position:fixed}',
     '.pdpx.mob .pdp-sticky.hide-mob{display:none}',
     '.pdpx .pdp-sticky img{width:46px;height:46px;object-fit:cover;border-radius:8px}',
     '.pdpx .pdp-sticky .meta{flex:1;min-width:0}',
     '.pdpx .pdp-sticky .meta b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
-    '.pdpx .pdp-sticky-bundle{display:block;font-size:11px;font-style:normal;color:#b45309;margin-top:2px}',
     '.pdpx .pdp-sticky .sticky-qty{flex:none}',
     '.pdpx .pdp-pop,.pdpx .pdp-zoom{position:absolute;inset:0;z-index:6;background:rgba(17,24,39,.45);display:none;align-items:flex-start;justify-content:center;padding:28px 16px}',
     '.pdpx .pdp-pop.on,.pdpx .pdp-zoom.on{display:flex}',
+    '.pdpx .pdp-pop.on[data-pdp-pop]{animation:pdp-pop-scrim .22s ease}',
     '.pdpx .pdp-pop-card{width:min(420px,100%);background:#fff;color:#1a1a1a;border-radius:12px;padding:20px;box-shadow:0 18px 50px rgba(0,0,0,.2)}',
+    '.pdpx .pdp-pop.on[data-pdp-pop] .pdp-pop-card{animation:pdp-pop-card-in .34s cubic-bezier(.2,.8,.2,1)}',
+    '@keyframes pdp-pop-scrim{from{opacity:0}to{opacity:1}}',
+    '@keyframes pdp-pop-card-in{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}',
+    '@media (prefers-reduced-motion:reduce){.pdpx .pdp-atc-spin{animation:none}.pdpx .pdp-pop.on[data-pdp-pop],.pdpx .pdp-pop.on[data-pdp-pop] .pdp-pop-card{animation:none}}',
     '.pdpx .pdp-pop-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:16px}',
     '.pdpx .pdp-pop-head strong{font-size:16px;font-weight:650}',
     '.pdpx .pdp-pop-x{width:28px;height:28px;padding:0;border:1px solid rgba(0,0,0,.18);border-radius:6px;background:#fff;color:#111;font-size:18px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}',
@@ -299,6 +597,84 @@
     { value: 'text', label: 'Text' }, { value: 'inverse', label: 'Inverse' },
   ];
   const PAYS = [['visa', 'Visa'], ['mastercard', 'Mastercard'], ['amex', 'Amex'], ['paypal', 'PayPal'], ['apple', 'Apple Pay']];
+  const PAY_ICON_BASE = 'settings/assets/payments/';
+  const TRUST_LOGO_SRC = {
+    visa: PAY_ICON_BASE + 'visa.svg',
+    mastercard: PAY_ICON_BASE + 'mastercard.svg',
+    amex: PAY_ICON_BASE + 'amex.svg',
+    discover: PAY_ICON_BASE + 'discover.svg',
+    diners: PAY_ICON_BASE + 'diners.svg',
+    paypal: PAY_ICON_BASE + 'paypal-logo.svg',
+    apple_pay: PAY_ICON_BASE + 'applepay.svg',
+    google_pay: PAY_ICON_BASE + 'googlepay.svg',
+    amazon: PAY_ICON_BASE + 'amazonpay.svg',
+  };
+  const TRUST_LOGO_META = {
+    norton: { label: 'Norton', cls: 'norton' },
+    mcafee: { label: 'McAfee', cls: 'mcafee' },
+    money_back: { label: '100% Money Back', cls: 'mb' },
+    visa: { label: 'Visa', cls: 'visa' },
+    mastercard: { label: 'Mastercard', cls: 'mc' },
+    amex: { label: 'Amex', cls: 'amex' },
+    discover: { label: 'Discover', cls: 'discover' },
+    diners: { label: 'Diners Club', cls: 'diners' },
+    amazon: { label: 'Amazon', cls: 'amazon' },
+    paypal: { label: 'PayPal', cls: 'paypal' },
+    apple_pay: { label: 'Apple Pay', cls: 'apple' },
+    google_pay: { label: 'Google Pay', cls: 'google' },
+    venmo: { label: 'Venmo', cls: 'venmo' },
+    bancontact: { label: 'Bancontact', cls: 'bancontact' },
+    giropay: { label: 'Giropay', cls: 'giropay' },
+  };
+  const TRUST_LOGO_OPTIONS = [
+    { value: 'norton', label: 'Norton' }, { value: 'mcafee', label: 'McAfee' }, { value: 'money_back', label: 'Money back' },
+    { value: 'visa', label: 'Visa' }, { value: 'mastercard', label: 'Mastercard' }, { value: 'amex', label: 'Amex' },
+    { value: 'discover', label: 'Discover' }, { value: 'diners', label: 'Diners Club' }, { value: 'amazon', label: 'Amazon' },
+    { value: 'paypal', label: 'PayPal' }, { value: 'apple_pay', label: 'Apple Pay' },
+    { value: 'google_pay', label: 'Google Pay' }, { value: 'venmo', label: 'Venmo' }, { value: 'bancontact', label: 'Bancontact' }, { value: 'giropay', label: 'Giropay' },
+  ];
+  function normalizeBuyChannels(list) {
+    // Dynamic checkout channels. Shop removed; buy_now lives here under show_dynamic.
+    const allowed = ['buy_now', 'paypal', 'apple_pay', 'google_pay'];
+    const src = Array.isArray(list) ? list : [];
+    const out = [];
+    src.forEach((id) => {
+      if (id === 'shop') return;
+      if (allowed.indexOf(id) >= 0 && out.indexOf(id) < 0) out.push(id);
+    });
+    return out;
+  }
+  function resolveBuyChannels(b) {
+    let raw = Array.isArray(b.channels) ? b.channels.slice() : null;
+    if (raw == null) raw = ['buy_now', 'paypal'];
+    // Legacy: standalone show_buy_now merges into channels once.
+    if (b.show_buy_now && raw.indexOf('buy_now') < 0) raw = ['buy_now'].concat(raw);
+    return normalizeBuyChannels(raw);
+  }
+  function buyButtonRadius(shape, custom) {
+    // Legacy shared button_shape / custom_radius still accepted as fallback.
+    if (shape === 'pill') return 999;
+    if (shape === 'square') return 0;
+    if (shape === 'custom') return Number(custom == null ? 8 : custom);
+    return 8;
+  }
+  function atcIconHtml(name) {
+    if (!name || name === 'none') return '';
+    const svg = (window.OS_THEME_ICONS && window.OS_THEME_ICONS.svg(name, 20)) || '';
+    return svg ? '<span class="pdp-atc-ic" aria-hidden="true">' + svg + '</span>' : '';
+  }
+  function atcButtonInner(icon, label) {
+    return atcIconHtml(icon) + '<span class="pdp-atc-label">' + OS.esc(label) + '</span>';
+  }
+  function trustLogoHtml(id) {
+    if (id === 'shop') return '';
+    const meta = TRUST_LOGO_META[id] || { label: id, cls: 'card' };
+    const src = TRUST_LOGO_SRC[id];
+    if (src) {
+      return '<span class="pdp-safe-logo is-img ' + meta.cls + '" title="' + OS.esc(meta.label) + '"><img src="' + OS.esc(src) + '" alt="' + OS.esc(meta.label) + '"></span>';
+    }
+    return '<span class="pdp-safe-logo ' + meta.cls + '">' + OS.esc(meta.label) + '</span>';
+  }
 
   function scheme(value, t) {
     const c = (t && t.colors) || {};
@@ -310,6 +686,41 @@
   function productOf(ctx) {
     if (ctx && ctx.resource && ctx.resource.title) return ctx.resource;
     return ((OS.sample && OS.sample.products) || [])[0] || { id: 'p1', title: 'Product', price: 0, image: '', swatches: ['#222'] };
+  }
+  function resolveProductMetafield(product, path) {
+    if (!product || !path) return '';
+    if (path === 'resource.description' || path === 'description') return product.description || '';
+    const mf = product.metafields || {};
+    if (mf[path] != null && mf[path] !== '') return String(mf[path]);
+    const parts = String(path).split('.');
+    if (parts.length === 2) {
+      const ns = parts[0];
+      const key = parts[1];
+      const nested = mf[ns];
+      if (nested && typeof nested === 'object') {
+        if (nested[ns + ':' + key] != null && nested[ns + ':' + key] !== '') return String(nested[ns + ':' + key]);
+        if (nested[key] != null && nested[key] !== '') return String(nested[key]);
+      }
+    }
+    return '';
+  }
+  // Replace inline metafield variable chips with live product values for storefront preview.
+  function resolveMetafieldChips(html, product) {
+    if (!html || String(html).indexOf('data-mf-path') < 0) return html || '';
+    const box = document.createElement('div');
+    box.innerHTML = html;
+    box.querySelectorAll('[data-mf-path]').forEach((chip) => {
+      const path = chip.getAttribute('data-mf-path') || '';
+      const val = resolveProductMetafield(product, path);
+      if (/<[a-z][\s\S]*>/i.test(val)) {
+        const holder = document.createElement('span');
+        holder.innerHTML = val;
+        chip.replaceWith.apply(chip, Array.prototype.slice.call(holder.childNodes));
+      } else {
+        chip.replaceWith(document.createTextNode(val || ''));
+      }
+    });
+    return box.innerHTML;
   }
   // PRD 3.1 — sellable = tracked inventory and inventory > 0 (prototype: inventory field + available).
   function isSellableVariant(v) {
@@ -354,6 +765,26 @@
   function byIds(ids) {
     const all = (OS.sample && OS.sample.products) || [];
     return (ids || []).map((id) => all.find((p) => p.id === id)).filter(Boolean);
+  }
+  function byCollection(collectionId, n) {
+    const cols = (OS.sample && OS.sample.collections) || [];
+    const col = cols.find((c) => c.id === collectionId);
+    if (!col) return [];
+    const all = (OS.sample && OS.sample.products) || [];
+    let base = byIds(Array.isArray(col.productIds) ? col.productIds : []);
+    if (!base.length) base = all.slice();
+    // Prototype: collections advertise large counts but only seed a few ids —
+    // cycle the seed (then catalog) so the slider has enough cards to scroll.
+    const want = Math.max(1, Math.min(
+      n != null ? n : (Number(col.count) || base.length || 8),
+      16
+    ));
+    if (base.length >= want) return base.slice(0, want);
+    const pool = base.length ? base : all;
+    if (!pool.length) return [];
+    const out = [];
+    for (let i = 0; i < want; i++) out.push(pool[i % pool.length]);
+    return out;
   }
   function slides(p) {
     const images = Array.isArray(p.images) && p.images.length ? p.images : [p.image];
@@ -402,71 +833,92 @@
   const BLOCKS = {
     // unique follows PRD 「限一条」. Multi (否): rating, icon_text, collapsible, text, liquid, popup, divider.
     badges: { name: 'Badges and tags', icon: 'label', unique: true, preview:
-      '<span class="pdp-tag" style="background:#2563eb">Best Seller</span>' +
-      '<span class="pdp-tag" style="background:#2563eb">End of Summer Sale</span>' +
-      '<span class="pdp-tag" style="background:#2563eb">Halloween Sale</span>' +
-      '<span class="pdp-tag sale">Sale</span>' +
-      '<span class="pdp-tag" style="background:#2563eb">Material Safety</span>',
+      '<span class="pdp-tag" style="background:#103635">Best seller</span>' +
+      '<span class="pdp-tag" style="background:#ffc439;color:#fff">Black Friday Sale</span>' +
+      '<span class="pdp-tag sale outline" style="color:#d63a2f;background:#f9fafb;border:0;box-shadow:inset 0 0 0 1px rgba(214,58,47,.22);border-radius:5px;font-weight:700;height:24px;padding:2px 8px">Sale</span>',
       fields: [
-      { info: 'Valid custom tags use tag__hot_[DISPLAY_TEXT] or tag__new_[DISPLAY_TEXT].' },
-      { key: 'show_sold_out', control: 'toggle', label: 'Show sold out badge', default: false },
-      { key: 'show_saving', control: 'toggle', label: 'Show saving amount', default: false },
-      { key: 'saving_type', control: 'select', label: 'Type', default: 'percentage', options: [
-        { value: 'text', label: 'Sale' }, { value: 'percentage', label: 'Percentage' }, { value: 'fixed', label: 'Fixed amount' },
-      ], visibleWhen: (v) => !!v.show_saving },
-      { key: 'badge_position', control: 'select', label: 'Badge position', default: 'top-left', options: [
-        { value: 'top-left', label: 'Top left' }, { value: 'top-right', label: 'Top right' },
-        { value: 'below-title', label: 'Below title' }, { value: 'above-price', label: 'Above price' },
+      { sub: 'Valid custom tags' },
+      { info: 'Use tag__hot_[DISPLAY_TEXT] or tag__new_[DISPLAY_TEXT]. Example: tag__hot_HOT, tag__new_NEW ARRIVAL' },
+      { key: 'custom_tag_style', control: 'segmented', label: 'Tag style', default: 'filled', options: [
+        { value: 'filled', label: 'Filled' }, { value: 'outline', label: 'Outline' },
       ] },
+      { key: 'hot_badge_bg', control: 'color', label: 'Hot tag background', default: '', blankValue: () => OS.themeColor('primary_color', '#103635'), info: 'Blank inherits the theme primary color. Applies to tag__hot_*.' },
+      { key: 'hot_badge_text_color', control: 'color', label: 'Hot tag text', default: '#ffffff', blankValue: () => '#ffffff', visibleWhen: (v) => v.custom_tag_style !== 'outline' },
+      { key: 'new_badge_bg', control: 'color', label: 'New tag background', default: '#FFC439', blankValue: () => '#FFC439', info: 'Applies to tag__new_*.' },
+      { key: 'new_badge_text_color', control: 'color', label: 'New tag text', default: '#ffffff', blankValue: () => '#ffffff', visibleWhen: (v) => v.custom_tag_style !== 'outline' },
       { key: 'badge_icon', control: 'select', label: 'Badge icon', default: 'none', options: ((window.OS_THEME_ICONS && window.OS_THEME_ICONS.options) ? window.OS_THEME_ICONS.options(true) : [{ value: 'none', label: 'None' }, { value: 'fire', label: 'Fire' }, { value: 'heart', label: 'Heart' }, { value: 'truck', label: 'Truck' }, { value: 'star', label: 'Star' }]) },
       { key: 'badge_icon_image', control: 'image', label: 'Custom badge icon', default: '', info: 'Custom image replaces the built-in icon when set.' },
-      { key: 'badge_bg', control: 'color', label: 'Badge background', default: '', info: 'Blank inherits the theme primary color.' },
-      { key: 'badge_text_color', control: 'color', label: 'Badge text color', default: '', info: 'Blank uses white.' },
+      { sub: 'Product badges' },
+      { key: 'show_sold_out', control: 'toggle', label: 'Show sold out badge', default: false },
+      ...savingFields({ show_saving: false, saving_position: 'right' }),
+      { key: 'badge_position', control: 'segmented', label: 'Badge position', default: 'left', options: [
+        { value: 'left', label: 'Left' }, { value: 'right', label: 'Right' },
+      ] },
       { key: 'badge_gap', control: 'range', label: 'Badge gap', min: 0, max: 24, step: 1, unit: 'px', default: 8 },
     ] },
     title: { name: 'Title', icon: 'heading', unique: true, preview: '<div class="os-blkprev-title">Knitted Santa Wine Bottle Cover</div>', fields: [
-      { key: 'title_size', control: 'range', label: 'Title font size', min: 10, max: 50, step: 1, unit: 'px', default: 24 },
-      { key: 'description', control: 'richtext', label: 'Description', default: '', maxlength: 1000 },
-      { key: 'description_image', control: 'image', label: 'Description image', default: '' },
+      { key: 'title_size', control: 'range', label: 'Title font size', min: 10, max: 50, step: 1, unit: 'px', default: 30 },
+      // Title description is freeform or metafield-backed — never product.description.
+      { key: 'description', control: 'richtext', label: 'Description', default: '', maxlength: 1000, placeholder: 'Add description...', autoHeight: true, dynamicSource: { mode: 'metafields', includeProductFields: true } },
       { key: 'description_color', control: 'color', label: 'Description color', default: '#000000' },
       { key: 'description_size', control: 'range', label: 'Description font size', min: 10, max: 50, step: 1, unit: 'px', default: 14 },
       { key: 'description_top', control: 'range', label: 'Description top padding', min: 0, max: 100, step: 1, unit: 'px', default: 0 },
       { key: 'description_bottom', control: 'range', label: 'Description bottom padding', min: 0, max: 100, step: 1, unit: 'px', default: 0 },
     ] },
     price: { name: 'Price', icon: 'priceTag', unique: true, preview: '<div class="os-blkprev-price"><span>$24.00</span><s>$32.00</s><span class="save">-25%</span></div>', fields: [
+      { key: 'size', control: 'range', label: 'Size', min: 10, max: 120, step: 1, unit: 'px', default: 24 },
       { key: 'show_taxes', control: 'toggle', label: 'Show taxes notice', default: false },
-      { key: 'price_prefix', control: 'text', label: 'Price prefix', default: '', placeholder: 'e.g. Set of 2' },
-      { key: 'compare_order', control: 'segmented', label: 'Compare-at order', default: 'after', options: [
-        { value: 'before', label: 'Left' }, { value: 'after', label: 'Right' },
-      ] },
-      { key: 'show_saving', control: 'toggle', label: 'Show saving amount', default: true },
-      { key: 'saving_type', control: 'select', label: 'Type', default: 'percentage', options: [
-        { value: 'percentage', label: 'Percentage' }, { value: 'fixed', label: 'Fixed amount' },
-        { value: 'text', label: 'Sale' }, { value: 'label', label: 'Saving label' },
-      ], visibleWhen: (v) => !!v.show_saving },
-      { key: 'saving_label', control: 'text', label: 'Saving label', default: '', placeholder: 'e.g. Hot deal', visibleWhen: (v) => !!v.show_saving && v.saving_type === 'label' },
-      { key: 'saving_style', control: 'segmented', label: 'Saving style', default: 'filled', options: [
-        { value: 'filled', label: 'Filled' }, { value: 'outline', label: 'Outline' },
-      ], visibleWhen: (v) => !!v.show_saving },
-      { key: 'saving_position', control: 'segmented', label: 'Saving position', default: 'right', options: [
-        { value: 'left', label: 'Left' }, { value: 'right', label: 'Right' },
-      ], visibleWhen: (v) => !!v.show_saving },
-      { key: 'saving_bg', control: 'color', label: 'Saving background', default: '', info: 'Blank inherits the theme sale price color. Outline style uses this as border/text tint.', visibleWhen: (v) => !!v.show_saving },
-      { key: 'saving_text_color', control: 'color', label: 'Saving text color', default: '#ffffff', visibleWhen: (v) => !!v.show_saving && v.saving_style !== 'outline' },
-      { key: 'saving_icon', control: 'toggle', label: 'Show saving icon', default: false, visibleWhen: (v) => !!v.show_saving },
+      ...savingFields({ saving_position: 'right' }),
     ] },
     rating: { name: 'Rating', icon: 'starLine', preview:
       '<div class="os-blkprev-rate">' +
         '<span class="st">' + STAR_SVG + '</span><span class="st">' + STAR_SVG + '</span><span class="st">' + STAR_SVG + '</span><span class="st">' + STAR_SVG + '</span><span class="st">' + STAR_SVG + '</span>' +
       '</div>',
       fields: [
-      { key: 'show_rating', control: 'toggle', label: 'Show rating', default: true },
+      { key: 'layout', control: 'segmented', label: 'Layout', default: 'default', options: [
+        { value: 'default', label: 'Default' },
+        { value: 'single-icon', label: 'Single icon' },
+      ] },
+      { key: 'star_style', control: 'select', label: 'Star style', default: 'boxed', options: [
+        { value: 'regular', label: 'Regular' },
+        { value: 'boxed', label: 'Boxed' },
+      ], visibleWhen: (v) => (v.layout || 'default') === 'default' },
+      { key: 'style', control: 'select', label: 'Content', default: 'stars-rating-custom', options: (v) => {
+        const opts = [
+          { value: 'stars-and-reviews', label: 'Stars + rating + reviews' },
+          { value: 'stars-rating-custom', label: 'Stars + rating + custom text' },
+          { value: 'stars-custom', label: 'Stars + custom text' },
+        ];
+        if ((v.layout || 'default') === 'default') {
+          opts.unshift({ value: 'stars-and-count', label: 'Stars + review count' });
+        }
+        return opts;
+      } },
+      { key: 'custom_text', control: 'text', label: 'Custom text', default: 'Trusted by 2000+', placeholder: 'e.g. Trusted by 2000+', reinjectWhenVisible: true, visibleWhen: (v) => v.style === 'stars-rating-custom' || v.style === 'stars-custom' },
+      { key: 'underline_text', control: 'toggle', label: 'Underline text', default: false, visibleWhen: (v) => v.style === 'stars-rating-custom' || v.style === 'stars-custom' },
+      { key: 'review_label', control: 'text', label: 'Review label', default: 'reviews', reinjectWhenVisible: true, visibleWhen: (v) => v.style === 'stars-and-count' || v.style === 'stars-and-reviews' },
       { key: 'size', control: 'range', label: 'Size', min: 8, max: 48, step: 1, unit: 'px', default: 14 },
-      { key: 'show_text', control: 'toggle', label: 'Show text', default: false },
-      { key: 'text', control: 'text', label: 'Text', default: '4.8 (214) 7,000+ satisfied customers', visibleWhen: (v) => !!v.show_text },
+      { key: 'color', control: 'color', label: 'Star color', default: '#0f3636', allowTransparent: true, blankValue: () => '#0f3636', info: 'Defaults to brand teal. T = transparent.' },
+      { key: 'text_color', control: 'color', label: 'Text color', default: '', allowTransparent: true, info: 'Blank inherits the theme text color. T = transparent.' },
     ] },
     description: { name: 'Description', icon: 'text', unique: true, preview: '<div class="os-blkprev-copy">Soft knit bottle cover with festive trim. Perfect for holiday gifting.</div>', fields: [
-      { info: 'No customizable settings available.' },
+      { key: 'text', control: 'richtext', label: 'Text', default: '', placeholder: 'Add product description...', dynamicSource: { label: 'Description', path: 'resource.description', defaultConnected: true } },
+      { sub: 'Layout' },
+      { key: 'width', control: 'segmented', label: 'Width', default: 'fit', options: [
+        { value: 'fit', label: 'Fit' }, { value: 'fill', label: 'Fill' },
+      ] },
+      { key: 'alignment', control: 'segmented', label: 'Alignment', default: 'left', options: [
+        { value: 'left', label: 'Left' }, { value: 'center', label: 'Center' }, { value: 'right', label: 'Right' },
+      ], visibleWhen: (v) => v.width === 'fill' },
+      { sub: 'Appearance' },
+      { key: 'background', control: 'toggle', label: 'Background', default: false },
+      { key: 'background_color', control: 'color', label: 'Background color', default: '#FFFFFF', allowTransparent: true, blankValue: () => '#FFFFFF', visibleWhen: (v) => !!v.background },
+      { key: 'corner_radius', control: 'range', label: 'Corner radius', min: 0, max: 40, step: 1, unit: 'px', default: 0, visibleWhen: (v) => !!v.background },
+      { sub: 'Padding' },
+      { key: 'padding_top', control: 'range', label: 'Top', min: 0, max: 100, step: 1, unit: 'px', default: 0 },
+      { key: 'padding_bottom', control: 'range', label: 'Bottom', min: 0, max: 100, step: 1, unit: 'px', default: 0 },
+      { key: 'padding_left', control: 'range', label: 'Left', min: 0, max: 100, step: 1, unit: 'px', default: 0 },
+      { key: 'padding_right', control: 'range', label: 'Right', min: 0, max: 100, step: 1, unit: 'px', default: 0 },
     ] },
     inventory: { name: 'Inventory', unique: true, preview: '<div class="os-blkprev-stock"><i></i><span>In stock · 24 left</span></div>', fields: [
       { key: 'show_status', control: 'toggle', label: 'Show inventory status', default: true },
@@ -478,7 +930,9 @@
       { key: 'status_style', control: 'segmented', label: 'Status style', default: 'dot', options: [
         { value: 'dot', label: 'Dot' }, { value: 'badge', label: 'Badge' }, { value: 'text-only', label: 'Text only' },
       ] },
-      { key: 'status_color', control: 'color', label: 'Status color', default: '#f59e0b' },
+      { key: 'in_stock_color', control: 'color', label: 'In stock color', default: '#10a443', info: 'Shown when inventory is above the low stock threshold.' },
+      { key: 'status_color', control: 'color', label: 'Low stock color', default: '#f59e0b', info: 'Shown when inventory is at or below the low stock threshold.' },
+      { key: 'font_size', control: 'range', label: 'Font size', min: 10, max: 50, step: 1, unit: 'px', default: 14 },
     ] },
     variant: { name: 'Variant picker', icon: 'variant', unique: true, preview:
       '<div class="os-blkprev-var">' +
@@ -504,34 +958,41 @@
       { key: 'show_sku_in_option', control: 'toggle', label: 'Show SKU in option', default: false },
     ] },
     buy: { name: 'Buy buttons', icon: 'cart', unique: true, preview: '<div class="os-blkprev-btns"><div class="b b1">Add to cart</div><div class="b b2">Buy with PayPal</div></div>', fields: [
+      { sub: 'Add to cart' },
       { key: 'show_quantity', control: 'toggle', label: 'Show quantity selector', default: true },
       { key: 'show_add', control: 'toggle', label: 'Show Add-to-cart button', default: true },
-      { key: 'show_buy_now', control: 'toggle', label: 'Show Buy now button', default: false },
-      { key: 'buy_now_text', control: 'text', label: 'Buy now label', default: 'Buy now', visibleWhen: (v) => !!v.show_buy_now },
-      { key: 'show_dynamic', control: 'toggle', label: 'Show dynamic checkout buttons', default: true },
-      { key: 'show_payment_options', control: 'toggle', label: 'Show more payment options', default: true },
-      { key: 'show_shop_installments', control: 'toggle', label: 'Show Shop Pay installments', default: false, visibleWhen: (v) => !!v.show_dynamic },
-      { key: 'button_shape', control: 'segmented', label: 'Button shape', default: 'normal', options: [
+      { key: 'atc_layout', control: 'segmented', label: 'Add to cart style', default: 'with-quantity', options: [
+        { value: 'with-quantity', label: 'With quantity' }, { value: 'full-width', label: 'Full width' },
+      ], visibleWhen: (v) => !!v.show_add },
+      { key: 'atc_icon', control: 'select', label: 'Add to cart icon', default: 'bag-plus', options: ((window.OS_THEME_ICONS && window.OS_THEME_ICONS.options) ? window.OS_THEME_ICONS.options(true) : [{ value: 'none', label: 'None' }, { value: 'bag-plus', label: 'Bag plus' }, { value: 'gift', label: 'Gift' }, { value: 'heart', label: 'Heart' }, { value: 'star', label: 'Star' }]), visibleWhen: (v) => !!v.show_add, info: 'Default is shopping bag with plus. Pick None to hide, or any icon from the theme library.' },
+      { key: 'atc_background', control: 'color', label: 'Add to cart background', default: '#FFC439', allowTransparent: true, blankValue: () => '#FFC439', info: 'Defaults to PayPal yellow. T = transparent.', visibleWhen: (v) => !!v.show_add },
+      { key: 'atc_text_color', control: 'color', label: 'Add to cart text', default: '#FFFFFF', allowTransparent: true, blankValue: () => '#FFFFFF', info: 'Defaults to white. T = transparent.', visibleWhen: (v) => !!v.show_add },
+      { key: 'atc_shape', control: 'segmented', label: 'Button shape', default: 'pill', options: [
         { value: 'normal', label: 'Normal' }, { value: 'pill', label: 'Pill' }, { value: 'square', label: 'Square' }, { value: 'custom', label: 'Custom' },
       ] },
-      { key: 'custom_radius', control: 'range', label: 'Custom radius', min: 0, max: 40, step: 1, unit: 'px', default: 8, visibleWhen: (v) => v.button_shape === 'custom' },
-      { key: 'button_layout', control: 'select', label: 'Button layout', default: 'stacked', options: [
-        { value: 'stacked', label: 'Stacked' }, { value: 'side-by-side', label: 'Side by side' },
-      ] },
-      // Express checkout action buttons only. Card brands belong under Trust logos (safe checkout strip).
-      { key: 'channels', control: 'multiselect', label: 'Channels', default: ['shop', 'paypal', 'apple_pay', 'google_pay'], options: [
-        { value: 'shop', label: 'Shop' }, { value: 'paypal', label: 'PayPal' }, { value: 'apple_pay', label: 'Apple Pay' }, { value: 'google_pay', label: 'Google Pay' },
+      { key: 'atc_custom_radius', control: 'range', label: 'Custom radius', min: 0, max: 40, step: 1, unit: 'px', default: 8, visibleWhen: (v) => (v.atc_shape || v.button_shape) === 'custom' },
+      { sub: 'Dynamic checkout' },
+      { key: 'show_dynamic', control: 'toggle', label: 'Show dynamic checkout buttons', default: true },
+      // Buy now + wallets under show_dynamic. Only selected channels render. Card brands → Trust logos.
+      { key: 'channels', control: 'multiselect', label: 'Channels', default: ['buy_now', 'paypal'], options: [
+        { value: 'buy_now', label: 'Buy now' }, { value: 'paypal', label: 'PayPal' }, { value: 'apple_pay', label: 'Apple Pay' }, { value: 'google_pay', label: 'Google Pay' },
       ], visibleWhen: (v) => !!v.show_dynamic },
-      { key: 'channel_logo', control: 'toggle', label: 'Show channel logo', default: false, visibleWhen: (v) => !!v.show_dynamic },
-      { key: 'show_safe_checkout', control: 'toggle', label: 'Show safe checkout strip', default: false },
-      { key: 'safe_checkout_label', control: 'text', label: 'Safe checkout label', default: 'GUARANTEED SAFE CHECKOUT', visibleWhen: (v) => !!v.show_safe_checkout },
-      { key: 'trust_logos', control: 'multiselect', label: 'Trust logos', default: ['norton', 'paypal', 'visa', 'mastercard', 'mcafee', 'money_back'], options: [
-        { value: 'norton', label: 'Norton' }, { value: 'mcafee', label: 'McAfee' }, { value: 'money_back', label: 'Money back' },
-        { value: 'visa', label: 'Visa' }, { value: 'mastercard', label: 'Mastercard' }, { value: 'amex', label: 'Amex' },
-        { value: 'discover', label: 'Discover' }, { value: 'diners', label: 'Diners Club' }, { value: 'amazon', label: 'Amazon' },
-        { value: 'paypal', label: 'PayPal' }, { value: 'shop', label: 'Shop' }, { value: 'apple_pay', label: 'Apple Pay' },
-        { value: 'google_pay', label: 'Google Pay' }, { value: 'venmo', label: 'Venmo' }, { value: 'bancontact', label: 'Bancontact' }, { value: 'giropay', label: 'Giropay' },
-      ], visibleWhen: (v) => !!v.show_safe_checkout },
+      { key: 'buy_now_text', control: 'text', label: 'Buy now label', default: 'Buy now', visibleWhen: (v) => !!v.show_dynamic && Array.isArray(v.channels) && v.channels.indexOf('buy_now') >= 0 },
+      { key: 'buy_now_background', control: 'color', label: 'Buy now background', default: '#000000', allowTransparent: true, blankValue: () => '#000000', info: 'Defaults to black. T = transparent.', visibleWhen: (v) => !!v.show_dynamic && Array.isArray(v.channels) && v.channels.indexOf('buy_now') >= 0 },
+      { key: 'buy_now_text_color', control: 'color', label: 'Buy now text', default: '#FFFFFF', allowTransparent: true, blankValue: () => '#FFFFFF', info: 'Defaults to white. T = transparent.', visibleWhen: (v) => !!v.show_dynamic && Array.isArray(v.channels) && v.channels.indexOf('buy_now') >= 0 },
+      { key: 'dyn_shape', control: 'segmented', label: 'Button shape', default: 'normal', options: [
+        { value: 'normal', label: 'Normal' }, { value: 'pill', label: 'Pill' }, { value: 'square', label: 'Square' }, { value: 'custom', label: 'Custom' },
+      ], visibleWhen: (v) => !!v.show_dynamic },
+      { key: 'dyn_custom_radius', control: 'range', label: 'Custom radius', min: 0, max: 40, step: 1, unit: 'px', default: 8, visibleWhen: (v) => !!v.show_dynamic && (v.dyn_shape || v.button_shape) === 'custom' },
+      { key: 'show_payment_options', control: 'toggle', label: 'Show more payment options', default: true, visibleWhen: (v) => !!v.show_dynamic && Array.isArray(v.channels) && v.channels.length > 0 },
+      { key: 'channel_logo', control: 'toggle', label: 'Show channel logo', default: true, visibleWhen: (v) => !!v.show_dynamic },
+      { key: 'show_safe_checkout', control: 'toggle', label: 'Show safe checkout strip', default: true, visibleWhen: (v) => !!v.show_dynamic },
+      { key: 'safe_checkout_align', control: 'segmented', label: 'Layout', default: 'center', options: [
+        { value: 'left', label: 'Left' }, { value: 'center', label: 'Center' }, { value: 'right', label: 'Right' },
+      ], visibleWhen: (v) => !!v.show_dynamic && !!v.show_safe_checkout },
+      { key: 'safe_checkout_label', control: 'text', label: 'Safe checkout label', default: 'GUARANTEED SAFE CHECKOUT', visibleWhen: (v) => !!v.show_dynamic && !!v.show_safe_checkout },
+      { key: 'trust_logos', control: 'multiselect', label: 'Trust logos', default: ['visa', 'mastercard', 'amex', 'paypal', 'apple_pay', 'google_pay'], options: TRUST_LOGO_OPTIONS, visibleWhen: (v) => !!v.show_dynamic && !!v.show_safe_checkout },
+      { key: 'trust_logo_size', control: 'range', label: 'Logo size', min: 20, max: 56, step: 1, unit: 'px', default: 28, visibleWhen: (v) => !!v.show_dynamic && !!v.show_safe_checkout },
     ] },
     icon_text: { name: 'Icon with text', preview:
       '<div class="os-blkprev-icons">' +
@@ -541,29 +1002,42 @@
       fields: [
       { key: 'layout', control: 'segmented', label: 'Layout', default: 'horizontal', options: [
         { value: 'horizontal', label: 'Horizontal' }, { value: 'vertical', label: 'Vertical' },
+      ], info: 'How the three items are arranged as a group.' },
+      { key: 'item_layout', control: 'segmented', label: 'Item layout', default: 'icon-left', options: [
+        { value: 'icon-left', label: 'Icon left' }, { value: 'icon-top', label: 'Icon top' },
+      ] },
+      { key: 'alignment', control: 'segmented', label: 'Alignment', default: 'left', options: [
+        { value: 'left', label: 'Left' }, { value: 'center', label: 'Center' }, { value: 'right', label: 'Right' },
       ] },
       { key: 'font', control: 'select', label: 'Title font family', default: 'body', options: [
         { value: 'body', label: 'Body font' }, { value: 'heading', label: 'Heading font' },
       ] },
-      { key: 'size', control: 'select', label: 'Title size', default: 'base', options: [
-        { value: 'small', label: 'Small' }, { value: 'base', label: 'Base size' }, { value: 'large', label: 'Large' },
-      ] },
+      { key: 'size', control: 'range', label: 'Title size', min: 10, max: 48, step: 1, unit: 'px', default: 16, info: 'Defaults to the theme body base size (Typography → Base size).' },
+      { key: 'icon_size', control: 'range', label: 'Icon size', min: 16, max: 96, step: 1, unit: 'px', default: 20 },
+      { key: 'item_gap', control: 'range', label: 'Item gap', min: 4, max: 48, step: 1, unit: 'px', default: 24 },
+      { key: 'icon_text_gap', control: 'range', label: 'Icon / text gap', min: 0, max: 32, step: 1, unit: 'px', default: 8 },
       { key: 'background', control: 'toggle', label: 'Show background', default: false },
+      { key: 'background_color', control: 'color', label: 'Background color', default: '#f6f6f6', allowTransparent: true, blankValue: () => '#f6f6f6', visibleWhen: (v) => !!v.background },
+      { key: 'corner_radius', control: 'range', label: 'Corner radius', min: 0, max: 40, step: 1, unit: 'px', default: 10, visibleWhen: (v) => !!v.background },
+      { key: 'text_color', control: 'color', label: 'Text color', default: '', allowTransparent: true, blankValue: () => OS.themeColor('text_color', '#1A1A1A'), info: 'Blank inherits the theme text color. T = transparent.' },
+      { key: 'icon_color', control: 'color', label: 'Icon color', default: '', allowTransparent: true, blankValue: () => OS.themeColor('primary_color', '#103635'), info: 'Blank inherits the theme primary color. T = transparent.' },
       { key: 'card_style', control: 'segmented', label: 'Card style', default: 'none', options: [
         { value: 'none', label: 'None' }, { value: 'outline', label: 'Outline' }, { value: 'filled', label: 'Filled' },
       ] },
+      { sub: 'Content' },
+      { tip: 'Choose an icon or add an image for each column or row.' },
       { key: 'icon_1', control: 'select', label: 'First icon', default: 'box', options: ((window.OS_THEME_ICONS && window.OS_THEME_ICONS.options) ? window.OS_THEME_ICONS.options(true) : [{ value: 'none', label: 'None' }, { value: 'fire', label: 'Fire' }, { value: 'heart', label: 'Heart' }, { value: 'truck', label: 'Truck' }, { value: 'star', label: 'Star' }]) },
-      { key: 'image_1', control: 'image', label: 'First image / logo', default: '', info: 'Use for trust logos such as BBC / Forbes. Custom image replaces the built-in icon.' },
-      { key: 'first', control: 'richtext', label: 'First heading', default: 'Orders over $50 ship free' },
-      { key: 'link_1', control: 'text', label: 'First link', default: '', placeholder: 'https://' },
+      { key: 'image_1', control: 'image', label: 'First image / logo', default: '', info: 'Custom image replaces the built-in icon. Use for trust logos such as BBC / Forbes.' },
+      { key: 'first_heading', control: 'richtext', label: 'First heading', default: 'Orders over $50 ship free', autoHeight: true, info: 'Leave the heading label blank to hide the icon column.' },
+      { key: 'first_content', control: 'richtext', label: 'First content', default: '', autoHeight: true, placeholder: 'Add description...' },
       { key: 'icon_2', control: 'select', label: 'Second icon', default: 'return', options: ((window.OS_THEME_ICONS && window.OS_THEME_ICONS.options) ? window.OS_THEME_ICONS.options(true) : [{ value: 'none', label: 'None' }, { value: 'fire', label: 'Fire' }, { value: 'heart', label: 'Heart' }, { value: 'truck', label: 'Truck' }, { value: 'star', label: 'Star' }]) },
       { key: 'image_2', control: 'image', label: 'Second image / logo', default: '' },
-      { key: 'second', control: 'richtext', label: 'Second heading', default: '30 day returns' },
-      { key: 'link_2', control: 'text', label: 'Second link', default: '', placeholder: 'https://' },
+      { key: 'second_heading', control: 'richtext', label: 'Second heading', default: '30 day returns', autoHeight: true, info: 'Leave the heading label blank to hide the icon column.' },
+      { key: 'second_content', control: 'richtext', label: 'Second content', default: '', autoHeight: true, placeholder: 'Add description...' },
       { key: 'icon_3', control: 'select', label: 'Third icon', default: 'star', options: ((window.OS_THEME_ICONS && window.OS_THEME_ICONS.options) ? window.OS_THEME_ICONS.options(true) : [{ value: 'none', label: 'None' }, { value: 'fire', label: 'Fire' }, { value: 'heart', label: 'Heart' }, { value: 'truck', label: 'Truck' }, { value: 'star', label: 'Star' }]) },
       { key: 'image_3', control: 'image', label: 'Third image / logo', default: '' },
-      { key: 'third', control: 'richtext', label: 'Third heading', default: '' },
-      { key: 'link_3', control: 'text', label: 'Third link', default: '', placeholder: 'https://' },
+      { key: 'third_heading', control: 'richtext', label: 'Third heading', default: '', autoHeight: true, info: 'Leave the heading label blank to hide the icon column.' },
+      { key: 'third_content', control: 'richtext', label: 'Third content', default: '', autoHeight: true, placeholder: 'Add description...' },
     ] },
     sku: { name: 'SKU', unique: true, preview: '<div class="os-blkprev-sku">SKU: AURA-KNIT-01</div>', fields: [
       { key: 'text_style', control: 'select', label: 'Text style', default: 'body', options: [
@@ -571,7 +1045,7 @@
       ] },
     ] },
     text: { name: 'Text', icon: 'text', preview: '<div class="os-blkprev-copy">Add supporting product information.</div>', fields: [
-      { key: 'text', control: 'richtext', label: 'Text', default: 'Add supporting product information.' },
+      { key: 'text', control: 'richtext', label: 'Text', default: 'Add supporting product information.', dynamicSource: { label: 'Text', path: 'resource.text' } },
       { key: 'text_style', control: 'select', label: 'Text style', default: 'body', options: [
         { value: 'body', label: 'Body' }, { value: 'subtitle', label: 'Subtitle' }, { value: 'uppercase', label: 'Uppercase' },
       ] },
@@ -583,32 +1057,26 @@
     collapsible: { name: 'Collapsible row', preview: '<div class="os-blkprev-row"><span>Overview</span><span>+</span></div>', fields: [
       { key: 'heading', control: 'text', label: 'Heading', default: 'Overview' },
       { key: 'icon', control: 'select', label: 'Icon', default: 'none', options: ((window.OS_THEME_ICONS && window.OS_THEME_ICONS.options) ? window.OS_THEME_ICONS.options(true) : [{ value: 'none', label: 'None' }, { value: 'fire', label: 'Fire' }, { value: 'heart', label: 'Heart' }, { value: 'truck', label: 'Truck' }, { value: 'star', label: 'Star' }]) },
-      { key: 'content', control: 'richtext', label: 'Row content', default: 'A clinically proven, non-sticky, vegan lip treatment that delivers the intense hydration of a lip mask with a sweet sheer tint using food-grade, non-artificial flavor. Designed for sensitive, irritated lips, this cushiony treatment delivers instant comfort to rescue dry, chapped lips.' },
+      { key: 'content', control: 'richtext', label: 'Row content', default: 'A clinically proven, non-sticky, vegan lip treatment that delivers the intense hydration of a lip mask with a sweet sheer tint using food-grade, non-artificial flavor. Designed for sensitive, irritated lips, this cushiony treatment delivers instant comfort to rescue dry, chapped lips.', autoHeight: true, dynamicSource: { mode: 'metafields', includeProductFields: true } },
       { key: 'custom_liquid', control: 'textarea', label: 'Custom liquid', default: '' },
-      { key: 'page', control: 'page', label: 'Row content from page', default: '' },
-      { key: 'open', control: 'toggle', label: 'Default open', default: false },
-      { key: 'first_open_default', control: 'toggle', label: 'Open by default', default: false },
+      { key: 'open', control: 'toggle', label: 'Open by default', default: false },
       { key: 'accordion_mode', control: 'toggle', label: 'Accordion mode', default: false, info: 'When on, only one row stays open at a time.' },
       { key: 'icon_position', control: 'segmented', label: 'Icon position', default: 'right', options: [
         { value: 'left', label: 'Left' }, { value: 'right', label: 'Right' },
       ] },
       { info: 'Mobile order reuses the desktop block order.' },
     ] },
-    popup: { name: 'Pop-up', preview: '<button type="button" style="padding:0;border:0;background:none;color:#111;font:inherit;font-size:13px;font-weight:650;line-height:1.3;text-decoration:underline;text-underline-offset:3px;cursor:default">View size guide</button>', fields: [
-      { key: 'label', control: 'text', label: 'Link label', default: 'View size guide' },
+    popup: { name: 'Pop-up', preview: '<button type="button" style="padding:0;border:0;background:none;color:#111;font:inherit;font-size:13px;font-weight:650;line-height:1.3;text-decoration:underline;text-underline-offset:3px;cursor:default">Pop-up link text</button>', fields: [
+      { key: 'label', control: 'text', label: 'Link label', default: 'Pop-up link text' },
       { key: 'page', control: 'page', label: 'Page', default: '' },
-      { key: 'trigger', control: 'segmented', label: 'Trigger', default: 'click', options: [
-        { value: 'click', label: 'Click' },
-      ] },
-      { key: 'content_type', control: 'select', label: 'Content type', default: 'page', options: [
-        { value: 'page', label: 'Page' },
-      ] },
-      { key: 'hover_effect', control: 'toggle', label: 'Hover effect', default: false },
       { key: 'popup_width', control: 'range', label: 'Popup width', min: 280, max: 900, step: 10, unit: 'px', default: 560 },
       { key: 'popup_height', control: 'range', label: 'Popup height', min: 200, max: 800, step: 10, unit: 'px', default: 420 },
     ] },
     shipping: { name: 'Shipping', icon: 'doc', unique: true, preview: '<div class="os-blkprev-ship"><strong style="display:block;margin-bottom:4px;color:#111">Estimated delivery:</strong>Arrives by Oct 30</div>', fields: [
-      { key: 'delivery_text', control: 'text', label: 'Delivery text', default: 'Estimated delivery:' },
+      { key: 'layout', control: 'segmented', label: 'Layout', default: 'timeline', options: [
+        { value: 'text', label: 'Text' }, { value: 'timeline', label: 'Timeline' },
+      ] },
+      { key: 'delivery_text', control: 'text', label: 'Delivery text', default: 'Estimated delivery:', placeholder: 'Leave empty to hide title' },
       { key: 'days', control: 'number', label: 'Deliver in', min: 1, max: 60, default: 7 },
       { key: 'date_format', control: 'text', label: 'Date format', default: '%b %d' },
       { key: 'timezone', control: 'select', label: 'Timezone', default: 'store', options: [
@@ -640,11 +1108,15 @@
       ], visibleWhen: (v) => v.show_share !== false },
       { key: 'show_copy', control: 'toggle', label: 'Show copy link', default: true, visibleWhen: (v) => v.show_share !== false },
     ] },
-    // Products default to [] — no init data, preview stays blank.
+    // Products default to [] — empty uses collection source or automatic fallback.
     recommendations: { name: 'Inline recommendations', unique: true, fields: [
-      { key: 'heading', control: 'text', label: 'Heading', default: 'You Might Also Like' },
-      { key: 'products', control: 'ordered_products', label: 'Select products', default: [], max: 8 },
-      { key: 'per_row', control: 'range', label: 'Row Count/Desktop', min: 1, max: 4, step: 1, default: 2 },
+      { key: 'subheading', control: 'text', label: 'Subheading', default: '', dynamicSource: { label: 'Subheading' } },
+      { key: 'heading', control: 'text', label: 'Heading', default: 'You Might Also Like', dynamicSource: { label: 'Heading' } },
+      { key: 'content', control: 'richtext', label: 'Content', default: '', dynamicSource: { label: 'Content' } },
+      { key: 'products', control: 'ordered_products', label: 'Select products', default: [], max: 8,
+        info: 'If left empty, automatic recommendations will be shown.',
+        dynamicSource: { mode: 'collections', label: 'Products' } },
+      { key: 'per_row', control: 'range', label: 'Row Count/Desktop', min: 2, max: 6, step: 1, default: 2 },
       { key: 'mobile_count', control: 'range', label: 'Row Count/Mobile', min: 1, max: 2, step: 1, default: 2 },
       { key: 'image_ratio', control: 'select', label: 'Image aspect ratio', default: 'adapt', options: [
         { value: 'adapt', label: 'Adapt to image' }, { value: 'square', label: 'Square' }, { value: 'portrait', label: 'Portrait' },
@@ -655,36 +1127,88 @@
       { key: 'exclude_soldout', control: 'toggle', label: 'Exclude sold out', default: false },
       { key: 'dedupe_current', control: 'toggle', label: 'Hide current product', default: true },
     ] },
-    featured_reviews: { name: 'Featured reviews', preview:
-      '<div class="os-blkprev-copy" style="display:flex;gap:8px;align-items:center"><span style="width:28px;height:28px;border-radius:8px;background:#ddd;display:inline-block"></span><span>Debi T. · ★★★★★</span></div>',
+    featured_reviews: { name: 'Featured reviews', preview: () => {
+      const IMG = (OS.sample && OS.sample.IMG) || {};
+      const av = IMG.av1 || '';
+      const img = IMG.p1blk || IMG.p1 || '';
+      const avHtml = av
+        ? '<img class="os-blkprev-fr-av" alt="" src="' + OS.esc(av) + '">'
+        : '<span class="os-blkprev-fr-av is-empty" aria-hidden="true"></span>';
+      const sideHtml = img
+        ? '<img class="os-blkprev-fr-side" alt="" src="' + OS.esc(img) + '">'
+        : '';
+      const shield = '<svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M12 2 4 5v6c0 5 3.5 8.5 8 11 4.5-2.5 8-6 8-11V5z"/><path fill="#fff" d="m10.2 12.8-2-2-1.1 1.1 3.1 3.1 5.2-5.2-1.1-1.1z"/></svg>';
+      // Matches Trust card: square avatar | italic quote + shield verified | side review image.
+      return '<div class="os-blkprev-fr">' +
+        '<div class="os-blkprev-fr-h">What Our Customers Are Saying</div>' +
+        '<div class="os-blkprev-fr-card">' +
+          avHtml +
+          '<div class="os-blkprev-fr-body">' +
+            '<div class="os-blkprev-fr-text">Very comfortable and great fit. Want to buy more. Wore them on a ten hour hike. Held up great.</div>' +
+            '<div class="os-blkprev-fr-author">— Debi T.<span class="os-blkprev-fr-verified">' + shield + 'Verified Customer</span></div>' +
+            '<div class="os-blkprev-fr-sub">Real customer · Verified order · Real buyer</div>' +
+          '</div>' +
+          sideHtml +
+        '</div>' +
+      '</div>';
+    },
+      defaults: () => ({
+        heading: 'What Our Customers Are Saying',
+        data_source: 'manual',
+        auto_count: 3,
+        reviews: [OS.defaultFeaturedReviewItem()],
+        layout: 'nav',
+        show_image: true,
+        show_avatar: true,
+        round_avatar: false,
+        star_color: '#16a34a',
+        show_verified: true,
+        verified_text: 'Verified Customer',
+        verified_subtext: 'Real customer · Verified order · Real buyer',
+        scroll: true,
+        nav_style: 'auto',
+        auto_play: false,
+        cards_per_row: 1,
+      }),
       fields: [
-      { key: 'heading', control: 'text', label: 'Heading', default: 'What Our Customers Are Saying' },
-      { key: 'data_source', control: 'select', label: 'Data source', default: 'auto', options: [
-        { value: 'auto', label: 'Auto' }, { value: 'manual', label: 'Manual' }, { value: 'both', label: 'Both' },
-      ] },
-      { key: 'show_image', control: 'toggle', label: 'Show review image', default: true },
+      { sub: 'Style' },
+      { key: 'layout', control: 'select', label: 'Layout', default: 'nav', options: [
+        { value: 'media', label: 'Media (side image + dots)' },
+        { value: 'quote', label: 'Quote (check + dots)' },
+        { value: 'nav', label: 'Navigation (arrows + image)' },
+        { value: 'trust', label: 'Trust (shield + side image)' },
+        { value: 'split', label: 'Split (avatar + divider)' },
+      ], info: 'Media / Navigation / Trust can show a review image. Quote and Split do not.' },
+      { key: 'show_image', control: 'toggle', label: 'Show review image', default: true, info: 'Media: image on the right. Navigation: image under the text. Trust: image on the right.', visibleWhen: (v) => v.layout === 'media' || v.layout === 'nav' || v.layout === 'trust' || !v.layout },
       { key: 'show_avatar', control: 'toggle', label: 'Show avatar', default: true },
+      { key: 'round_avatar', control: 'toggle', label: 'Round avatar', default: true, info: 'Navigation layout often uses a rounded square; turn off for that look.' },
+      { key: 'star_color', control: 'color', label: 'Star color', default: '#16a34a', allowTransparent: true, blankValue: () => '#16a34a', info: 'Used by Media, Quote, Navigation, and Split. Trust has no stars. T = transparent.' },
+      { key: 'show_verified', control: 'toggle', label: 'Show verified badge', default: true, info: 'Quote / Split use a checkmark. Trust uses shield + subtitle. Media and Navigation have no badge.', visibleWhen: (v) => v.layout === 'quote' || v.layout === 'trust' || v.layout === 'split' },
+      { key: 'verified_text', control: 'text', label: 'Verified text', default: 'Verified Customer', visibleWhen: (v) => (v.layout === 'quote' || v.layout === 'trust' || v.layout === 'split') && v.show_verified !== false },
+      { key: 'verified_subtext', control: 'text', label: 'Verified subtitle', default: 'Real customer · Verified order · Real buyer', visibleWhen: (v) => v.layout === 'trust' && v.show_verified !== false },
       { key: 'scroll', control: 'toggle', label: 'Scroll / carousel', default: true },
+      { key: 'nav_style', control: 'segmented', label: 'Navigation', default: 'auto', options: [
+        { value: 'auto', label: 'Auto' }, { value: 'arrows', label: 'Arrows' }, { value: 'dots', label: 'Dots' }, { value: 'none', label: 'None' },
+      ], visibleWhen: (v) => !!v.scroll },
       { key: 'auto_play', control: 'toggle', label: 'Auto play', default: false, visibleWhen: (v) => !!v.scroll },
-      { key: 'view_all_popup', control: 'toggle', label: 'View all popup', default: true },
-      { key: 'cards_per_row', control: 'range', label: 'Cards per row', min: 1, max: 3, step: 1, default: 1 },
-      { key: 'manual_author', control: 'text', label: 'Manual author', default: 'Debi T.', visibleWhen: (v) => v.data_source !== 'auto' },
-      { key: 'manual_rating', control: 'number', label: 'Manual rating', default: 5, min: 1, max: 5, visibleWhen: (v) => v.data_source !== 'auto' },
-      { key: 'manual_text', control: 'textarea', label: 'Manual review', default: 'Very comfortable and great fit. Want to buy more. Wore them on a ten hour hike. Held up great.', visibleWhen: (v) => v.data_source !== 'auto' },
-      { key: 'manual_image', control: 'image', label: 'Manual image', default: '', visibleWhen: (v) => v.data_source !== 'auto' },
+      { key: 'cards_per_row', control: 'range', label: 'Cards per row', min: 1, max: 3, step: 1, default: 1, visibleWhen: (v) => !v.scroll },
+      { sub: 'Content' },
+      { key: 'heading', control: 'text', label: 'Heading', default: 'What Our Customers Are Saying' },
+      { key: 'data_source', control: 'select', label: 'Data source', default: 'manual', options: [
+        { value: 'manual', label: 'Manual (add one by one)' },
+        { value: 'auto', label: 'Auto (pull product reviews)' },
+      ], info: 'Manual: add entries and either pick an existing review or edit by hand. Auto: pull the latest product reviews.' },
+      { key: 'auto_count', control: 'range', label: 'Reviews to show', min: 1, max: 8, step: 1, default: 3, visibleWhen: (v) => v.data_source === 'auto' },
+      { key: 'reviews', control: 'review_items', label: 'Reviews', default: [], max: 10, visibleWhen: (v) => v.data_source !== 'auto', info: 'Each row can select an existing review or use manual edit. Default is one manual entry.' },
     ] },
     sticky: { name: 'Sticky cart', unique: true, preview: '<div class="os-blkprev-btns"><div class="b b1">Add to cart</div></div>', fields: [
       { key: 'show_image', control: 'toggle', label: 'Show image', default: true },
       { key: 'show_title', control: 'toggle', label: 'Show title', default: true },
       { key: 'show_price', control: 'toggle', label: 'Show price', default: true },
       { key: 'show_quantity', control: 'toggle', label: 'Show quantity', default: true },
-      { key: 'show_bundle', control: 'toggle', label: 'Show bundle', default: false, info: 'Bundle is handled by a separate app. Off by default.' },
       { key: 'show_after_scroll', control: 'toggle', label: 'Show after scroll', default: true },
       { key: 'appear_at', control: 'segmented', label: 'Appear at', default: 'scroll', options: [
         { value: 'top', label: 'Top' }, { value: 'scroll', label: 'After scroll' },
-      ] },
-      { key: 'position', control: 'segmented', label: 'Position', default: 'bottom', options: [
-        { value: 'top', label: 'Top' }, { value: 'bottom', label: 'Bottom' },
       ] },
       { key: 'mobile_visible', control: 'toggle', label: 'Show on mobile', default: true },
       { key: 'button_text', control: 'text', label: 'Button text', default: 'Add to cart' },
@@ -695,17 +1219,146 @@
       { key: 'padding_top', control: 'range', label: 'Padding Top', min: 0, max: 100, step: 1, unit: 'px', default: 0 },
       { key: 'padding_bottom', control: 'range', label: 'Padding Bottom', min: 0, max: 100, step: 1, unit: 'px', default: 0 },
     ] },
+    // Vertical video rail inside the buy column — click opens the shared lightbox player.
+    video_column: { name: 'Video column', icon: 'play', preview: (() => {
+      const IMG = (OS.sample && OS.sample.IMG) || {};
+      const a = IMG.ug1 || IMG.p3 || '';
+      const b = IMG.ug2 || IMG.p4 || '';
+      const c = IMG.ug3 || IMG.p5 || '';
+      const cell = (src) => '<span class="os-blkprev-vc-cell"' + (src ? ' style="background-image:url(' + OS.esc(src) + ')"' : '') + '></span>';
+      return '<div class="os-blkprev-vc">' + cell(a) + cell(b) + cell(c) + '</div>';
+    })(),
+      defaults: () => {
+        const IMG = (OS.sample && OS.sample.IMG) || {};
+        const covers = [IMG.ug1, IMG.ug2, IMG.ug3, IMG.ug4, IMG.ug5, IMG.ug6].filter(Boolean);
+        return {
+          heading: '',
+          heading_color: '',
+          per_row: 4,
+          mobile_count: 2,
+          gap: 10,
+          corner_radius: 12,
+          video_border: 'transparent',
+          show_play_button: true,
+          videos: covers.map((cover, i) => ({ id: 'vi-seed-' + i, cover_image: cover, video_url: '', accessible_label: '' })),
+        };
+      },
+      fields: [
+      { key: 'heading', control: 'text', label: 'Heading', default: '' },
+      { key: 'heading_color', control: 'color', label: 'Heading color', default: '', allowTransparent: true, blankValue: () => OS.themeColor('heading_color', '#1a1a1a'), info: 'Blank inherits the theme heading color. T = transparent.' },
+      { key: 'per_row', control: 'range', label: 'Videos per row · Desktop', min: 2, max: 6, step: 1, default: 4 },
+      { key: 'mobile_count', control: 'range', label: 'Videos per row · Mobile', min: 1, max: 2, step: 1, default: 2 },
+      { key: 'gap', control: 'range', label: 'Gap', min: 4, max: 24, step: 1, unit: 'px', default: 10 },
+      { key: 'corner_radius', control: 'range', label: 'Corner radius', min: 0, max: 24, step: 1, unit: 'px', default: 12 },
+      { key: 'video_border', control: 'color', label: 'Video border', default: 'transparent', allowTransparent: true, blankValue: () => '#222222', info: 'T = no border. Turn T off to restore a dark border.' },
+      { key: 'show_play_button', control: 'toggle', label: 'Show play button', default: true },
+      { key: 'videos', control: 'video_items', label: 'Videos', default: [], max: 12, info: 'Click a cover in the preview to open the enlarged player.' },
+    ] },
   };
 
-  // Trustpilot / Loox style: green square tiles with a white star.
-  function stars(rating) {
-    const star = '<svg viewBox="0 0 24 24" fill="#fff" stroke="none" aria-hidden="true"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>';
+  // Regular = filled star glyphs. Boxed = Trustpilot / Loox square tiles with a white star.
+  function ratingStars(rating, opts) {
+    const o = opts || {};
+    const count = o.count == null ? 5 : o.count;
+    const boxed = o.style === 'boxed';
+    const color = o.color || (boxed ? '#0f3636' : '#f5b301');
+    const starPath = '<path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/>';
+    const starSvg = (fill) => '<svg viewBox="0 0 24 24" fill="' + OS.esc(fill) + '" stroke="none" aria-hidden="true">' + starPath + '</svg>';
     let html = '';
-    for (let i = 1; i <= 5; i++) {
+    for (let i = 1; i <= count; i++) {
       const on = rating >= i - 0.25;
-      html += '<span class="pdp-rate-st" style="background:' + (on ? '#2e7d32' : '#dcdce6') + '">' + star + '</span>';
+      if (boxed) {
+        html += '<span class="pdp-rate-st" style="background:' + (on ? OS.esc(color) : '#dcdce6') + '">' + starSvg('#fff') + '</span>';
+      } else {
+        html += '<span class="pdp-rate-icon">' + starSvg(on ? color : '#d8dce3') + '</span>';
+      }
     }
     return '<span class="pdp-rate-stars">' + html + '</span>';
+  }
+
+  function savingFields(defaults) {
+    const d = defaults || {};
+    return [
+      { key: 'show_saving', control: 'toggle', label: 'Show saving amount', default: d.show_saving == null ? true : d.show_saving },
+      { key: 'saving_type', control: 'select', label: 'Type', default: d.saving_type || 'percentage', options: [
+        { value: 'percentage', label: 'Percentage' }, { value: 'fixed', label: 'Fixed amount' },
+        { value: 'text', label: 'Sale' }, { value: 'label', label: 'Saving text' },
+      ], visibleWhen: (v) => !!v.show_saving },
+      { key: 'saving_label', control: 'text', label: 'Saving text', default: d.saving_label || '', placeholder: 'e.g. Price after 34% Off', visibleWhen: (v) => !!v.show_saving && v.saving_type === 'label' },
+      { key: 'saving_style', control: 'segmented', label: 'Saving style', default: d.saving_style || 'filled', options: [
+        { value: 'filled', label: 'Filled' }, { value: 'outline', label: 'Outline' },
+      ], visibleWhen: (v) => !!v.show_saving },
+      { key: 'saving_position', control: 'segmented', label: 'Saving position', default: d.saving_position || 'right', options: [
+        { value: 'left', label: 'Left' }, { value: 'right', label: 'Right' },
+      ], visibleWhen: (v) => !!v.show_saving },
+      { key: 'saving_bg', control: 'color', label: 'Saving background', default: d.saving_bg || '', blankValue: () => OS.themeColor('sale_price_color', '#D92D20'), info: 'Blank inherits the theme sale price color. Outline style uses this as border/text tint.', visibleWhen: (v) => !!v.show_saving },
+      { key: 'saving_text_color', control: 'color', label: 'Saving text color', default: d.saving_text_color || '#ffffff', blankValue: () => '#ffffff', visibleWhen: (v) => !!v.show_saving && v.saving_style !== 'outline' },
+      { key: 'saving_icon', control: 'toggle', label: 'Show saving icon', default: d.saving_icon == null ? false : d.saving_icon, visibleWhen: (v) => !!v.show_saving },
+    ];
+  }
+
+  function savingLabel(b, price, compareAt) {
+    if (b.saving_type === 'label') return String(b.saving_label || '').trim() || 'Save';
+    if (b.saving_type === 'text') return 'Sale';
+    if (b.saving_type === 'fixed') return 'Save ' + OS.money(compareAt - price);
+    return 'Save ' + Math.round((1 - price / compareAt) * 100) + '%';
+  }
+
+  function savingIcon(enabled) {
+    return enabled
+      ? ((window.OS_THEME_ICONS && window.OS_THEME_ICONS.svg('price-tag', 12)) || '')
+      : '';
+  }
+
+  function colorLuma(hex) {
+    const h = String(hex || '').replace('#', '');
+    const full = h.length === 3 ? h.split('').map((c) => c + c).join('') : h;
+    const n = parseInt(full, 16);
+    if (isNaN(n) || full.length !== 6) return 0;
+    const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  }
+  function outlineTagStyle(accent, textColor) {
+    // Draw stroke inside the box. Never use border — it used to make Outline taller than Filled.
+    // Badge chips lock height via .pdp-tag CSS; price saves keep flexible height from font-size.
+    const text = textColor || accent;
+    const stroke = OS.hexAlpha(accent, 0.22);
+    return 'background:#f9fafb;color:' + OS.esc(text) + ';border:0;outline:0;box-shadow:inset 0 0 0 1px ' + stroke + ';border-radius:5px;font-weight:700;letter-spacing:normal;box-sizing:border-box;';
+  }
+  function savingStyle(b, saleColor) {
+    const saveBg = b.saving_bg || saleColor;
+    const outline = b.saving_style === 'outline';
+    const saveText = outline ? saveBg : (b.saving_text_color || '#ffffff');
+    const style = outline
+      ? outlineTagStyle(saveBg, saveText)
+      : 'background:' + OS.esc(saveBg) + ';color:' + OS.esc(saveText) + ';';
+    return { outline: outline, style: style };
+  }
+  function customTagStyle(kind, b, c) {
+    const isNew = kind === 'new';
+    const fillBg = isNew
+      ? (b.new_badge_bg || '#FFC439')
+      : (b.hot_badge_bg || b.badge_bg || c.primary_color || '#5b3f94');
+    const fillText = isNew
+      ? (b.new_badge_text_color || '#ffffff')
+      : (b.hot_badge_text_color || b.badge_text_color || '#ffffff');
+    const outline = b.custom_tag_style === 'outline';
+    if (outline) {
+      // Bright accents (e.g. yellow) need dark text; light configured text falls back to accent.
+      const text = colorLuma(fillText) > 0.72
+        ? (colorLuma(fillBg) > 0.72 ? '#111111' : fillBg)
+        : fillText;
+      const strokeBase = colorLuma(fillBg) > 0.72 ? text : fillBg;
+      return { outline: true, style: outlineTagStyle(strokeBase, text) };
+    }
+    return { outline: false, style: 'background:' + OS.esc(fillBg) + ';color:' + OS.esc(fillText) + ';' };
+  }
+
+  function badgesPositionOf(block) {
+    const raw = ((block && block.settings) || {}).badge_position || 'left';
+    // Migrate removed media placements to buy-column Left / Right alignment.
+    if (raw === 'top-right' || raw === 'right') return 'right';
+    return 'left';
   }
 
   function rowHtml(block, p, s, t, ctx, selectedOverride) {
@@ -721,63 +1374,95 @@
     const mob = ctx.mob;
     let body = '';
     if (block.kind === 'badges') {
-      const badgeBg = b.badge_bg || c.primary_color || '#5b3f94';
-      const badgeText = b.badge_text_color || '#ffffff';
       const badgeGap = Number(b.badge_gap == null ? 8 : b.badge_gap);
-      const position = b.badge_position || 'top-left';
+      const position = badgesPositionOf(block);
       const iconHtml = b.badge_icon_image
         ? '<img alt="" src="' + OS.esc(b.badge_icon_image) + '">'
         : ((window.OS_THEME_ICONS && window.OS_THEME_ICONS.svg(b.badge_icon, 14)) || '');
-      const tagStyle = 'background:' + OS.esc(badgeBg) + ';color:' + OS.esc(badgeText);
-      const wrapTag = (label, extraClass) => '<span class="pdp-tag' + (extraClass ? ' ' + extraClass : '') + '" style="' + tagStyle + '">' + iconHtml + OS.esc(label) + '</span>';
-      const tags = (p.tags || []).filter((tag) => /^tag__(hot|new)_/i.test(tag)).map((tag) =>
-        wrapTag(String(tag).replace(/^tag__(hot|new)_/i, '')));
-      if (b.show_sold_out && inventory <= 0) tags.push(wrapTag('Sold out', 'sold'));
-      if (b.show_saving && sale) {
-        const label = b.saving_type === 'text' ? 'Sale'
-          : (b.saving_type === 'fixed' ? 'Save ' + OS.money(compareAt - price) : 'Save ' + Math.round((1 - price / compareAt) * 100) + '%');
-        tags.push(wrapTag(label, 'sale'));
+      const wrapCustom = (kind, label) => {
+        const st = customTagStyle(kind, b, c);
+        return '<span class="pdp-tag tag-' + kind + (st.outline ? ' outline' : '') + '" style="' + st.style + '">' + iconHtml + OS.esc(label) + '</span>';
+      };
+      const tags = (p.tags || []).map((tag) => {
+        const m = String(tag).match(/^tag__(hot|new)_(.+)$/i);
+        if (!m) return '';
+        return wrapCustom(m[1].toLowerCase(), m[2]);
+      }).filter(Boolean);
+      // Always mount sold badge when enabled so variant switches can toggle it live.
+      if (b.show_sold_out) {
+        tags.push('<span class="pdp-tag sold" data-pdp-sold-badge' + (inventory <= 0 ? '' : ' hidden') + '>' + OS.esc('Sold out') + '</span>');
       }
-      const overlay = (position === 'top-left' || position === 'top-right') ? ' is-overlay' : '';
+      if (b.show_saving && sale) {
+        const save = savingStyle(b, saleColor);
+        const icon = savingIcon(b.saving_icon);
+        const label = savingLabel(b, price, compareAt);
+        const saveTag = '<span class="pdp-tag sale' + (save.outline ? ' outline' : '') + '" data-pdp-sale-badge style="' + save.style + '">' + icon + OS.esc(label) + '</span>';
+        // Left / right relative to the whole tag row (custom tags + sold out + save).
+        if (b.saving_position === 'left') tags.unshift(saveTag);
+        else tags.push(saveTag);
+      }
+      const badgesHidden = b.show_sold_out && inventory > 0 && tags.length === 1;
       body = tags.length
-        ? '<div class="pdp-tags' + overlay + '" data-badge-position="' + OS.esc(position) + '" style="gap:' + badgeGap + 'px">' + tags.join('') + '</div>'
+        ? '<div class="pdp-tags" data-pdp-badges data-badge-position="' + OS.esc(position) + '" style="gap:' + badgeGap + 'px"' + (badgesHidden ? ' hidden' : '') + '>' + tags.join('') + '</div>'
         : '';
     } else if (block.kind === 'title') {
-      const px = Number(b.title_size || 24);
+      const px = Number(b.title_size || 30);
       body = '<h1 class="pdp-title" style="font-family:' + OS.headingFamily(t) + ';font-size:' + OS.headingSize(t, px, mob) + 'px;color:' + OS.col(s.text, c.heading_color || '#1a1a1a') + '">' + OS.esc(p.title) + '</h1>';
-      if (b.description || b.description_image) {
+      const titleDescSrc = b.description_dynamic_source;
+      let titleDescHtml = '';
+      if (typeof titleDescSrc === 'string' && titleDescSrc && titleDescSrc !== 'true' && titleDescSrc !== 'false'
+          && String(b.description || '').indexOf('data-mf-path') < 0) {
+        const mfVal = resolveProductMetafield(p, titleDescSrc);
+        titleDescHtml = mfVal ? (/<[a-z][\s\S]*>/i.test(mfVal) ? mfVal : OS.esc(mfVal)) : '';
+      } else if (!titleDescSrc || titleDescSrc === false) {
+        titleDescHtml = resolveMetafieldChips(String(b.description || '').trim(), p);
+      } else {
+        titleDescHtml = resolveMetafieldChips(String(b.description || '').trim(), p);
+      }
+      if (titleDescHtml) {
         body += '<div class="pdp-title-desc" style="color:' + OS.esc(b.description_color || '#000000') + ';font-size:' + (b.description_size || 14) + 'px;padding-top:' + (b.description_top || 0) + 'px;padding-bottom:' + (b.description_bottom || 0) + 'px">' +
-          (b.description || '') + (b.description_image ? '<img alt="" src="' + OS.esc(b.description_image) + '">' : '') + '</div>';
+          titleDescHtml + '</div>';
       }
     } else if (block.kind === 'rating') {
-      if (!p.rating || b.show_rating === false) return '';
-      body = '<div class="pdp-rate" style="font-size:' + (b.size || 14) + 'px">' + stars(p.rating) +
-        (b.show_text ? '<span>' + OS.esc(b.text || '') + '</span>' : '<b>' + p.rating + '</b><span style="opacity:.6">(' + (p.reviews || 0) + ')</span>') + '</div>';
+      if (!p.rating) return '';
+      const ratingLayout = b.layout || 'default';
+      let ratingStyle = b.style || 'stars-rating-custom';
+      // Single icon drops "Stars + review count" — fall back so the score stays visible.
+      if (ratingLayout === 'single-icon' && ratingStyle === 'stars-and-count') ratingStyle = 'stars-and-reviews';
+      const starStyle = (ratingLayout === 'single-icon') ? 'regular' : (b.star_style || 'boxed');
+      const rating = Number(p.rating).toFixed(1);
+      const reviews = Number(p.reviews || 0).toLocaleString();
+      const starColor = (!b.color || b.color === '') ? (starStyle === 'boxed' ? '#0f3636' : '#f5b301') : b.color;
+      const reviewLabel = OS.esc(String(b.review_label || 'reviews'));
+      const customText = OS.esc(String(b.custom_text || ''));
+      const textColor = (!b.text_color || b.text_color === '') ? 'inherit' : b.text_color;
+      const textStyle = 'color:' + OS.esc(textColor) + ';' + (b.underline_text ? 'text-decoration:underline;text-underline-offset:3px;' : '');
+      const starCount = ratingLayout === 'single-icon' ? 1 : 5;
+      const starRow = ratingStars(p.rating, { style: starStyle, color: starColor, count: starCount });
+      let textHtml = '';
+      if (ratingStyle === 'stars-and-count') textHtml = '(' + reviews + ' ' + reviewLabel + ')';
+      else if (ratingStyle === 'stars-and-reviews') textHtml = rating + ' (' + reviews + ' ' + reviewLabel + ')';
+      else if (ratingStyle === 'stars-rating-custom') textHtml = rating + '/5 ' + customText;
+      else if (ratingStyle === 'stars-custom') textHtml = customText;
+      body = '<div class="pdp-rate" style="font-size:' + (b.size || 14) + 'px">' + starRow +
+        (textHtml ? '<span style="' + textStyle + '">' + textHtml + '</span>' : '') + '</div>';
     } else if (block.kind === 'price') {
-      const saving = b.saving_type === 'label'
-        ? (String(b.saving_label || '').trim() || 'Save')
-        : (b.saving_type === 'text' ? 'Sale'
-          : (b.saving_type === 'fixed'
-            ? 'Save ' + OS.money(compareAt - price)
-            : 'Save ' + Math.round((1 - price / compareAt) * 100) + '%'));
-      const saveBg = b.saving_bg || saleColor;
-      const outline = b.saving_style === 'outline';
-      const saveText = outline ? saveBg : (b.saving_text_color || '#ffffff');
-      const saveIcon = b.saving_icon
-        ? ((window.OS_THEME_ICONS && window.OS_THEME_ICONS.svg('percent', 12)) || '')
-        : '';
+      const saving = savingLabel(b, price, compareAt);
+      const save = savingStyle(b, saleColor);
       const saveOrder = b.saving_position === 'left' ? 'order:-1;' : '';
-      const saveStyle = outline
-        ? 'background:' + OS.esc((b.saving_bg && b.saving_bg !== saveBg) ? b.saving_bg : 'rgba(214,58,47,.08)') + ';color:' + OS.esc(saveText) + ';border:1px solid ' + OS.esc(saveBg) + ';' + saveOrder
-        : 'background:' + OS.esc(saveBg) + ';color:' + OS.esc(saveText) + ';' + saveOrder;
-      const prefix = String(b.price_prefix || '').trim();
-      const nowHtml = '<span class="now" data-pdp-now' + (sale ? ' style="color:' + saleColor + '"' : '') + '>' + OS.money(price) + '</span>';
-      const compareHtml = sale ? '<s data-pdp-compare>' + OS.money(compareAt) + '</s>' : '<s data-pdp-compare hidden></s>';
-      const priceRow = (b.compare_order === 'before' ? (compareHtml + nowHtml) : (nowHtml + compareHtml));
-      body = '<div class="pdp-price">' + priceRow +
-        (prefix ? '<span class="pdp-price-prefix">' + OS.esc(prefix) + '</span>' : '') +
+      const priceSize = Math.max(10, Math.min(120, Number(b.size == null ? 24 : b.size)));
+      const compareSize = Math.max(10, Math.round(priceSize * (16 / 24)));
+      const saveSize = Math.max(10, Math.round(priceSize * (14.4 / 24)));
+      const nowStyle = 'font-size:' + priceSize + 'px;line-height:' + Math.round(priceSize * 1.45) + 'px;' + (sale ? 'color:' + saleColor + ';' : '');
+      const compareStyle = 'font-size:' + compareSize + 'px;line-height:' + Math.round(compareSize * 1.6) + 'px;';
+      const saveStyle = save.style + saveOrder + 'font-size:' + saveSize + 'px;line-height:' + Math.round(saveSize * 1.25) + 'px;';
+      const nowHtml = '<span class="now" data-pdp-now style="' + nowStyle + '">' + OS.money(price) + '</span>';
+      const compareHtml = sale
+        ? '<s data-pdp-compare style="' + compareStyle + '">' + OS.money(compareAt) + '</s>'
+        : '<s data-pdp-compare hidden style="' + compareStyle + '"></s>';
+      body = '<div class="pdp-price" style="--pdp-price-size:' + priceSize + 'px">' + nowHtml + compareHtml +
         (b.show_saving && sale
-          ? '<span class="save' + (outline ? ' outline' : '') + '" data-pdp-save data-save-type="' + OS.esc(b.saving_type || 'percentage') + '" data-save-label="' + OS.esc(String(b.saving_label || '').trim()) + '" data-save-icon="' + (b.saving_icon ? '1' : '0') + '" style="' + saveStyle + '">' + saveIcon + OS.esc(saving) + '</span>'
+          ? '<span class="save' + (save.outline ? ' outline' : '') + '" data-pdp-save data-save-type="' + OS.esc(b.saving_type || 'percentage') + '" data-save-label="' + OS.esc(String(b.saving_label || '').trim()) + '" data-save-icon="' + (b.saving_icon ? '1' : '0') + '" style="' + saveStyle + '">' + savingIcon(b.saving_icon) + OS.esc(saving) + '</span>'
           : '') + '</div>' +
         (b.show_taxes ? '<div style="font-size:12px;opacity:.62;margin-top:4px">Tax included. Shipping calculated at checkout.</div>' : '');
     } else if (block.kind === 'divider') {
@@ -820,7 +1505,18 @@
         return (match && match.image) || (p.images && p.images[0]) || p.image || '';
       };
       // Keep every SKU in the data node so deep links to sold-out variants still resolve (PRD).
-      const data = variants.map((v) => '<i data-pdp-variant data-id="' + OS.esc(v.id || '') + '" data-color="' + OS.esc(v.color || '') + '" data-size="' + OS.esc(v.size || '') + '" data-price="' + Number(v.price || 0) + '" data-compare="' + Number(v.compareAt || 0) + '" data-inventory="' + Number(v.inventory || 0) + '" data-image="' + OS.esc(v.image || p.image || '') + '" data-sku="' + OS.esc(v.sku || '') + '"></i>').join('');
+      // No variants array → one default SKU from the product (single-SKU / no-picker case).
+      const dataSource = variants.length ? variants : [{
+        id: p.id || p.handle || 'default',
+        color: '',
+        size: '',
+        price: p.price,
+        compareAt: p.compareAt,
+        inventory: p.inventory == null ? 99 : p.inventory,
+        image: p.image,
+        sku: p.sku || '',
+      }];
+      const data = dataSource.map((v) => '<i data-pdp-variant data-id="' + OS.esc(v.id || '') + '" data-color="' + OS.esc(v.color || '') + '" data-size="' + OS.esc(v.size || '') + '" data-price="' + Number(v.price || 0) + '" data-compare="' + Number(v.compareAt || 0) + '" data-inventory="' + Number(v.inventory == null ? 99 : v.inventory) + '" data-image="' + OS.esc(v.image || p.image || '') + '" data-sku="' + OS.esc(v.sku || '') + '"></i>').join('');
       if (b.nested_dropdown) {
         const selectedId = selected.id || '';
         const selectedCombo = [selectedSize, selectedColor].filter(Boolean).join(' / ') || 'Variant';
@@ -866,7 +1562,27 @@
           sizeHtml + '</div></div><span hidden data-pdp-variant-data>' + data + '</span>';
       }
     } else if (block.kind === 'description') {
-      body = '<div class="pdp-custom-text">' + OS.esc(p.description || 'Product description will appear here.') + '</div>';
+      const useMeta = b.text_dynamic_source !== false;
+      const customText = String(b.text || '').trim();
+      const productDesc = String(p.description || '').trim();
+      // Product descriptions are HTML (same as Shopify resource.description).
+      const descHtml = useMeta
+        ? (productDesc || 'Product description will appear here.')
+        : (customText || productDesc || 'Product description will appear here.');
+      const pad = [b.padding_top, b.padding_right, b.padding_bottom, b.padding_left]
+        .map((n) => (n == null ? 0 : Number(n)) + 'px').join(' ');
+      const isFit = b.width === 'fit';
+      const align = (!isFit && (b.alignment === 'center' || b.alignment === 'right')) ? b.alignment : 'left';
+      const widthStyle = isFit
+        ? 'width:fit-content;max-width:100%;'
+        : 'width:100%;max-width:100%;text-align:' + align + ';';
+      let bgStyle = '';
+      if (b.background) {
+        const bgColor = OS.bgOrTransparent(b.background_color) || '#FFFFFF';
+        const radius = (b.corner_radius == null ? 0 : Number(b.corner_radius)) + 'px';
+        bgStyle = 'background:' + bgColor + ';border-radius:' + radius + ';--pdp-desc-bg:' + bgColor + ';--pdp-desc-radius:' + radius + ';';
+      }
+      body = '<div class="pdp-desc' + (b.background ? ' has-bg' : '') + '" style="' + widthStyle + 'font-size:14px;line-height:1.55;' + bgStyle + 'padding:' + pad + '">' + descHtml + '</div>';
     } else if (block.kind === 'inventory') {
       if (b.show_status === false) return '';
       const showCount = b.show_count !== false;
@@ -875,7 +1591,9 @@
       const lowTextTpl = String(b.low_stock_text || 'Low stock - {n} items left');
       const soldText = String(b.sold_out_text || 'Sold out');
       const style = b.status_style || 'dot';
-      const statusColor = b.status_color || '#f59e0b';
+      const inStockColor = b.in_stock_color || '#10a443';
+      const lowStockColor = b.status_color || '#f59e0b';
+      const fontSize = Math.max(10, Math.min(50, b.font_size == null ? 14 : Number(b.font_size)));
       const isLow = inventory > 0 && inventory <= threshold;
       const statusText = inventory <= 0
         ? soldText
@@ -883,20 +1601,26 @@
           ? lowTextTpl.replace(/\{n\}/g, String(inventory)) + customText
           : ((showCount ? inventory + ' in stock' : 'In stock') + customText));
       const styleClass = style === 'badge' ? ' style-badge' : (style === 'text-only' ? ' style-text' : '');
-      body = '<div class="pdp-stock' + (inventory <= 0 ? ' sold' : (isLow ? ' low' : '')) + styleClass + '" data-pdp-stock data-show-count="' + (showCount ? '1' : '0') + '" data-custom-text="' + OS.esc(customText) + '" data-low-threshold="' + threshold + '" data-low-text="' + OS.esc(lowTextTpl) + '" data-sold-text="' + OS.esc(soldText) + '" style="--status-color:' + OS.esc(inventory <= 0 ? '#9ca3af' : statusColor) + '"><i></i><span>' +
+      const activeColor = inventory <= 0 ? '#9ca3af' : (isLow ? lowStockColor : inStockColor);
+      body = '<div class="pdp-stock' + (inventory <= 0 ? ' sold' : (isLow ? ' low' : '')) + styleClass + '" data-pdp-stock data-show-count="' + (showCount ? '1' : '0') + '" data-custom-text="' + OS.esc(customText) + '" data-low-threshold="' + threshold + '" data-low-text="' + OS.esc(lowTextTpl) + '" data-sold-text="' + OS.esc(soldText) + '" data-in-stock-color="' + OS.esc(inStockColor) + '" data-low-stock-color="' + OS.esc(lowStockColor) + '" style="--status-color:' + OS.esc(activeColor) + ';--pdp-stock-fs:' + fontSize + 'px"><i></i><span>' +
         OS.esc(statusText) + '</span></div>';
     } else if (block.kind === 'buy') {
-      const showPayMore = b.show_payment_options !== false;
-      const radius = b.button_shape === 'pill' ? 999
-        : (b.button_shape === 'square' ? 0
-          : (b.button_shape === 'custom' ? Number(b.custom_radius == null ? 8 : b.custom_radius) : 8));
-      const radiusStyle = 'border-radius:' + radius + 'px';
-      const layoutSide = b.button_layout === 'side-by-side';
-      const expressIds = ['shop', 'paypal', 'apple_pay', 'google_pay'];
-      const rawChannels = Array.isArray(b.channels) && b.channels.length ? b.channels : expressIds;
-      // Drop legacy card brands wrongly stored as checkout channels.
-      const channels = rawChannels.filter((id) => expressIds.indexOf(id) >= 0);
+      const showDyn = !!b.show_dynamic;
+      const channels = resolveBuyChannels(b);
+      const showPayMore = showDyn && channels.length > 0 && b.show_payment_options !== false;
+      const atcShape = b.atc_shape || b.button_shape || 'normal';
+      const dynShape = b.dyn_shape || b.button_shape || 'normal';
+      const atcRadius = buyButtonRadius(atcShape, b.atc_custom_radius != null ? b.atc_custom_radius : b.custom_radius);
+      const dynRadius = buyButtonRadius(dynShape, b.dyn_custom_radius != null ? b.dyn_custom_radius : b.custom_radius);
+      const atcRadiusStyle = 'border-radius:' + atcRadius + 'px';
+      const dynRadiusStyle = 'border-radius:' + dynRadius + 'px';
+      const atcFull = b.atc_layout === 'full-width';
       const useLogo = !!b.channel_logo;
+      const buyNowLabel = b.buy_now_text || 'Buy now';
+      // Drop theme button border — filled ATC looks harsh with a contrasting outline.
+      // Match Buy now type: inherit size + weight 700 (btnStyle theme type is lighter/smaller).
+      const atcColorStyle = (b.atc_background ? ';background:' + b.atc_background : '') + (b.atc_text_color ? ';color:' + b.atc_text_color : '') + ';border:0;font:inherit;font-weight:700';
+      const buyNowColorStyle = ';background:' + (b.buy_now_background || '#fff') + ';color:' + (b.buy_now_text_color || 'inherit') + ';border:0';
       const paypalLogo = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="38 6 86 24" height="22" aria-hidden="true" focusable="false">' +
         '<path fill="#253B80" d="M46.211 6.749h-6.839c-.468 0-.866.34-.939.802l-2.766 17.537c-.055.346.213.658.564.658h3.265c.468 0 .866-.34.939-.803l.746-4.73c.072-.463.471-.803.938-.803h2.165c4.505 0 7.105-2.18 7.784-6.5.306-1.89.013-3.375-.872-4.415C50.224 7.353 48.5 6.749 46.211 6.749zm.789 6.405c-.374 2.454-2.249 2.454-4.062 2.454h-1.032l.724-4.583c.043-.277.283-.481.563-.481h.473c1.235 0 2.4 0 3.002.704.361.41.471 1.034.332 1.906z"/>' +
         '<path fill="#253B80" d="M66.654 13.075h-3.275c-.279 0-.52.204-.563.481l-.145.916-.229-.332c-.709-1.029-2.29-1.373-3.868-1.373-3.619 0-6.71 2.741-7.312 6.586-.313 1.918.132 3.752 1.22 5.031.998 1.176 2.426 1.666 4.125 1.666 2.916 0 4.533-1.875 4.533-1.875l-.146.91c-.055.348.213.66.562.66h2.95c.469 0 .865-.34.939-.803l1.77-11.209c.055-.347-.212-.66-.562-.66zm-4.565 6.374c-.316 1.871-1.801 3.127-3.695 3.127-.951 0-1.711-.305-2.199-.883-.484-.574-.668-1.391-.514-2.301.295-1.855 1.805-3.152 3.67-3.152.93 0 1.686.309 2.184.892.489.577.687 1.399.554 2.317z"/>' +
@@ -906,12 +1630,14 @@
         '<path fill="#179BD7" d="M119.295 7.23l-2.807 17.858c-.055.346.213.658.562.658h2.822c.469 0 .867-.34.939-.803l2.768-17.536c.055-.346-.213-.659-.562-.659h-3.16c-.279 0-.519.204-.562.482z"/>' +
       '</svg>';
       const channelBtn = (id) => {
-        const style = ' style="' + radiusStyle + '"';
+        const style = ' style="' + dynRadiusStyle + '"';
+        if (id === 'buy_now') {
+          return '<button type="button" class="pdp-buynow" data-pdp-buynow style="' + dynRadiusStyle + buyNowColorStyle + '"' + (inventory <= 0 ? ' disabled' : '') + '>' + OS.esc(buyNowLabel) + '</button>';
+        }
         if (id === 'paypal') {
           return '<button type="button" class="pdp-paypal" data-pdp-paypal aria-label="PayPal"' + style + '>' + (useLogo ? paypalLogo : 'PayPal') + '</button>';
         }
         const map = {
-          shop: { cls: 'shop', label: useLogo ? 'Buy with shop' : 'Shop', logo: 'Buy with shop' },
           apple_pay: { cls: 'apple', label: 'Apple Pay', logo: 'Apple Pay' },
           google_pay: { cls: 'google', label: 'Google Pay', logo: 'G Pay' },
         };
@@ -919,56 +1645,138 @@
         if (!m) return '';
         return '<button type="button" class="pdp-chan ' + m.cls + '" aria-label="' + OS.esc(m.label) + '"' + style + '>' + OS.esc(useLogo ? m.logo : m.label) + '</button>';
       };
-      const channelHtml = b.show_dynamic ? (channels.length ? channels : expressIds).map(channelBtn).join('') : '';
-      const installment = (b.show_dynamic && b.show_shop_installments && (channels.length ? channels : expressIds).indexOf('shop') >= 0)
-        ? '<p class="pdp-installments">Pay in 2 interest-free installments of <b>' + OS.money(Math.round((selected.price || p.price || 0) / 2 * 100) / 100) + '</b> with <span class="shop">shop</span></p>'
-        : '';
-      const dyn = (channelHtml || showPayMore || installment) ? '<div class="pdp-dyn">' + channelHtml +
+      // Only selected channels; empty = none (no fallback to all wallets).
+      const channelHtml = showDyn ? channels.map(channelBtn).join('') : '';
+      const dyn = (channelHtml || showPayMore) ? '<div class="pdp-dyn">' + channelHtml +
         (showPayMore ? '<button type="button" class="pdp-pay-more" data-pdp-pay-more>More payment options</button>' : '') +
-        installment +
       '</div>' : '';
-      const trustMap = {
-        norton: { label: 'Norton', cls: 'norton' }, mcafee: { label: 'McAfee', cls: 'mcafee' }, money_back: { label: '100% Money Back', cls: 'mb' },
-        paypal: { label: 'PayPal', cls: 'paypal' }, visa: { label: 'VISA', cls: 'visa' }, mastercard: { label: 'Mastercard', cls: 'mc' },
-        amex: { label: 'AMEX', cls: 'amex' }, discover: { label: 'Discover', cls: 'discover' }, diners: { label: 'Diners', cls: 'diners' },
-        amazon: { label: 'Amazon', cls: 'amazon' }, shop: { label: 'shop', cls: 'shop' },
-        apple_pay: { label: 'Apple Pay', cls: 'apple' }, google_pay: { label: 'G Pay', cls: 'google' },
-        venmo: { label: 'Venmo', cls: 'venmo' }, bancontact: { label: 'Bancontact', cls: 'bancontact' }, giropay: { label: 'Giropay', cls: 'giropay' },
-      };
-      const trustList = Array.isArray(b.trust_logos) && b.trust_logos.length ? b.trust_logos : ['norton', 'paypal', 'visa', 'mastercard', 'mcafee', 'money_back'];
-      const safe = b.show_safe_checkout
-        ? '<div class="pdp-safe">' +
+      const trustList = (Array.isArray(b.trust_logos) && b.trust_logos.length ? b.trust_logos : ['norton', 'paypal', 'visa', 'mastercard', 'mcafee', 'money_back'])
+        .filter((id) => id && id !== 'shop');
+      const logoSize = Math.max(20, Math.min(56, Number(b.trust_logo_size == null ? 28 : b.trust_logo_size)));
+      const safeAlign = ({ left: 'left', right: 'right' }[b.safe_checkout_align] || 'center');
+      const safe = (showDyn && b.show_safe_checkout)
+        ? '<div class="pdp-safe align-' + safeAlign + '" style="--pdp-safe-h:' + logoSize + 'px">' +
             '<div class="pdp-safe-label">' + OS.esc(b.safe_checkout_label || 'GUARANTEED SAFE CHECKOUT') + '</div>' +
-            '<div class="pdp-safe-logos">' + trustList.map((id) => {
-              const m = trustMap[id] || { label: id, cls: 'card' };
-              return '<span class="pdp-safe-logo ' + m.cls + '">' + OS.esc(m.label) + '</span>';
-            }).join('') + '</div></div>'
+            '<div class="pdp-safe-logos">' + trustList.map(trustLogoHtml).join('') + '</div></div>'
         : '';
-      const buyNow = b.show_buy_now
-        ? '<button type="button" class="pdp-buynow" data-pdp-buynow style="' + radiusStyle + '"' + (inventory <= 0 ? ' disabled' : '') + '>' + OS.esc(b.buy_now_text || 'Buy now') + '</button>'
+      const qtyHtml = b.show_quantity
+        ? '<div class="pdp-qty" style="' + atcRadiusStyle + '"><button type="button" data-pdp-q="-">-</button><span data-pdp-qty>1</span><button type="button" data-pdp-q="+">+</button></div>'
         : '';
-      body = '<div class="pdp-actions' + (layoutSide ? ' side' : '') + '">' +
-        ((b.show_quantity || b.show_add) ? '<div class="pdp-buy-row">' +
-          (b.show_quantity ? '<div class="pdp-qty" style="' + radiusStyle + '"><button type="button" data-pdp-q="-">-</button><span data-pdp-qty>1</span><button type="button" data-pdp-q="+">+</button></div>' : '') +
-          (b.show_add ? '<button type="button" class="pdp-atc" data-pdp-atc style="' + OS.btnStyle(t) + ';' + radiusStyle + '"' + (inventory <= 0 ? ' disabled' : '') + '>' + (inventory <= 0 ? 'Sold out' : 'Add to cart') + '</button>' : '') +
-        '</div>' : '') +
-        buyNow + dyn + safe + '</div>';
+      const atcIcon = b.atc_icon == null ? 'bag-plus' : b.atc_icon;
+      const atcHtml = b.show_add
+        ? '<button type="button" class="pdp-atc' + (atcFull ? ' full' : '') + '" data-pdp-atc data-atc-icon="' + OS.esc(atcIcon) + '" style="' + OS.btnStyle(t) + ';' + atcRadiusStyle + atcColorStyle + '"' + (inventory <= 0 ? ' disabled' : '') + '>' +
+          (inventory <= 0 ? atcButtonInner(atcIcon, 'Sold out') : atcButtonInner(atcIcon, 'Add to cart')) + '</button>'
+        : '';
+      let buyPrimary = '';
+      if (qtyHtml || atcHtml) {
+        if (atcFull) {
+          buyPrimary = (qtyHtml ? '<div class="pdp-buy-row">' + qtyHtml + '</div>' : '') + atcHtml;
+        } else {
+          buyPrimary = '<div class="pdp-buy-row">' + qtyHtml + atcHtml + '</div>';
+        }
+      }
+      body = '<div class="pdp-actions">' + buyPrimary + dyn + safe + '</div>';
     } else if (block.kind === 'icon_text') {
-      const mark = (name) => (window.OS_THEME_ICONS && window.OS_THEME_ICONS.svg(name || 'box', 20)) || '';
+      const mark = (name, px) => (window.OS_THEME_ICONS && window.OS_THEME_ICONS.svg(name || 'box', px)) || '';
+      const pickCopy = (primary, legacy) => {
+        if (primary != null && String(primary).trim() !== '') return primary;
+        if (legacy != null && String(legacy).trim() !== '') return legacy;
+        return primary != null ? primary : (legacy || '');
+      };
+      // Whitespace / empty richtext tags do not count as content. Icon or image alone is hidden.
+      const hasCopy = (html) => {
+        const text = String(html || '')
+          .replace(/<br\s*\/?>/gi, '\n')
+          .replace(/<\/(p|div|li|h[1-6])>/gi, '\n')
+          .replace(/<[^>]+>/g, '')
+          .replace(/&nbsp;/gi, ' ')
+          .replace(/\u00a0/g, ' ')
+          .replace(/&amp;/g, '&')
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .trim();
+        return text.length > 0;
+      };
+      // Prefer first_heading / first_content; fall back to legacy first / second / third.
       const items = [
-        { icon: b.icon_1 || 'box', image: b.image_1, text: b.first, link: b.link_1 },
-        { icon: b.icon_2 || 'return', image: b.image_2, text: b.second, link: b.link_2 },
-        { icon: b.icon_3 || 'star', image: b.image_3, text: b.third, link: b.link_3 },
-      ].filter((item) => String(item.text || '').trim() || item.image);
-      const spec = { small: { text: 14, icon: 18, line: 24 }, base: { text: 16, icon: 20, line: 26 }, large: { text: 18, icon: 24, line: 30 } }[b.size] || { text: 16, icon: 20, line: 26 };
+        { icon: b.icon_1 || 'box', image: b.image_1, heading: pickCopy(b.first_heading, b.first), content: b.first_content || '' },
+        { icon: b.icon_2 || 'return', image: b.image_2, heading: pickCopy(b.second_heading, b.second), content: b.second_content || '' },
+        { icon: b.icon_3 || 'star', image: b.image_3, heading: pickCopy(b.third_heading, b.third), content: b.third_content || '' },
+      ].filter((item) => hasCopy(item.heading) || hasCopy(item.content));
+      // Title font family picks the theme Body or Heading type token set.
+      const ty = (t && t.typography) || {};
+      const themeBase = Number(ty.base_font_size || 16);
+      // Title size is a px drag. OOB / blank / legacy tokens fall back to theme base size.
+      const sizeLegacy = ({ small: 14, base: themeBase, large: 18 })[b.size];
+      const sizePx = sizeLegacy != null
+        ? sizeLegacy
+        : Math.max(10, Math.min(48, Number(b.size == null || b.size === '' ? themeBase : b.size) || themeBase));
+      const useHeading = b.font === 'heading';
+      const titleFamily = useHeading ? OS.headingFamily(t) : OS.bodyFamily(t);
+      const titlePx = useHeading ? OS.headingSize(t, sizePx, mob) : sizePx;
+      const boldW = (() => { const n = Number(ty.body_bold_weight); return n >= 100 && n <= 900 ? n : 500; })();
+      const titleWeight = useHeading ? boldW : 400;
+      const titleTracking = useHeading
+        ? ((isFinite(Number(ty.heading_letter_spacing)) ? Number(ty.heading_letter_spacing) : -4) / 100) + 'em'
+        : 'normal';
+      const titleTransform = (useHeading && ty.heading_uppercase) ? 'uppercase' : 'none';
+      // Content always stays on Body type (theme base size / regular weight).
+      const contentFamily = OS.bodyFamily(t);
+      const contentPx = Math.max(10, Math.round(sizePx * 0.875));
+      const contentWeight = 400;
+      const iconPx = Math.max(16, Math.min(96, Number(b.icon_size == null ? Math.round(titlePx * 1.25) : b.icon_size) || 20));
+      const linePx = Math.max(iconPx, Math.round(titlePx * 1.6));
+      const itemGap = Math.max(4, Math.min(48, Number(b.item_gap == null ? 24 : b.item_gap) || 24));
+      const iconTextGap = Math.max(0, Math.min(32, Number(b.icon_text_gap == null ? 8 : b.icon_text_gap) || 8));
+      const itemLayout = b.item_layout === 'icon-top' ? 'top' : 'left';
+      const align = (b.alignment === 'center' || b.alignment === 'right') ? b.alignment : 'left';
       const cardClass = b.card_style === 'outline' ? ' card-outline' : (b.card_style === 'filled' ? ' card-filled' : '');
-      body = items.length ? '<div class="pdp-icons' + (b.layout === 'vertical' ? ' vertical' : '') + (b.background ? ' has-bg' : '') + '" style="font-family:' + (b.font === 'heading' ? OS.headingFamily(t) : OS.bodyFamily(t)) + ';font-size:' + spec.text + 'px;--pdp-icon-size:' + spec.icon + 'px;--pdp-icon-line:' + spec.line + 'px">' +
+      const textColor = OS.col(b.text_color, (t.colors && t.colors.text_color) || '#1A1A1A');
+      const iconColor = OS.col(b.icon_color, (t.colors && t.colors.primary_color) || '#103635');
+      const logoW = Math.max(40, Math.min(240, Math.round(iconPx * 2.2)));
+      const logoH = Math.max(20, Math.min(96, Math.round(iconPx * 1.1)));
+      let bgStyle = '';
+      if (b.background) {
+        const bgColor = OS.bgOrTransparent(b.background_color) || '#f6f6f6';
+        const radius = Math.max(0, Number(b.corner_radius == null ? 10 : b.corner_radius)) + 'px';
+        bgStyle = '--pdp-icons-bg:' + bgColor + ';--pdp-icons-radius:' + radius + ';';
+      }
+      const gapY = b.layout === 'vertical' ? itemGap : Math.max(8, Math.round(itemGap * 0.4));
+      const styleVars = [
+        'font-family:' + titleFamily,
+        'font-size:' + titlePx + 'px',
+        '--pdp-title-font:' + titleFamily,
+        '--pdp-title-size:' + titlePx + 'px',
+        '--pdp-title-weight:' + titleWeight,
+        '--pdp-title-tracking:' + titleTracking,
+        '--pdp-title-transform:' + titleTransform,
+        '--pdp-content-font:' + contentFamily,
+        '--pdp-content-size:' + contentPx + 'px',
+        '--pdp-content-weight:' + contentWeight,
+        '--pdp-icon-size:' + iconPx + 'px',
+        '--pdp-icon-line:' + linePx + 'px',
+        '--pdp-item-gap-x:' + itemGap + 'px',
+        '--pdp-item-gap-y:' + gapY + 'px',
+        '--pdp-icon-text-gap:' + iconTextGap + 'px',
+        '--pdp-logo-width:' + logoW + 'px',
+        '--pdp-logo-height:' + logoH + 'px',
+        '--pdp-icons-text:' + textColor,
+        '--pdp-icons-icon:' + iconColor,
+        bgStyle,
+      ].join(';');
+      body = items.length ? '<div class="pdp-icons' + (b.layout === 'vertical' ? ' vertical' : '') + ' align-' + align + (b.background ? ' has-bg' : '') + '" style="' + styleVars + '">' +
         items.map((item) => {
-          const inner = (item.image ? '<img class="pdp-icon-img' + (String(item.text || '').trim() ? '' : ' logo') + '" alt="" src="' + OS.esc(item.image) + '">' : '<span class="pdp-icon-mark">' + mark(item.icon) + '</span>') +
-            (String(item.text || '').trim() ? '<span>' + item.text + '</span>' : '');
-          const tag = item.link ? 'a' : 'div';
-          const href = item.link ? ' href="' + OS.esc(item.link) + '" target="_blank" rel="noopener"' : '';
-          return '<' + tag + ' class="pdp-icon-item' + cardClass + '"' + href + '>' + inner + '</' + tag + '>';
+          const hasText = String(item.heading || '').trim() || String(item.content || '').trim();
+          const media = item.image
+            ? '<img class="pdp-icon-img' + (hasText ? '' : ' logo') + '" alt="" src="' + OS.esc(item.image) + '">'
+            : (item.icon && item.icon !== 'none' ? '<span class="pdp-icon-mark">' + mark(item.icon, iconPx) + '</span>' : '');
+          const bodyHtml = hasText
+            ? '<div class="pdp-icon-body">' +
+              (String(item.heading || '').trim() ? '<div class="pdp-icon-h">' + item.heading + '</div>' : '') +
+              (String(item.content || '').trim() ? '<div class="pdp-icon-c">' + item.content + '</div>' : '') +
+              '</div>'
+            : '';
+          return '<div class="pdp-icon-item ' + itemLayout + cardClass + '">' + media + bodyHtml + '</div>';
         }).join('') + '</div>' : '';
     } else if (block.kind === 'sku') {
       body = '<div class="pdp-sku" style="' + (b.text_style === 'uppercase' ? 'text-transform:uppercase;letter-spacing:.06em' : '') + '">SKU: <span data-pdp-sku>' + OS.esc(selected.sku || p.sku || 'AUR-PRODUCT') + '</span></div>';
@@ -977,30 +1785,98 @@
     } else if (block.kind === 'liquid') {
       body = b.code ? '<div class="pdp-custom-text" style="font-family:ui-monospace,monospace">' + OS.esc(b.code) + '</div>' : '';
     } else if (block.kind === 'shipping') {
-      const days = Number(b.days || 7);
+      const days = Math.max(1, Number(b.days || 7));
+      const titleText = String(b.delivery_text == null ? 'Estimated delivery:' : b.delivery_text).trim();
+      const titleHtml = titleText ? '<div class="pdp-ship-title">' + OS.esc(titleText) + '</div>' : '';
       let dateLabel = '';
+      let purchasedLabel = '';
+      let processingLabel = '';
+      let deliveredLabel = '';
       try {
-        const ms = Date.now() + days * 86400000;
-        const date = b.timezone === 'utc' ? new Date(ms) : new Date(ms);
-        dateLabel = b.timezone === 'utc'
-          ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
-          : date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const now = Date.now();
+        const dayMs = 86400000;
+        const formatDate = (ms) => {
+          const date = new Date(ms);
+          const timeZone = b.timezone === 'utc' ? 'UTC' : undefined;
+          const parts = new Intl.DateTimeFormat('en-US', {
+            month: 'short', day: '2-digit', year: 'numeric', timeZone,
+          }).formatToParts(date).reduce((out, part) => { out[part.type] = part.value; return out; }, {});
+          const format = String(b.date_format || '%b %d');
+          return format
+            .replace(/%B/g, parts.month)
+            .replace(/%b/g, parts.month)
+            .replace(/%d/g, parts.day)
+            .replace(/%m/g, String(date.getMonth() + 1).padStart(2, '0'))
+            .replace(/%Y/g, parts.year);
+        };
+        const atDay = (n) => formatDate(now + n * dayMs);
+        const procStart = Math.max(1, Math.round(days * 0.35));
+        const procEnd = Math.max(procStart + 1, Math.round(days * 0.5));
+        const delStart = Math.max(procEnd + 1, days);
+        const delEnd = delStart + Math.max(3, Math.round(days * 0.45));
+        purchasedLabel = atDay(0);
+        processingLabel = atDay(procStart) + ' - ' + atDay(procEnd);
+        deliveredLabel = atDay(delStart) + ' - ' + atDay(delEnd);
+        dateLabel = atDay(days);
       } catch (err) {
         dateLabel = '';
       }
       const shipLine = dateLabel
         ? (dateLabel + ' (+/- 2 days)')
         : String(b.fallback_text || '');
-      body = '<div class="pdp-ship" data-ship-tz="' + OS.esc(b.timezone || 'store') + '"><strong>' + OS.esc(b.delivery_text || 'Estimated delivery:') + '</strong><div>' + OS.esc(shipLine || String(b.fallback_text || 'Delivery date unavailable')) + '</div></div>';
+      const fallback = OS.esc(String(b.fallback_text || 'Delivery date unavailable'));
+      if (b.layout === 'timeline' && purchasedLabel) {
+        const icon = (name) => {
+          const paths = {
+            bag: '<path d="M29 30c0 .55-.45 1-1 1H4c-.55 0-1-.45-1-1L5 8c0-.55.45-1 1-1h20c.55 0 1 .45 1 1L29 30z"/><path d="M10 11V7c0-3.31 2.69-6 6-6s6 2.69 6 6v4"/><circle cx="10" cy="11.5" r=".5"/><circle cx="22" cy="11.5" r=".5"/>',
+            truck: '<circle cx="25" cy="27" r="3"/><circle cx="8" cy="27" r="3"/><path d="M5 27H4c-1.66 0-3-1.34-3-3V8c0-1.66 1.34-3 3-3h12c1.66 0 3 1.34 3 3v19h-8"/><path d="M19 27V13h7l5 6.17V24c0 1.66-1.34 3-3 3"/><path d="M31 19H19"/>',
+            pin: '<path d="M27 12c0 9.17-11 18-11 18S5 21.13 5 12C5 5.93 9.93 1 16 1s11 4.93 11 11z"/><circle cx="16" cy="12" r="5"/>',
+          };
+          return '<span class="pdp-ship-icon"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-miterlimit="10">' + paths[name] + '</svg></span>';
+        };
+        const step = (align, iconName, date, label) =>
+          '<div class="pdp-ship-step ' + align + '">' + icon(iconName) +
+          '<div class="pdp-ship-meta"><span class="pdp-ship-date">' + OS.esc(date) + '</span><span class="pdp-ship-label">' + OS.esc(label) + '</span></div></div>';
+        const line = '<div class="pdp-ship-line" aria-hidden="true"><i><span></span></i></div>';
+        body = '<div class="pdp-ship pdp-ship--timeline" data-ship-tz="' + OS.esc(b.timezone || 'store') + '">' + titleHtml +
+          '<div class="pdp-ship-track">' +
+          step('is-start', 'bag', purchasedLabel, 'Purchased') + line +
+          step('is-mid', 'truck', processingLabel, 'Processing') + line +
+          step('is-end', 'pin', deliveredLabel, 'Delivered') +
+          '</div></div>';
+      } else {
+        body = '<div class="pdp-ship" data-ship-tz="' + OS.esc(b.timezone || 'store') + '">' + titleHtml + '<div>' + OS.esc(shipLine || fallback) + '</div></div>';
+      }
     } else if (block.kind === 'collapsible') {
-      const isOpen = !!(b.open || b.first_open_default);
+      const isOpen = !!b.open;
       const iconLeft = b.icon_position === 'left';
-      const headingIcon = (b.icon && b.icon !== 'none' && window.OS_THEME_ICONS) ? ('<span class="pdp-acc-ic">' + window.OS_THEME_ICONS.svg(b.icon, 16) + '</span>') : '';
-      body = '<div class="pdp-acc' + (isOpen ? ' open' : '') + (iconLeft ? ' icon-left' : '') + '" data-pdp-acc data-accordion="' + (b.accordion_mode ? '1' : '0') + '"><button type="button"><span class="pdp-acc-title">' + headingIcon + OS.esc(b.heading || 'Details') + '</span><span class="pdp-acc-mark">' + (isOpen ? '–' : '+') + '</span></button><div class="body">' + (b.content || '') + (b.custom_liquid ? '<pre>' + OS.esc(b.custom_liquid) + '</pre>' : '') + '</div></div>';
+      const headingIcon = (b.icon && b.icon !== 'none' && window.OS_THEME_ICONS) ? ('<span class="pdp-acc-ic">' + window.OS_THEME_ICONS.svg(b.icon, 20) + '</span>') : '';
+      const src = b.content_dynamic_source;
+      const paths = Array.isArray(src)
+        ? src.map(String).filter(Boolean)
+        : (typeof src === 'string' && src && src !== 'true' && src !== 'false' ? [src] : []);
+      let contentHtml = resolveMetafieldChips(b.content || '', p);
+      // Legacy whole-field / multi-path bind (no inline chips in content).
+      if (paths.length && String(b.content || '').indexOf('data-mf-path') < 0) {
+        contentHtml = paths.map((path) => {
+          const v = resolveProductMetafield(p, path);
+          if (!v) return '';
+          return /<[a-z][\s\S]*>/i.test(v) ? v : ('<p>' + OS.esc(v) + '</p>');
+        }).filter(Boolean).join('');
+      }
+      body = '<div class="pdp-acc' + (isOpen ? ' open' : '') + (iconLeft ? ' icon-left' : '') + '" data-pdp-acc data-accordion="' + (b.accordion_mode ? '1' : '0') + '"><button type="button"><span class="pdp-acc-title">' + headingIcon + OS.esc(b.heading || 'Details') + '</span><span class="pdp-acc-mark">' + (isOpen ? '–' : '+') + '</span></button><div class="body">' + contentHtml + (b.custom_liquid ? '<pre>' + OS.esc(b.custom_liquid) + '</pre>' : '') + '</div></div>';
     } else if (block.kind === 'popup') {
-      const w = Number(b.popup_width == null ? 560 : b.popup_width);
-      const h = Number(b.popup_height == null ? 420 : b.popup_height);
-      body = '<button type="button" class="pdp-popup-link' + (b.hover_effect ? ' hover-fx' : '') + '" data-pdp-popup-link data-popup-trigger="' + OS.esc(b.trigger || 'click') + '" data-popup-type="' + OS.esc(b.content_type || 'page') + '" data-popup-page="' + OS.esc(b.page || '') + '" data-popup-w="' + w + '" data-popup-h="' + h + '">' + OS.esc(b.label || 'View details') + '</button>';
+      const pages = ((ctx.sample && ctx.sample.pages) || (OS.sample && OS.sample.pages) || []);
+      const page = pages.find((x) => x.id === b.page);
+      const pageHtml = page ? String(page.content || '').trim() : '';
+      // Buyer / published preview hides empty page popups; editor keeps the link for setup.
+      if (ctx.previewOnly && !pageHtml) {
+        body = '';
+      } else {
+        const w = Number(b.popup_width == null ? 560 : b.popup_width);
+        const h = Number(b.popup_height == null ? 420 : b.popup_height);
+        body = '<button type="button" class="pdp-popup-link" data-pdp-popup-link data-popup-page="' + OS.esc(b.page || '') + '" data-popup-w="' + w + '" data-popup-h="' + h + '">' + OS.esc(b.label || 'Pop-up link text') + '</button>';
+      }
     } else if (block.kind === 'line_property') {
       body = '<label class="pdp-property"><span class="pdp-label">' + OS.esc(b.label || 'Your label') + (b.required ? ' *' : '') + '</span><input type="' + (b.type === 'number' ? 'number' : 'text') + '" placeholder="' + OS.esc(b.placeholder || '') + '"' + (b.required ? ' required' : '') + '></label>';
     } else if (block.kind === 'actions') {
@@ -1035,43 +1911,231 @@
         }
       }
     } else if (block.kind === 'recommendations') {
+      // Priority: hand-picked products → connected collection → automatic sample fallback.
       let list = byIds(b.products);
-      if (!list.length) list = others(p, 4);
+      const src = b.products_dynamic_source;
+      if (!list.length && src && src !== true && src !== false) list = byCollection(src, 12);
+      if (!list.length) list = others(p, 8);
       if (b.dedupe_current !== false) list = list.filter((item) => item.id !== p.id && item.handle !== p.handle);
       if (b.exclude_soldout) list = list.filter((item) => Number(item.inventory == null ? 1 : item.inventory) > 0);
       if (!list.length && (b.empty_behavior || 'hide') === 'hide') {
         body = '';
       } else {
-        const cols = mob ? (b.mobile_count || 2) : (b.per_row || 2);
-        const cards = list.map((item) => '<div class="pdp-rec-card"><div class="im" style="background-image:url(' + OS.esc(item.image) + ')"></div><b>' + OS.esc(item.title) + '</b><div>' + OS.money(item.price) + '</div></div>').join('');
-        body = (b.heading ? '<h3 class="pdp-rec-h">' + OS.esc(b.heading) + '</h3>' : '') +
-          '<div class="pdp-rec-row" data-pdp-rec style="grid-template-columns:repeat(' + cols + ',minmax(0,1fr))">' + cards + '</div>';
+        const gap = 10;
+        const cols = mob
+          ? Math.max(1, Math.min(2, Number(b.mobile_count) || 2))
+          : Math.max(2, Math.min(6, Number(b.per_row) || 2));
+        // Peek the next card when there is overflow so sliding is obvious.
+        const perView = list.length > cols ? (cols + 0.25) : cols;
+        const cardW = 'calc((100% - ' + gap + 'px * ' + (perView - 1) + ') / ' + perView + ')';
+        const cards = list.map((item) =>
+          '<div class="pdp-rec-card" style="width:' + cardW + '">' +
+            '<div class="im" style="background-image:url(' + OS.esc(item.image) + ')"></div>' +
+            '<b>' + OS.esc(item.title) + '</b><div>' + OS.money(item.price) + '</div>' +
+          '</div>'
+        ).join('');
+        const sub = String(b.subheading || '').trim();
+        const head = String(b.heading || '').trim();
+        const copy = String(b.content || '').trim();
+        const headHtml = (sub || head || copy)
+          ? '<div class="pdp-rec-head">' +
+              (sub ? '<div class="pdp-rec-sub">' + OS.esc(sub) + '</div>' : '') +
+              (head ? '<h3 class="pdp-rec-h">' + OS.esc(head) + '</h3>' : '') +
+              (copy ? '<div class="pdp-rec-copy">' + copy + '</div>' : '') +
+            '</div>'
+          : '';
+        const rail = '<div class="pdp-rec-row" data-pdp-rec style="gap:' + gap + 'px">' + cards + '</div>';
+        // Side arrows only when cards overflow one viewport (peek / slide).
+        if (list.length > cols) {
+          const chev = (d) => '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="' +
+            (d < 0 ? 'M10 3.5 5.5 8 10 12.5' : 'M6 3.5 10.5 8 6 12.5') +
+            '" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+          body = headHtml +
+            '<div class="pdp-rec-wrap" data-pdp-rec-wrap>' +
+              '<button type="button" class="pdp-rec-nav prev" data-pdp-rec-nav="-1" aria-label="Previous" disabled>' + chev(-1) + '</button>' +
+              rail +
+              '<button type="button" class="pdp-rec-nav next" data-pdp-rec-nav="1" aria-label="Next">' + chev(1) + '</button>' +
+            '</div>';
+        } else {
+          body = headHtml + rail;
+        }
+      }
+    } else if (block.kind === 'video_column') {
+      const list = (Array.isArray(b.videos) ? b.videos : []).filter((v) => v && v.cover_image);
+      if (!list.length) {
+        body = '';
+      } else {
+        const gap = Math.max(4, Math.min(24, Number(b.gap) || 10));
+        const rad = Math.max(0, Math.min(24, Number(b.corner_radius) || 12));
+        const headColor = OS.col(b.heading_color, c.heading_color || '#1a1a1a');
+        const borderRaw = b.video_border;
+        const borderColor = (borderRaw && borderRaw !== 'transparent') ? borderRaw : '';
+        const borderCss = borderColor ? 'border:1px solid ' + OS.esc(borderColor) + ';' : 'border:0;';
+        const cols = mob
+          ? Math.max(1, Math.min(2, Number(b.mobile_count) || 2))
+          : Math.max(2, Math.min(6, Number(b.per_row) || 4));
+        const perView = list.length > cols ? (cols + 0.2) : cols;
+        const cardW = 'calc((100% - ' + gap + 'px * ' + (perView - 1) + ') / ' + perView + ')';
+        const playBtn = b.show_play_button !== false
+          ? '<span class="pdp-vc-play" aria-hidden="true">' + OS.icon('play') + '</span>'
+          : '';
+        const cards = list.map((v) => {
+          const label = String(v.accessible_label || '').trim() || 'Play video';
+          return '<div class="pdp-vc-card" style="width:' + cardW + '">' +
+            '<button type="button" class="pdp-vc-media" data-pdp-vc-open data-cover="' + OS.esc(v.cover_image || '') + '" data-video="' + OS.esc(v.video_url || '') + '" aria-label="' + OS.esc(label) + '" style="border-radius:' + rad + 'px;' + borderCss + '">' +
+              '<img src="' + OS.esc(v.cover_image) + '" alt="' + OS.esc(label) + '" loading="lazy">' +
+              playBtn +
+            '</button>' +
+          '</div>';
+        }).join('');
+        const head = String(b.heading || '').trim();
+        const headHtml = head
+          ? '<div class="pdp-vc-head"><h3 class="pdp-vc-h" style="color:' + OS.esc(headColor) + '">' + OS.esc(head) + '</h3></div>'
+          : '';
+        const rail = '<div class="pdp-vc-rail" data-pdp-vc style="gap:' + gap + 'px">' + cards + '</div>';
+        if (list.length > cols) {
+          const chev = (d) => '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="' +
+            (d < 0 ? 'M10 3.5 5.5 8 10 12.5' : 'M6 3.5 10.5 8 6 12.5') +
+            '" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+          body = '<div class="pdp-vc">' + headHtml +
+            '<div class="pdp-vc-wrap" data-pdp-vc-wrap>' +
+              '<button type="button" class="pdp-vc-nav prev" data-pdp-vc-nav="-1" aria-label="Previous" disabled>' + chev(-1) + '</button>' +
+              rail +
+              '<button type="button" class="pdp-vc-nav next" data-pdp-vc-nav="1" aria-label="Next">' + chev(1) + '</button>' +
+            '</div></div>';
+        } else {
+          body = '<div class="pdp-vc">' + headHtml + rail + '</div>';
+        }
       }
     }
     if (block.kind === 'featured_reviews') {
-      const reviews = [
-        { author: b.manual_author || 'Debi T.', rating: Number(b.manual_rating || 5), text: b.manual_text || 'Very comfortable and great fit. Want to buy more. Wore them on a ten hour hike. Held up great.', image: b.manual_image || (p.image || ''), avatar: (OS.sample && OS.sample.IMG && OS.sample.IMG.av1) || p.image || '' },
-        { author: 'Emily R.', rating: 5, text: 'After 6 weeks the dark red stretch marks faded and the fine lines nearly disappeared.', image: p.image || '', avatar: (OS.sample && OS.sample.IMG && OS.sample.IMG.av2) || p.image || '' },
-        { author: 'James Carter', rating: 5, text: 'A month in and my energy is up. I recommend it to anyone who feels drained every afternoon.', image: '', avatar: (OS.sample && OS.sample.IMG && OS.sample.IMG.av3) || p.image || '' },
-      ];
-      const list = b.data_source === 'manual' ? reviews.slice(0, 1) : reviews;
+      const layout = b.layout || 'nav';
+      const list = OS.resolveFeaturedReviewItems(b, p);
       const cols = Math.max(1, Math.min(3, Number(b.cards_per_row || 1)));
+      const carousel = b.scroll !== false && list.length > 1;
+      let navMode = b.nav_style || 'auto';
+      if (navMode === 'auto') navMode = (layout === 'nav') ? 'arrows' : 'dots';
+      if (!carousel) navMode = 'none';
+      const starColor = (b.star_color && b.star_color !== 'transparent') ? b.star_color : '#16a34a';
+      const avRound = b.round_avatar !== false;
+      const showVerified = b.show_verified !== false;
+      // Trust chip / subtitle: empty or missing settings hide the block (no silent default fill).
+      // Schema defaults still seed new blocks via matBlock; clearing the input stores ''.
+      const verifiedLabel = String(b.verified_text || '').trim();
+      const verifiedSub = String(b.verified_subtext || '').trim();
+      const checkSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>';
+      const shieldSvg = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 4 5v6c0 5 3.5 8.5 8 11 4.5-2.5 8-6 8-11V5z"/><path fill="#fff" d="m10.2 12.8-2-2-1.1 1.1 3.1 3.1 5.2-5.2-1.1-1.1z"/></svg>';
+      const starsHtml = (n, boxed) => '<span class="pdp-fr-stars' + (boxed ? ' boxed' : '') + '" style="color:' + OS.esc(starColor) + '">' +
+        '★'.repeat(Math.max(1, Math.min(5, Number(n) || 5))) + '</span>';
+      // Avatar never reuses review image — those are separate slots on image layouts.
+      const avHtml = (r) => {
+        if (b.show_avatar === false) return '';
+        const src = r.avatar || '';
+        const cls = 'pdp-fr-av' + (avRound ? ' round' : '') + (src ? '' : ' is-empty');
+        return src
+          ? '<img class="' + cls + '" alt="" src="' + OS.esc(src) + '">'
+          : '<span class="' + cls + '" aria-hidden="true"></span>';
+      };
+      const checkHtml = (showVerified
+        ? '<span class="pdp-fr-check"' + (verifiedLabel ? ' title="' + OS.esc(verifiedLabel) + '"' : '') + '>' + checkSvg + '</span>'
+        : '');
+      const layoutSupportsImage = layout === 'media' || layout === 'nav' || layout === 'trust';
       const cards = list.map((r, i) => {
-        const starRow = '<span class="pdp-fr-stars">' + '★'.repeat(Math.max(1, Math.min(5, Number(r.rating) || 5))) + '</span>';
-        return '<div class="pdp-fr-card" data-fr-idx="' + i + '">' +
-          (b.show_avatar !== false ? '<img class="pdp-fr-av" alt="" src="' + OS.esc(r.avatar || r.image || '') + '">' : '') +
-          '<div class="pdp-fr-body"><div class="pdp-fr-meta"><b>' + OS.esc(r.author) + '</b>' + starRow + '</div>' +
-          '<div class="pdp-fr-text">' + OS.esc(r.text) + '</div>' +
-          ((b.show_image !== false && r.image) ? '<img class="pdp-fr-img" alt="" src="' + OS.esc(r.image) + '">' : '') +
-          '</div></div>';
+        const img = (layoutSupportsImage && b.show_image !== false && r.image) ? r.image : '';
+        const payload = {
+          author: r.author || '',
+          rating: Number(r.rating) || 5,
+          text: r.text || '',
+          image: r.image || '',
+          images: Array.isArray(r.images) ? r.images.filter(Boolean) : (r.image ? [r.image] : []),
+          avatar: r.avatar || '',
+          item_type: r.item_type || '',
+          star_color: starColor,
+          show_verified: showVerified,
+          verified_text: verifiedLabel || 'Verified',
+        };
+        let inner = '';
+        if (layout === 'media') {
+          // Text + small avatar/name | side review image (image is the signature).
+          inner =
+            '<div class="pdp-fr-body">' +
+              '<div class="pdp-fr-text">' + OS.esc(r.text) + '</div>' +
+              '<div class="pdp-fr-person">' + avHtml(r) +
+                '<div><div class="pdp-fr-meta" style="margin:0"><b>' + OS.esc(r.author) + '</b></div>' + starsHtml(r.rating, false) + '</div>' +
+              '</div>' +
+            '</div>' +
+            (img ? '<img class="pdp-fr-side" alt="" src="' + OS.esc(img) + '">' : '');
+        } else if (layout === 'quote') {
+          // No review image — stacked stars then author check.
+          inner =
+            avHtml(r) +
+            '<div class="pdp-fr-body">' +
+              '<div class="pdp-fr-text italic">' + OS.esc(r.text) + '</div>' +
+              starsHtml(r.rating, false) +
+              '<div class="pdp-fr-author" style="margin-top:8px">— ' + OS.esc(r.author) + checkHtml + '</div>' +
+            '</div>';
+        } else if (layout === 'trust') {
+          const verifiedChip = (showVerified && verifiedLabel)
+            ? '<span class="pdp-fr-verified">' + shieldSvg + OS.esc(verifiedLabel) + '</span>'
+            : '';
+          const verifiedSubHtml = (showVerified && verifiedSub)
+            ? '<div class="pdp-fr-sub">' + OS.esc(verifiedSub) + '</div>'
+            : '';
+          // No stars — shield verified + optional side image.
+          inner =
+            avHtml(r) +
+            '<div class="pdp-fr-body">' +
+              '<div class="pdp-fr-text italic">' + OS.esc(r.text) + '</div>' +
+              '<div class="pdp-fr-foot">' +
+                '<div class="pdp-fr-author">— ' + OS.esc(r.author) + verifiedChip + '</div>' +
+                verifiedSubHtml +
+              '</div>' +
+            '</div>' +
+            (img ? '<img class="pdp-fr-side" alt="" src="' + OS.esc(img) + '">' : '');
+        } else if (layout === 'split') {
+          // No review image — avatar | divider | stars — author ✓ on one row.
+          inner =
+            avHtml(r) +
+            '<div class="pdp-fr-body">' +
+              '<div class="pdp-fr-text italic">' + OS.esc(r.text) + '</div>' +
+              '<div class="pdp-fr-row">' +
+                starsHtml(r.rating, false) +
+                '<span class="pdp-fr-author">— ' + OS.esc(r.author) + '</span>' +
+                checkHtml +
+              '</div>' +
+            '</div>';
+        } else {
+          // nav — name-first + boxed stars; optional image under the copy.
+          inner =
+            avHtml(r) +
+            '<div class="pdp-fr-body">' +
+              '<div class="pdp-fr-meta"><b>' + OS.esc(r.author) + '</b>' + starsHtml(r.rating, true) + '</div>' +
+              '<div class="pdp-fr-text">' + OS.esc(r.text) + '</div>' +
+              (img ? '<img class="pdp-fr-img" alt="" src="' + OS.esc(img) + '">' : '') +
+            '</div>';
+        }
+        return '<div class="pdp-fr-card layout-' + OS.esc(layout) + '" data-fr-idx="' + i + '" data-fr-review="' + OS.esc(JSON.stringify(payload)) + '" role="button" tabindex="0">' + inner + '</div>';
       }).join('');
-      const nav = b.scroll !== false
+      const arrows = navMode === 'arrows'
         ? '<button type="button" class="pdp-fr-nav prev" data-pdp-fr-prev aria-label="Previous">‹</button><button type="button" class="pdp-fr-nav next" data-pdp-fr-next aria-label="Next">›</button>'
         : '';
-      const viewAll = b.view_all_popup !== false ? '<button type="button" class="pdp-fr-all" data-pdp-fr-all>View all</button>' : '';
-      body = '<div class="pdp-fr" data-pdp-fr data-autoplay="' + (b.auto_play ? '1' : '0') + '">' +
+      const dots = navMode === 'dots'
+        ? '<div class="pdp-fr-dots" data-pdp-fr-dots>' + list.map((_, i) =>
+            '<button type="button" class="pdp-fr-dot' + (i === 0 ? ' on' : '') + '" data-pdp-fr-dot="' + i + '" aria-label="Review ' + (i + 1) + '"></button>'
+          ).join('') + '</div>'
+        : '';
+      const railClass = carousel ? 'is-carousel' : 'is-stack';
+      const railStyle = (!carousel && cols > 1)
+        ? 'style="grid-template-columns:repeat(' + cols + ',minmax(0,1fr))"'
+        : '';
+      const content = list.length
+        ? ('<div class="pdp-fr-rail ' + railClass + '" ' + railStyle + '>' + cards + '</div>' + arrows + dots)
+        : ('<div style="opacity:.55;font-size:13px;padding:8px 0">' +
+            (b.data_source === 'auto' ? 'No reviews to pull yet.' : 'Add a review in the block settings.') +
+          '</div>');
+      body = '<div class="pdp-fr' + (navMode === 'arrows' ? ' has-arrows' : '') + '" data-pdp-fr data-autoplay="' + (b.auto_play && carousel ? '1' : '0') + '" data-carousel="' + (carousel ? '1' : '0') + '">' +
         (b.heading ? '<div class="pdp-fr-h">' + OS.esc(b.heading) + '</div>' : '') +
-        '<div class="pdp-fr-rail" style="--fr-cols:' + cols + '">' + cards + '</div>' + nav + viewAll + '</div>';
+        content + '</div>';
     }
     if (block.kind === 'sticky') body = '';
     if (!body) return '';
@@ -1097,28 +2161,48 @@
     return '<div class="pdp-media pdp-carousel' + (left ? ' left' : '') + '">' + (left ? thumbs + main : main + thumbs) + '</div>';
   }
 
-  function stickyHtml(block, p, t) {
+  function stickyHtml(block, p, t, buyBlock) {
     if (!block || block.hidden) return '';
     const b = block.settings || {};
-    const pos = b.position === 'top' ? ' top' : ' bottom';
+    const buy = (buyBlock && buyBlock.settings) || {};
     const appear = (b.appear_at === 'top' || b.show_after_scroll === false) ? ' always' : ' after-scroll';
     const mobHide = b.mobile_visible === false ? ' hide-mob' : '';
-    return '<div class="pdp-sticky' + pos + appear + mobHide + '" data-block-id="' + OS.esc(block.id) + '" data-pdp-sticky>' +
+    // Match Buy buttons ATC: background / text / radius / weight / icon.
+    const atcShape = buy.atc_shape || buy.button_shape || 'pill';
+    const atcRadius = buyButtonRadius(atcShape, buy.atc_custom_radius != null ? buy.atc_custom_radius : buy.custom_radius);
+    const atcBg = buy.atc_background || '#FFC439';
+    const atcFg = buy.atc_text_color || '#FFFFFF';
+    const atcIcon = buy.atc_icon == null ? 'bag-plus' : buy.atc_icon;
+    const label = b.button_text || 'Add to cart';
+    const atcStyle = OS.btnStyle(t) + ';border-radius:' + atcRadius + 'px;background:' + atcBg + ';color:' + atcFg + ';border:0;font:inherit;font-weight:700';
+    return '<div class="pdp-sticky bottom' + appear + mobHide + '" data-block-id="' + OS.esc(block.id) + '" data-pdp-sticky>' +
       (b.show_image !== false ? '<img alt="" src="' + OS.esc(p.image) + '">' : '') +
-      '<div class="meta">' + (b.show_title !== false ? '<b>' + OS.esc(p.title) + '</b>' : '') + (b.show_price !== false ? '<span data-pdp-sticky-price>' + OS.money(p.price) + '</span>' : '') +
-      (b.show_bundle ? '<em class="pdp-sticky-bundle">Bundle deal</em>' : '') + '</div>' +
+      '<div class="meta">' + (b.show_title !== false ? '<b>' + OS.esc(p.title) + '</b>' : '') + (b.show_price !== false ? '<span data-pdp-sticky-price>' + OS.money(p.price) + '</span>' : '') + '</div>' +
       (b.show_quantity !== false ? '<div class="pdp-qty sticky-qty"><button type="button" data-pdp-q="-">-</button><span data-pdp-qty>1</span><button type="button" data-pdp-q="+">+</button></div>' : '') +
-      '<button type="button" class="pdp-atc" data-pdp-atc style="' + OS.btnStyle(t) + '">' + OS.esc(b.button_text || 'Add to cart') + '</button></div>';
+      '<button type="button" class="pdp-atc" data-pdp-atc data-atc-icon="' + OS.esc(atcIcon) + '" style="' + atcStyle + '">' + atcButtonInner(atcIcon, label) + '</button></div>';
   }
 
   function popupHtml(s, p, t) {
-    const recs = s.atc_show_recs ? others(p, 2).map((item) => '<div class="pdp-rec-card"><div class="im" style="background-image:url(' + OS.esc(item.image) + ')"></div><b>' + OS.esc(item.title) + '</b><div>' + OS.money(item.price) + '</div></div>').join('') : '';
-    return '<div class="pdp-pop" data-pdp-pop><div class="pdp-pop-card">' +
-      '<div class="pdp-pop-head"><strong>' + OS.esc(s.atc_heading || 'Added to cart') + '</strong><button type="button" class="pdp-pop-x" data-pdp-pop-close>×</button></div>' +
-      '<div class="pdp-pop-item"><img alt="" data-pdp-pop-img src="' + OS.esc(p.image) + '"><div><div class="nm">' + OS.esc(p.title) + '</div><div class="sub" data-pdp-pop-meta>M · Qty 1</div><div style="margin-top:4px;font-weight:700" data-pdp-pop-price>' + OS.money(p.price) + '</div></div></div>' +
-      (recs ? '<div class="pdp-pop-recs">' + recs + '</div>' : '') +
-      '<div class="pdp-pop-actions"><button type="button" style="' + OS.btnStyle(t) + ';width:100%" data-pdp-view>View cart</button><button type="button" style="' + OS.btnStyle(t, { variant: 'secondary' }) + ';width:100%" data-pdp-pop-close>Continue shopping</button></div>' +
-      '</div></div><div class="pdp-zoom" data-pdp-zoom><img alt="" data-pdp-zoom-img></div>' +
+    return '<div class="pdp-zoom" data-pdp-zoom><img alt="" data-pdp-zoom-img></div>' +
+      '<div class="pdp-page-pop" data-pdp-page-pop role="dialog" aria-modal="true">' +
+        '<div class="pdp-page-pop-card">' +
+          '<button type="button" class="pdp-page-pop-x" data-pdp-page-pop-close aria-label="Close">×</button>' +
+          '<div class="pdp-page-pop-body is-empty" data-pdp-page-pop-body></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="pdp-fr-pop" data-pdp-fr-pop role="dialog" aria-modal="true" aria-label="Review">' +
+        '<div class="pdp-fr-pop-card" data-pdp-fr-pop-card>' +
+          '<div class="pdp-fr-pop-media" data-pdp-fr-pop-media>' +
+            '<div class="pdp-fr-pop-stage" data-pdp-fr-pop-stage></div>' +
+            '<button type="button" class="pdp-fr-pop-x" data-pdp-fr-pop-close aria-label="Close">×</button>' +
+            '<button type="button" class="pdp-fr-pop-nav prev" data-pdp-fr-pop-prev aria-label="Previous image">‹</button>' +
+            '<button type="button" class="pdp-fr-pop-nav next" data-pdp-fr-pop-next aria-label="Next image">›</button>' +
+            '<div class="pdp-fr-pop-thumbs" data-pdp-fr-pop-thumbs></div>' +
+          '</div>' +
+          '<div class="pdp-fr-pop-body" data-pdp-fr-pop-body></div>' +
+          '<button type="button" class="pdp-fr-pop-x-alt" data-pdp-fr-pop-close aria-label="Close">×</button>' +
+        '</div>' +
+      '</div>' +
       '<div class="pdp-pop" data-pdp-share-pop><div class="pdp-pop-card" data-pdp-share-card>' +
         '<div class="pdp-pop-head"><strong>Share this product</strong><button type="button" class="pdp-share-x" data-pdp-share-close aria-label="Close"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M18.75 5.13496L5.25 18.8544" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M18.75 18.8544L5.25 5.13496" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>' +
         '<div class="pdp-share-row"><input data-pdp-share-url readonly value=""><button type="button" data-pdp-share-copy>Copy</button></div>' +
@@ -1148,21 +2232,26 @@
     ],
     blocks: { kinds: BLOCKS, max: 24 },
     defaultBlocks: () => ([
-      ['badges', { show_sold_out: false, show_saving: false, saving_type: 'percentage', badge_position: 'top-left', badge_icon: 'none', badge_icon_image: '', badge_bg: '', badge_text_color: '', badge_gap: 8 }],
-      ['title', { title_size: 24, description: '', description_image: '', description_color: '#000000', description_size: 14, description_top: 0, description_bottom: 0 }],
-      ['price', { show_taxes: false, price_prefix: '', compare_order: 'after', show_saving: true, saving_type: 'percentage', saving_style: 'filled', saving_position: 'right', saving_label: '', saving_bg: '', saving_text_color: '#ffffff', saving_icon: false }],
-      ['rating', { show_rating: true, size: 14, show_text: false, text: '4.8 (214) 7,000+ satisfied customers' }],
-      ['description', {}],
-      ['inventory', { show_status: true, show_count: true, custom_text: '', low_stock_threshold: 5, low_stock_text: 'Low stock - {n} items left', sold_out_text: 'Sold out', status_style: 'dot', status_color: '#f59e0b' }],
+      ['badges', { custom_tag_style: 'filled', hot_badge_bg: '', hot_badge_text_color: '#ffffff', new_badge_bg: '#FFC439', new_badge_text_color: '#ffffff', badge_icon: 'none', badge_icon_image: '', show_sold_out: false, show_saving: false, saving_type: 'percentage', saving_style: 'filled', saving_position: 'right', saving_label: '', saving_bg: '', saving_text_color: '#ffffff', saving_icon: false, badge_position: 'left', badge_gap: 8 }],
+      ['title', { title_size: 30, description: '', description_color: '#000000', description_size: 14, description_top: 0, description_bottom: 0 }],
+      ['price', { size: 24, show_taxes: false, show_saving: true, saving_type: 'percentage', saving_style: 'filled', saving_position: 'right', saving_label: '', saving_bg: '', saving_text_color: '#ffffff', saving_icon: false }],
+      ['rating', { layout: 'default', star_style: 'boxed', style: 'stars-rating-custom', custom_text: 'Trusted by 2000+', underline_text: false, review_label: 'reviews', size: 14, color: '#0f3636', text_color: '' }],
+      ['inventory', { show_status: true, show_count: true, custom_text: '', low_stock_threshold: 5, low_stock_text: 'Low stock - {n} items left', sold_out_text: 'Sold out', status_style: 'dot', in_stock_color: '#10a443', status_color: '#f59e0b', font_size: 14 }],
       ['variant', { hide_sold_out: false, picker_type: 'buttons', swatch_style: 'color', shape: 'normal', nested_dropdown: false, show_group_title: false, sku_display_name: '', show_sku_in_option: false }],
-      ['buy', { show_quantity: true, show_add: true, show_buy_now: false, buy_now_text: 'Buy now', show_dynamic: true, show_payment_options: true, show_shop_installments: false, button_shape: 'normal', custom_radius: 8, button_layout: 'stacked', channels: ['shop', 'paypal', 'apple_pay', 'google_pay'], channel_logo: false, show_safe_checkout: false, safe_checkout_label: 'GUARANTEED SAFE CHECKOUT', trust_logos: ['norton', 'paypal', 'visa', 'mastercard', 'mcafee', 'money_back'] }],
-      ['icon_text', { layout: 'horizontal', font: 'body', size: 'base', background: false, card_style: 'none', icon_1: 'box', image_1: '', first: 'Orders over $50 ship free', link_1: '', icon_2: 'return', image_2: '', second: '30 day returns', link_2: '', icon_3: 'star', image_3: '', third: '', link_3: '' }],
-      ['collapsible', { heading: 'Overview', icon: 'none', content: 'A clinically proven, non-sticky, vegan lip treatment that delivers the intense hydration of a lip mask with a sweet sheer tint using food-grade, non-artificial flavor. Designed for sensitive, irritated lips, this cushiony treatment delivers instant comfort to rescue dry, chapped lips.', custom_liquid: '', page: '', open: false }],
-      ['collapsible', { heading: 'How to use', icon: 'none', content: 'Apply generously to lips for hydration and comfort. Use at night for an overnight mask.', custom_liquid: '', page: '', open: false }],
-      ['collapsible', { heading: 'Ingredients', icon: 'none', content: '<ul><li>Dulce De Leche</li><li>Ube vanilla</li><li>Watermelon kiwi</li><li>Blood orange vanilla</li></ul>', custom_liquid: '', page: '', open: false }],
-      ['featured_reviews', { heading: 'What Our Customers Are Saying', data_source: 'auto', show_image: true, show_avatar: true, scroll: true, auto_play: false, view_all_popup: true, cards_per_row: 1 }],
+      ['buy', { show_quantity: true, show_add: true, atc_layout: 'with-quantity', atc_icon: 'bag-plus', atc_background: '#FFC439', atc_text_color: '#FFFFFF', atc_shape: 'pill', atc_custom_radius: 8, show_dynamic: true, channels: ['buy_now', 'paypal'], buy_now_text: 'Buy now', buy_now_background: '#000000', buy_now_text_color: '#FFFFFF', dyn_shape: 'normal', dyn_custom_radius: 8, show_payment_options: true, channel_logo: true, show_safe_checkout: true, safe_checkout_align: 'center', safe_checkout_label: 'GUARANTEED SAFE CHECKOUT', trust_logos: ['visa', 'mastercard', 'amex', 'paypal', 'apple_pay', 'google_pay'], trust_logo_size: 28 }],
+      ['icon_text', { layout: 'horizontal', item_layout: 'icon-left', alignment: 'left', font: 'body', size: 16, icon_size: 20, item_gap: 24, icon_text_gap: 8, background: false, background_color: '#f6f6f6', corner_radius: 10, text_color: '', icon_color: '', card_style: 'none', icon_1: 'box', image_1: '', first_heading: 'Orders over $50 ship free', first_content: '', icon_2: 'return', image_2: '', second_heading: '30 day returns', second_content: '', icon_3: 'star', image_3: '', third_heading: '', third_content: '' }],
+      ['collapsible', { heading: 'Overview', icon: 'none', content: 'A clinically proven, non-sticky, vegan lip treatment that delivers the intense hydration of a lip mask with a sweet sheer tint using food-grade, non-artificial flavor. Designed for sensitive, irritated lips, this cushiony treatment delivers instant comfort to rescue dry, chapped lips.', custom_liquid: '', open: false }],
+      ['collapsible', { heading: 'How to use', icon: 'none', content: 'Apply generously to lips for hydration and comfort. Use at night for an overnight mask.', custom_liquid: '', open: false }],
+      ['collapsible', { heading: 'Ingredients', icon: 'none', content: '<ul><li>Dulce De Leche</li><li>Ube vanilla</li><li>Watermelon kiwi</li><li>Blood orange vanilla</li></ul>', custom_liquid: '', open: false }],
+      ['featured_reviews', {
+        heading: 'What Our Customers Are Saying', layout: 'nav', data_source: 'manual', auto_count: 3,
+        reviews: [OS.defaultFeaturedReviewItem()],
+        show_image: true, show_avatar: true, round_avatar: false, star_color: '#16a34a',
+        show_verified: true, verified_text: 'Verified Customer', verified_subtext: 'Real customer · Verified order · Real buyer',
+        scroll: true, nav_style: 'auto', auto_play: false, cards_per_row: 1,
+      }],
       ['actions', { show_share: true, layout: 'tile', icon_style: 'brand', platforms: ['facebook', 'x', 'pinterest'], show_copy: true }],
-      ['sticky', { show_image: true, show_title: true, show_price: true, show_quantity: true, show_bundle: false, show_after_scroll: true, appear_at: 'scroll', position: 'bottom', mobile_visible: true, button_text: 'Add to cart' }],
+      ['sticky', { show_image: true, show_title: true, show_price: true, show_quantity: true, show_after_scroll: true, appear_at: 'scroll', mobile_visible: true, button_text: 'Add to cart' }],
     ]).map((pair) => ({ kind: pair[0], hidden: false, settings: pair[1] })),
     render: function (s, blocks, ctx) {
       const t = ctx.tokens || {};
@@ -1182,18 +2271,21 @@
       const customCss = s.custom_css ? '<style>' + String(s.custom_css).replace(/<\/style/gi, '<\\/style') + '</style>' : '';
       const padTop = Math.max(0, Math.min(100, s.padding_top == null ? 0 : Number(s.padding_top)));
       const padBot = Math.max(0, Math.min(100, s.padding_bottom == null ? 100 : Number(s.padding_bottom)));
-      return '<div class="pdpx' + (mob ? ' mob' : '') + '" data-media-size="' + OS.esc(mediaSize) + '" data-pdp-handle="' + OS.esc(p.handle || p.id || '') + '" data-pdp-url-state="' + OS.esc(resolved.urlState) + '" data-pdp-variant="' + OS.esc(selected.id || '') + '" style="color:' + text + ';font-family:' + OS.bodyFamily(t) + ';padding:' + padTop + 'px ' + padX + ' ' + padBot + 'px">' +
+      const selInv = selected.inventory == null ? (p.inventory == null ? 99 : p.inventory) : selected.inventory;
+      // Shell always carries a default SKU so ATC works even when Variant block is hidden / empty.
+      const shellData = '<span hidden data-pdp-variant-data data-pdp-shell-data>' +
+        '<i data-pdp-variant data-id="' + OS.esc(selected.id || p.id || p.handle || 'default') + '" data-color="' + OS.esc(selected.color || '') + '" data-size="' + OS.esc(selected.size || '') + '" data-price="' + Number(selected.price == null ? p.price : selected.price) + '" data-compare="' + Number(selected.compareAt == null ? p.compareAt || 0 : selected.compareAt) + '" data-inventory="' + Number(selInv) + '" data-image="' + OS.esc(selected.image || p.image || '') + '" data-sku="' + OS.esc(selected.sku || p.sku || '') + '"></i></span>';
+      return '<div class="pdpx' + (mob ? ' mob' : '') + '" data-media-size="' + OS.esc(mediaSize) + '" data-pdp-handle="' + OS.esc(p.handle || p.id || '') + '" data-pdp-url-state="' + OS.esc(resolved.urlState) + '" data-pdp-variant="' + OS.esc(selected.id || p.id || '') + '" data-pdp-price="' + Number(selected.price == null ? p.price : selected.price) + '" data-pdp-image="' + OS.esc(selected.image || p.image || '') + '" data-pdp-inventory="' + Number(selInv) + '" style="color:' + text + ';font-family:' + OS.bodyFamily(t) + ';padding:' + padTop + 'px ' + padX + ' ' + padBot + 'px">' +
         '<div style="max-width:100%;width:100%;margin:0 auto">' +
         '<div class="pdp-grid" style="grid-template-columns:' + size + '% minmax(0,1fr)">' +
           mediaHtml(items, s, t, mob) +
           '<div class="pdp-buy" style="background:' + bg + ';color:' + text + ';padding:' + (bg && bg !== 'transparent' ? '16px' : '0') + '">' +
             visible.filter((b) => b.kind !== 'sticky').map((b) => rowHtml(b, p, s, t, ctx, selected)).join('') +
           '</div></div></div>' +
-          stickyHtml(visible.find((b) => b.kind === 'sticky'), p, t) +
-          popupHtml(s, p, t) + customCss + '</div>';
+          stickyHtml(visible.find((b) => b.kind === 'sticky'), p, t, visible.find((b) => b.kind === 'buy')) +
+          shellData + popupHtml(s, p, t) + customCss + '</div>';
     },
     hydrate: function (root, settings) {
-      const pop = root.querySelector('[data-pdp-pop]');
       const zoom = root.querySelector('[data-pdp-zoom]');
       let slideBusy = false;
       const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1273,12 +2365,118 @@
         zoom.classList.add('on');
       }));
       if (zoom) zoom.addEventListener('click', (e) => { e.stopPropagation(); zoom.classList.remove('on'); });
+      // Inline recommendations: side arrows + peek + pointer-drag / touch swipe (scrollbar hidden).
+      root.querySelectorAll('[data-pdp-rec]').forEach((rail) => {
+        let drag = null;
+        let suppressClick = false;
+        const wrap = rail.closest('[data-pdp-rec-wrap]');
+        const prevBtn = wrap ? wrap.querySelector('[data-pdp-rec-nav="-1"]') : null;
+        const nextBtn = wrap ? wrap.querySelector('[data-pdp-rec-nav="1"]') : null;
+        function syncNav() {
+          if (!prevBtn && !nextBtn) return;
+          const max = Math.max(0, rail.scrollWidth - rail.clientWidth);
+          const left = rail.scrollLeft;
+          if (prevBtn) prevBtn.disabled = left <= 2;
+          if (nextBtn) nextBtn.disabled = left >= max - 2;
+        }
+        function step(dir) {
+          const card = rail.querySelector('.pdp-rec-card');
+          const gap = parseFloat(getComputedStyle(rail).gap) || 10;
+          const stepPx = card ? (card.getBoundingClientRect().width + gap) : Math.max(120, rail.clientWidth * 0.8);
+          rail.scrollBy({ left: dir * stepPx, behavior: 'smooth' });
+        }
+        if (prevBtn) prevBtn.addEventListener('click', (e) => { e.stopPropagation(); e.preventDefault(); step(-1); });
+        if (nextBtn) nextBtn.addEventListener('click', (e) => { e.stopPropagation(); e.preventDefault(); step(1); });
+        rail.addEventListener('scroll', syncNav, { passive: true });
+        syncNav();
+        rail.addEventListener('pointerdown', (e) => {
+          if (e.button != null && e.button !== 0) return;
+          if (e.target && e.target.closest && e.target.closest('[data-pdp-rec-nav]')) return;
+          drag = { id: e.pointerId, x: e.clientX, left: rail.scrollLeft, moved: false };
+          try { rail.setPointerCapture(e.pointerId); } catch (_) {}
+        });
+        rail.addEventListener('pointermove', (e) => {
+          if (!drag || e.pointerId !== drag.id) return;
+          const dx = e.clientX - drag.x;
+          if (!drag.moved && Math.abs(dx) < 4) return;
+          if (!drag.moved) { drag.moved = true; rail.classList.add('is-dragging'); }
+          rail.scrollLeft = drag.left - dx;
+          e.preventDefault();
+        });
+        const endDrag = (e) => {
+          if (!drag || (e && e.pointerId !== drag.id)) return;
+          if (drag.moved) {
+            rail.classList.remove('is-dragging');
+            suppressClick = true;
+            syncNav();
+          }
+          drag = null;
+        };
+        rail.addEventListener('pointerup', endDrag);
+        rail.addEventListener('pointercancel', endDrag);
+        rail.addEventListener('click', (e) => {
+          if (!suppressClick) return;
+          suppressClick = false;
+          e.preventDefault();
+          e.stopPropagation();
+        }, true);
+      });
+      // Video column — carousel arrows + click-to-enlarge (shared lightbox with Video feed).
+      root.querySelectorAll('[data-pdp-vc-open]').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (typeof OS.openVideoLightbox === 'function') {
+            OS.openVideoLightbox(btn.getAttribute('data-cover') || '', btn.getAttribute('data-video') || '');
+          }
+        });
+      });
+      root.querySelectorAll('[data-pdp-vc]').forEach((rail) => {
+        const wrap = rail.closest('[data-pdp-vc-wrap]');
+        const prevBtn = wrap ? wrap.querySelector('[data-pdp-vc-nav="-1"]') : null;
+        const nextBtn = wrap ? wrap.querySelector('[data-pdp-vc-nav="1"]') : null;
+        function syncNav() {
+          if (!prevBtn && !nextBtn) return;
+          const max = Math.max(0, rail.scrollWidth - rail.clientWidth);
+          const left = rail.scrollLeft;
+          if (prevBtn) prevBtn.disabled = left <= 2;
+          if (nextBtn) nextBtn.disabled = left >= max - 2;
+        }
+        function step(dir) {
+          const card = rail.querySelector('.pdp-vc-card');
+          const gap = parseFloat(getComputedStyle(rail).gap) || 10;
+          const stepPx = card ? (card.getBoundingClientRect().width + gap) : Math.max(100, rail.clientWidth * 0.8);
+          rail.scrollBy({ left: dir * stepPx, behavior: 'smooth' });
+        }
+        if (prevBtn) prevBtn.addEventListener('click', (e) => { e.stopPropagation(); e.preventDefault(); step(-1); });
+        if (nextBtn) nextBtn.addEventListener('click', (e) => { e.stopPropagation(); e.preventDefault(); step(1); });
+        rail.addEventListener('scroll', syncNav, { passive: true });
+        syncNav();
+      });
       const qtyEl = root.querySelector('[data-pdp-qty]');
       let qty = 1;
-      // Only the hidden <i data-pdp-variant> rows — not .pdpx[data-pdp-variant].
-      const variantEls = Array.from(root.querySelectorAll('[data-pdp-variant-data] [data-id]'));
+      let currentMatch = null;
+      let atcBusy = false;
+      // Prefer Variant-block rows; fall back to shell default SKU (single-SKU / no picker).
+      const variantEls = (() => {
+        const fromBlock = Array.from(root.querySelectorAll('[data-pdp-variant-data]:not([data-pdp-shell-data]) [data-id]'));
+        if (fromBlock.length) return fromBlock;
+        return Array.from(root.querySelectorAll('[data-pdp-variant-data] [data-id]'));
+      })();
       const shellEl = root.querySelector('.pdpx') || root;
       const productHandle = shellEl.getAttribute('data-pdp-handle') || root.getAttribute('data-pdp-handle') || '';
+      function productFallbackMatch() {
+        return {
+          id: shellEl.getAttribute('data-pdp-variant') || productHandle || 'default',
+          color: currentColor || '',
+          size: currentSize || '',
+          price: Number(shellEl.getAttribute('data-pdp-price') || 0),
+          compareAt: 0,
+          inventory: Number(shellEl.getAttribute('data-pdp-inventory') || 99),
+          image: shellEl.getAttribute('data-pdp-image') || '',
+          sku: '',
+        };
+      }
       let currentColor = (root.querySelector('[data-pdp-color].on') || {}).dataset ? root.querySelector('[data-pdp-color].on').dataset.pdpColor : '';
       let currentSize = (root.querySelector('[data-pdp-size].on') || {}).dataset ? root.querySelector('[data-pdp-size].on').dataset.pdpSize : '';
       const colorDd = root.querySelector('[data-pdp-color-dd]');
@@ -1372,7 +2570,9 @@
         if (!match && prefer === 'color') match = all.find((v) => !currentColor || v.color === currentColor);
         if (!match && prefer === 'size') match = all.find((v) => !currentSize || v.size === currentSize);
         if (!match) match = all[0];
+        if (!match) match = productFallbackMatch();
         if (!match) return;
+        currentMatch = match;
         currentColor = match.color || currentColor;
         currentSize = match.size || currentSize;
         root.querySelectorAll('button[data-pdp-color]').forEach((el) => el.classList.toggle('on', el.dataset.pdpColor === currentColor));
@@ -1415,9 +2615,7 @@
               : (saveType === 'fixed'
                 ? 'Save ' + OS.money(match.compareAt - match.price)
                 : 'Save ' + Math.round((1 - match.price / match.compareAt) * 100) + '%'));
-          const iconHtml = save.dataset.saveIcon === '1'
-            ? '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4.2 4.2h7.6v7.6H4.2z" stroke="currentColor" stroke-width="1.4"/><path d="M6.2 9.8 9.8 6.2M6.5 6.5h.01M9.5 9.5h.01" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>'
-            : '';
+          const iconHtml = save.dataset.saveIcon === '1' ? savingIcon(true) : '';
           save.innerHTML = iconHtml + label;
         }
         if (stock) {
@@ -1425,6 +2623,9 @@
           const isLow = match.inventory > 0 && match.inventory <= threshold;
           stock.classList.toggle('sold', match.inventory <= 0);
           stock.classList.toggle('low', isLow);
+          const inStockColor = stock.getAttribute('data-in-stock-color') || '#10a443';
+          const lowStockColor = stock.getAttribute('data-low-stock-color') || '#f59e0b';
+          stock.style.setProperty('--status-color', match.inventory <= 0 ? '#9ca3af' : (isLow ? lowStockColor : inStockColor));
           const text = stock.querySelector('span');
           const showCount = stock.getAttribute('data-show-count') !== '0';
           const customText = stock.getAttribute('data-custom-text') || '';
@@ -1438,12 +2639,19 @@
                 : ((showCount ? match.inventory + ' in stock' : 'In stock') + customText));
           }
         }
+        const soldBadge = root.querySelector('[data-pdp-sold-badge]');
+        if (soldBadge) {
+          soldBadge.hidden = match.inventory > 0;
+          const badges = soldBadge.closest('[data-pdp-badges]');
+          if (badges) {
+            const anyVisible = [...badges.querySelectorAll('.pdp-tag')].some((el) => !el.hidden);
+            badges.hidden = !anyVisible;
+          }
+        }
         if (sku) sku.textContent = match.sku || '';
         if (match.image) {
           const hero = root.querySelector('.pdp-stage > .pdp-cell, .pdp-carousel > .pdp-cell, .pdp-media > .pdp-cell');
           if (hero) hero.style.backgroundImage = 'url("' + match.image + '")';
-          const popImage = root.querySelector('[data-pdp-pop-img]');
-          if (popImage) popImage.src = match.image;
         }
         if (qty > Math.max(1, match.inventory)) {
           qty = Math.max(1, match.inventory);
@@ -1451,7 +2659,8 @@
         }
         root.querySelectorAll('[data-pdp-atc]').forEach((button) => {
           button.disabled = match.inventory <= 0;
-          button.textContent = match.inventory <= 0 ? 'Sold out' : 'Add to cart';
+          const icon = button.getAttribute('data-atc-icon') || 'bag-plus';
+          button.innerHTML = atcButtonInner(icon, match.inventory <= 0 ? 'Sold out' : 'Add to cart');
         });
         // render() puts data-pdp-variant on .pdpx; hydrate root is .os-sec — keep the shell in sync.
         shellEl.setAttribute('data-pdp-variant', match.id || '');
@@ -1571,30 +2780,132 @@
           setAcc(box, open);
         });
       });
-      function chosenSize() {
-        const on = root.querySelector('button[data-pdp-size].on');
-        const ddOn = root.querySelector('[data-pdp-size-dd] .pdp-dd-opt.on');
-        return (on && on.textContent) || (ddOn && ddOn.getAttribute('data-value')) || currentSize || 'M';
+      function variantLabel(match) {
+        const parts = [];
+        if (match && match.color) parts.push(match.color);
+        if (match && match.size) parts.push(match.size);
+        return parts.join(' / ') || 'Default';
       }
-      function openPop() {
-        if (settings.atc_popup === false || !pop) return;
-        const meta = pop.querySelector('[data-pdp-pop-meta]');
-        const price = pop.querySelector('[data-pdp-pop-price]');
-        const unit = root.querySelector('.pdp-price .now');
-        if (meta) meta.textContent = chosenSize() + ' · Qty ' + qty;
-        if (price && unit) price.textContent = unit.textContent;
-        pop.classList.add('on');
-        const card = pop.querySelector('.pdp-pop-card');
-        if (card && card.scrollIntoView) card.scrollIntoView({ block: 'nearest' });
+      function productTitle() {
+        const el = root.querySelector('.pdp-title, h1.pdp-title, [data-pdp-title], h1');
+        return (el && el.textContent.trim()) || 'Product';
       }
-      root.querySelectorAll('[data-pdp-atc]').forEach((el) => el.addEventListener('click', (e) => { e.stopPropagation(); openPop(); }));
+      function playAtcButton(btn) {
+        if (!btn) return;
+        const icon = btn.getAttribute('data-atc-icon') || 'bag-plus';
+        const prev = btn.getAttribute('data-prev-label') || 'Add to cart';
+        btn.setAttribute('data-prev-label', prev);
+        btn.classList.add('is-adding');
+        btn.classList.remove('is-added');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="pdp-atc-spin" aria-hidden="true"></span>';
+        setTimeout(() => {
+          btn.classList.remove('is-adding');
+          btn.classList.add('is-added');
+          btn.innerHTML = atcButtonInner(icon, 'Added');
+          setTimeout(() => {
+            btn.classList.remove('is-added');
+            const sold = currentMatch && currentMatch.inventory <= 0;
+            btn.disabled = !!sold;
+            btn.innerHTML = atcButtonInner(icon, sold ? 'Sold out' : (btn.getAttribute('data-prev-label') || 'Add to cart'));
+            atcBusy = false;
+          }, 850);
+        }, 360);
+      }
+      function addCurrentVariant(fromBtn) {
+        if (atcBusy) return;
+        const match = currentMatch || productFallbackMatch();
+        if (!match || match.inventory <= 0) return;
+        currentMatch = match;
+        atcBusy = true;
+        const line = {
+          productId: productHandle,
+          variantId: match.id,
+          title: productTitle(),
+          image: match.image || '',
+          price: match.price,
+          options: variantLabel(match),
+          qty: qty,
+        };
+        if (OS.cart && typeof OS.cart.add === 'function') OS.cart.add(line);
+        const flyFrom = fromBtn || root.querySelector('.pdp-buy [data-pdp-atc], .pdp-buy .pdp-atc') || root.querySelector('[data-pdp-atc]');
+        if (OS.cart && typeof OS.cart.flyToCart === 'function') {
+          OS.cart.flyToCart({ image: line.image, fromEl: flyFrom });
+        }
+        playAtcButton(fromBtn);
+      }
+      root.querySelectorAll('[data-pdp-atc]').forEach((el) => el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (el.disabled) return;
+        addCurrentVariant(el);
+      }));
       root.querySelectorAll('[data-pdp-paypal]').forEach((el) => el.addEventListener('click', (e) => e.stopPropagation()));
       root.querySelectorAll('[data-pdp-pay-more]').forEach((el) => el.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
         if (typeof OS.goCheckout === 'function') OS.goCheckout();
       }));
-      root.querySelectorAll('[data-pdp-popup-link]').forEach((el) => el.addEventListener('click', (e) => { e.stopPropagation(); openPop(); }));
+      const pagePop = root.querySelector('[data-pdp-page-pop]');
+      const pagePopBody = pagePop && pagePop.querySelector('[data-pdp-page-pop-body]');
+      function resolvePopupPage(pageId) {
+        const pages = (OS.sample && OS.sample.pages) || [];
+        return pages.find((x) => x.id === pageId) || null;
+      }
+      function closePagePop() {
+        if (!pagePop) return;
+        pagePop.classList.remove('on');
+      }
+      function openPagePop(pageId, size) {
+        if (!pagePop || !pagePopBody) return;
+        const page = resolvePopupPage(pageId);
+        const html = page ? String(page.content || '').trim() : '';
+        const title = page && page.title ? String(page.title) : '';
+        const card = pagePop.querySelector('.pdp-page-pop-card');
+        const w = Number(size && size.w);
+        const h = Number(size && size.h);
+        if (card) {
+          card.style.width = (w > 0 ? Math.min(w, 900) : 560) + 'px';
+          card.style.maxWidth = '100%';
+          if (html && h > 0) {
+            card.style.height = Math.min(h, 800) + 'px';
+            card.style.minHeight = '';
+          } else {
+            card.style.height = '';
+            card.style.minHeight = html ? '' : '120px';
+          }
+        }
+        if (html) {
+          pagePopBody.classList.remove('is-empty');
+          pagePopBody.innerHTML = (title ? '<h3>' + OS.esc(title) + '</h3>' : '') + html;
+        } else {
+          pagePopBody.classList.add('is-empty');
+          pagePopBody.innerHTML = '';
+        }
+        pagePop.classList.remove('on');
+        void pagePop.offsetWidth;
+        pagePop.classList.add('on');
+      }
+      root.querySelectorAll('[data-pdp-popup-link]').forEach((el) => el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        el.classList.remove('is-anim');
+        void el.offsetWidth;
+        el.classList.add('is-anim');
+        const onEnd = () => { el.classList.remove('is-anim'); el.removeEventListener('animationend', onEnd); };
+        el.addEventListener('animationend', onEnd);
+        openPagePop(el.getAttribute('data-popup-page') || '', {
+          w: el.getAttribute('data-popup-w'),
+          h: el.getAttribute('data-popup-h'),
+        });
+      }));
+      if (pagePop) {
+        pagePop.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (e.target === pagePop) closePagePop();
+        });
+        pagePop.querySelectorAll('[data-pdp-page-pop-close]').forEach((el) => {
+          el.addEventListener('click', (e) => { e.stopPropagation(); closePagePop(); });
+        });
+      }
       const sharePop = root.querySelector('[data-pdp-share-pop]');
       let shareCopyTimer = 0;
       function shareUrl() {
@@ -1686,51 +2997,236 @@
           shareCopyTimer = setTimeout(resetShareCopy, 1800);
         });
       }
-      if (pop) {
-        pop.addEventListener('click', (e) => e.stopPropagation());
-        pop.querySelectorAll('[data-pdp-pop-close]').forEach((el) => el.addEventListener('click', () => pop.classList.remove('on')));
-        const view = pop.querySelector('[data-pdp-view]');
-        if (view) view.addEventListener('click', () => pop.classList.remove('on'));
+      const frPop = root.querySelector('[data-pdp-fr-pop]');
+      const frPopCard = frPop && frPop.querySelector('[data-pdp-fr-pop-card]');
+      const frPopMedia = frPop && frPop.querySelector('[data-pdp-fr-pop-media]');
+      const frPopStage = frPop && frPop.querySelector('[data-pdp-fr-pop-stage]');
+      const frPopThumbs = frPop && frPop.querySelector('[data-pdp-fr-pop-thumbs]');
+      const frPopPrev = frPop && frPop.querySelector('[data-pdp-fr-pop-prev]');
+      const frPopNext = frPop && frPop.querySelector('[data-pdp-fr-pop-next]');
+      const frPopBody = frPop && frPop.querySelector('[data-pdp-fr-pop-body]');
+      let frPopImages = [];
+      let frPopImgIdx = 0;
+      const syncFrPopNav = () => {
+        const multi = frPopImages.length > 1;
+        if (frPopPrev) frPopPrev.classList.toggle('on', multi);
+        if (frPopNext) frPopNext.classList.toggle('on', multi);
+      };
+      function pinFrPop() {
+        if (!frPop) return;
+        const stage = document.getElementById('os-cscroll')
+          || document.querySelector('.os-canvas-scroll')
+          || document.querySelector('.os-preview-stage')
+          || document.getElementById('os-frame')
+          || root;
+        const r = stage.getBoundingClientRect();
+        frPop.style.position = 'fixed';
+        frPop.style.inset = 'auto';
+        frPop.style.left = Math.round(r.left) + 'px';
+        frPop.style.top = Math.round(r.top) + 'px';
+        frPop.style.right = 'auto';
+        frPop.style.bottom = 'auto';
+        frPop.style.width = Math.round(r.width) + 'px';
+        frPop.style.height = Math.round(r.height) + 'px';
+        frPop.style.zIndex = '40';
+      }
+      function unpinFrPop() {
+        if (!frPop) return;
+        ['position', 'inset', 'left', 'top', 'right', 'bottom', 'width', 'height', 'zIndex'].forEach((k) => {
+          frPop.style[k] = '';
+        });
+      }
+      function setFrPopImage(n) {
+        if (!frPopStage || !frPopImages.length) return;
+        frPopImgIdx = ((n % frPopImages.length) + frPopImages.length) % frPopImages.length;
+        frPopStage.style.backgroundImage = 'url(' + frPopImages[frPopImgIdx] + ')';
+        if (frPopThumbs) {
+          frPopThumbs.querySelectorAll('.pdp-fr-pop-thumb').forEach((t, i) => t.classList.toggle('on', i === frPopImgIdx));
+        }
+      }
+      function closeFrPop() {
+        if (!frPop) return;
+        frPop.classList.remove('on');
+        unpinFrPop();
+      }
+      function openFrPop(data) {
+        if (!frPop || !frPopCard || !frPopBody || !data) return;
+        const images = (Array.isArray(data.images) ? data.images : []).map(String).filter(Boolean);
+        if (!images.length && data.image) images.push(String(data.image));
+        frPopImages = images;
+        frPopImgIdx = 0;
+        const hasMedia = images.length > 0;
+        frPopCard.classList.toggle('no-media', !hasMedia);
+        if (frPopMedia) frPopMedia.style.display = hasMedia ? '' : 'none';
+        if (hasMedia) {
+          setFrPopImage(0);
+          syncFrPopNav();
+          if (frPopThumbs) {
+            frPopThumbs.classList.toggle('on', images.length > 1);
+            frPopThumbs.innerHTML = images.length > 1
+              ? images.map((src, i) => '<button type="button" class="pdp-fr-pop-thumb' + (i === 0 ? ' on' : '') + '" data-pdp-fr-pop-thumb="' + i + '" style="background-image:url(' + OS.esc(src) + ')" aria-label="Image ' + (i + 1) + '"></button>').join('')
+              : '';
+          }
+        } else if (frPopThumbs) {
+          frPopThumbs.classList.remove('on');
+          frPopThumbs.innerHTML = '';
+          syncFrPopNav();
+        }
+        const starColor = (data.star_color && data.star_color !== 'transparent') ? data.star_color : '#16a34a';
+        const rating = Math.max(1, Math.min(5, Number(data.rating) || 5));
+        const checkSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>';
+        const verified = data.show_verified !== false
+          ? ('<span class="pdp-fr-pop-verified"><i>' + checkSvg + '</i>' + OS.esc(data.verified_text || 'Verified') + '</span>')
+          : '';
+        const itemType = String(data.item_type || '').trim();
+        frPopBody.innerHTML =
+          '<div class="pdp-fr-pop-top">' +
+            '<span class="pdp-fr-pop-name">' + OS.esc(data.author || 'Customer') + '</span>' +
+            verified +
+            '<button type="button" class="pdp-fr-pop-info" title="Verified purchase" aria-label="Info">i</button>' +
+          '</div>' +
+          '<div class="pdp-fr-pop-stars" style="color:' + OS.esc(starColor) + '">' + '\u2605'.repeat(rating) + '</div>' +
+          '<div class="pdp-fr-pop-text">' + OS.esc(data.text || '') + '</div>' +
+          (itemType
+            ? ('<div class="pdp-fr-pop-meta"><span class="pdp-fr-pop-meta-label">Item type:</span><span class="pdp-fr-pop-meta-value">' + OS.esc(itemType) + '</span></div>')
+            : '');
+        pinFrPop();
+        frPop.classList.remove('on');
+        void frPop.offsetWidth;
+        frPop.classList.add('on');
+      }
+      if (frPop) {
+        frPop.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (e.target === frPop) closeFrPop();
+        });
+        frPop.addEventListener('click', (e) => {
+          const closeBtn = e.target.closest('[data-pdp-fr-pop-close]');
+          if (closeBtn) { e.preventDefault(); closeFrPop(); return; }
+          const thumb = e.target.closest('[data-pdp-fr-pop-thumb]');
+          if (thumb) {
+            e.preventDefault();
+            setFrPopImage(Number(thumb.getAttribute('data-pdp-fr-pop-thumb')) || 0);
+            return;
+          }
+          if (e.target.closest('[data-pdp-fr-pop-prev]')) {
+            e.preventDefault();
+            setFrPopImage(frPopImgIdx - 1);
+            return;
+          }
+          if (e.target.closest('[data-pdp-fr-pop-next]')) {
+            e.preventDefault();
+            setFrPopImage(frPopImgIdx + 1);
+          }
+        });
       }
 
       root.querySelectorAll('[data-pdp-fr]').forEach((fr) => {
         const cards = Array.from(fr.querySelectorAll('.pdp-fr-card'));
         if (!cards.length) return;
+        const carousel = fr.getAttribute('data-carousel') === '1';
+        const rail = fr.querySelector('.pdp-fr-rail');
+        const dots = Array.from(fr.querySelectorAll('[data-pdp-fr-dot]'));
         let idx = 0;
-        const show = (n) => {
-          idx = (n + cards.length) % cards.length;
-          cards.forEach((c, i) => { c.style.display = i === idx ? '' : 'none'; });
+        let autoTimer = 0;
+        const syncDots = () => { dots.forEach((d, i) => d.classList.toggle('on', i === idx)); };
+        const readIdx = () => {
+          if (!carousel || !rail || !cards.length) return 0;
+          const origin = rail.getBoundingClientRect().left;
+          let best = 0;
+          let bestDist = Infinity;
+          cards.forEach((card, i) => {
+            const dist = Math.abs(card.getBoundingClientRect().left - origin);
+            if (dist < bestDist) { bestDist = dist; best = i; }
+          });
+          return best;
         };
-        show(0);
+        const cardLeft = (card) =>
+          card.getBoundingClientRect().left - rail.getBoundingClientRect().left + rail.scrollLeft;
+        const show = (n, smooth) => {
+          if (!carousel || !rail || !cards.length) return;
+          idx = ((n % cards.length) + cards.length) % cards.length;
+          const left = Math.max(0, cardLeft(cards[idx]));
+          if (typeof rail.scrollTo === 'function') {
+            rail.scrollTo({ left: left, behavior: smooth === false ? 'auto' : 'smooth' });
+          } else {
+            rail.scrollLeft = left;
+          }
+          syncDots();
+        };
+        show(0, false);
         const prev = fr.querySelector('[data-pdp-fr-prev]');
         const next = fr.querySelector('[data-pdp-fr-next]');
-        if (prev) prev.addEventListener('click', () => show(idx - 1));
-        if (next) next.addEventListener('click', () => show(idx + 1));
-        const all = fr.querySelector('[data-pdp-fr-all]');
-        if (all) all.addEventListener('click', () => {
-          if (pop) {
-            const head = pop.querySelector('.pdp-pop-head strong');
-            if (head) head.textContent = 'Customer reviews';
-            pop.classList.add('on');
-          }
+        if (prev) prev.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); show(idx - 1); });
+        if (next) next.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); show(idx + 1); });
+        dots.forEach((d) => d.addEventListener('click', (e) => {
+          e.preventDefault(); e.stopPropagation();
+          show(Number(d.getAttribute('data-pdp-fr-dot')) || 0);
+        }));
+        cards.forEach((card) => {
+          const open = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            let data = null;
+            try { data = JSON.parse(card.getAttribute('data-fr-review') || ''); } catch (err) { data = null; }
+            if (data) openFrPop(data);
+          };
+          card.addEventListener('click', open);
+          card.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') open(e);
+          });
         });
-        if (fr.getAttribute('data-autoplay') === '1') {
-          setInterval(() => show(idx + 1), 4200);
+        if (carousel && rail) {
+          let scrollTick = 0;
+          rail.addEventListener('scroll', () => {
+            if (scrollTick) cancelAnimationFrame(scrollTick);
+            scrollTick = requestAnimationFrame(() => {
+              idx = readIdx();
+              syncDots();
+            });
+          }, { passive: true });
+        }
+        if (carousel && fr.getAttribute('data-autoplay') === '1') {
+          autoTimer = setInterval(() => show(idx + 1), 4200);
+          fr.addEventListener('pointerenter', () => { if (autoTimer) { clearInterval(autoTimer); autoTimer = 0; } });
         }
       });
 
-      const sticky = root.querySelector('[data-pdp-sticky]');
-      if (sticky && sticky.classList.contains('after-scroll')) {
+      const sticky = root.querySelector('[data-pdp-sticky], .pdp-sticky');
+      if (sticky) {
         const sc = document.getElementById('os-cscroll') || document.querySelector('.os-canvas-scroll') || window;
-        const buy = root.querySelector('.pdp-buy') || root;
+        const buyBtn = root.querySelector('.pdp-buy [data-pdp-atc], .pdp-buy .pdp-atc') || root.querySelector('[data-pdp-atc], .pdp-atc');
+        const pinToCanvas = () => {
+          const host = (sc && sc.getBoundingClientRect) ? sc : null;
+          if (!host) return;
+          const r = host.getBoundingClientRect();
+          const pad = 12;
+          sticky.style.left = Math.round(r.left + pad) + 'px';
+          sticky.style.width = Math.max(0, Math.round(r.width - pad * 2)) + 'px';
+          sticky.style.right = 'auto';
+          sticky.style.bottom = Math.max(8, Math.round(window.innerHeight - r.bottom + 8)) + 'px';
+        };
+        const clearPin = () => {
+          sticky.style.left = '';
+          sticky.style.width = '';
+          sticky.style.right = '';
+          sticky.style.bottom = '';
+        };
         const onScroll = () => {
-          const top = buy.getBoundingClientRect ? buy.getBoundingClientRect().bottom : 0;
-          const threshold = 100;
-          if (top < threshold) sticky.classList.add('on');
-          else sticky.classList.remove('on');
+          const afterScroll = sticky.classList.contains('after-scroll');
+          let show = !afterScroll;
+          if (afterScroll) {
+            const anchor = buyBtn || root.querySelector('.pdp-buy') || root;
+            const bottom = anchor.getBoundingClientRect ? anchor.getBoundingClientRect().bottom : 0;
+            show = bottom < 100;
+          }
+          sticky.classList.toggle('on', show);
+          if (show) pinToCanvas();
+          else clearPin();
         };
         onScroll();
         sc.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', onScroll, { passive: true });
       }
     },
   });

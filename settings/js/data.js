@@ -104,6 +104,13 @@ window.DATA_SETTINGS = {
       autoCancelMinutes: 360,
       autoReceiveDays: 7,
     },
+    // Store-level product URL rules (not PDP theme settings).
+    // SPU custom-field prefix + optional SEO-title path for storefront links.
+    productUrl: {
+      spuPrefixEnabled: false,
+      spuPrefix: '5000',
+      seoTitleEnabled: false,
+    },
     // Bestfulfill OMS identifiers. These stay blank until the merchant maps
     // this store to its fulfillment ERP.
     bestfulfill: {
