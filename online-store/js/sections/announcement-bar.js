@@ -32,7 +32,7 @@
       { key: 'rotate_seconds', control: 'range', label: 'Change messages every', min: 4, max: 20, step: 1, unit: 's', default: 4, visibleWhen: (s) => s.navigation !== 'auto' && s.auto_rotate },
       { key: 'text_size', control: 'select', label: 'Text size', default: 'large', options: [{ value: 'xsmall', label: 'X-Small' }, { value: 'small', label: 'Small' }, { value: 'medium', label: 'Medium' }, { value: 'large', label: 'Large' }] },
       { sub: 'Colors' },
-      { key: 'background', control: 'color', label: 'Background', default: '', allowTransparent: true, info: 'Defaults to your theme Primary color.' },
+      { key: 'background', control: 'color', label: 'Background', default: '', allowTransparent: true, blankValue: () => OS.themeColor('primary_color', '#000000'), info: 'Defaults to your theme Primary color.' },
       { key: 'text', control: 'color', label: 'Text', default: '#FFFFFF' },
     ],
     blocks: {
@@ -41,19 +41,17 @@
         { key: 'text', control: 'text', label: 'Text', default: '', required: true, placeholder: 'Announcement text' },
         { key: 'link', control: 'url', label: 'Link', default: '', placeholder: 'https://…' },
       ],
-      defaults: () => ({ text: 'Free shipping on orders over $79', link: '' }),
+      defaults: () => ({ text: 'Free shipping on all U.S. orders $500+', link: '' }),
     },
     defaultBlocks: () => ([
-      { id: OS.uid('msg'), kind: 'message', hidden: false, settings: { text: 'Free shipping on orders over $79', link: '' } },
-      { id: OS.uid('msg'), kind: 'message', hidden: false, settings: { text: '30% off all dresses — this week only', link: '/collections/sale' } },
-      { id: OS.uid('msg'), kind: 'message', hidden: false, settings: { text: 'New spring arrivals just dropped', link: '/collections/new-arrivals' } },
+      { id: OS.uid('msg'), kind: 'message', hidden: false, settings: { text: 'Free shipping on all U.S. orders $500+', link: '' } },
     ]),
     render: function (s, blocks, ctx) {
       const t = ctx.tokens;
       // Checkout reuse (Content PRD §6.2): the same component is allowed on Checkout but
       // the click-through link is dropped there to avoid pulling buyers out of the funnel.
       const noLink = ctx.surface === 'checkout';
-      let bg = OS.bgOrTransparent(OS.col(s.background, (t.colors && t.colors.primary_color) || '#103635'));
+      let bg = OS.bgOrTransparent(OS.col(s.background, (t.colors && t.colors.primary_color) || '#000000'));
       const vis = (blocks || []).filter((b) => !b.hidden && b.settings.text) ;
       const list = vis.length ? vis : [{ id: '_', settings: { text: 'Add a message to this announcement bar.' } }];
       const multi = list.length > 1;

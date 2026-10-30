@@ -15,10 +15,18 @@
     '.fcx .fc-view a{text-decoration:none;font-weight:600;cursor:pointer}',
   ].join(''));
 
-  function tabProducts(t, count) {
-    const all = OS.sample.products; const out = [];
-    for (let i = 0; i < count; i++) out.push(all[i % all.length]);
-    return out;
+  function tabProducts(tabSettings, count) {
+    const all = OS.sample.products || [];
+    const byId = {};
+    all.forEach((p) => { if (p && p.id != null) byId[String(p.id)] = p; });
+    const src = tabSettings || {};
+    if (src.product_source === 'manual' && Array.isArray(src.products) && src.products.length) {
+      const picked = src.products.map((id) => byId[String(id)]).filter(Boolean);
+      if (picked.length) return picked.slice(0, count);
+    }
+    const out = [];
+    for (let i = 0; i < count; i++) out.push(all[i % Math.max(1, all.length)]);
+    return out.filter(Boolean);
   }
 
   OS.register('featured-collection', {
@@ -35,7 +43,7 @@
       { key: 'view_all_text', control: 'text', label: 'View all text', default: 'View all', visibleWhen: (s) => s.show_view_all },
       { sub: 'Colors' },
       { key: 'background', control: 'color', label: 'Background', default: 'transparent', allowTransparent: true },
-      { key: 'text', control: 'color', label: 'Text', default: '', allowTransparent: true, info: 'Blank inherits the theme heading color. Product cards follow Theme settings › Product cards.' },
+      { key: 'text', control: 'color', label: 'Text', default: '', allowTransparent: true, blankValue: () => OS.themeColor('heading_color', '#000000'), info: 'Blank inherits the theme heading color. Product cards follow Theme settings › Product cards.' },
     ],
     blocks: {
       name: 'Tab', kind: 'tab', max: 8,
@@ -64,7 +72,7 @@
       let active = 0; if (ctx.selectedBlockId) { const i = tabs.findIndex((b) => b.id === ctx.selectedBlockId); if (i >= 0) active = i; }
       const showTabs = tabs.length > 1;
       const cur = tabs[active] || { id: '_', settings: { tab_title: s.heading } };
-      const prods = tabProducts(t, limit);
+      const prods = tabProducts(cur.settings || {}, limit);
       const grid = '<div class="fc-grid" data-block-id="' + OS.esc(cur.id) + '" style="grid-template-columns:repeat(' + cols + ',1fr);gap:' + gap + 'px">' +
         prods.map((p) => OS.productCard(p, t)).join('') + '</div>';
       const tabNav = showTabs ? '<div class="fc-tabs" style="color:' + headColor + '">' + tabs.map((b, i) => '<button class="fc-tab' + (i === active ? ' on' : '') + '" data-fc-tab="' + i + '" data-block-id="' + OS.esc(b.id) + '">' + OS.esc(b.settings.tab_title || ('Tab ' + (i + 1))) + '</button>').join('') + '</div>' : '';

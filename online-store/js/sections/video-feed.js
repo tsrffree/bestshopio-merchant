@@ -45,11 +45,16 @@
     '.vfx .vf-nav:disabled{opacity:.3;cursor:default;background:#fff;color:#1a1a1a;box-shadow:0 1px 3px rgba(0,0,0,.08)}',
     '.vfx .vf-empty{opacity:.5;font-size:13px;padding:24px;text-align:center}',
     /* Lightbox — fixed to the viewport so it stays centered while the canvas scrolls */
-    '.vf-lightbox{position:fixed;inset:0;z-index:12000;display:flex;align-items:center;justify-content:center;background:rgba(80,80,80,.72);padding:24px 16px;box-sizing:border-box}',
+    '.vf-lightbox{position:fixed;inset:0;z-index:12000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:rgba(80,80,80,.72);padding:24px 16px 28px;box-sizing:border-box}',
     '.vf-lightbox .vf-lb-close{position:absolute;top:16px;right:18px;z-index:2;height:36px;padding:0 14px;border:0;border-radius:8px;background:transparent;color:#fff;font:600 15px/36px system-ui,sans-serif;cursor:pointer;text-shadow:0 1px 2px rgba(0,0,0,.35)}',
     '.vf-lightbox .vf-lb-close:hover{opacity:.85}',
-    '.vf-lightbox .vf-lb-player{position:relative;width:min(360px,72vw);aspect-ratio:9/16;max-height:min(86vh,720px);background:#111;border-radius:10px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.35)}',
+    '.vf-lightbox .vf-lb-player{position:relative;width:min(360px,72vw);aspect-ratio:9/16;max-height:min(78vh,720px);background:#111;border-radius:10px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.35)}',
     '.vf-lightbox .vf-lb-player video,.vf-lightbox .vf-lb-player img{display:block;width:100%;height:100%;object-fit:cover;background:#111}',
+    /* Same control pattern as product-main image zoom: previous / close / next */
+    '.vf-lightbox .vf-lb-controls{position:relative;z-index:2;display:flex;align-items:center;gap:12px}',
+    '.vf-lightbox .vf-lb-controls button{width:36px;height:36px;border:0;border-radius:50%;background:#fff;color:#222;font-size:22px;line-height:36px;cursor:pointer;padding:0}',
+    '.vf-lightbox .vf-lb-controls button:hover{background:#f3f3f3}',
+    '.vf-lightbox .vf-lb-controls button:disabled{opacity:.4;cursor:default}',
   ].join(''));
 
   const ASPECT = { '9/16': 9 / 16, '4/5': 4 / 5, '1/1': 1, '16/9': 16 / 9 };
@@ -59,22 +64,80 @@
     youtube: { label: 'YouTube', color: '#FF0000' },
   };
 
+  let lbItems = [];
+  let lbIndex = 0;
+  let lbLayer = null;
+
   function closeLightbox() {
     document.querySelectorAll('.vf-lightbox').forEach((n) => {
       const v = n.querySelector('video');
       if (v) { try { v.pause(); } catch (_) {} }
       n.remove();
     });
+    lbLayer = null;
+    lbItems = [];
+    lbIndex = 0;
     document.removeEventListener('keydown', onLbKey);
   }
 
-  function onLbKey(e) {
-    if (e.key === 'Escape') closeLightbox();
+  function normalizePlaylist(coverOrItems, videoOrIndex) {
+    // openLightbox([{ cover, video }, ...], startIndex)
+    if (Array.isArray(coverOrItems)) {
+      const items = coverOrItems.map((it) => ({
+        cover: String((it && (it.cover || it.cover_image)) || ''),
+        video: String((it && (it.video || it.video_url || it.videoUrl)) || ''),
+      })).filter((it) => it.cover || it.video);
+      const idx = Math.max(0, Math.min(items.length - 1, Number(videoOrIndex) || 0));
+      return { items: items.length ? items : [{ cover: '', video: '' }], index: items.length ? idx : 0 };
+    }
+    // openLightbox(cover, videoUrl) — single clip (legacy)
+    return {
+      items: [{ cover: String(coverOrItems || ''), video: String(videoOrIndex || '') }],
+      index: 0,
+    };
   }
 
-  function openLightbox(cover, videoUrl) {
+  function renderLbMedia() {
+    if (!lbLayer || !lbItems.length) return;
+    const item = lbItems[lbIndex] || lbItems[0];
+    const src = item.video || SAMPLE_CLIP;
+    const player = lbLayer.querySelector('.vf-lb-player');
+    if (!player) return;
+    const prev = player.querySelector('video');
+    if (prev) { try { prev.pause(); } catch (_) {} }
+    player.innerHTML = '<video controls playsinline autoplay poster="' + OS.esc(item.cover || '') + '" src="' + OS.esc(src) + '"></video>';
+    const multi = lbItems.length > 1;
+    lbLayer.querySelectorAll('[data-vf-lb-step]').forEach((btn) => {
+      btn.disabled = !multi;
+    });
+  }
+
+  function stepLightbox(dir) {
+    if (lbItems.length < 2) return;
+    lbIndex = (lbIndex + dir + lbItems.length) % lbItems.length;
+    renderLbMedia();
+  }
+
+  function onLbKey(e) {
+    if (e.key === 'Escape') {
+      closeLightbox();
+      return;
+    }
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      stepLightbox(-1);
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      stepLightbox(1);
+    }
+  }
+
+  function openLightbox(coverOrItems, videoOrIndex) {
     closeLightbox();
-    const src = videoUrl || SAMPLE_CLIP;
+    const normalized = normalizePlaylist(coverOrItems, videoOrIndex);
+    lbItems = normalized.items;
+    lbIndex = normalized.index;
+    const multi = lbItems.length > 1;
     const layer = document.createElement('div');
     layer.className = 'vf-lightbox';
     layer.setAttribute('role', 'dialog');
@@ -82,12 +145,26 @@
     layer.setAttribute('aria-label', 'Video');
     layer.innerHTML =
       '<button type="button" class="vf-lb-close" data-vf-lb-close>Close</button>' +
-      '<div class="vf-lb-player">' +
-        '<video controls playsinline autoplay poster="' + OS.esc(cover || '') + '" src="' + OS.esc(src) + '"></video>' +
+      '<div class="vf-lb-player"></div>' +
+      '<div class="vf-lb-controls">' +
+        '<button type="button" data-vf-lb-step="-1" aria-label="Previous video"' + (multi ? '' : ' disabled') + '>&#8249;</button>' +
+        '<button type="button" data-vf-lb-close aria-label="Close video">&#215;</button>' +
+        '<button type="button" data-vf-lb-step="1" aria-label="Next video"' + (multi ? '' : ' disabled') + '>&#8250;</button>' +
       '</div>';
     document.body.appendChild(layer);
+    lbLayer = layer;
+    renderLbMedia();
     const close = () => closeLightbox();
-    layer.querySelector('[data-vf-lb-close]').onclick = (e) => { e.preventDefault(); e.stopPropagation(); close(); };
+    layer.querySelectorAll('[data-vf-lb-close]').forEach((btn) => {
+      btn.onclick = (e) => { e.preventDefault(); e.stopPropagation(); close(); };
+    });
+    layer.querySelectorAll('[data-vf-lb-step]').forEach((btn) => {
+      btn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        stepLightbox(Number(btn.getAttribute('data-vf-lb-step') || 0));
+      };
+    });
     layer.addEventListener('click', (e) => {
       if (e.target === layer) close();
     });
@@ -95,6 +172,7 @@
   }
 
   // Shared by product-main › Video column block.
+  // Signature: openVideoLightbox(cover, videoUrl) or openVideoLightbox([{cover,video},...], index)
   OS.openVideoLightbox = openLightbox;
   OS.closeVideoLightbox = closeLightbox;
   OS.sampleVideoClip = SAMPLE_CLIP;
@@ -227,11 +305,19 @@
         '<div style="max-width:' + maxW + ';margin:0 auto">' + head + container + '</div></div>';
     },
     hydrate: function (el) {
-      el.querySelectorAll('[data-vf-open]').forEach((btn) => {
+      const openBtns = Array.from(el.querySelectorAll('[data-vf-open]'));
+      const playlist = openBtns.map((btn) => ({
+        cover: btn.getAttribute('data-cover') || '',
+        video: btn.getAttribute('data-video') || '',
+      }));
+      openBtns.forEach((btn, i) => {
         btn.onclick = (e) => {
           e.preventDefault();
           e.stopPropagation();
-          openLightbox(btn.getAttribute('data-cover') || '', btn.getAttribute('data-video') || '');
+          openLightbox(playlist.length ? playlist : [{
+            cover: btn.getAttribute('data-cover') || '',
+            video: btn.getAttribute('data-video') || '',
+          }], i);
         };
       });
 

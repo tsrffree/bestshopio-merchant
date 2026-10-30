@@ -64,7 +64,7 @@
 
 ### 4. Variant
 - nested_dropdown: toggle / false (开 = 单下拉显示组合值 12-18M / Yellow)
-- show_group_title: toggle / false
+- show_group_title: toggle / true (显示 Color / Size 标题, 并随选中项更新名称)
 - sku_display_name: text / 空 (空 = 原始 SKU)
 - show_sku_in_option: toggle / false
 

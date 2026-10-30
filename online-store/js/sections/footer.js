@@ -77,7 +77,7 @@
       { key: 'copyright_text', control: 'text', label: 'Copyright text', default: '© {{year}} {{shop_name}}. All Rights Reserved.' },
       { key: 'show_powered_by', control: 'toggle', label: 'Show “Powered by”', default: false },
       { sub: 'Colors' },
-      { key: 'background', control: 'color', label: 'Background', default: '', allowTransparent: true, info: 'Blank inherits Theme settings › Colors › Footer background.' },
+      { key: 'background', control: 'color', label: 'Background', default: '', allowTransparent: true, blankValue: () => OS.themeColor('footer_background', '#000000'), info: 'Blank inherits Theme settings › Colors › Footer background.' },
       { key: 'text', control: 'color', label: 'Text', default: '#FFFFFF' },
       { key: 'heading_text', control: 'color', label: 'Heading text', default: '#FFFFFF' },
     ],

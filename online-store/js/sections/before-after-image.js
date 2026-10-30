@@ -40,7 +40,7 @@
       { key: 'drag_initial_position', control: 'range', label: 'Handle start position', min: 0, max: 100, step: 1, unit: '%', default: 50 },
       { sub: 'Colors' },
       { key: 'background', control: 'color', label: 'Background', default: 'transparent', allowTransparent: true },
-      { key: 'text', control: 'color', label: 'Text', default: '', allowTransparent: true, info: 'Blank inherits the theme text color.' },
+      { key: 'text', control: 'color', label: 'Text', default: '', allowTransparent: true, blankValue: () => OS.themeColor('text_color', '#000000'), info: 'Blank inherits the theme text color.' },
       { key: 'handle_color', control: 'color', label: 'Handle', default: '#FFFFFF' },
     ],
     defaults: () => ({ before_image: OS.sample.IMG.hero1, after_image: OS.sample.IMG.hero3 }),

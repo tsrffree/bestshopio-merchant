@@ -101,9 +101,11 @@
   const ICON = (n) => I[n] || I.layers;
 
   // ------------------------------------------------------------------ token / style helpers
-  const FONT_SERIF = ['Playfair Display', 'DM Serif Display', 'Georgia'];
+  const FONT_SERIF = ['Fraunces', 'Playfair Display', 'DM Serif Display', 'Georgia'];
   const GOOGLE_FONT_QUERY = {
+    'Montserrat': 'Montserrat:ital,wght@0,200..700;1,200..700',
     'DM Sans': 'DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000',
+    'Fraunces': 'Fraunces:opsz,wght@9..144,400;500;600;700',
     'Playfair Display': 'Playfair+Display:wght@400;500;600;700',
     'DM Serif Display': 'DM+Serif+Display:ital@0;1',
     'Manrope': 'Manrope:wght@400;500;600;700;800',
@@ -592,6 +594,32 @@
   function groupDefaults(groups) {
     const out = {};
     groups.forEach((g) => { out[g.key] = {}; g.fields.forEach((f) => { if (f.key) out[g.key][f.key] = f.default; }); });
+    // Chantilly / Symmetry product reference: Montserrat, charcoal controls, white canvas.
+    if (groups === D.SETTINGS_GROUPS) {
+      out.colors.primary_color = '#222222';
+      out.colors.secondary_color = '#777777';
+      out.colors.page_background = '#FFFFFF';
+      out.colors.text_color = '#232323';
+      out.colors.heading_color = '#232323';
+      out.colors.link_color = '#232323';
+      out.colors.border_color = '#E5E5E5';
+      out.colors.footer_background = '#222222';
+      out.typography.body_font = 'Montserrat';
+      out.typography.heading_font = 'Montserrat';
+      out.typography.base_font_size = 14;
+      out.typography.body_font_weight = 300;
+      out.typography.body_bold_weight = 700;
+      out.typography.heading_letter_spacing = 0;
+      out.typography.heading_uppercase = false;
+      out.buttons.button_background = '#232323';
+      out.buttons.button_text = '#FFFFFF';
+      out.buttons.button_border = '#232323';
+      out.buttons.button_radius = 0;
+      out.buttons.button_height = 47;
+      out.typography.button_font_weight = 300;
+      out.typography.button_letter_spacing = 8;
+      out.typography.button_font_family = 'body';
+    }
     return out;
   }
   function defForKind(kind) { return SECTIONS[kind]; }
@@ -1062,6 +1090,11 @@
       const next = (page && (D.PAGE_OPTIONS || []).some((p) => p.value === page)) ? page : 'home';
       if (ED.currentPage !== next) {
         ED.currentPage = next; ED.leftMode = 'sections'; ED.selection = defaultSelection();
+      }
+      // Honor ?tpl= for multi-template page types (e.g. product?tpl=pdp-apparel).
+      if (host.tpl) {
+        const list = (((ED.theme.templates[ED.currentPage] || {}).list) || []);
+        if (list.some((t) => t.id === host.tpl)) ED.tplSel[ED.currentPage] = host.tpl;
       }
     }
     if (ED.history && !ED.history.undo.length && !ED.history.redo.length) {
@@ -2448,8 +2481,11 @@
     const metaLabel = dynamicSourceLabel(f, values);
     const metaConnected = isDynamicConnected(f, values);
     const sourceMode = (f.dynamicSource && f.dynamicSource.mode) || 'fixed';
+    const metaPath = metaConnected ? dynamicSourcePath(f, values) : '';
     const metadata = showMeta
-      ? '<button type="button" class="os-field-meta i18n-skip' + (metaConnected ? ' is-connected' : '') + '" data-rt-source data-rt-source-label="' + esc(metaLabel) + '" data-rt-source-mode="' + esc(sourceMode) + '" aria-label="Connect dynamic source" title="Connect dynamic source">' + I.database + '</button>'
+      ? '<button type="button" class="os-field-meta i18n-skip' + (metaConnected ? ' is-connected' : '') + '" data-rt-source data-rt-source-label="' + esc(metaLabel) + '" data-rt-source-mode="' + esc(sourceMode) + '"' +
+        (metaPath ? ' data-rt-source-path="' + esc(metaPath) + '"' : '') +
+        ' aria-label="Connect dynamic source" title="Connect dynamic source">' + I.database + '</button>'
       : '';
     const label = '<label class="os-flabel' + (showMeta ? ' has-meta' : '') + '">' + esc(f.label) + req(f) + metadata + '</label>';
     const oneLine = (cls) => '<div class="os-fld ' + cls + '">' + label + control(f, val, values, ctx) + (hint || '') + '</div>';
@@ -2487,15 +2523,24 @@
       label: d.name,
     }));
   }
+  // Built-in product fields from merchant product admin (Name / Summary / Highlights / Description / Vendor).
+  const PRODUCT_RESOURCE_FIELDS = [
+    { value: 'resource.title', label: 'Name' },
+    { value: 'resource.summary', label: 'Summary' },
+    { value: 'resource.highlights', label: 'Highlights' },
+    { value: 'resource.description', label: 'Description' },
+    { value: 'resource.vendor', label: 'Vendor' },
+  ];
   // Flat product dynamic-source list: optional built-in fields + all product metafield defs.
   function productDynamicSourceOptions(includeProductFields) {
-    const list = [];
-    if (includeProductFields) list.push({ value: 'resource.description', label: 'Description' });
+    const list = includeProductFields ? PRODUCT_RESOURCE_FIELDS.slice() : [];
     return list.concat(productMetafieldOptions());
   }
   function metafieldDisplayName(path) {
     if (!path || typeof path !== 'string') return '';
-    if (path === 'resource.description' || path === 'description') return 'Description';
+    if (path === 'resource.name' || path === 'name' || path === 'title' || path === 'resource.title') return 'Name';
+    const builtIn = PRODUCT_RESOURCE_FIELDS.find((f) => f.value === path || path === f.value.replace(/^resource\./, ''));
+    if (builtIn) return builtIn.label;
     const hit = productMetafieldDefs().find((d) => (d.namespace + '.' + d.key) === path);
     return hit ? hit.name : path;
   }
@@ -2505,12 +2550,26 @@
     // Metafields mode inserts inline variable chips — never whole-field bind.
     if (f.dynamicSource && f.dynamicSource.mode === 'metafields') return false;
     const stored = values && values[f.key + '_dynamic_source'];
-    if (stored === false || stored == null || stored === '') {
+    // Explicit Remove dynamic source writes false — must stick (do not revive defaultConnected).
+    if (stored === false) return false;
+    if (stored == null || stored === '') {
       return !!(f.dynamicSource && f.dynamicSource.defaultConnected);
     }
     return true;
   }
+  // Whole-field bind path: explicit string, legacy true, or schema defaultConnected path.
+  function dynamicSourcePath(f, values) {
+    if (!isDynamicConnected(f, values)) return '';
+    const stored = values && values[f.key + '_dynamic_source'];
+    if (typeof stored === 'string' && stored && stored !== 'true' && stored !== 'false') return stored;
+    return (f.dynamicSource && f.dynamicSource.path) || 'resource.description';
+  }
   function dynamicSourceLabel(f, values) {
+    const path = dynamicSourcePath(f, values);
+    if (path) {
+      const named = metafieldDisplayName(path);
+      if (named) return named;
+    }
     return (f.dynamicSource && f.dynamicSource.label) || f.label || 'Value';
   }
   function richTextControl(f, val, dk, values) {
@@ -2519,7 +2578,9 @@
     const chipMode = sourceMode === 'metafields';
     // Only fixed-path sources blank the editor into a bound pill.
     const connected = chipMode ? false : isDynamicConnected(f, values);
-    const attrs = dk + ' data-rt-source-mode="' + esc(sourceMode) + '"';
+    const srcPath = connected ? dynamicSourcePath(f, values) : '';
+    const attrs = dk + ' data-rt-source-mode="' + esc(sourceMode) + '"' +
+      (srcPath ? ' data-rt-source-path="' + esc(srcPath) + '"' : '');
     if (window.BSRichText && typeof window.BSRichText.render === 'function') {
       window.BSRichText.ensureStyles();
       return window.BSRichText.render({
@@ -2527,6 +2588,7 @@
         placeholder: f.placeholder || 'Add description...',
         connected: connected,
         sourceLabel: metaLabel,
+        sourcePath: srcPath,
         autoHeight: !!f.autoHeight,
         attrs: attrs,
       });
@@ -2891,13 +2953,17 @@
       const f = field || {};
       const ds = f.dynamicSource || {};
       const mode = ds.mode || el.getAttribute('data-rt-source-mode') || 'fixed';
+      // Same searchable source list for every richtext dynamic-source field (bind + chip).
+      const includeProductFields = ds.includeProductFields != null ? !!ds.includeProductFields : true;
+      const listSources = mode !== 'collections' && (mode === 'metafields' || !!f.dynamicSource || f.control === 'richtext');
       window.BSRichText.wire(el, onChange, {
         openImagePicker: (onPick) => openSelectFileModal('', onPick),
         toast: toast,
         sourceMode: mode,
         fixedSourceLabel: ds.label || f.label || 'Value',
-        sourceOptions: mode === 'metafields'
-          ? (() => productDynamicSourceOptions(!!ds.includeProductFields))
+        currentPath: dynamicSourcePath(f, values || {}),
+        sourceOptions: listSources
+          ? (() => productDynamicSourceOptions(includeProductFields))
           : null,
         autoHeight: !!f.autoHeight || el.getAttribute('data-rt-autoheight') === '1',
       });
@@ -5884,7 +5950,7 @@
   .btn-warn{background:#f59e0b;color:#fff}.btn-warn:hover{background:#e08c08}
   .btn-danger{background:var(--err);color:#fff}.btn-danger:hover{background:#b3401f}
   .os-top .btn[disabled]{opacity:.45;cursor:not-allowed}
-  .os-body{flex:1;min-height:0;display:grid;grid-template-columns:300px 1fr 340px;overflow:hidden}
+  .os-body{flex:1;min-height:0;display:grid;grid-template-columns:300px 1fr 296px;overflow:hidden}
   .os-builder.os-full-preview .os-body{grid-template-columns:1fr}
   .os-builder.os-full-preview .os-left,.os-builder.os-full-preview .os-right{display:none}
   .os-builder.os-full-preview .os-canvas-scroll{padding:0}

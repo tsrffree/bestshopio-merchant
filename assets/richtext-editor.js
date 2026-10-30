@@ -34,6 +34,7 @@
     more: svg('<circle cx="6" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="18" cy="12" r="1.4" fill="currentColor" stroke="none"/>'),
     icon: svg('<circle cx="12" cy="12" r="8"/><path d="M8.5 11.2c.4-.8 1.2-1.3 2.1-1.3.8 0 1.5.4 1.9 1M13.5 11.2c.4-.8 1.2-1.3 2.1-1.3"/><path d="M9 14.2c.8.9 1.8 1.4 3 1.4s2.2-.5 3-1.4"/>'),
     database: svg('<ellipse cx="12" cy="5" rx="7" ry="3"/><path d="M5 5v7c0 1.7 3.1 3 7 3s7-1.3 7-3V5"/><path d="M5 12v7c0 1.7 3.1 3 7 3s7-1.3 7-3v-7"/>'),
+    search: svg('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'),
   };
 
   function btn(cmd, title, content, disabled) {
@@ -110,9 +111,12 @@
     const autoHeight = !!opts.autoHeight;
     const tall = autoHeight && isMultilineHtml(html);
 
+    const sourcePath = opts.sourcePath || '';
     const sourcePill = connected
       ? ('<div class="bs-rt-source-wrap i18n-skip">' +
-          '<button type="button" class="bs-rt-source" data-rt-source data-rt-source-label="' + esc(sourceLabel) + '" aria-haspopup="menu" title="Dynamic source">' +
+          '<button type="button" class="bs-rt-source" data-rt-source data-rt-source-label="' + esc(sourceLabel) + '"' +
+            (sourcePath ? ' data-rt-source-path="' + esc(sourcePath) + '"' : '') +
+            ' aria-haspopup="menu" title="Dynamic source">' +
             '<span class="bs-rt-source-icon">' + I.database + '</span><span>' + esc(sourceLabel) + '</span>' +
           '</button></div>')
       : '';
@@ -259,6 +263,64 @@
     if (typeof sync === 'function') sync();
   }
 
+  function filterSourceOptions(options, query) {
+    const q = String(query || '').trim().toLowerCase();
+    if (!q) return options.slice();
+    return options.filter((o) => {
+      const label = String(o.label || '').toLowerCase();
+      const value = String(o.value || '').toLowerCase();
+      return label.indexOf(q) >= 0 || value.indexOf(q) >= 0;
+    });
+  }
+
+  function sourceListButtonsHtml(options, currentPath) {
+    if (!options.length) return '<div class="bs-rt-source-empty">No matching sources</div>';
+    return options.map((o) => {
+      const on = currentPath && String(o.value) === String(currentPath);
+      return '<button type="button" data-rt-pick-source="' + esc(o.value) + '" data-rt-pick-label="' + esc(o.label) + '"' + (on ? ' class="on"' : '') + '>' +
+        '<span>' + I.database + '</span>' + esc(o.label) +
+      '</button>';
+    }).join('');
+  }
+
+  // Shared dynamic-source picker: crumb + search + selectable list (chip insert or whole-field bind).
+  function openSourcePickerList(pop, opts) {
+    const options = resolveSourceOptions(opts);
+    const currentPath = opts.currentPath || '';
+    const crumb = opts.crumbHtml || '<div class="bs-rt-source-crumb">Template <span>›</span> Product</div>';
+    pop.classList.add('is-list');
+    pop.innerHTML = crumb +
+      '<div class="bs-rt-source-search">' +
+        '<span class="bs-rt-source-search-ico" aria-hidden="true">' + I.search + '</span>' +
+        '<input type="text" data-rt-source-q placeholder="Search" autocomplete="off">' +
+      '</div>' +
+      '<div class="bs-rt-source-list" data-rt-source-list>' +
+        (options.length
+          ? sourceListButtonsHtml(options, currentPath)
+          : '<div class="bs-rt-source-empty">No metafields available</div>') +
+      '</div>';
+    const listEl = pop.querySelector('[data-rt-source-list]');
+    const search = pop.querySelector('[data-rt-source-q]');
+    const wirePicks = () => {
+      pop.querySelectorAll('[data-rt-pick-source]').forEach((btn) => {
+        btn.onclick = () => {
+          const path = btn.getAttribute('data-rt-pick-source') || '';
+          const label = btn.getAttribute('data-rt-pick-label') || path;
+          if (typeof opts.onPick === 'function') opts.onPick(path, label);
+        };
+      });
+    };
+    wirePicks();
+    if (search) {
+      search.addEventListener('input', () => {
+        if (!listEl) return;
+        listEl.innerHTML = sourceListButtonsHtml(filterSourceOptions(options, search.value), currentPath);
+        wirePicks();
+      });
+      setTimeout(() => { try { search.focus(); } catch (e) { /* ignore */ } }, 0);
+    }
+  }
+
   function openSourceMenu(field, editor, key, onChange, bound, opts) {
     closeAllPops();
     opts = opts || {};
@@ -269,67 +331,86 @@
     const chipMode = mode === 'metafields';
     const connected = !chipMode && !opts.forcePicker && (bound || field.classList.contains('is-connected') || field.classList.contains('bs-rt-source'));
     const savedRange = chipMode ? (opts.savedRange || saveEditorSelection(editor)) : null;
+    const currentPath = opts.currentPath || field.getAttribute('data-rt-source-path') || '';
     const pop = document.createElement('div');
-    pop.className = 'bs-rt-source-pop i18n-skip' + (chipMode ? ' is-list' : '');
+    pop.className = 'bs-rt-source-pop i18n-skip';
     pop.setAttribute('role', 'menu');
 
-    if (connected) {
+    const placePop = () => {
+      const rect = field.getBoundingClientRect();
+      const popW = 280;
+      pop.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - popW - 8)) + 'px';
+      pop.style.top = (rect.bottom + 6) + 'px';
+    };
+
+    const attachClose = () => {
+      const close = (e) => {
+        if (!pop.contains(e.target) && e.target !== field && !field.contains(e.target)) {
+          pop.remove();
+          document.removeEventListener('mousedown', close);
+        }
+      };
+      setTimeout(() => document.addEventListener('mousedown', close), 0);
+    };
+
+    if (connected && !opts.forcePicker) {
       pop.innerHTML = '<div class="bs-rt-source-crumb">Template <span>›</span> Product <span>›</span> ' + esc(sourceLabel) + '</div>' +
+        '<button type="button" data-rt-change-source><span>' + I.database + '</span>Change dynamic source</button>' +
         '<button type="button" data-rt-edit-source><span>' + svg('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>') + '</span>Edit value</button>' +
         '<button type="button" data-rt-remove-source><span>' + svg('<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>') + '</span>Remove dynamic source</button>';
-    } else if (chipMode) {
-      const list = options.length
-        ? '<div class="bs-rt-source-list">' + options.map((o) =>
-            '<button type="button" data-rt-insert-mf="' + esc(o.value) + '" data-rt-insert-label="' + esc(o.label) + '"><span>' + I.database + '</span>' + esc(o.label) + '</button>'
-          ).join('') + '</div>'
-        : '<div class="bs-rt-source-empty">No metafields available</div>';
-      pop.innerHTML = '<div class="bs-rt-source-crumb">Template <span>›</span> Product <span>›</span> Metafields</div>' + list;
-    } else {
-      pop.innerHTML = '<div class="bs-rt-source-crumb">Template <span>›</span> Product</div>' +
-        '<button type="button" data-rt-connect-source><span>' + I.database + '</span>Connect ' + esc(sourceLabel) + '</button>';
+      document.body.appendChild(pop);
+      placePop();
+      const edit = pop.querySelector('[data-rt-edit-source]');
+      if (edit) edit.onclick = () => {
+        pop.remove();
+        const notify = opts.toast || global.toast;
+        if (typeof notify === 'function') notify('Edit this value on the product details page');
+      };
+      const change = pop.querySelector('[data-rt-change-source]');
+      if (change) change.onclick = () => {
+        openSourcePickerList(pop, {
+          sourceOptions: options,
+          currentPath: currentPath,
+          crumbHtml: '<div class="bs-rt-source-crumb">Template <span>›</span> Product</div>',
+          onPick: (path) => {
+            pop.remove();
+            onChange(key + '_dynamic_source', path || true, true);
+          },
+        });
+        placePop();
+      };
+      const remove = pop.querySelector('[data-rt-remove-source]');
+      if (remove) remove.onclick = () => {
+        pop.remove();
+        onChange(key + '_dynamic_source', false, true);
+      };
+      attachClose();
+      return;
     }
 
+    // Disconnected / chip mode: same searchable list component for every richtext source.
     document.body.appendChild(pop);
-    const rect = field.getBoundingClientRect();
-    const popW = chipMode ? 280 : 260;
-    pop.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - popW)) + 'px';
-    pop.style.top = (rect.bottom + 6) + 'px';
-
-    const edit = pop.querySelector('[data-rt-edit-source]');
-    if (edit) edit.onclick = () => {
-      pop.remove();
-      const notify = opts.toast || global.toast;
-      if (typeof notify === 'function') notify('Edit this value on the product details page');
-    };
-    const connect = pop.querySelector('[data-rt-connect-source]');
-    if (connect) connect.onclick = () => {
-      pop.remove();
-      onChange(key + '_dynamic_source', true, true);
-    };
-    pop.querySelectorAll('[data-rt-insert-mf]').forEach((btn) => {
-      btn.onclick = () => {
-        const path = btn.getAttribute('data-rt-insert-mf') || '';
-        const label = btn.getAttribute('data-rt-insert-label') || path;
+    openSourcePickerList(pop, {
+      sourceOptions: options,
+      currentPath: chipMode ? '' : currentPath,
+      crumbHtml: chipMode
+        ? '<div class="bs-rt-source-crumb">Template <span>›</span> Product <span>›</span> Metafields</div>'
+        : '<div class="bs-rt-source-crumb">Template <span>›</span> Product</div>',
+      onPick: (path, label) => {
         pop.remove();
-        if (!path || !editor) return;
-        // Drop legacy whole-field bind when switching to inline chips.
-        onChange(key + '_dynamic_source', false, false);
-        restoreEditorSelection(editor, savedRange);
-        insertMetafieldChip(editor, path, label, () => onChange(key, editor.innerHTML, false));
-      };
+        if (!path) return;
+        if (chipMode) {
+          if (!editor) return;
+          onChange(key + '_dynamic_source', false, false);
+          restoreEditorSelection(editor, savedRange);
+          insertMetafieldChip(editor, path, label, () => onChange(key, editor.innerHTML, false));
+          return;
+        }
+        onChange(key + '_dynamic_source', path, true);
+      },
     });
-    const remove = pop.querySelector('[data-rt-remove-source]');
-    if (remove) remove.onclick = () => {
-      pop.remove();
-      onChange(key + '_dynamic_source', false, true);
-    };
-    const close = (e) => {
-      if (!pop.contains(e.target) && e.target !== field && !field.contains(e.target)) {
-        pop.remove();
-        document.removeEventListener('mousedown', close);
-      }
-    };
-    setTimeout(() => document.addEventListener('mousedown', close), 0);
+    placePop();
+    attachClose();
   }
 
   function wire(el, onChange, opts) {
@@ -560,11 +641,16 @@
       '.bs-rt-source-icon{display:inline-flex;color:#005bd3}',
       '.bs-rt-source-icon svg{width:14px;height:14px;display:block}',
       '.bs-rt-source-pop,.bs-rt-icon-pop{position:fixed;z-index:500;min-width:220px;padding:8px 0;border:1px solid #d9d9d9;border-radius:10px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.16);color:#303030}',
-      '.bs-rt-source-pop.is-list{min-width:260px;max-width:320px}',
+      '.bs-rt-source-pop.is-list{width:280px;max-width:min(320px,calc(100vw - 16px));padding-bottom:4px}',
       '.bs-rt-source-crumb{padding:3px 12px 8px;color:#6b7280;font-size:12px;white-space:nowrap}',
       '.bs-rt-source-crumb span{padding:0 4px;color:#a0a6ad}',
+      '.bs-rt-source-search{position:relative;margin:0 10px 8px}',
+      '.bs-rt-source-search-ico{position:absolute;left:10px;top:0;bottom:0;display:inline-flex;align-items:center;color:#8a8a8a;pointer-events:none}',
+      '.bs-rt-source-search-ico svg{width:14px;height:14px;display:block}',
+      '.bs-rt-source-search input{width:100%;box-sizing:border-box;height:32px;padding:0 10px 0 32px;border:1px solid #c9cccf;border-radius:8px;background:#fff;color:#303030;font:inherit;font-size:13px;outline:none}',
+      '.bs-rt-source-search input:focus{border-color:#005bd3;box-shadow:0 0 0 1px #005bd3}',
       '.bs-rt-source-pop button{display:flex;align-items:center;gap:9px;width:100%;padding:9px 12px;border:0;background:#fff;color:#303030;text-align:left;font:inherit;font-size:13px;cursor:pointer}',
-      '.bs-rt-source-pop button:hover{background:#f5f6f7}',
+      '.bs-rt-source-pop button:hover,.bs-rt-source-pop button.on{background:#f5f6f7}',
       '.bs-rt-source-pop button span{display:inline-flex;width:15px;color:#555}',
       '.bs-rt-source-pop button svg{width:15px;height:15px}',
       '.bs-rt-source-list{max-height:280px;overflow:auto;padding:0 0 4px}',

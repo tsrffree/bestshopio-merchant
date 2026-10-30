@@ -1706,10 +1706,10 @@
     return Object.assign(blankProduct(), {
       product_id: p.product_id || numericId,
       name: p.title || '',
-      summary: '',
-      highlights: [''],
+      summary: p.summary || '',
+      highlights: Array.isArray(p.highlights) && p.highlights.length ? p.highlights.slice() : [''],
       description: p.description || '',
-      detail: '',
+      detail: p.detail || '',
       vendor: p.vendor || '',
       cate_id: 0,
       category_label: p.category || '',
@@ -1744,7 +1744,12 @@
   function applyEditToSample(sample, edit) {
     if (!sample || !edit) return;
     sample.title = edit.name || '';
+    sample.summary = edit.summary || '';
+    sample.highlights = Array.isArray(edit.highlights)
+      ? edit.highlights.map((x) => String(x || '').trim()).filter(Boolean)
+      : [];
     sample.description = edit.description || '';
+    if (edit.detail != null) sample.detail = edit.detail;
     if (edit.vendor != null) sample.vendor = edit.vendor;
     sample.tags = Array.isArray(edit.tags) ? edit.tags.slice() : [];
     sample.images = (edit.images || []).map((im) => im.url).filter(Boolean);

@@ -49,8 +49,8 @@
       { key: 'gap', control: 'range', label: 'Gap', min: 8, max: 48, step: 1, unit: 'px', default: 24 },
       { sub: 'Colors' },
       { key: 'background', control: 'color', label: 'Background', default: 'transparent', allowTransparent: true },
-      { key: 'text', control: 'color', label: 'Text', default: '', allowTransparent: true },
-      { key: 'icon_color', control: 'color', label: 'Icon', default: '', allowTransparent: true, info: 'Blank inherits the theme primary color.' },
+      { key: 'text', control: 'color', label: 'Text', default: '', allowTransparent: true, blankValue: () => OS.themeColor('text_color', '#000000') },
+      { key: 'icon_color', control: 'color', label: 'Icon', default: '', allowTransparent: true, blankValue: () => OS.themeColor('primary_color', '#000000'), info: 'Blank inherits the theme primary color.' },
     ],
     blocks: {
       name: 'Item', kind: 'item', max: 8,

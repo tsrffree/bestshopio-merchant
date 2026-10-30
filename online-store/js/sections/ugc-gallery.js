@@ -48,7 +48,7 @@
       { key: 'show_social_handle', control: 'toggle', label: 'Show social handle on hover', default: true },
       { sub: 'Colors' },
       { key: 'background', control: 'color', label: 'Background', default: 'transparent', allowTransparent: true },
-      { key: 'text', control: 'color', label: 'Text', default: '', allowTransparent: true },
+      { key: 'text', control: 'color', label: 'Text', default: '', allowTransparent: true, blankValue: () => OS.themeColor('text_color', '#000000') },
     ],
     blocks: {
       name: 'UGC item', kind: 'item', max: 30,

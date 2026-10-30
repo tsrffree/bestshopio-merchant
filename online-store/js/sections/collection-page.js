@@ -440,7 +440,7 @@
       { sub: 'Section style' },
       { key: 'container_max_width', control: 'numberInherit', label: 'Container max width', min: 600, max: 1600, step: 10, unit: 'px', default: null },
       { key: 'background', control: 'color', label: 'Background', default: 'transparent', allowTransparent: true },
-      { key: 'text', control: 'color', label: 'Text', default: '', allowTransparent: true },
+      { key: 'text', control: 'color', label: 'Text', default: '', allowTransparent: true, blankValue: () => OS.themeColor('text_color', '#000000') },
       { key: 'padding_top', control: 'numberInherit', label: 'Padding top', min: 0, max: 160, step: 4, unit: 'px', default: null },
       { key: 'padding_bottom', control: 'numberInherit', label: 'Padding bottom', min: 0, max: 160, step: 4, unit: 'px', default: null },
       { key: 'custom_css', control: 'custom_css', label: 'Custom CSS', default: '' },

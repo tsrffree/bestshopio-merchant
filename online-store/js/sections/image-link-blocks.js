@@ -51,7 +51,7 @@
       { key: 'card_radius', control: 'range', label: 'Image corner radius', min: 0, max: 30, step: 1, unit: 'px', default: 0 },
       { sub: 'Colors' },
       { key: 'background', control: 'color', label: 'Background', default: 'transparent', allowTransparent: true },
-      { key: 'text', control: 'color', label: 'Text', default: '', allowTransparent: true, info: 'Blank inherits the theme heading color.' },
+      { key: 'text', control: 'color', label: 'Text', default: '', allowTransparent: true, blankValue: () => OS.themeColor('heading_color', '#000000'), info: 'Blank inherits the theme heading color.' },
     ],
     blocks: {
       name: 'Link block', kind: 'tile', max: 20,

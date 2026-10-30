@@ -39,7 +39,7 @@
       { key: 'media_width', control: 'range', label: 'Media width', min: 30, max: 60, step: 1, unit: '%', default: 50, visibleWhen: (s) => s.layout_style === 'and-media' },
       { sub: 'Colors' },
       { key: 'background', control: 'color', label: 'Background', default: 'transparent', allowTransparent: true },
-      { key: 'heading_color', control: 'color', label: 'Heading', default: '', allowTransparent: true, info: 'Blank inherits the theme heading color.' },
+      { key: 'heading_color', control: 'color', label: 'Heading', default: '', allowTransparent: true, blankValue: () => OS.themeColor('heading_color', '#000000'), info: 'Blank inherits the theme heading color.' },
       { key: 'accordion_background', control: 'color', label: 'Accordion background', default: '#F4F4F4', allowTransparent: true },
     ],
     blocks: {

@@ -54,7 +54,7 @@
       { sub: 'Colors' },
       { key: 'background', control: 'color', label: 'Background', default: 'transparent', allowTransparent: true },
       { key: 'card_background', control: 'color', label: 'Card background', default: '#FFFFFF', allowTransparent: true },
-      { key: 'text', control: 'color', label: 'Text', default: '', allowTransparent: true },
+      { key: 'text', control: 'color', label: 'Text', default: '', allowTransparent: true, blankValue: () => OS.themeColor('text_color', '#000000') },
       { key: 'star_color', control: 'color', label: 'Star color', default: '#F5B301' },
       /* Shopify Polaris green — same family as admin / many Shopify review apps */
       { key: 'verified_color', control: 'color', label: 'Verified badge', default: '#008060' },

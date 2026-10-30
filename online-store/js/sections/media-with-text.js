@@ -30,7 +30,7 @@
       { key: 'show_block_numbers', control: 'toggle', label: 'Show block numbers', default: true },
       { sub: 'Colors' },
       { key: 'background', control: 'color', label: 'Background', default: 'transparent', allowTransparent: true },
-      { key: 'text', control: 'color', label: 'Text', default: '', allowTransparent: true, info: 'Blank inherits the theme body text color.' },
+      { key: 'text', control: 'color', label: 'Text', default: '', allowTransparent: true, blankValue: () => OS.themeColor('text_color', '#000000'), info: 'Blank inherits the theme body text color.' },
     ],
     blocks: {
       name: 'Image', kind: 'image', max: 10,

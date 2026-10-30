@@ -49,7 +49,7 @@
       { key: 'count', control: 'range', label: 'Reviews to show', min: 2, max: 8, step: 1, default: 4 },
       { sub: 'Colors' },
       { key: 'background', control: 'color', label: 'Background', default: '#F7F7F5' },
-      { key: 'text', control: 'color', label: 'Text', default: '', allowTransparent: true },
+      { key: 'text', control: 'color', label: 'Text', default: '', allowTransparent: true, blankValue: () => OS.themeColor('text_color', '#000000') },
       { key: 'padding_top', control: 'range', label: 'Top padding', min: 0, max: 120, step: 4, unit: 'px', default: 36 },
       { key: 'padding_bottom', control: 'range', label: 'Bottom padding', min: 0, max: 120, step: 4, unit: 'px', default: 36 },
     ],

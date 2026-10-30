@@ -59,7 +59,7 @@
   const BLOCK_KINDS = {
     tag: { name: 'Tag', icon: 'label', fields: [
       { key: 'tag_text', control: 'text', label: 'Tag text', default: 'Best seller' },
-      { key: 'tag_color', control: 'color', label: 'Tag color', default: '', allowTransparent: true, info: 'Blank inherits the theme primary color.' },
+      { key: 'tag_color', control: 'color', label: 'Tag color', default: '', allowTransparent: true, blankValue: () => OS.themeColor('primary_color', '#000000'), info: 'Blank inherits the theme primary color.' },
     ], defaults: () => ({}) },
     title: { name: 'Title', icon: 'heading', fields: [
       { key: 'title_size', control: 'select', label: 'Title size', default: 'large', options: [{ value: 'large', label: 'Large' }, { value: 'medium', label: 'Medium' }, { value: 'small', label: 'Small' }] },
@@ -131,7 +131,7 @@
       { key: 'enable_image_zoom', control: 'toggle', label: 'Enable image zoom', default: true },
       { sub: 'Colors' },
       { key: 'background', control: 'color', label: 'Background', default: 'transparent', allowTransparent: true },
-      { key: 'text', control: 'color', label: 'Text', default: '', allowTransparent: true },
+      { key: 'text', control: 'color', label: 'Text', default: '', allowTransparent: true, blankValue: () => OS.themeColor('text_color', '#000000') },
     ],
     blocks: { kinds: BLOCK_KINDS, max: 12 },
     defaultBlocks: () => ([
@@ -185,7 +185,7 @@
           const showDyn = b.show_dynamic !== false || !!b.show_paypal;
           const showPayMore = showDyn && channels.length > 0 && b.show_payment_options !== false;
           const buyNowLabel = b.buy_now_text || 'Buy now';
-          const atcColorStyle = (b.atc_background ? ';background:' + b.atc_background : '') + (b.atc_text_color ? ';color:' + b.atc_text_color : '') + ';border:0;font:inherit;font-weight:700';
+          const atcColorStyle = (b.atc_background ? ';background:' + b.atc_background : '') + (b.atc_text_color ? ';color:' + b.atc_text_color : '') + ';border:0';
           const buyNowColorStyle = ';background:' + (b.buy_now_background || '#fff') + ';color:' + (b.buy_now_text_color || 'inherit') + ';border:0';
           const paySrc = {
             visa: 'settings/assets/payments/visa.svg', mastercard: 'settings/assets/payments/mastercard.svg', amex: 'settings/assets/payments/amex.svg',

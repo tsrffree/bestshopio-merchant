@@ -10,13 +10,14 @@
   OS.featuredReviewCatalog = function () {
     const IMG = (OS.sample && OS.sample.IMG) || {};
     const gallery = (a, b, c) => [a, b, c].filter(Boolean);
+    // Wildpeak apparel social proof — hike / fit / fabric copy with real product + lifestyle media.
     return [
-      { id: 'rv-debi', author: 'Debi T.', rating: 5, text: 'Very comfortable and great fit. Want to buy more. miss having a phone pocket. Wore them on a ten hour hike. Held up great', image: IMG.av1 || IMG.p1 || '', images: gallery(IMG.av1, IMG.p1sand, IMG.p1blk), avatar: IMG.av1 || '', item_type: 'Coffee / L' },
-      { id: 'rv-emily', author: 'Emily R.', rating: 5, text: 'After 6 weeks the dark red stretch marks faded and the fine lines nearly disappeared.', image: IMG.p1 || IMG.p1sand || '', images: gallery(IMG.p1, IMG.p1sand, IMG.p1c), avatar: IMG.av2 || '', item_type: 'Sand / M' },
-      { id: 'rv-james', author: 'James Carter', rating: 5, text: 'A month in and my energy is up. I recommend it to anyone who feels drained every afternoon.', image: IMG.p1c || IMG.p1 || '', images: gallery(IMG.p1c, IMG.p1, IMG.p1b), avatar: IMG.av3 || '', item_type: 'Cream / L' },
-      { id: 'rv-maya', author: 'Maya L.', rating: 5, text: 'Worth every penny. Soft, breathable, and looks exactly like the photos.', image: IMG.p1sand || IMG.p1 || '', images: gallery(IMG.p1sand, IMG.p1, IMG.p1d), avatar: IMG.av1 || '', item_type: 'Sand / S' },
-      { id: 'rv-jonah', author: 'Jonah P.', rating: 4, text: 'True to size and arrived faster than expected. Will order again.', image: IMG.p1b || IMG.p1 || '', images: gallery(IMG.p1b, IMG.p1blk, IMG.p1), avatar: IMG.av2 || '', item_type: 'Black / M' },
-      { id: 'rv-alicia', author: 'Alicia R.', rating: 5, text: 'Color matches the gallery and the cut is flattering. Already planning a second order.', image: IMG.p1d || IMG.p1 || '', images: gallery(IMG.p1d, IMG.p1sand, IMG.p1), avatar: IMG.av3 || '', item_type: 'Cream / S' },
+      { id: 'rv-debi', author: 'Debi T.', rating: 5, text: 'Very comfortable and great fit. Want to buy more. Wore them on a ten hour hike. Held up great.', image: IMG.testi1 || IMG.ug1 || IMG.p1 || '', images: gallery(IMG.testi1, IMG.p1, IMG.p1b), avatar: IMG.av1 || '', item_type: 'Black / M' },
+      { id: 'rv-maya', author: 'Maya L.', rating: 5, text: 'Worth every penny. Soft, breathable, and looks exactly like the photos.', image: IMG.testi2 || IMG.p1grn || IMG.p1 || '', images: gallery(IMG.testi2, IMG.p1grn, IMG.p1), avatar: IMG.av2 || '', item_type: 'Green / S' },
+      { id: 'rv-jonah', author: 'Jonah P.', rating: 5, text: 'True to size and arrived faster than expected. Layers clean under a shell.', image: IMG.ug4 || IMG.p4 || '', images: gallery(IMG.ug4, IMG.p4, IMG.p4b), avatar: IMG.av3 || '', item_type: 'Black / L' },
+      { id: 'rv-alicia', author: 'Alicia R.', rating: 5, text: 'Color matches the gallery and the cut is flattering. Already planning a second order.', image: IMG.testi3 || IMG.p1brg || '', images: gallery(IMG.testi3, IMG.p1brg, IMG.p1), avatar: IMG.av1 || '', item_type: 'Burgundy / M' },
+      { id: 'rv-chris', author: 'Chris N.', rating: 5, text: 'Wore it three days on the trail. Holds shape, dries fast, no itch.', image: IMG.ug2 || IMG.p3 || '', images: gallery(IMG.ug2, IMG.p3, IMG.p3b), avatar: IMG.av2 || '', item_type: 'Green / M' },
+      { id: 'rv-dana', author: 'Dana P.', rating: 4, text: 'Soft hand feel and a clean outdoor cut. Highly recommend for travel packing.', image: IMG.ug5 || IMG.p6 || '', images: gallery(IMG.ug5, IMG.p6, IMG.shorts1), avatar: IMG.av3 || '', item_type: 'Black / S' },
     ];
   };
   OS.featuredReviewItemFromCatalog = function (base) {
@@ -107,7 +108,7 @@
     '.pdpx.mob .pdp-grid{grid-template-columns:1fr!important;gap:30px}',
     '.pdpx .pdp-media{min-width:0}',
     '.pdpx .pdp-media.expanded{margin-left:-16px;margin-right:-16px}',
-    '.pdpx .pdp-stage{position:relative;overflow:hidden}',
+    '.pdpx .pdp-stage{position:relative;overflow:hidden;background:#efefef}',
     '.pdpx .pdp-nav{position:absolute;top:50%;z-index:4;display:grid;place-items:center;width:44px;height:44px;margin:0;padding:0;border:1px solid rgba(34,34,34,.16);border-radius:50%;background:#fff;color:#222;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .28s ease,background .2s ease,color .2s ease,border-color .2s ease,transform .28s ease}',
     '.pdpx .pdp-nav svg{width:16px;height:16px;display:block;transition:transform .22s ease}',
     '.pdpx .pdp-nav.prev{left:14px;transform:translate(-10px,-50%)}',
@@ -120,7 +121,7 @@
     '.pdpx .pdp-nav.next:hover svg,.pdpx .pdp-nav.next:focus-visible svg{transform:translateX(3px)}',
     '.pdpx.mob .pdp-nav{opacity:1;pointer-events:auto}',
     '.pdpx.mob .pdp-nav.prev,.pdpx.mob .pdp-nav.next{transform:translate(0,-50%)}',
-    '.pdpx .pdp-slide{position:absolute;inset:0;z-index:2;background:#f1f2f4 center/cover no-repeat;pointer-events:none;will-change:transform}',
+    '.pdpx .pdp-slide{position:absolute;inset:0;z-index:2;background-color:#efefef;background-position:center;background-size:cover;background-repeat:no-repeat;background-blend-mode:darken;pointer-events:none;will-change:transform}',
     '.pdpx .pdp-slide.from-right{animation:pdp-slide-in-right .42s cubic-bezier(.22,.61,.36,1) both}',
     '.pdpx .pdp-slide.from-left{animation:pdp-slide-in-left .42s cubic-bezier(.22,.61,.36,1) both}',
     '.pdpx .pdp-slide.to-left{animation:pdp-slide-out-left .42s cubic-bezier(.22,.61,.36,1) both}',
@@ -130,22 +131,34 @@
     '@keyframes pdp-slide-out-left{from{transform:translateX(0)}to{transform:translateX(-100%)}}',
     '@keyframes pdp-slide-out-right{from{transform:translateX(0)}to{transform:translateX(100%)}}',
     '@media (prefers-reduced-motion:reduce){.pdpx .pdp-nav,.pdpx .pdp-nav svg{transition:none}.pdpx .pdp-nav.prev,.pdpx .pdp-nav.next{transform:translate(0,-50%)}.pdpx .pdp-slide{animation:none!important}}',
-    '.pdpx .pdp-cell{position:relative;display:block;width:100%;border:0;padding:0;background:#f1f2f4 center/cover no-repeat;cursor:pointer;overflow:hidden}',
+    '.pdpx .pdp-cell{position:relative;display:block;width:100%;border:0;padding:0;background:#efefef;cursor:pointer;overflow:hidden}',
+    '.pdpx .pdp-cell > img,.pdpx .pdp-cell > video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;display:block;border:0;pointer-events:none}',
+    '.pdpx .pdp-cell > img{mix-blend-mode:darken}',
+    '.pdpx .pdp-cell > video{background:#111;mix-blend-mode:normal}',
+    '.pdpx .pdp-thumb.is-video{position:relative}',
+    '.pdpx .pdp-thumb-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;font-size:10px;line-height:22px;text-align:center;pointer-events:none}',
     '.pdpx .pdp-cell.zoomable{cursor:zoom-in}',
+    '.pdpx .pdp-grid-1{display:grid;grid-template-columns:1fr;gap:8px}',
     '.pdpx .pdp-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}',
     '.pdpx .pdp-highlight{display:grid;grid-template-columns:1.4fr 1fr;grid-template-rows:1fr 1fr;gap:8px}',
     '.pdpx .pdp-highlight .pdp-cell:first-child{grid-row:1/span 2;min-height:420px}',
+    '.pdpx .pdp-collage{display:flex;flex-direction:column;gap:8px}',
+    '.pdpx .pdp-collage-row{display:grid;gap:8px;width:100%}',
+    '.pdpx .pdp-collage-row.full{grid-template-columns:1fr}',
+    '.pdpx .pdp-collage-row.pair{grid-template-columns:1fr 1fr}',
+    '.pdpx .pdp-collage-row.pair .pdp-cell:only-child{max-width:100%}',
     '.pdpx .pdp-carousel{display:grid;gap:8px}',
     '.pdpx .pdp-carousel.left{grid-template-columns:var(--pdp-thumb,72px) 1fr}',
-    '.pdpx .pdp-thumbs{display:flex;gap:var(--pdp-thumb-gap,8px)}',
-    '.pdpx .pdp-carousel.left .pdp-thumbs{flex-direction:column}',
-    '.pdpx .pdp-thumb{width:var(--pdp-thumb,64px);height:var(--pdp-thumb,64px);flex:0 0 auto;border-radius:4px;border:1px solid transparent;background:#f1f2f4 center/cover no-repeat;padding:0;cursor:pointer;box-sizing:border-box}',
+    '.pdpx .pdp-thumbs{display:flex;gap:var(--pdp-thumb-gap,8px);padding-bottom:8px}',
+    '.pdpx .pdp-carousel.left .pdp-thumbs{flex-direction:column;row-gap:calc(var(--pdp-thumb-gap,8px) + 6px)}',
+    '.pdpx .pdp-thumb{position:relative;width:var(--pdp-thumb,64px);height:var(--pdp-thumb,64px);flex:0 0 auto;border:0;border-radius:0;outline:0;background-color:#efefef;background-position:center;background-size:cover;background-repeat:no-repeat;background-blend-mode:darken;padding:0;cursor:pointer;box-sizing:border-box;box-shadow:none}',
+    '.pdpx .pdp-thumb:focus,.pdpx .pdp-thumb:focus-visible{outline:0;box-shadow:none}',
     '.pdpx .pdp-carousel:not(.left) .pdp-thumb{flex:1 1 0;width:auto;height:auto;min-width:0;aspect-ratio:1/1}',
     '.pdpx .pdp-carousel.left .pdp-thumb{width:100%;height:auto;aspect-ratio:1/1}',
     '.pdpx[data-media-size="small"]{--pdp-thumb:56px;--pdp-thumb-gap:6px}',
     '.pdpx[data-media-size="medium"]{--pdp-thumb:72px;--pdp-thumb-gap:8px}',
     '.pdpx[data-media-size="large"]{--pdp-thumb:96px;--pdp-thumb-gap:10px}',
-    '.pdpx .pdp-thumb.on{border-color:currentColor}',
+    '.pdpx .pdp-thumb.on::after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:3px;background:#111;pointer-events:none}',
     '.pdpx .pdp-dots{display:flex;justify-content:center;gap:6px;margin-top:10px}',
     '.pdpx .pdp-dot{width:7px;height:7px;border-radius:50%;border:0;background:rgba(0,0,0,.2);padding:0;cursor:pointer}',
     '.pdpx .pdp-dot.on{background:currentColor}',
@@ -167,6 +180,8 @@
     '.pdpx .pdp-kind-shipping+.pdp-kind-icon_text,.pdpx .pdp-kind-icon_text+.pdp-kind-icon_text,.pdpx .pdp-kind-icon_text+.pdp-kind-shipping{margin-top:12px}',
     '.pdpx .pdp-row+.pdp-kind-actions{margin-top:11px}',
     '.pdpx .pdp-row+.pdp-kind-buy,.pdpx .pdp-kind-buy+.pdp-row{margin-top:32px}',
+    // Icon with text + collapsible stack matches Symmetry my-7 (~28px) rhythm.
+    '.pdpx .pdp-kind-buy+.pdp-kind-icon_text,.pdpx .pdp-kind-icon_text+.pdp-kind-collapsible{margin-top:28px}',
     '.pdpx .pdp-kind-recommendations+.pdp-kind-collapsible{margin-top:12px}',
     '.pdpx .pdp-kind-collapsible+.pdp-kind-collapsible{margin-top:0}',
     '.pdpx.mob .pdp-row+.pdp-row{margin-top:20px}',
@@ -178,7 +193,7 @@
     '.pdpx.mob .pdp-kind-recommendations+.pdp-kind-collapsible{margin-top:8px}',
     '.pdpx.mob .pdp-kind-collapsible+.pdp-kind-collapsible{margin-top:0}',
     '.pdpx .pdp-row[data-block-id]{scroll-margin:80px}',
-    '.pdpx .pdp-title{margin:0;line-height:1.15}',
+    '.pdpx .pdp-title{margin:0 0 17px;line-height:1.2;font-weight:200;letter-spacing:-0.04em}',
     '.pdpx .pdp-title-desc{font-size:14px;line-height:1.55}',
     '.pdpx .pdp-title-desc img{display:block;max-width:100%;margin-top:8px;border-radius:8px}',
     '.pdpx .pdp-desc{box-sizing:border-box;color:inherit;opacity:.92}',
@@ -193,7 +208,7 @@
     '.pdpx .pdp-tag{display:inline-flex;align-items:center;gap:4px;box-sizing:border-box;height:24px;min-height:24px;max-height:24px;padding:2px 8px;border-radius:5px;background:#5b3f94;color:#fff;font-size:14.4px;font-weight:700;line-height:18px;letter-spacing:normal;border:0;box-shadow:none}',
     '.pdpx .pdp-tag svg,.pdpx .pdp-tag img{width:12px;height:12px;flex:none;object-fit:contain}',
     '.pdpx .pdp-tag.tag-new{background:#ffc439;color:#fff}',
-    '.pdpx .pdp-tag.sale{background:#d63a2f}.pdpx .pdp-tag.sold{background:#4b5563}',
+    '.pdpx .pdp-tag.sale{background:#d63a2f}.pdpx .pdp-tag.sold{background:#4b5563}.pdpx .pdp-tag.preorder{background:#5b3f94;color:#fff}',
     /* Outline must share the exact 24px filled box — never grow via border/shadow. */
     '.pdpx .pdp-tag.outline{background:#f9fafb;border:0!important;outline:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18);font-weight:700;letter-spacing:normal;height:24px;min-height:24px;max-height:24px;padding:2px 8px}',
     '.pdpx .pdp-rate{display:flex;align-items:center;gap:6px;font-size:13px;line-height:1}',
@@ -203,23 +218,28 @@
     '.pdpx .pdp-rate-st{display:inline-grid;place-items:center;width:1.15em;height:1.15em;border-radius:2px;flex:none}',
     '.pdpx .pdp-rate-st svg{display:block;width:72%;height:72%}',
     '.pdpx .pdp-rate > span:not(.pdp-rate-stars):not(.pdp-rate-st){display:inline-flex;align-items:center;line-height:1}',
+    '.pdpx .pdp-price-wrap{display:flex;flex-direction:column;align-items:flex-start;gap:4px;width:100%}',
     '.pdpx .pdp-price{display:flex;align-items:center;gap:8px;flex-wrap:wrap}',
-    '.pdpx .pdp-price .now,.os-frame.os-store .pdpx .pdp-price .now{font-size:24px;font-weight:700;line-height:35px}',
-    '.pdpx .pdp-price s{font-size:16px;font-weight:400;line-height:26px;color:#666;opacity:1;text-decoration-thickness:1px}',
+    '.pdpx .pdp-price .now,.os-frame.os-store .pdpx .pdp-price .now{font-size:var(--pdp-price-size,14px);font-weight:var(--pdp-price-weight,300);line-height:1.6}',
+    '.pdpx .pdp-price s{font-size:var(--pdp-price-size,14px);font-weight:400;line-height:1.6;color:#666;opacity:1;text-decoration-thickness:1px}',
     '.pdpx .pdp-price .save{display:inline-flex;align-items:center;gap:4px;box-sizing:border-box;min-height:24px;padding:2px 8px;border-radius:5px;background:#d63a2f;color:#fff;font-size:14.4px;font-weight:700;line-height:18px;border:0;box-shadow:none}',
     '.pdpx .pdp-price .save.outline{background:#f9fafb;border:0!important;outline:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18);font-weight:700;letter-spacing:normal}',
     '.pdpx .pdp-price .save svg{width:12px;height:12px;flex:none}',
-    '.pdpx .pdp-safe{margin-top:14px;text-align:center}',
+    '.pdpx .pdp-taxes{margin:0;font-size:12px;line-height:1.45;color:rgba(0,0,0,.55)}',
+    '.pdpx .pdp-taxes a{color:inherit;text-decoration:underline;text-underline-offset:2px}',
+    '.pdpx .pdp-taxes a:hover{opacity:.75}',
+    /* Safe strip — Wildpeak-adjacent: muted divider label + bordered payment chips. */
+    '.pdpx .pdp-safe{margin:0;width:100%;text-align:center}',
     /* Divider label always stays centered; Layout only moves the logo row */
-    '.pdpx .pdp-safe-label{display:flex;align-items:center;gap:10px;justify-content:center;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.8}',
-    '.pdpx .pdp-safe-label:before,.pdpx .pdp-safe-label:after{content:"";flex:1;height:1px;background:rgba(0,0,0,.18)}',
-    '.pdpx .pdp-safe-logos{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px;margin-top:10px}',
+    '.pdpx .pdp-safe-label{display:flex;align-items:center;gap:12px;justify-content:center;width:100%;font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:#999999;opacity:1}',
+    '.pdpx .pdp-safe-label:before,.pdpx .pdp-safe-label:after{content:"";flex:1 1 0;min-width:16px;height:1px;background:#E5E5E5}',
+    '.pdpx .pdp-safe-logos{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px;margin-top:12px;width:100%}',
     '.pdpx .pdp-safe.align-left .pdp-safe-logos{justify-content:flex-start}',
     '.pdpx .pdp-safe.align-right .pdp-safe-logos{justify-content:flex-end}',
-    '.pdpx .pdp-safe-logo{display:inline-flex;align-items:center;justify-content:center;height:var(--pdp-safe-h,28px);min-width:calc(var(--pdp-safe-h,28px) * 1.55);padding:0 6px;border:1px solid rgba(0,0,0,.12);border-radius:4px;background:#fff;font-size:10px;font-weight:700;letter-spacing:.02em;color:#222;box-sizing:border-box}',
-    '.pdpx .pdp-safe-logo.is-img{min-width:0;padding:0;border:0;background:transparent;border-radius:0}',
-    '.pdpx .pdp-safe-logo img{display:block;height:var(--pdp-safe-h,28px);width:auto;max-width:calc(var(--pdp-safe-h,28px) * 2.4);object-fit:contain}',
-    '.pdpx .pdp-safe-logo.norton{color:#1a7a3c}.pdpx .pdp-safe-logo.mcafee{color:#c01818}.pdpx .pdp-safe-logo.mb{color:#b45309;min-width:calc(var(--pdp-safe-h,28px) * 2.4)}',
+    '.pdpx .pdp-safe-logo{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;min-height:calc(var(--pdp-safe-h,24px) + 12px);min-width:calc(var(--pdp-safe-h,24px) * 1.7);padding:6px 8px;border:1px solid #E5E5E5;border-radius:4px;background:#fff;font-size:10px;font-weight:700;letter-spacing:.02em;color:#222}',
+    '.pdpx .pdp-safe-logo.is-img{min-width:calc(var(--pdp-safe-h,24px) * 1.7);padding:6px 8px;border:1px solid #E5E5E5;background:#fff;border-radius:4px}',
+    '.pdpx .pdp-safe-logo img{display:block;height:var(--pdp-safe-h,24px);width:auto;max-width:calc(var(--pdp-safe-h,24px) * 2.2);object-fit:contain}',
+    '.pdpx .pdp-safe-logo.norton{color:#1a7a3c}.pdpx .pdp-safe-logo.mcafee{color:#c01818}.pdpx .pdp-safe-logo.mb{color:#b45309;min-width:calc(var(--pdp-safe-h,24px) * 2.4)}',
     '.pdpx .pdp-fr{position:relative;padding:4px 0 8px}',
     '.pdpx .pdp-fr-h{font-size:15px;font-weight:700;margin:0 0 10px}',
     '.pdpx .pdp-fr-rail{display:grid;gap:10px}',
@@ -319,16 +339,21 @@
     '.pdpx .pdp-fr-dots{display:flex;justify-content:center;gap:6px;margin-top:10px}',
     '.pdpx .pdp-fr-dot{width:7px;height:7px;border-radius:50%;border:0;padding:0;background:rgba(0,0,0,.2);cursor:pointer}',
     '.pdpx .pdp-fr-dot.on{background:#222}',
-    '.pdpx .pdp-acc-ic{display:inline-flex;margin-right:8px;vertical-align:-3px}',
-    '.pdpx .pdp-acc-ic svg{display:block;width:20px;height:20px}',
+    '.pdpx .pdp-acc-ic{display:inline-flex;flex:none;line-height:0;width:16px;height:16px}',
+    '.pdpx .pdp-acc-ic svg{display:block;width:16px;height:16px}',
     '.pdpx .pdp-line{border:0;border-top:1px solid rgba(0,0,0,.12);margin:2px 0}',
     '.pdpx .pdp-label{font-size:12px;font-weight:650;letter-spacing:.02em;margin-bottom:12px;opacity:.75;line-height:26px}',
     '.pdpx .pdp-options{display:flex;flex-direction:column}',
     '.pdpx .pdp-option+.pdp-option{margin-top:20px}',
-    '.pdpx .pdp-option .pdp-label{display:flex;align-items:center;gap:4px;margin-bottom:12px;font-size:16px;font-weight:500;line-height:24px;letter-spacing:0;opacity:1;color:#222}',
+    '.pdpx .pdp-option .pdp-label{display:flex;align-items:center;gap:4px;margin-bottom:12px;font-size:14px;font-weight:600;line-height:1.4;letter-spacing:0;opacity:1;color:#232323}',
+    '.pdpx .pdp-option .pdp-label.pdp-size-head{justify-content:space-between;width:100%}',
+    '.pdpx .pdp-size-guide-slot{margin-left:auto;flex:none}',
+    '.pdpx .pdp-size-guide-slot .pdp-popup-link{color:#bf570a;font-size:14px;font-weight:300;padding:0;text-decoration:none}',
+    '.pdpx .pdp-size-guide-slot .pdp-popup-link::after{display:none}',
     '.pdpx .pdp-opt-val{font-weight:400}',
-    '.pdpx .pdp-swatches{display:flex;flex-wrap:wrap;margin:0 -5px}',
-    '.pdpx .pdp-sw{width:40px;height:40px;margin:5px;border:0;border-radius:50%;padding:0;cursor:pointer;background-position:center;background-size:cover;background-repeat:no-repeat;box-shadow:0 0 0 1px rgba(34,34,34,.1);transition:box-shadow .25s ease,transform .25s ease}',
+    /* gap instead of negative margin so swatch/size left edge matches ATC / dyn buttons */
+    '.pdpx .pdp-swatches{display:flex;flex-wrap:wrap;gap:10px;margin:0}',
+    '.pdpx .pdp-sw{width:40px;height:40px;margin:0;border:0;border-radius:50%;padding:0;cursor:pointer;background-position:center;background-size:cover;background-repeat:no-repeat;box-shadow:0 0 0 1px rgba(34,34,34,.1);transition:box-shadow .25s ease,transform .25s ease}',
     '.pdpx .pdp-sw.pdp-sw-img{border-radius:8px}',
     '.pdpx .pdp-sw:hover{box-shadow:0 0 0 1px #222,0 8px 20px rgba(34,34,34,.2),inset 0 0 0 4px #fff;transform:scale(1.1)}',
     '.pdpx .pdp-sw.on{box-shadow:0 0 0 1px #222,inset 0 0 0 4px #fff}',
@@ -337,10 +362,20 @@
     '.pdpx .pdp-sw.sold,.pdpx .pdp-size.sold{position:relative;opacity:.4}',
     '.pdpx .pdp-sw.sold:before,.pdpx .pdp-size.sold:before{content:"";position:absolute;inset:0;background:linear-gradient(to bottom right,transparent calc(50% - 1px),#eee 50%,transparent calc(50% + 1px));z-index:1}',
     '.pdpx .pdp-sw.sold:before{border-radius:50%}',
-    '.pdpx .pdp-sizes{display:flex;flex-wrap:wrap;margin:0 -5px}',
-    '.pdpx .pdp-size{min-width:45px;margin:5px;padding:10px;border:1px solid #eee;border-radius:5px;background:transparent;cursor:pointer;font:400 16px/1.3 inherit;color:#222;text-transform:capitalize;transition:.25s}',
+    '.pdpx .pdp-sizes{display:flex;flex-wrap:wrap;gap:10px;margin:0}',
+    '.pdpx .pdp-size{min-width:45px;margin:0;padding:10px;border:1px solid #eee;border-radius:5px;background:transparent;cursor:pointer;font:400 16px/1.3 inherit;color:#222;text-transform:capitalize;transition:.25s;box-sizing:border-box}',
     '.pdpx .pdp-size:hover{border-color:#222}',
     '.pdpx .pdp-size.on{background:#222;border-color:#222;color:#fff}',
+    /* Symmetry / Chantilly size pills — opt in via data-pdp-size-style=outline on .pdpx */
+    '.pdpx[data-pdp-size-style="outline"] .pdp-size{min-width:63px;padding:11px 15px;border:1px solid #c8c8c8;border-radius:0;background:#fff;font:300 14px/1.3 inherit;color:#232323}',
+    '.pdpx[data-pdp-size-style="outline"] .pdp-size:hover{border-color:#232323}',
+    '.pdpx[data-pdp-size-style="outline"] .pdp-size.on{background:#fff;border-color:#232323;color:#232323}',
+    '.pdpx .pdp-qty-wrap{display:flex;flex-direction:column;align-items:flex-start;gap:8px;width:100%}',
+    '.pdpx .pdp-qty-label{font-size:14px;font-weight:600;line-height:1.4;color:inherit}',
+    '.pdpx .pdp-buy-row.is-qty-only{justify-content:flex-start}',
+    '.pdpx .pdp-buy-row.is-qty-only .pdp-qty{flex:none;width:116px;max-width:100%;height:46px;min-height:46px;border-radius:0;border-color:#c8c8c8}',
+    '.pdpx .pdp-atc.full{font-size:14px;font-weight:300;letter-spacing:.08em;text-transform:uppercase}',
+    '.pdpx[data-pdp-swatch-style="ring"] .pdp-sw.on{box-shadow:0 0 0 .5px #232323}',
     '.pdpx .pdp-dd{position:relative;width:100%}',
     '.pdpx .pdp-dd-btn{display:flex;align-items:center;width:100%;max-width:100%;min-height:48px;height:48px;margin:0;padding:0 40px 0 14px;border:1px solid rgba(0,0,0,.2);border-radius:8px;background:#fff url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2712%27 height=%278%27 viewBox=%270 0 12 8%27%3E%3Cpath d=%27M1 1.5l5 5 5-5%27 fill=%27none%27 stroke=%27%23222%27 stroke-width=%271.5%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E") no-repeat right 14px center;background-size:12px 8px;font:400 16px/1.3 inherit;color:#222;text-align:left;cursor:pointer;box-sizing:border-box}',
     '.pdpx .pdp-dd-btn:hover{border-color:#222}',
@@ -353,9 +388,10 @@
     '.pdpx .pdp-dd-opt.on{font-weight:650}',
     '.pdpx .pdp-dd-opt[disabled]{opacity:.4;cursor:default}',
     '.pdpx .pdp-dd-opt.sold{color:#6b7280}',
-    '.pdpx .pdp-qty{display:inline-flex;align-items:center;width:125px;height:48px;border:1px solid rgba(0,0,0,.2);border-radius:8px;overflow:hidden}',
-    '.pdpx .pdp-qty button{width:38px;height:100%;border:0;background:transparent;cursor:pointer;font-size:16px;color:inherit}',
-    '.pdpx .pdp-qty span{min-width:36px;text-align:center;font-weight:650}',
+    // Qty box stays left of the column; value is centered between - / +.
+    '.pdpx .pdp-qty{display:inline-flex;align-items:center;justify-content:space-between;width:116px;min-height:var(--pdp-btn-h,48px);height:var(--pdp-btn-h,48px);border:1px solid #c8c8c8;border-radius:var(--pdp-atc-radius,8px);overflow:hidden;box-sizing:border-box;color:#232323}',
+    '.pdpx .pdp-qty button{flex:none;width:36px;height:100%;border:0;background:transparent;cursor:pointer;padding:0;font-size:18px;line-height:1;color:inherit;display:inline-flex;align-items:center;justify-content:center}',
+    '.pdpx .pdp-qty span{flex:1;min-width:0;text-align:center;font-weight:400;font-size:14px;line-height:1;color:inherit}',
     // Match Silix .product__inventory: #10a443, DM Sans 16/400/26, 10px pulse dot
     '.pdpx .pdp-stock{--status-color:#10a443;--pdp-stock-fs:14px;display:flex;align-items:center;gap:0 8px;margin:0;font-family:inherit;font-size:var(--pdp-stock-fs);font-weight:400;line-height:1.625;letter-spacing:normal;color:#10a443;color:var(--status-color)}',
     '.pdpx .pdp-stock > span{font:inherit;font-size:inherit;font-weight:400;line-height:inherit;letter-spacing:normal;color:inherit}',
@@ -370,10 +406,13 @@
     '.pdpx .pdp-stock.style-text i{display:none}',
     '@keyframes pdp-inventory-pulse{0%{opacity:.6}100%{transform:scale(2.5);opacity:0}}',
     '.pdpx .pdp-sku{font-size:13px;opacity:.72}',
-    '.pdpx .pdp-actions{display:flex;flex-direction:column;gap:20px}',
-    '.pdpx .pdp-buy-row{display:flex;align-items:center;gap:12px}',
-    '.pdpx .pdp-buy-row .pdp-qty{flex:none}',
-    '.pdpx .pdp-atc{flex:1;width:auto;min-height:48px;position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;font:inherit;font-weight:700;transition:transform .18s ease,opacity .18s ease}',
+    /* One stack — qty/ATC/dyn/safe share column width; 12px matches Wildpeak buy-stack air */
+    '.pdpx .pdp-actions{display:flex;flex-direction:column;gap:12px;width:100%;--pdp-atc-radius:8px;--pdp-dyn-radius:8px}',
+    '.pdpx .pdp-buy-row{display:flex;align-items:stretch;gap:10px;width:100%}',
+    // Direct qty sibling of ATC (with-quantity). Do not target .pdp-qty-wrap .pdp-qty — align-self:center would center it in the column wrap.
+    '.pdpx .pdp-buy-row > .pdp-qty{flex:none;align-self:center;height:var(--pdp-btn-h,48px);min-height:var(--pdp-btn-h,48px)}',
+    '.pdpx .pdp-qty-wrap .pdp-qty{align-self:flex-start}',
+    '.pdpx .pdp-atc{flex:1;width:auto;min-height:var(--pdp-btn-h,48px);height:var(--pdp-btn-h,48px);position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:var(--pdp-atc-radius,8px);box-sizing:border-box;transition:transform .18s ease,opacity .18s ease}',
     '.pdpx .pdp-atc.full{display:inline-flex;align-items:center;justify-content:center;width:100%;flex:none}',
     '.pdpx .pdp-atc-ic{display:inline-flex;align-items:center;justify-content:center;flex:none;line-height:0}',
     '.pdpx .pdp-atc-ic svg{display:block;width:20px;height:20px}',
@@ -382,16 +421,16 @@
     '.pdpx .pdp-atc.is-added{transform:scale(.98)}',
     '.pdpx .pdp-atc-spin{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.35);border-top-color:currentColor;border-radius:50%;animation:pdp-atc-spin .6s linear infinite;vertical-align:-3px}',
     '@keyframes pdp-atc-spin{to{transform:rotate(360deg)}}',
-    '.pdpx .pdp-buy-row .pdp-atc,.pdpx .pdp-paypal,.pdpx .pdp-chan{border-radius:8px}',
-    '.pdpx .pdp-paypal,.pdpx .pdp-chan{display:inline-flex;align-items:center;justify-content:center;width:100%;height:48px;border:0;border-radius:8px;cursor:pointer;padding:0 16px;font:inherit;font-weight:650}',
+    '.pdpx .pdp-paypal,.pdpx .pdp-chan{display:inline-flex;align-items:center;justify-content:center;width:100%;min-height:var(--pdp-btn-h,48px);height:var(--pdp-btn-h,48px);border:0;border-radius:var(--pdp-dyn-radius,8px);cursor:pointer;padding:0 16px;font:inherit;font-weight:650;box-sizing:border-box}',
     '.pdpx .pdp-paypal{background:#ffc439}',
     '.pdpx .pdp-paypal:hover{background:#f2bb31}',
     '.pdpx .pdp-paypal svg,.pdpx .pdp-chan svg{display:block;height:22px;width:auto}',
     '.pdpx .pdp-chan.apple{background:#111;color:#fff}',
     '.pdpx .pdp-chan.google{background:#fff;color:#202124;border:1px solid #dadce0}',
-    '.pdpx .pdp-buynow{display:inline-flex;align-items:center;justify-content:center;width:100%;min-height:48px;border:1px solid rgba(0,0,0,.2);background:#fff;color:inherit;cursor:pointer;padding:0 16px;font:inherit;font-weight:700}',
-    '.pdpx .pdp-dyn{display:flex;flex-direction:column;gap:8px;align-items:center;width:100%}',
-    '.pdpx .pdp-pay-more{padding:0;border:0;background:none;color:inherit;font:inherit;font-size:14px;line-height:1.4;text-decoration:underline;text-underline-offset:3px;cursor:pointer}',
+    '.pdpx .pdp-buynow{display:inline-flex;align-items:center;justify-content:center;width:100%;min-height:var(--pdp-btn-h,48px);height:var(--pdp-btn-h,48px);border:0;border-radius:var(--pdp-dyn-radius,8px);background:#fff;color:inherit;cursor:pointer;padding:0 16px;box-sizing:border-box}',
+    '.pdpx .pdp-dyn{display:flex;flex-direction:column;gap:12px;align-items:stretch;width:100%}',
+    /* Wildpeak more-options: 12px / ls .5px / underline. pdp-dyn gap 12 + mt 4 ≈ 16 above; mb 10 below. Color inherits theme text. */
+    '.pdpx .pdp-pay-more{align-self:center;margin:4px 0 10px;padding:0;border:0;background:none;color:inherit;font:inherit;font-size:12px;font-weight:400;line-height:1.5;letter-spacing:.5px;text-decoration:underline;text-underline-offset:2px;cursor:pointer}',
     '.pdpx .pdp-safe-logo.venmo{color:#008cff}.pdpx .pdp-safe-logo.bancontact{color:#005498}.pdpx .pdp-safe-logo.giropay{color:#000}',
     '.pdpx .pdp-icons{display:flex;flex-wrap:nowrap;align-items:flex-start;gap:var(--pdp-item-gap-y,8px) var(--pdp-item-gap-x,24px);width:100%;color:var(--pdp-icons-text,inherit)}',
     '.pdpx .pdp-icons.vertical{flex-direction:column;flex-wrap:nowrap;align-items:flex-start;gap:var(--pdp-item-gap-y,8px)}',
@@ -427,10 +466,14 @@
     '.pdpx .pdp-icons.align-center .pdp-icon-item:not(.top) .pdp-icon-body,.pdpx .pdp-icons.align-right .pdp-icon-item:not(.top) .pdp-icon-body{flex:0 1 auto;width:auto;max-width:100%}',
     '.pdpx .pdp-icon-item.top .pdp-icon-body{flex:none;width:100%}',
     '.pdpx .pdp-icon-body .pdp-icon-h,.pdpx .pdp-icon-body .pdp-icon-c{max-width:100%;overflow-wrap:anywhere;word-break:break-word;white-space:normal}',
-    '.pdpx .pdp-icon-body .pdp-icon-h{font-family:var(--pdp-title-font,inherit);font-size:var(--pdp-title-size,1em);font-weight:var(--pdp-title-weight,400);letter-spacing:var(--pdp-title-tracking,normal);text-transform:var(--pdp-title-transform,none);line-height:1.35}',
-    '.pdpx .pdp-icon-body .pdp-icon-c{font-family:var(--pdp-content-font,inherit);font-size:var(--pdp-content-size,.875em);font-weight:var(--pdp-content-weight,400);letter-spacing:normal;text-transform:none;line-height:1.45;opacity:.78}',
+    '.pdpx .pdp-icon-body .pdp-icon-h{font-family:var(--pdp-title-font,inherit);font-size:var(--pdp-title-size,1em);font-weight:var(--pdp-title-weight,400);letter-spacing:var(--pdp-title-tracking,normal);text-transform:var(--pdp-title-transform,none);line-height:1.6}',
+    '.pdpx .pdp-icon-body .pdp-icon-c{font-family:var(--pdp-content-font,inherit);font-size:var(--pdp-content-size,1em);font-weight:var(--pdp-content-weight,300);letter-spacing:normal;text-transform:none;line-height:1.6;opacity:1}',
     '.pdpx .pdp-icon-body .pdp-icon-h p,.pdpx .pdp-icon-body .pdp-icon-c p{margin:0;overflow-wrap:anywhere;word-break:break-word}',
+    '.pdpx .pdp-icon-body .pdp-icon-h strong{font-weight:700}',
     '.pdpx .pdp-icon-body .pdp-icon-c a{color:inherit}',
+    // Icon-top trust row: tighter icon→title, subtitle sits flush under title (Symmetry).
+    '.pdpx .pdp-icon-item.top .pdp-icon-body{gap:0}',
+    '.pdpx .pdp-icon-item.top .pdp-icon-mark,.pdpx .pdp-icon-item.top .pdp-icon-img{margin-bottom:0}',
     '.pdpx .pdp-custom-text{font-size:14px;line-height:1.6}',
     '.pdpx .pdp-property{display:grid;gap:6px}.pdpx .pdp-property input{height:40px;padding:0 10px;border:1px solid rgba(0,0,0,.2);border-radius:7px;font:inherit}',
     '.pdpx .pdp-link-actions{display:flex;align-items:center;flex-wrap:wrap;gap:0 24px;min-height:48px}',
@@ -485,14 +528,22 @@
     '.pdpx .pdp-ship-line i:before,.pdpx .pdp-ship-line i:after{content:"";display:block;min-width:6px;min-height:6px;border-radius:50%;background:#303030;flex:none}',
     '.pdpx .pdp-ship-line i span{display:block;height:2.25px;max-height:2.25px;margin:0 -2px;width:100%;background:#303030}',
     '@media(max-width:600px){.pdpx .pdp-ship--timeline{padding:12px}.pdpx .pdp-ship-line i{margin:0 6px}.pdpx .pdp-ship-date{font-size:10px;line-height:10px}.pdpx .pdp-ship-label{font-size:11px;line-height:11px}}',
-    '.pdpx .pdp-acc{border-bottom:1px solid rgba(0,0,0,.12)}',
-    '.pdpx .pdp-acc button{width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px;border:0;background:transparent;padding:20px 0;font:inherit;font-weight:650;text-align:left;cursor:pointer;color:inherit}',
-    '.pdpx .pdp-acc.icon-left button{flex-direction:row-reverse;justify-content:flex-end}',
-    '.pdpx .pdp-acc.icon-left button .pdp-acc-mark{order:-1}',
-    '.pdpx .pdp-acc .body{display:none;padding:0 0 12px;font-size:14px;line-height:1.6;opacity:.85}',
-    '.pdpx .pdp-acc.open .body{display:block}',
+    /* Collapsible row — Symmetry disclosure: 16px heading icon, 11px CSS plus. */
+    '.pdpx .pdp-acc{border-bottom:1px solid rgba(35,35,35,.15)}',
+    '.pdpx .pdp-acc button{position:relative;width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px;border:0;background:transparent;padding:15px 30px 15px 0;font:inherit;font-size:14px;font-weight:600;line-height:1.4;text-align:left;cursor:pointer;color:inherit}',
+    '.pdpx .pdp-acc.icon-left button{flex-direction:row-reverse;justify-content:flex-end;padding:15px 0 15px 30px}',
+    '.pdpx .pdp-acc.icon-left button .pdp-acc-mark{order:-1;right:auto;left:0}',
+    '.pdpx .pdp-acc-title{display:inline-flex;align-items:center;gap:12px;min-width:0}',
+    '.pdpx .pdp-acc-mark{position:absolute;right:0;top:50%;display:block;flex:none;width:11px;height:11px;margin-top:-5.5px;line-height:0}',
+    '.pdpx .pdp-acc-plus{position:relative;display:block;width:11px;height:11px}',
+    '.pdpx .pdp-acc-plus .pdp-acc-h,.pdpx .pdp-acc-plus .pdp-acc-v{position:absolute;left:0;top:5px;width:11px;height:1px;background:currentColor}',
+    '.pdpx .pdp-acc-plus .pdp-acc-v{transform-origin:center;transform:rotate(90deg);transition:transform .5s cubic-bezier(.3,1,.3,1)}',
+    '.pdpx .pdp-acc.open .pdp-acc-plus .pdp-acc-v{transform:rotate(0deg)}',
+    '.pdpx .pdp-acc .body{overflow:hidden;height:0;opacity:0;padding:0;font-size:14px;font-weight:300;line-height:1.6;transform:translateY(10px)}',
+    '.pdpx .pdp-acc.open .body{height:auto;opacity:.85;padding:0 0 15px;transform:none}',
+    '@media (prefers-reduced-motion:reduce){.pdpx .pdp-acc-plus .pdp-acc-v{transition:none}.pdpx .pdp-acc .body{transform:none}}',
     '.pdpx .pdp-rec-head{margin:0 0 10px}',
-    '.pdpx .pdp-rec-h{font-size:15px;margin:0}',
+    '.pdpx .pdp-rec-h{font-size:14px;font-weight:600;margin:0}',
     '.pdpx .pdp-rec-sub{font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:.6;margin:0 0 4px}',
     '.pdpx .pdp-rec-copy{font-size:13px;line-height:1.5;opacity:.75;margin:6px 0 0}',
     '.pdpx .pdp-rec-copy p{margin:0 0 .4em}.pdpx .pdp-rec-copy p:last-child{margin:0}',
@@ -534,7 +585,7 @@
     '.pdpx.mob .pdp-vc-nav{display:none}',
     '.pdpx .pdp-progress{height:3px;border-radius:99px;background:rgba(0,0,0,.08);margin-top:10px;overflow:hidden}',
     '.pdpx .pdp-progress i{display:block;height:100%;width:40%;background:currentColor;opacity:.7}',
-    '.pdpx .pdp-sticky{display:flex;align-items:center;gap:12px;margin-top:18px;padding:10px 12px;border:1px solid rgba(0,0,0,.08);border-radius:12px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:40;box-sizing:border-box}',
+    '.pdpx .pdp-sticky{--pdp-sticky-gap:12px;display:flex;align-items:center;gap:var(--pdp-sticky-gap);margin-top:18px;padding:10px 12px;border:1px solid rgba(0,0,0,.08);border-radius:12px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:40;box-sizing:border-box}',
     '.pdpx .pdp-sticky.bottom{position:sticky;bottom:8px}',
     '.pdpx .pdp-sticky.after-scroll{opacity:0;visibility:hidden;pointer-events:none;transform:translateY(8px);transition:opacity .2s ease,transform .2s ease}',
     '.pdpx .pdp-sticky.after-scroll.on{opacity:1;visibility:visible;pointer-events:auto;transform:none}',
@@ -546,6 +597,11 @@
     '.pdpx .pdp-sticky .meta{flex:1;min-width:0}',
     '.pdpx .pdp-sticky .meta b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
     '.pdpx .pdp-sticky .sticky-qty{flex:none}',
+    '.pdpx .pdp-sticky .pdp-atc{flex:0 0 var(--pdp-sticky-button-width,320px);width:var(--pdp-sticky-button-width,320px)}',
+    '.pdpx.mob .pdp-sticky{padding:10px var(--pdp-sticky-gap);border:0;border-radius:0}',
+    '.pdpx.mob .pdp-sticky>img,.pdpx.mob .pdp-sticky>.meta{display:none}',
+    '.pdpx.mob .pdp-sticky .pdp-atc{flex:1;min-width:0;width:auto}',
+    '.pdpx .pdp-sticky.is-full-width{border-radius:0}',
     '.pdpx .pdp-pop,.pdpx .pdp-zoom{position:absolute;inset:0;z-index:6;background:rgba(17,24,39,.45);display:none;align-items:flex-start;justify-content:center;padding:28px 16px}',
     '.pdpx .pdp-pop.on,.pdpx .pdp-zoom.on{display:flex}',
     '.pdpx .pdp-pop.on[data-pdp-pop]{animation:pdp-pop-scrim .22s ease}',
@@ -563,7 +619,11 @@
     '.pdpx .pdp-pop-item .sub{font-size:12px;opacity:.65;margin-top:2px}',
     '.pdpx .pdp-pop-actions{display:flex;flex-direction:column;gap:8px;margin-top:14px}',
     '.pdpx .pdp-pop-recs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}',
-    '.pdpx .pdp-zoom img{max-width:min(720px,100%);max-height:100%;object-fit:contain;border-radius:8px;background:#fff}',
+    '.pdpx .pdp-zoom{position:fixed;z-index:100;align-items:center;background:#000;padding:0 0 64px;box-sizing:border-box}',
+    '.pdpx .pdp-zoom img{max-width:100%;max-height:100%;object-fit:contain}',
+    '.pdpx .pdp-zoom-controls{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:12px}',
+    '.pdpx .pdp-zoom-controls button{width:36px;height:36px;border:0;border-radius:50%;background:#fff;color:#222;font-size:22px;cursor:pointer}',
+    '.pdpx .pdp-zoom-controls button:disabled{opacity:.4;cursor:default}',
     '.pdpx .pdp-pop[data-pdp-share-pop]{background:rgba(0,0,0,.5);padding:16px;align-items:center;justify-content:center}',
     '.pdpx .pdp-pop[data-pdp-share-pop] .pdp-pop-card{position:relative;left:auto;top:auto;width:min(420px,100%);padding:20px 20px 18px;border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.22)}',
     '.pdpx .pdp-share-x{-webkit-appearance:none;appearance:none;width:24px;height:24px;padding:0;margin:0;border:0;outline:0;box-shadow:none;border-radius:0;background:transparent;color:#111;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:none}',
@@ -587,6 +647,8 @@
     { value: 'thumbs-left', label: 'Vertical thumbnail carousel' },
     { value: 'grid-1', label: 'Grid (1x1)' },
     { value: 'grid-2', label: 'Grid (2x2)' },
+    { value: 'collage-1', label: 'Collage - style 1' },
+    { value: 'collage-2', label: 'Collage - style 2' },
   ];
   const POS = [
     { value: 'tr', label: 'Top right' }, { value: 'tl', label: 'Top left' },
@@ -651,12 +713,22 @@
     if (b.show_buy_now && raw.indexOf('buy_now') < 0) raw = ['buy_now'].concat(raw);
     return normalizeBuyChannels(raw);
   }
-  function buyButtonRadius(shape, custom) {
+  function buyButtonRadius(shape, custom, themeRadius) {
     // Legacy shared button_shape / custom_radius still accepted as fallback.
+    // normal → Theme settings › Buttons › Corner radius.
     if (shape === 'pill') return 999;
     if (shape === 'square') return 0;
     if (shape === 'custom') return Number(custom == null ? 8 : custom);
-    return 8;
+    const tr = Number(themeRadius);
+    return isFinite(tr) ? tr : 8;
+  }
+  function themeButtonHeight(t) {
+    const h = Number(((t && t.buttons) || {}).button_height);
+    return Math.max(32, Math.min(64, isFinite(h) ? h : 48));
+  }
+  function themeButtonRadius(t) {
+    const r = Number(((t && t.buttons) || {}).button_border_radius);
+    return isFinite(r) ? r : 8;
   }
   function atcIconHtml(name) {
     if (!name || name === 'none') return '';
@@ -689,17 +761,30 @@
   }
   function resolveProductMetafield(product, path) {
     if (!product || !path) return '';
-    if (path === 'resource.description' || path === 'description') return product.description || '';
+    const key = String(path).replace(/^resource\./, '');
+    if (key === 'description') return product.description || '';
+    if (key === 'title' || key === 'name') return product.title || product.name || '';
+    if (key === 'summary') return product.summary || '';
+    if (key === 'vendor') return product.vendor || '';
+    if (key === 'highlights') {
+      const hl = product.highlights;
+      if (Array.isArray(hl)) {
+        const items = hl.map((x) => String(x || '').trim()).filter(Boolean);
+        if (!items.length) return '';
+        return '<ul>' + items.map((x) => '<li>' + OS.esc(x) + '</li>').join('') + '</ul>';
+      }
+      return hl ? String(hl) : '';
+    }
     const mf = product.metafields || {};
     if (mf[path] != null && mf[path] !== '') return String(mf[path]);
     const parts = String(path).split('.');
     if (parts.length === 2) {
       const ns = parts[0];
-      const key = parts[1];
+      const mk = parts[1];
       const nested = mf[ns];
       if (nested && typeof nested === 'object') {
-        if (nested[ns + ':' + key] != null && nested[ns + ':' + key] !== '') return String(nested[ns + ':' + key]);
-        if (nested[key] != null && nested[key] !== '') return String(nested[key]);
+        if (nested[ns + ':' + mk] != null && nested[ns + ':' + mk] !== '') return String(nested[ns + ':' + mk]);
+        if (nested[mk] != null && nested[mk] !== '') return String(nested[mk]);
       }
     }
     return '';
@@ -787,8 +872,22 @@
     return out;
   }
   function slides(p) {
+    if (Array.isArray(p.media) && p.media.length) {
+      return p.media.map((m) => {
+        if (!m) return null;
+        if (typeof m === 'string') return { type: 'image', src: m };
+        if (m.type === 'video') {
+          const poster = m.poster || m.src || '';
+          const video = m.video || m.src || '';
+          if (!video && !poster) return null;
+          return { type: 'video', src: poster || video, poster: poster, video: video };
+        }
+        const src = m.src || m.image || '';
+        return src ? { type: 'image', src: src } : null;
+      }).filter(Boolean);
+    }
     const images = Array.isArray(p.images) && p.images.length ? p.images : [p.image];
-    return images.filter(Boolean).map((src) => ({ type: 'image', src }));
+    return images.filter(Boolean).map((src) => ({ type: 'image', src: src }));
   }
   function badge(s) {
     if (!s.show_trust_badge) return '';
@@ -800,16 +899,17 @@
     return '<span class="pdp-badge ' + pos + '" style="width:' + size + 'px;height:' + size + 'px">Trusted<br>quality</span>';
   }
   function videoChrome(s, t) {
+    // Gallery videos autoplay muted/loop like GIFs — no play overlay unless click-to-play.
     const play = scheme(s.play_button_scheme, t);
     const sound = scheme(s.sound_button_scheme, t);
-    const auto = s.video_player === 'muted-autoplay';
+    const auto = s.video_player !== 'click-to-play';
     let html = '';
     if (!auto) html += '<span class="pdp-play" style="background:' + play + '"><i>▶</i></span>';
-    html += '<span class="pdp-video-ui">';
-    if (auto && s.video_pause) html += '<span class="pdp-chip">II</span>';
-    if (s.video_sound) html += '<span class="pdp-chip" style="background:' + sound + ';color:' + (s.sound_button_scheme === 'inverse' ? '#111' : '#fff') + '">♪</span>';
-    if (s.video_timeline) html += '<span class="pdp-time"><i style="background:' + play + '"></i></span>';
-    html += '</span>';
+    const chips = [];
+    if (auto && s.video_pause) chips.push('<span class="pdp-chip">II</span>');
+    if (s.video_sound) chips.push('<span class="pdp-chip" style="background:' + sound + ';color:' + (s.sound_button_scheme === 'inverse' ? '#111' : '#fff') + '">♪</span>');
+    if (s.video_timeline) chips.push('<span class="pdp-time"><i style="background:' + play + '"></i></span>');
+    if (chips.length) html += '<span class="pdp-video-ui">' + chips.join('') + '</span>';
     return html;
   }
   function navArrows() {
@@ -822,9 +922,15 @@
     return '<div class="pdp-stage">' + main + navArrows() + '</div>';
   }
   function cell(item, i, s, t, style) {
-    const zoom = s.enable_zoom && item.type !== 'video' ? ' zoomable' : '';
-    return '<button type="button" class="pdp-cell' + (i === 0 ? ' on' : '') + (item.type === 'video' ? ' is-video' : '') + zoom + '" data-pdp-media="' + i + '" data-src="' + OS.esc(item.src) + '" style="' + style + 'background-image:url(' + OS.esc(item.src) + ')">' +
-      (i === 0 ? badge(s) : '') + (item.type === 'video' ? videoChrome(s, t) : '') + '</button>';
+    const isVideo = item.type === 'video';
+    const poster = item.poster || item.src || '';
+    const videoSrc = item.video || '';
+    const zoom = s.enable_zoom && !isVideo ? ' zoomable' : '';
+    const media = isVideo
+      ? '<video src="' + OS.esc(videoSrc) + '" poster="' + OS.esc(poster) + '" muted loop playsinline autoplay preload="metadata"></video>'
+      : '<img alt="" src="' + OS.esc(item.src) + '" loading="' + (i ? 'lazy' : 'eager') + '" decoding="async">';
+    return '<button type="button" class="pdp-cell' + (i === 0 ? ' on' : '') + (isVideo ? ' is-video is-playing' : '') + zoom + '" data-pdp-media="' + i + '" data-src="' + OS.esc(poster || item.src || '') + '" data-video="' + OS.esc(videoSrc) + '" style="' + style + '">' +
+      media + (i === 0 ? badge(s) : '') + (isVideo ? videoChrome(s, t) : '') + '</button>';
   }
 
   const STAR_SVG = '<svg viewBox="0 0 24 24" width="16" height="16" fill="#fff" stroke="none" aria-hidden="true"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>';
@@ -842,10 +948,10 @@
       { key: 'custom_tag_style', control: 'segmented', label: 'Tag style', default: 'filled', options: [
         { value: 'filled', label: 'Filled' }, { value: 'outline', label: 'Outline' },
       ] },
-      { key: 'hot_badge_bg', control: 'color', label: 'Hot tag background', default: '', blankValue: () => OS.themeColor('primary_color', '#103635'), info: 'Blank inherits the theme primary color. Applies to tag__hot_*.' },
-      { key: 'hot_badge_text_color', control: 'color', label: 'Hot tag text', default: '#ffffff', blankValue: () => '#ffffff', visibleWhen: (v) => v.custom_tag_style !== 'outline' },
-      { key: 'new_badge_bg', control: 'color', label: 'New tag background', default: '#FFC439', blankValue: () => '#FFC439', info: 'Applies to tag__new_*.' },
-      { key: 'new_badge_text_color', control: 'color', label: 'New tag text', default: '#ffffff', blankValue: () => '#ffffff', visibleWhen: (v) => v.custom_tag_style !== 'outline' },
+      { key: 'hot_badge_bg', control: 'color', label: 'Hot tag background', default: '', allowTransparent: true, blankValue: () => OS.themeColor('primary_color', '#000000'), info: 'Blank inherits the theme primary color. Applies to tag__hot_*. T = transparent.' },
+      { key: 'hot_badge_text_color', control: 'color', label: 'Hot tag text', default: '#ffffff', allowTransparent: true, blankValue: () => '#ffffff', visibleWhen: (v) => v.custom_tag_style !== 'outline' },
+      { key: 'new_badge_bg', control: 'color', label: 'New tag background', default: '#FFC439', allowTransparent: true, blankValue: () => '#FFC439', info: 'Applies to tag__new_*. T = transparent.' },
+      { key: 'new_badge_text_color', control: 'color', label: 'New tag text', default: '#ffffff', allowTransparent: true, blankValue: () => '#ffffff', visibleWhen: (v) => v.custom_tag_style !== 'outline' },
       { key: 'badge_icon', control: 'select', label: 'Badge icon', default: 'none', options: ((window.OS_THEME_ICONS && window.OS_THEME_ICONS.options) ? window.OS_THEME_ICONS.options(true) : [{ value: 'none', label: 'None' }, { value: 'fire', label: 'Fire' }, { value: 'heart', label: 'Heart' }, { value: 'truck', label: 'Truck' }, { value: 'star', label: 'Star' }]) },
       { key: 'badge_icon_image', control: 'image', label: 'Custom badge icon', default: '', info: 'Custom image replaces the built-in icon when set.' },
       { sub: 'Product badges' },
@@ -860,14 +966,14 @@
       { key: 'title_size', control: 'range', label: 'Title font size', min: 10, max: 50, step: 1, unit: 'px', default: 30 },
       // Title description is freeform or metafield-backed — never product.description.
       { key: 'description', control: 'richtext', label: 'Description', default: '', maxlength: 1000, placeholder: 'Add description...', autoHeight: true, dynamicSource: { mode: 'metafields', includeProductFields: true } },
-      { key: 'description_color', control: 'color', label: 'Description color', default: '#000000' },
+      { key: 'description_color', control: 'color', label: 'Description color', default: '#000000', allowTransparent: true, blankValue: () => OS.themeColor('text_color', '#000000'), info: 'Blank inherits the theme text color. T = transparent.' },
       { key: 'description_size', control: 'range', label: 'Description font size', min: 10, max: 50, step: 1, unit: 'px', default: 14 },
       { key: 'description_top', control: 'range', label: 'Description top padding', min: 0, max: 100, step: 1, unit: 'px', default: 0 },
       { key: 'description_bottom', control: 'range', label: 'Description bottom padding', min: 0, max: 100, step: 1, unit: 'px', default: 0 },
     ] },
     price: { name: 'Price', icon: 'priceTag', unique: true, preview: '<div class="os-blkprev-price"><span>$24.00</span><s>$32.00</s><span class="save">-25%</span></div>', fields: [
       { key: 'size', control: 'range', label: 'Size', min: 10, max: 120, step: 1, unit: 'px', default: 24 },
-      { key: 'show_taxes', control: 'toggle', label: 'Show taxes notice', default: false },
+      { key: 'show_taxes', control: 'toggle', label: 'Show tax status and shipping policy link', default: false },
       ...savingFields({ saving_position: 'right' }),
     ] },
     rating: { name: 'Rating', icon: 'starLine', preview:
@@ -899,7 +1005,7 @@
       { key: 'review_label', control: 'text', label: 'Review label', default: 'reviews', reinjectWhenVisible: true, visibleWhen: (v) => v.style === 'stars-and-count' || v.style === 'stars-and-reviews' },
       { key: 'size', control: 'range', label: 'Size', min: 8, max: 48, step: 1, unit: 'px', default: 14 },
       { key: 'color', control: 'color', label: 'Star color', default: '#0f3636', allowTransparent: true, blankValue: () => '#0f3636', info: 'Defaults to brand teal. T = transparent.' },
-      { key: 'text_color', control: 'color', label: 'Text color', default: '', allowTransparent: true, info: 'Blank inherits the theme text color. T = transparent.' },
+      { key: 'text_color', control: 'color', label: 'Text color', default: '', allowTransparent: true, blankValue: () => OS.themeColor('text_color', '#000000'), info: 'Blank inherits the theme text color. T = transparent.' },
     ] },
     description: { name: 'Description', icon: 'text', unique: true, preview: '<div class="os-blkprev-copy">Soft knit bottle cover with festive trim. Perfect for holiday gifting.</div>', fields: [
       { key: 'text', control: 'richtext', label: 'Text', default: '', placeholder: 'Add product description...', dynamicSource: { label: 'Description', path: 'resource.description', defaultConnected: true } },
@@ -930,8 +1036,8 @@
       { key: 'status_style', control: 'segmented', label: 'Status style', default: 'dot', options: [
         { value: 'dot', label: 'Dot' }, { value: 'badge', label: 'Badge' }, { value: 'text-only', label: 'Text only' },
       ] },
-      { key: 'in_stock_color', control: 'color', label: 'In stock color', default: '#10a443', info: 'Shown when inventory is above the low stock threshold.' },
-      { key: 'status_color', control: 'color', label: 'Low stock color', default: '#f59e0b', info: 'Shown when inventory is at or below the low stock threshold.' },
+      { key: 'in_stock_color', control: 'color', label: 'In stock color', default: '#10a443', allowTransparent: true, blankValue: () => '#10a443', info: 'Shown when inventory is above the low stock threshold. T = transparent.' },
+      { key: 'status_color', control: 'color', label: 'Low stock color', default: '#f59e0b', allowTransparent: true, blankValue: () => '#f59e0b', info: 'Shown when inventory is at or below the low stock threshold. T = transparent.' },
       { key: 'font_size', control: 'range', label: 'Font size', min: 10, max: 50, step: 1, unit: 'px', default: 14 },
     ] },
     variant: { name: 'Variant picker', icon: 'variant', unique: true, preview:
@@ -953,7 +1059,7 @@
         { value: 'normal', label: 'Normal' }, { value: 'circle', label: 'Circle' }, { value: 'square', label: 'Square' },
       ], visibleWhen: (v) => v.picker_type === 'buttons' && !v.nested_dropdown },
       { key: 'nested_dropdown', control: 'toggle', label: 'Nested dropdown', default: false, info: 'Show one dropdown with combined option values.' },
-      { key: 'show_group_title', control: 'toggle', label: 'Show group title', default: false },
+      { key: 'show_group_title', control: 'toggle', label: 'Show group title', default: true, info: 'Shows Color / Size labels with the selected option name, and updates the name when the shopper switches variants.' },
       { key: 'sku_display_name', control: 'text', label: 'SKU display name', default: '', placeholder: 'Empty = original SKU', visibleWhen: (v) => !!v.show_sku_in_option },
       { key: 'show_sku_in_option', control: 'toggle', label: 'Show SKU in option', default: false },
     ] },
@@ -980,7 +1086,7 @@
       { key: 'buy_now_text', control: 'text', label: 'Buy now label', default: 'Buy now', visibleWhen: (v) => !!v.show_dynamic && Array.isArray(v.channels) && v.channels.indexOf('buy_now') >= 0 },
       { key: 'buy_now_background', control: 'color', label: 'Buy now background', default: '#000000', allowTransparent: true, blankValue: () => '#000000', info: 'Defaults to black. T = transparent.', visibleWhen: (v) => !!v.show_dynamic && Array.isArray(v.channels) && v.channels.indexOf('buy_now') >= 0 },
       { key: 'buy_now_text_color', control: 'color', label: 'Buy now text', default: '#FFFFFF', allowTransparent: true, blankValue: () => '#FFFFFF', info: 'Defaults to white. T = transparent.', visibleWhen: (v) => !!v.show_dynamic && Array.isArray(v.channels) && v.channels.indexOf('buy_now') >= 0 },
-      { key: 'dyn_shape', control: 'segmented', label: 'Button shape', default: 'normal', options: [
+      { key: 'dyn_shape', control: 'segmented', label: 'Button shape', default: 'pill', options: [
         { value: 'normal', label: 'Normal' }, { value: 'pill', label: 'Pill' }, { value: 'square', label: 'Square' }, { value: 'custom', label: 'Custom' },
       ], visibleWhen: (v) => !!v.show_dynamic },
       { key: 'dyn_custom_radius', control: 'range', label: 'Custom radius', min: 0, max: 40, step: 1, unit: 'px', default: 8, visibleWhen: (v) => !!v.show_dynamic && (v.dyn_shape || v.button_shape) === 'custom' },
@@ -1019,8 +1125,8 @@
       { key: 'background', control: 'toggle', label: 'Show background', default: false },
       { key: 'background_color', control: 'color', label: 'Background color', default: '#f6f6f6', allowTransparent: true, blankValue: () => '#f6f6f6', visibleWhen: (v) => !!v.background },
       { key: 'corner_radius', control: 'range', label: 'Corner radius', min: 0, max: 40, step: 1, unit: 'px', default: 10, visibleWhen: (v) => !!v.background },
-      { key: 'text_color', control: 'color', label: 'Text color', default: '', allowTransparent: true, blankValue: () => OS.themeColor('text_color', '#1A1A1A'), info: 'Blank inherits the theme text color. T = transparent.' },
-      { key: 'icon_color', control: 'color', label: 'Icon color', default: '', allowTransparent: true, blankValue: () => OS.themeColor('primary_color', '#103635'), info: 'Blank inherits the theme primary color. T = transparent.' },
+      { key: 'text_color', control: 'color', label: 'Text color', default: '', allowTransparent: true, blankValue: () => OS.themeColor('text_color', '#000000'), info: 'Blank inherits the theme text color. T = transparent.' },
+      { key: 'icon_color', control: 'color', label: 'Icon color', default: '', allowTransparent: true, blankValue: () => OS.themeColor('primary_color', '#000000'), info: 'Blank inherits the theme primary color. T = transparent.' },
       { key: 'card_style', control: 'segmented', label: 'Card style', default: 'none', options: [
         { value: 'none', label: 'None' }, { value: 'outline', label: 'Outline' }, { value: 'filled', label: 'Filled' },
       ] },
@@ -1057,7 +1163,7 @@
     collapsible: { name: 'Collapsible row', preview: '<div class="os-blkprev-row"><span>Overview</span><span>+</span></div>', fields: [
       { key: 'heading', control: 'text', label: 'Heading', default: 'Overview' },
       { key: 'icon', control: 'select', label: 'Icon', default: 'none', options: ((window.OS_THEME_ICONS && window.OS_THEME_ICONS.options) ? window.OS_THEME_ICONS.options(true) : [{ value: 'none', label: 'None' }, { value: 'fire', label: 'Fire' }, { value: 'heart', label: 'Heart' }, { value: 'truck', label: 'Truck' }, { value: 'star', label: 'Star' }]) },
-      { key: 'content', control: 'richtext', label: 'Row content', default: 'A clinically proven, non-sticky, vegan lip treatment that delivers the intense hydration of a lip mask with a sweet sheer tint using food-grade, non-artificial flavor. Designed for sensitive, irritated lips, this cushiony treatment delivers instant comfort to rescue dry, chapped lips.', autoHeight: true, dynamicSource: { mode: 'metafields', includeProductFields: true } },
+      { key: 'content', control: 'richtext', label: 'Row content', default: 'Add product details such as fit, materials, care, or shipping notes.', autoHeight: true, dynamicSource: { mode: 'metafields', includeProductFields: true } },
       { key: 'custom_liquid', control: 'textarea', label: 'Custom liquid', default: '' },
       { key: 'open', control: 'toggle', label: 'Open by default', default: false },
       { key: 'accordion_mode', control: 'toggle', label: 'Accordion mode', default: false, info: 'When on, only one row stays open at a time.' },
@@ -1206,15 +1312,18 @@
       { key: 'show_title', control: 'toggle', label: 'Show title', default: true },
       { key: 'show_price', control: 'toggle', label: 'Show price', default: true },
       { key: 'show_quantity', control: 'toggle', label: 'Show quantity', default: true },
-      { key: 'show_after_scroll', control: 'toggle', label: 'Show after scroll', default: true },
       { key: 'appear_at', control: 'segmented', label: 'Appear at', default: 'scroll', options: [
         { value: 'top', label: 'Top' }, { value: 'scroll', label: 'After scroll' },
       ] },
       { key: 'mobile_visible', control: 'toggle', label: 'Show on mobile', default: true },
+      { key: 'width_mode', control: 'segmented', label: 'Bar width', default: 'container', options: [
+        { value: 'container', label: 'Follow container' }, { value: 'full', label: 'Full width' },
+      ], info: 'Follow container keeps the sticky bar aligned with the preview container. Full width spans the page viewport.' },
+      { key: 'desktop_button_width', control: 'range', label: 'Button width · desktop', min: 240, max: 560, step: 10, unit: 'px', default: 320, info: 'Mobile uses the automatic width formula.' },
       { key: 'button_text', control: 'text', label: 'Button text', default: 'Add to cart' },
     ] },
     divider: { name: 'Separator', preview: '<div class="os-blkprev-line"></div>', fields: [
-      { key: 'color', control: 'color', label: 'Color', default: '#E5E5E5' },
+      { key: 'color', control: 'color', label: 'Color', default: '#E5E5E5', allowTransparent: true, blankValue: () => OS.themeColor('border_color', '#E5E5E5'), info: 'Blank inherits Theme › Colors › Border. T = transparent.' },
       { key: 'thickness', control: 'range', label: 'Thickness', min: 1, max: 6, step: 1, unit: 'px', default: 1 },
       { key: 'padding_top', control: 'range', label: 'Padding Top', min: 0, max: 100, step: 1, unit: 'px', default: 0 },
       { key: 'padding_bottom', control: 'range', label: 'Padding Bottom', min: 0, max: 100, step: 1, unit: 'px', default: 0 },
@@ -1279,7 +1388,7 @@
   function savingFields(defaults) {
     const d = defaults || {};
     return [
-      { key: 'show_saving', control: 'toggle', label: 'Show saving amount', default: d.show_saving == null ? true : d.show_saving },
+      { key: 'show_saving', control: 'toggle', label: 'Show saving amount', default: d.show_saving == null ? true : d.show_saving, info: 'Only shows when the product has a compare-at price higher than the selling price.' },
       { key: 'saving_type', control: 'select', label: 'Type', default: d.saving_type || 'percentage', options: [
         { value: 'percentage', label: 'Percentage' }, { value: 'fixed', label: 'Fixed amount' },
         { value: 'text', label: 'Sale' }, { value: 'label', label: 'Saving text' },
@@ -1291,8 +1400,8 @@
       { key: 'saving_position', control: 'segmented', label: 'Saving position', default: d.saving_position || 'right', options: [
         { value: 'left', label: 'Left' }, { value: 'right', label: 'Right' },
       ], visibleWhen: (v) => !!v.show_saving },
-      { key: 'saving_bg', control: 'color', label: 'Saving background', default: d.saving_bg || '', blankValue: () => OS.themeColor('sale_price_color', '#D92D20'), info: 'Blank inherits the theme sale price color. Outline style uses this as border/text tint.', visibleWhen: (v) => !!v.show_saving },
-      { key: 'saving_text_color', control: 'color', label: 'Saving text color', default: d.saving_text_color || '#ffffff', blankValue: () => '#ffffff', visibleWhen: (v) => !!v.show_saving && v.saving_style !== 'outline' },
+      { key: 'saving_bg', control: 'color', label: 'Saving background', default: d.saving_bg || '', allowTransparent: true, blankValue: () => OS.themeColor('sale_price_color', '#D92D20'), info: 'Blank inherits the theme sale price color. Outline style uses this as border/text tint. T = transparent.', visibleWhen: (v) => !!v.show_saving },
+      { key: 'saving_text_color', control: 'color', label: 'Saving text color', default: d.saving_text_color || '#ffffff', allowTransparent: true, blankValue: () => '#ffffff', visibleWhen: (v) => !!v.show_saving && v.saving_style !== 'outline' },
       { key: 'saving_icon', control: 'toggle', label: 'Show saving icon', default: d.saving_icon == null ? false : d.saving_icon, visibleWhen: (v) => !!v.show_saving },
     ];
   }
@@ -1336,19 +1445,23 @@
   }
   function customTagStyle(kind, b, c) {
     const isNew = kind === 'new';
-    const fillBg = isNew
+    const rawBg = isNew
       ? (b.new_badge_bg || '#FFC439')
-      : (b.hot_badge_bg || b.badge_bg || c.primary_color || '#5b3f94');
-    const fillText = isNew
+      : (b.hot_badge_bg || b.badge_bg || c.primary_color || '#000000');
+    const rawText = isNew
       ? (b.new_badge_text_color || '#ffffff')
       : (b.hot_badge_text_color || b.badge_text_color || '#ffffff');
+    const fillBg = OS.bgOrTransparent(rawBg) || 'transparent';
+    const fillText = OS.bgOrTransparent(rawText) || 'transparent';
     const outline = b.custom_tag_style === 'outline';
     if (outline) {
       // Bright accents (e.g. yellow) need dark text; light configured text falls back to accent.
-      const text = colorLuma(fillText) > 0.72
-        ? (colorLuma(fillBg) > 0.72 ? '#111111' : fillBg)
-        : fillText;
-      const strokeBase = colorLuma(fillBg) > 0.72 ? text : fillBg;
+      const accent = fillBg === 'transparent' ? (c.primary_color || '#000000') : fillBg;
+      const textBase = fillText === 'transparent' ? accent : fillText;
+      const text = colorLuma(textBase) > 0.72
+        ? (colorLuma(accent) > 0.72 ? '#111111' : accent)
+        : textBase;
+      const strokeBase = colorLuma(accent) > 0.72 ? text : accent;
       return { outline: true, style: outlineTagStyle(strokeBase, text) };
     }
     return { outline: false, style: 'background:' + OS.esc(fillBg) + ';color:' + OS.esc(fillText) + ';' };
@@ -1361,7 +1474,7 @@
     return 'left';
   }
 
-  function rowHtml(block, p, s, t, ctx, selectedOverride) {
+  function rowHtml(block, p, s, t, ctx, selectedOverride, bare) {
     const b = block.settings || {};
     const c = t.colors || {};
     const variants = Array.isArray(p.variants) ? p.variants : [];
@@ -1369,8 +1482,9 @@
     const price = selected.price == null ? p.price : selected.price;
     const compareAt = selected.compareAt == null ? p.compareAt : selected.compareAt;
     const inventory = selected.inventory == null ? (p.inventory == null ? 12 : p.inventory) : selected.inventory;
-    const sale = compareAt && compareAt > price;
-    const saleColor = c.sale_price_color || '#d63a2f';
+      const sale = compareAt && compareAt > price;
+      const preorder = !!(selected.preorder || p.preorder);
+      const saleColor = c.sale_price_color || '#d63a2f';
     const mob = ctx.mob;
     let body = '';
     if (block.kind === 'badges') {
@@ -1390,7 +1504,10 @@
       }).filter(Boolean);
       // Always mount sold badge when enabled so variant switches can toggle it live.
       if (b.show_sold_out) {
-        tags.push('<span class="pdp-tag sold" data-pdp-sold-badge' + (inventory <= 0 ? '' : ' hidden') + '>' + OS.esc('Sold out') + '</span>');
+        tags.push('<span class="pdp-tag sold" data-pdp-sold-badge' + (inventory <= 0 && !preorder ? '' : ' hidden') + '>' + OS.esc('Sold out') + '</span>');
+      }
+      if (preorder && b.show_preorder !== false) {
+        tags.push('<span class="pdp-tag preorder" data-pdp-preorder-badge>Pre-order</span>');
       }
       if (b.show_saving && sale) {
         const save = savingStyle(b, saleColor);
@@ -1407,7 +1524,21 @@
         : '';
     } else if (block.kind === 'title') {
       const px = Number(b.title_size || 30);
-      body = '<h1 class="pdp-title" style="font-family:' + OS.headingFamily(t) + ';font-size:' + OS.headingSize(t, px, mob) + 'px;color:' + OS.col(s.text, c.heading_color || '#1a1a1a') + '">' + OS.esc(p.title) + '</h1>';
+      const titleWeight = b.title_weight != null ? String(b.title_weight) : '';
+      const titleTracking = b.title_letter_spacing != null ? Number(b.title_letter_spacing) : null;
+      const titleMb = b.title_margin_bottom != null ? Number(b.title_margin_bottom) : null;
+      const titleFont = b.title_font_family
+        ? OS.fontStack(String(b.title_font_family))
+        : (b.title_font === 'body' ? OS.bodyFamily(t) : OS.headingFamily(t));
+      // Title size is an absolute px control (same as Price size), not theme heading scale.
+      const titlePx = mob ? Math.max(10, Math.round(px * 0.88)) : px;
+      body = '<h1 class="pdp-title" style="font-family:' + titleFont +
+        ';font-size:' + titlePx + 'px' +
+        ';color:' + OS.col(s.text, c.heading_color || '#1a1a1a') +
+        (titleWeight ? ';font-weight:' + OS.esc(titleWeight) : '') +
+        (titleTracking != null && isFinite(titleTracking) ? ';letter-spacing:' + titleTracking + 'em' : '') +
+        (titleMb != null && isFinite(titleMb) ? ';margin-bottom:' + titleMb + 'px' : '') +
+        '">' + OS.esc(p.title) + '</h1>';
       const titleDescSrc = b.description_dynamic_source;
       let titleDescHtml = '';
       if (typeof titleDescSrc === 'string' && titleDescSrc && titleDescSrc !== 'true' && titleDescSrc !== 'false'
@@ -1435,12 +1566,15 @@
       const starColor = (!b.color || b.color === '') ? (starStyle === 'boxed' ? '#0f3636' : '#f5b301') : b.color;
       const reviewLabel = OS.esc(String(b.review_label || 'reviews'));
       const customText = OS.esc(String(b.custom_text || ''));
-      const textColor = (!b.text_color || b.text_color === '') ? 'inherit' : b.text_color;
+      // Blank inherits Theme › Colors › Body text (same as blankValue on the Text color control).
+      const textColor = (!b.text_color || b.text_color === '')
+        ? (((t.colors && t.colors.text_color) || '#000000'))
+        : b.text_color;
       const textStyle = 'color:' + OS.esc(textColor) + ';' + (b.underline_text ? 'text-decoration:underline;text-underline-offset:3px;' : '');
       const starCount = ratingLayout === 'single-icon' ? 1 : 5;
       const starRow = ratingStars(p.rating, { style: starStyle, color: starColor, count: starCount });
       let textHtml = '';
-      if (ratingStyle === 'stars-and-count') textHtml = '(' + reviews + ' ' + reviewLabel + ')';
+      if (ratingStyle === 'stars-and-count') textHtml = reviews + ' ' + reviewLabel;
       else if (ratingStyle === 'stars-and-reviews') textHtml = rating + ' (' + reviews + ' ' + reviewLabel + ')';
       else if (ratingStyle === 'stars-rating-custom') textHtml = rating + '/5 ' + customText;
       else if (ratingStyle === 'stars-custom') textHtml = customText;
@@ -1450,28 +1584,35 @@
       const saving = savingLabel(b, price, compareAt);
       const save = savingStyle(b, saleColor);
       const saveOrder = b.saving_position === 'left' ? 'order:-1;' : '';
-      const priceSize = Math.max(10, Math.min(120, Number(b.size == null ? 24 : b.size)));
-      const compareSize = Math.max(10, Math.round(priceSize * (16 / 24)));
-      const saveSize = Math.max(10, Math.round(priceSize * (14.4 / 24)));
-      const nowStyle = 'font-size:' + priceSize + 'px;line-height:' + Math.round(priceSize * 1.45) + 'px;' + (sale ? 'color:' + saleColor + ';' : '');
+      const priceSize = Math.max(10, Math.min(120, Number(b.size == null ? 14 : b.size)));
+      const priceWeight = b.weight != null ? String(b.weight) : '300';
+      // Compare-at matches sale price size (Chantilly / theme editor Size setting).
+      const compareSize = priceSize;
+      const saveSize = Math.max(10, Math.round(priceSize * (14.4 / 14)));
+      const nowStyle = 'font-size:' + priceSize + 'px;font-weight:' + OS.esc(priceWeight) + ';line-height:' + Math.round(priceSize * 1.6) + 'px;' + (sale ? 'color:' + saleColor + ';' : '');
       const compareStyle = 'font-size:' + compareSize + 'px;line-height:' + Math.round(compareSize * 1.6) + 'px;';
       const saveStyle = save.style + saveOrder + 'font-size:' + saveSize + 'px;line-height:' + Math.round(saveSize * 1.25) + 'px;';
       const nowHtml = '<span class="now" data-pdp-now style="' + nowStyle + '">' + OS.money(price) + '</span>';
       const compareHtml = sale
         ? '<s data-pdp-compare style="' + compareStyle + '">' + OS.money(compareAt) + '</s>'
         : '<s data-pdp-compare hidden style="' + compareStyle + '"></s>';
-      body = '<div class="pdp-price" style="--pdp-price-size:' + priceSize + 'px">' + nowHtml + compareHtml +
+      const taxesHtml = b.show_taxes
+        ? '<div class="pdp-taxes">Tax included. <a href="#shipping-policy">Shipping</a> calculated at checkout.</div>'
+        : '';
+      body = '<div class="pdp-price-wrap">' +
+        '<div class="pdp-price" style="--pdp-price-size:' + priceSize + 'px;--pdp-price-weight:' + OS.esc(priceWeight) + '">' + nowHtml + compareHtml +
         (b.show_saving && sale
           ? '<span class="save' + (save.outline ? ' outline' : '') + '" data-pdp-save data-save-type="' + OS.esc(b.saving_type || 'percentage') + '" data-save-label="' + OS.esc(String(b.saving_label || '').trim()) + '" data-save-icon="' + (b.saving_icon ? '1' : '0') + '" style="' + saveStyle + '">' + savingIcon(b.saving_icon) + OS.esc(saving) + '</span>'
           : '') + '</div>' +
-        (b.show_taxes ? '<div style="font-size:12px;opacity:.62;margin-top:4px">Tax included. Shipping calculated at checkout.</div>' : '');
+        taxesHtml +
+        '</div>';
     } else if (block.kind === 'divider') {
       body = '<div style="padding:' + (b.padding_top || 0) + 'px 0 ' + (b.padding_bottom || 0) + 'px"><hr class="pdp-line" style="border-top-width:' + (b.thickness || 1) + 'px;border-top-color:' + OS.esc(b.color || '#E5E5E5') + '"></div>';
     } else if (block.kind === 'variant') {
       const vis = b.hide_sold_out
         ? variants.filter((v) => Number(v.inventory || 0) > 0 && v.available !== false)
         : variants;
-      const inStock = (v) => Number(v.inventory || 0) > 0 && v.available !== false;
+      const inStock = (v) => (Number(v.inventory || 0) > 0 && v.available !== false) || !!v.preorder;
       const colors = Array.from(new Set(vis.map((v) => v.color).filter(Boolean)));
       const sizes = Array.from(new Set(vis.map((v) => v.size).filter(Boolean)));
       const selectedColor = selected.color || colors[0] || 'Default';
@@ -1516,7 +1657,7 @@
         image: p.image,
         sku: p.sku || '',
       }];
-      const data = dataSource.map((v) => '<i data-pdp-variant data-id="' + OS.esc(v.id || '') + '" data-color="' + OS.esc(v.color || '') + '" data-size="' + OS.esc(v.size || '') + '" data-price="' + Number(v.price || 0) + '" data-compare="' + Number(v.compareAt || 0) + '" data-inventory="' + Number(v.inventory == null ? 99 : v.inventory) + '" data-image="' + OS.esc(v.image || p.image || '') + '" data-sku="' + OS.esc(v.sku || '') + '"></i>').join('');
+      const data = dataSource.map((v) => '<i data-pdp-variant data-id="' + OS.esc(v.id || '') + '" data-color="' + OS.esc(v.color || '') + '" data-size="' + OS.esc(v.size || '') + '" data-price="' + Number(v.price || 0) + '" data-compare="' + Number(v.compareAt || 0) + '" data-inventory="' + Number(v.inventory == null ? 99 : v.inventory) + '" data-preorder="' + (v.preorder ? '1' : '0') + '" data-available="' + (v.available === false ? '0' : '1') + '" data-image="' + OS.esc(v.image || p.image || '') + '" data-sku="' + OS.esc(v.sku || '') + '"></i>').join('');
       if (b.nested_dropdown) {
         const selectedId = selected.id || '';
         const selectedCombo = [selectedSize, selectedColor].filter(Boolean).join(' / ') || 'Variant';
@@ -1531,7 +1672,7 @@
           '<button type="button" class="pdp-dd-btn" data-pdp-dd-btn aria-haspopup="listbox" aria-expanded="false" aria-label="Variant"><span data-pdp-dd-val>' + OS.esc(selectedCombo + skuLabel(selected)) + (selectedSold ? ' — Sold out' : '') + '</span></button>' +
           '<div class="pdp-dd-menu" data-pdp-dd-menu hidden role="listbox" aria-label="Variant">' + opts + '</div></div>';
         body = '<div class="pdp-options"><div class="pdp-option">' +
-          (showTitle ? '<div class="pdp-label">Variant: <span class="pdp-opt-val">' + OS.esc(selectedCombo) + '</span></div>' : '') +
+          (showTitle ? '<div class="pdp-label">Variant: <span class="pdp-opt-val" data-pdp-nested-label>' + OS.esc(selectedCombo) + '</span></div>' : '<span hidden data-pdp-nested-label>' + OS.esc(selectedCombo) + '</span>') +
           nestedDd + '</div></div><span hidden data-pdp-variant-data>' + data + '</span>';
       } else {
         const colorHtml = isDropdown
@@ -1555,20 +1696,31 @@
             const match = vis.find((v) => v.size === z) || {};
             return '<button type="button" class="pdp-size' + shape + (z === selectedSize ? ' on' : '') + (sold ? ' sold' : '') + '" data-pdp-size="' + OS.esc(z) + '">' + OS.esc(z + skuLabel(match)) + '</button>';
           }).join('') + '</div>';
+        const sizeGuideHtml = b._size_guide_html ? ('<span class="pdp-size-guide-slot">' + b._size_guide_html + '</span>') : '';
         body = '<div class="pdp-options"><div class="pdp-option">' +
           (showTitle ? '<div class="pdp-label">Color: <span class="pdp-opt-val" data-pdp-color-label>' + OS.esc(selectedColor) + '</span></div>' : '<span hidden data-pdp-color-label>' + OS.esc(selectedColor) + '</span>') +
           colorHtml + '</div><div class="pdp-option">' +
-          (showTitle ? '<div class="pdp-label">Size: <span class="pdp-opt-val" data-pdp-size-label>' + OS.esc(selectedSize) + '</span></div>' : '<span hidden data-pdp-size-label>' + OS.esc(selectedSize) + '</span>') +
+          (showTitle
+            ? '<div class="pdp-label pdp-size-head"><span>Size: <span class="pdp-opt-val" data-pdp-size-label>' + OS.esc(selectedSize) + '</span></span>' + sizeGuideHtml + '</div>'
+            : '<span hidden data-pdp-size-label>' + OS.esc(selectedSize) + '</span>' + sizeGuideHtml) +
           sizeHtml + '</div></div><span hidden data-pdp-variant-data>' + data + '</span>';
       }
     } else if (block.kind === 'description') {
-      const useMeta = b.text_dynamic_source !== false;
+      const src = b.text_dynamic_source;
       const customText = String(b.text || '').trim();
       const productDesc = String(p.description || '').trim();
-      // Product descriptions are HTML (same as Shopify resource.description).
-      const descHtml = useMeta
-        ? (productDesc || 'Product description will appear here.')
-        : (customText || productDesc || 'Product description will appear here.');
+      let descHtml = '';
+      if (src === false) {
+        descHtml = customText || productDesc || 'Product description will appear here.';
+      } else if (typeof src === 'string' && src && src !== 'true' && src !== 'false') {
+        const mfVal = resolveProductMetafield(p, src);
+        descHtml = mfVal
+          ? (/<[a-z][\s\S]*>/i.test(mfVal) ? mfVal : OS.esc(mfVal))
+          : (productDesc || 'Product description will appear here.');
+      } else {
+        // null / true / defaultConnected → product description (Shopify resource.description).
+        descHtml = productDesc || 'Product description will appear here.';
+      }
       const pad = [b.padding_top, b.padding_right, b.padding_bottom, b.padding_left]
         .map((n) => (n == null ? 0 : Number(n)) + 'px').join(' ');
       const isFit = b.width === 'fit';
@@ -1582,7 +1734,7 @@
         const radius = (b.corner_radius == null ? 0 : Number(b.corner_radius)) + 'px';
         bgStyle = 'background:' + bgColor + ';border-radius:' + radius + ';--pdp-desc-bg:' + bgColor + ';--pdp-desc-radius:' + radius + ';';
       }
-      body = '<div class="pdp-desc' + (b.background ? ' has-bg' : '') + '" style="' + widthStyle + 'font-size:14px;line-height:1.55;' + bgStyle + 'padding:' + pad + '">' + descHtml + '</div>';
+      body = '<div class="pdp-desc' + (b.background ? ' has-bg' : '') + '" style="' + widthStyle + 'font-size:14px;font-weight:300;line-height:1.4;' + bgStyle + 'padding:' + pad + '">' + descHtml + '</div>';
     } else if (block.kind === 'inventory') {
       if (b.show_status === false) return '';
       const showCount = b.show_count !== false;
@@ -1595,31 +1747,39 @@
       const lowStockColor = b.status_color || '#f59e0b';
       const fontSize = Math.max(10, Math.min(50, b.font_size == null ? 14 : Number(b.font_size)));
       const isLow = inventory > 0 && inventory <= threshold;
-      const statusText = inventory <= 0
-        ? soldText
-        : (isLow
+      const statusText = preorder
+        ? 'Pre-order now · ships as soon as it is in stock.'
+        : (inventory <= 0
+          ? soldText
+          : (isLow
           ? lowTextTpl.replace(/\{n\}/g, String(inventory)) + customText
-          : ((showCount ? inventory + ' in stock' : 'In stock') + customText));
+          : ((showCount ? inventory + ' in stock' : 'In stock') + customText)));
+      
       const styleClass = style === 'badge' ? ' style-badge' : (style === 'text-only' ? ' style-text' : '');
-      const activeColor = inventory <= 0 ? '#9ca3af' : (isLow ? lowStockColor : inStockColor);
-      body = '<div class="pdp-stock' + (inventory <= 0 ? ' sold' : (isLow ? ' low' : '')) + styleClass + '" data-pdp-stock data-show-count="' + (showCount ? '1' : '0') + '" data-custom-text="' + OS.esc(customText) + '" data-low-threshold="' + threshold + '" data-low-text="' + OS.esc(lowTextTpl) + '" data-sold-text="' + OS.esc(soldText) + '" data-in-stock-color="' + OS.esc(inStockColor) + '" data-low-stock-color="' + OS.esc(lowStockColor) + '" style="--status-color:' + OS.esc(activeColor) + ';--pdp-stock-fs:' + fontSize + 'px"><i></i><span>' +
+      const activeColor = preorder ? '#222222' : (inventory <= 0 ? '#9ca3af' : (isLow ? lowStockColor : inStockColor));
+      body = '<div class="pdp-stock' + (preorder ? ' preorder' : (inventory <= 0 ? ' sold' : (isLow ? ' low' : ''))) + styleClass + '" data-pdp-stock data-show-count="' + (showCount ? '1' : '0') + '" data-custom-text="' + OS.esc(customText) + '" data-low-threshold="' + threshold + '" data-low-text="' + OS.esc(lowTextTpl) + '" data-sold-text="' + OS.esc(soldText) + '" data-in-stock-color="' + OS.esc(inStockColor) + '" data-low-stock-color="' + OS.esc(lowStockColor) + '" style="--status-color:' + OS.esc(activeColor) + ';--pdp-stock-fs:' + fontSize + 'px"><i></i><span>' +
         OS.esc(statusText) + '</span></div>';
     } else if (block.kind === 'buy') {
       const showDyn = !!b.show_dynamic;
       const channels = resolveBuyChannels(b);
       const showPayMore = showDyn && channels.length > 0 && b.show_payment_options !== false;
-      const atcShape = b.atc_shape || b.button_shape || 'normal';
-      const dynShape = b.dyn_shape || b.button_shape || 'normal';
-      const atcRadius = buyButtonRadius(atcShape, b.atc_custom_radius != null ? b.atc_custom_radius : b.custom_radius);
-      const dynRadius = buyButtonRadius(dynShape, b.dyn_custom_radius != null ? b.dyn_custom_radius : b.custom_radius);
+      // Keep ATC + dynamic shapes in the same family by default (dyn falls back to atc).
+      // Height / typography → Theme settings › Buttons; shape/color → Buy block.
+      const themeRad = themeButtonRadius(t);
+      const btnH = themeButtonHeight(t);
+      const atcShape = b.atc_shape || b.button_shape || 'pill';
+      const dynShape = b.dyn_shape || b.atc_shape || b.button_shape || 'pill';
+      const atcRadius = buyButtonRadius(atcShape, b.atc_custom_radius != null ? b.atc_custom_radius : b.custom_radius, themeRad);
+      const dynRadius = buyButtonRadius(dynShape, b.dyn_custom_radius != null ? b.dyn_custom_radius : b.custom_radius, themeRad);
       const atcRadiusStyle = 'border-radius:' + atcRadius + 'px';
       const dynRadiusStyle = 'border-radius:' + dynRadius + 'px';
+      const actionsVarStyle = '--pdp-atc-radius:' + atcRadius + 'px;--pdp-dyn-radius:' + dynRadius + 'px;--pdp-btn-h:' + btnH + 'px';
       const atcFull = b.atc_layout === 'full-width';
       const useLogo = !!b.channel_logo;
       const buyNowLabel = b.buy_now_text || 'Buy now';
       // Drop theme button border — filled ATC looks harsh with a contrasting outline.
-      // Match Buy now type: inherit size + weight 700 (btnStyle theme type is lighter/smaller).
-      const atcColorStyle = (b.atc_background ? ';background:' + b.atc_background : '') + (b.atc_text_color ? ';color:' + b.atc_text_color : '') + ';border:0;font:inherit;font-weight:700';
+      // Keep btnStyle height / font / letter-spacing / transform; only paint from Buy block.
+      const atcColorStyle = (b.atc_background ? ';background:' + b.atc_background : '') + (b.atc_text_color ? ';color:' + b.atc_text_color : '') + ';border:0';
       const buyNowColorStyle = ';background:' + (b.buy_now_background || '#fff') + ';color:' + (b.buy_now_text_color || 'inherit') + ';border:0';
       const paypalLogo = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="38 6 86 24" height="22" aria-hidden="true" focusable="false">' +
         '<path fill="#253B80" d="M46.211 6.749h-6.839c-.468 0-.866.34-.939.802l-2.766 17.537c-.055.346.213.658.564.658h3.265c.468 0 .866-.34.939-.803l.746-4.73c.072-.463.471-.803.938-.803h2.165c4.505 0 7.105-2.18 7.784-6.5.306-1.89.013-3.375-.872-4.415C50.224 7.353 48.5 6.749 46.211 6.749zm.789 6.405c-.374 2.454-2.249 2.454-4.062 2.454h-1.032l.724-4.583c.043-.277.283-.481.563-.481h.473c1.235 0 2.4 0 3.002.704.361.41.471 1.034.332 1.906z"/>' +
@@ -1630,9 +1790,10 @@
         '<path fill="#179BD7" d="M119.295 7.23l-2.807 17.858c-.055.346.213.658.562.658h2.822c.469 0 .867-.34.939-.803l2.768-17.536c.055-.346-.213-.659-.562-.659h-3.16c-.279 0-.519.204-.562.482z"/>' +
       '</svg>';
       const channelBtn = (id) => {
+        // Wallets keep brand paint in CSS; height comes from --pdp-btn-h. Buy now uses Theme › Buttons type + block colors.
         const style = ' style="' + dynRadiusStyle + '"';
         if (id === 'buy_now') {
-          return '<button type="button" class="pdp-buynow" data-pdp-buynow style="' + dynRadiusStyle + buyNowColorStyle + '"' + (inventory <= 0 ? ' disabled' : '') + '>' + OS.esc(buyNowLabel) + '</button>';
+          return '<button type="button" class="pdp-buynow" data-pdp-buynow style="' + OS.btnStyle(t) + ';' + dynRadiusStyle + buyNowColorStyle + '"' + (inventory <= 0 ? ' disabled' : '') + '>' + OS.esc(buyNowLabel) + '</button>';
         }
         if (id === 'paypal') {
           return '<button type="button" class="pdp-paypal" data-pdp-paypal aria-label="PayPal"' + style + '>' + (useLogo ? paypalLogo : 'PayPal') + '</button>';
@@ -1659,23 +1820,29 @@
             '<div class="pdp-safe-label">' + OS.esc(b.safe_checkout_label || 'GUARANTEED SAFE CHECKOUT') + '</div>' +
             '<div class="pdp-safe-logos">' + trustList.map(trustLogoHtml).join('') + '</div></div>'
         : '';
-      const qtyHtml = b.show_quantity
+      const qtyInner = b.show_quantity
         ? '<div class="pdp-qty" style="' + atcRadiusStyle + '"><button type="button" data-pdp-q="-">-</button><span data-pdp-qty>1</span><button type="button" data-pdp-q="+">+</button></div>'
         : '';
+      const qtyHtml = qtyInner
+        ? (atcFull
+          ? '<div class="pdp-qty-wrap"><div class="pdp-qty-label">Quantity</div>' + qtyInner + '</div>'
+          : qtyInner)
+        : '';
       const atcIcon = b.atc_icon == null ? 'bag-plus' : b.atc_icon;
+      const atcType = atcFull ? ';font-size:14px;font-weight:300;letter-spacing:0.08em;text-transform:uppercase;height:47px;min-height:47px' : '';
       const atcHtml = b.show_add
-        ? '<button type="button" class="pdp-atc' + (atcFull ? ' full' : '') + '" data-pdp-atc data-atc-icon="' + OS.esc(atcIcon) + '" style="' + OS.btnStyle(t) + ';' + atcRadiusStyle + atcColorStyle + '"' + (inventory <= 0 ? ' disabled' : '') + '>' +
-          (inventory <= 0 ? atcButtonInner(atcIcon, 'Sold out') : atcButtonInner(atcIcon, 'Add to cart')) + '</button>'
+        ? '<button type="button" class="pdp-atc' + (atcFull ? ' full' : '') + '" data-pdp-atc data-atc-icon="' + OS.esc(atcIcon) + '" style="' + OS.btnStyle(t) + ';' + atcRadiusStyle + atcColorStyle + atcType + '"' + (inventory <= 0 && !preorder ? ' disabled' : '') + '>' +
+          (inventory <= 0 && !preorder ? atcButtonInner(atcIcon, 'Sold out') : atcButtonInner(atcIcon, 'Add to cart')) + '</button>'
         : '';
       let buyPrimary = '';
       if (qtyHtml || atcHtml) {
         if (atcFull) {
-          buyPrimary = (qtyHtml ? '<div class="pdp-buy-row">' + qtyHtml + '</div>' : '') + atcHtml;
+          buyPrimary = (qtyHtml ? '<div class="pdp-buy-row is-qty-only">' + qtyHtml + '</div>' : '') + atcHtml;
         } else {
           buyPrimary = '<div class="pdp-buy-row">' + qtyHtml + atcHtml + '</div>';
         }
       }
-      body = '<div class="pdp-actions">' + buyPrimary + dyn + safe + '</div>';
+      body = '<div class="pdp-actions" style="' + actionsVarStyle + '">' + buyPrimary + dyn + safe + '</div>';
     } else if (block.kind === 'icon_text') {
       const mark = (name, px) => (window.OS_THEME_ICONS && window.OS_THEME_ICONS.svg(name || 'box', px)) || '';
       const pickCopy = (primary, legacy) => {
@@ -1720,10 +1887,10 @@
         ? ((isFinite(Number(ty.heading_letter_spacing)) ? Number(ty.heading_letter_spacing) : -4) / 100) + 'em'
         : 'normal';
       const titleTransform = (useHeading && ty.heading_uppercase) ? 'uppercase' : 'none';
-      // Content always stays on Body type (theme base size / regular weight).
+      // Content stays on Body type at the same optical size as the heading line.
       const contentFamily = OS.bodyFamily(t);
-      const contentPx = Math.max(10, Math.round(sizePx * 0.875));
-      const contentWeight = 400;
+      const contentPx = Math.max(10, titlePx);
+      const contentWeight = 300;
       const iconPx = Math.max(16, Math.min(96, Number(b.icon_size == null ? Math.round(titlePx * 1.25) : b.icon_size) || 20));
       const linePx = Math.max(iconPx, Math.round(titlePx * 1.6));
       const itemGap = Math.max(4, Math.min(48, Number(b.item_gap == null ? 24 : b.item_gap) || 24));
@@ -1850,7 +2017,7 @@
     } else if (block.kind === 'collapsible') {
       const isOpen = !!b.open;
       const iconLeft = b.icon_position === 'left';
-      const headingIcon = (b.icon && b.icon !== 'none' && window.OS_THEME_ICONS) ? ('<span class="pdp-acc-ic">' + window.OS_THEME_ICONS.svg(b.icon, 20) + '</span>') : '';
+      const headingIcon = (b.icon && b.icon !== 'none' && window.OS_THEME_ICONS) ? ('<span class="pdp-acc-ic">' + window.OS_THEME_ICONS.svg(b.icon, 16) + '</span>') : '';
       const src = b.content_dynamic_source;
       const paths = Array.isArray(src)
         ? src.map(String).filter(Boolean)
@@ -1864,7 +2031,9 @@
           return /<[a-z][\s\S]*>/i.test(v) ? v : ('<p>' + OS.esc(v) + '</p>');
         }).filter(Boolean).join('');
       }
-      body = '<div class="pdp-acc' + (isOpen ? ' open' : '') + (iconLeft ? ' icon-left' : '') + '" data-pdp-acc data-accordion="' + (b.accordion_mode ? '1' : '0') + '"><button type="button"><span class="pdp-acc-title">' + headingIcon + OS.esc(b.heading || 'Details') + '</span><span class="pdp-acc-mark">' + (isOpen ? '–' : '+') + '</span></button><div class="body">' + contentHtml + (b.custom_liquid ? '<pre>' + OS.esc(b.custom_liquid) + '</pre>' : '') + '</div></div>';
+      // Symmetry disclosure plus: two 11×1px bars; vertical arm rotates flat when open.
+      const plusSvg = '<span class="pdp-acc-plus" aria-hidden="true"><i class="pdp-acc-h"></i><i class="pdp-acc-v"></i></span>';
+      body = '<div class="pdp-acc' + (isOpen ? ' open' : '') + (iconLeft ? ' icon-left' : '') + '" data-pdp-acc data-accordion="' + (b.accordion_mode ? '1' : '0') + '"><button type="button" aria-expanded="' + (isOpen ? 'true' : 'false') + '"><span class="pdp-acc-title">' + headingIcon + OS.esc(b.heading || 'Details') + '</span><span class="pdp-acc-mark">' + plusSvg + '</span></button><div class="body">' + contentHtml + (b.custom_liquid ? '<pre>' + OS.esc(b.custom_liquid) + '</pre>' : '') + '</div></div>';
     } else if (block.kind === 'popup') {
       const pages = ((ctx.sample && ctx.sample.pages) || (OS.sample && OS.sample.pages) || []);
       const page = pages.find((x) => x.id === b.page);
@@ -2139,25 +2308,83 @@
     }
     if (block.kind === 'sticky') body = '';
     if (!body) return '';
+    if (bare) return body;
     return '<div class="pdp-row pdp-kind-' + OS.esc(block.kind) + '" data-block-id="' + OS.esc(block.id) + '">' + body + '</div>';
   }
 
+  function thumbButton(item, i) {
+    const poster = item.poster || item.src || '';
+    const isVideo = item.type === 'video';
+    return '<button type="button" class="pdp-thumb' + (i === 0 ? ' on' : '') + (isVideo ? ' is-video' : '') + '" data-pdp-thumb="' + i + '" data-src="' + OS.esc(poster) + '" data-video="' + OS.esc(item.video || '') + '" style="background-image:url(' + OS.esc(poster) + ')">' +
+      (isVideo ? '<span class="pdp-thumb-play" aria-hidden="true">▶</span>' : '') +
+      '</button>';
+  }
+  function collageHtml(items, s, t, ratio, mode) {
+    const n = items.length;
+    if (!n) return '<div class="pdp-media pdp-collage"></div>';
+    const full = (item, i) => '<div class="pdp-collage-row full">' + cell(item, i, s, t, ratio) + '</div>';
+    const pair = (a, ai, b, bi) => {
+      let html = '<div class="pdp-collage-row pair">' + cell(a, ai, s, t, ratio);
+      if (b) html += cell(b, bi, s, t, ratio);
+      return html + '</div>';
+    };
+    const rows = [];
+    if (mode === 'collage-1') {
+      // First + last full width; everything between is 2-column pairs.
+      rows.push(full(items[0], 0));
+      if (n === 1) return '<div class="pdp-media pdp-collage">' + rows.join('') + '</div>';
+      if (n === 2) {
+        rows.push(full(items[1], 1));
+        return '<div class="pdp-media pdp-collage">' + rows.join('') + '</div>';
+      }
+      let i = 1;
+      const last = n - 1;
+      while (i < last) {
+        if (i + 1 < last) {
+          rows.push(pair(items[i], i, items[i + 1], i + 1));
+          i += 2;
+        } else {
+          rows.push(pair(items[i], i, null, -1));
+          i += 1;
+        }
+      }
+      rows.push(full(items[last], last));
+    } else {
+      // Alternate one full-width image with a 2-column pair until media runs out.
+      let i = 0;
+      while (i < n) {
+        rows.push(full(items[i], i));
+        i += 1;
+        if (i >= n) break;
+        if (i + 1 < n) {
+          rows.push(pair(items[i], i, items[i + 1], i + 1));
+          i += 2;
+        } else {
+          rows.push(pair(items[i], i, null, -1));
+          i += 1;
+        }
+      }
+    }
+    return '<div class="pdp-media pdp-collage">' + rows.join('') + '</div>';
+  }
   function mediaHtml(items, s, t, mob) {
-    const ratio = 'aspect-ratio:3/4;';
+    // Chantilly / swim media is 2:3 (1200x1800). 3:4 + cover crops the bottom.
+    const ratio = 'aspect-ratio:2/3;';
     const layout = s.desktop_media_layout || 'thumbs-bottom';
     if (mob) {
       return '<div class="pdp-media">' +
         stage(cell(items[0], 0, s, t, ratio), items.length) +
         (s.mobile_thumbnails !== false
-          ? '<div class="pdp-thumbs" style="margin-top:9px;overflow:auto">' + items.map((item, i) => '<button type="button" class="pdp-thumb' + (i === 0 ? ' on' : '') + '" data-pdp-thumb="' + i + '" data-src="' + OS.esc(item.src) + '" style="background-image:url(' + OS.esc(item.src) + ')"></button>').join('') + '</div>'
-          : '<div class="pdp-dots">' + items.map((item, i) => '<button type="button" class="pdp-dot' + (i === 0 ? ' on' : '') + '" data-pdp-dot="' + i + '" data-src="' + OS.esc(item.src) + '"></button>').join('') + '</div>') + '</div>';
+          ? '<div class="pdp-thumbs" style="margin-top:9px;overflow:auto">' + items.map((item, i) => thumbButton(item, i)).join('') + '</div>'
+          : '<div class="pdp-dots">' + items.map((item, i) => '<button type="button" class="pdp-dot' + (i === 0 ? ' on' : '') + '" data-pdp-dot="' + i + '" data-src="' + OS.esc(item.poster || item.src || '') + '"></button>').join('') + '</div>') + '</div>';
     }
-    if (layout === 'grid-1') return '<div class="pdp-media">' + cell(items[0], 0, s, t, ratio) + '</div>';
+    if (layout === 'grid-1') return '<div class="pdp-media pdp-grid-1">' + items.map((item, i) => cell(item, i, s, t, ratio)).join('') + '</div>';
     if (layout === 'grid-2') return '<div class="pdp-media pdp-grid-2">' + items.map((item, i) => cell(item, i, s, t, ratio)).join('') + '</div>';
     if (layout === 'grid-highlight') return '<div class="pdp-media pdp-highlight">' + items.map((item, i) => cell(item, i, s, t, i === 0 ? '' : ratio)).join('') + '</div>';
+    if (layout === 'collage-1' || layout === 'collage-2') return collageHtml(items, s, t, ratio, layout);
     const left = layout === 'thumbs-left';
     const main = stage(cell(items[0], 0, s, t, ratio + (left ? 'min-height:460px;' : '')), items.length);
-    const thumbs = '<div class="pdp-thumbs">' + items.map((item, i) => '<button type="button" class="pdp-thumb' + (i === 0 ? ' on' : '') + '" data-pdp-thumb="' + i + '" data-src="' + OS.esc(item.src) + '" style="background-image:url(' + OS.esc(item.src) + ')"></button>').join('') + '</div>';
+    const thumbs = '<div class="pdp-thumbs">' + items.map((item, i) => thumbButton(item, i)).join('') + '</div>';
     return '<div class="pdp-media pdp-carousel' + (left ? ' left' : '') + '">' + (left ? thumbs + main : main + thumbs) + '</div>';
   }
 
@@ -2165,17 +2392,22 @@
     if (!block || block.hidden) return '';
     const b = block.settings || {};
     const buy = (buyBlock && buyBlock.settings) || {};
-    const appear = (b.appear_at === 'top' || b.show_after_scroll === false) ? ' always' : ' after-scroll';
+    const appear = b.appear_at === 'top' ? ' always' : ' after-scroll';
     const mobHide = b.mobile_visible === false ? ' hide-mob' : '';
-    // Match Buy buttons ATC: background / text / radius / weight / icon.
+    // Match Buy buttons ATC: Theme › Buttons height/type + Buy block paint/radius/icon.
     const atcShape = buy.atc_shape || buy.button_shape || 'pill';
-    const atcRadius = buyButtonRadius(atcShape, buy.atc_custom_radius != null ? buy.atc_custom_radius : buy.custom_radius);
+    const atcRadius = buyButtonRadius(atcShape, buy.atc_custom_radius != null ? buy.atc_custom_radius : buy.custom_radius, themeButtonRadius(t));
     const atcBg = buy.atc_background || '#FFC439';
     const atcFg = buy.atc_text_color || '#FFFFFF';
     const atcIcon = buy.atc_icon == null ? 'bag-plus' : buy.atc_icon;
     const label = b.button_text || 'Add to cart';
-    const atcStyle = OS.btnStyle(t) + ';border-radius:' + atcRadius + 'px;background:' + atcBg + ';color:' + atcFg + ';border:0;font:inherit;font-weight:700';
-    return '<div class="pdp-sticky bottom' + appear + mobHide + '" data-block-id="' + OS.esc(block.id) + '" data-pdp-sticky>' +
+    const btnH = themeButtonHeight(t);
+    const atcStyle = OS.btnStyle(t) + ';border-radius:' + atcRadius + 'px;background:' + atcBg + ';color:' + atcFg + ';border:0';
+    const widthMode = b.width_mode === 'full' ? ' is-full-width' : '';
+    const desktopButtonWidth = Math.max(240, Number(b.desktop_button_width) || 320);
+    const qtyWidth = b.show_quantity !== false ? 125 : 0;
+    const stickyStyle = '--pdp-sticky-button-width:' + desktopButtonWidth + 'px;--pdp-sticky-qty-width:' + qtyWidth + 'px;--pdp-btn-h:' + btnH + 'px;--pdp-atc-radius:' + atcRadius + 'px';
+    return '<div class="pdp-sticky bottom' + appear + mobHide + widthMode + '" data-block-id="' + OS.esc(block.id) + '" data-pdp-sticky data-pdp-width-mode="' + OS.esc(b.width_mode || 'container') + '" style="' + stickyStyle + '">' +
       (b.show_image !== false ? '<img alt="" src="' + OS.esc(p.image) + '">' : '') +
       '<div class="meta">' + (b.show_title !== false ? '<b>' + OS.esc(p.title) + '</b>' : '') + (b.show_price !== false ? '<span data-pdp-sticky-price>' + OS.money(p.price) + '</span>' : '') + '</div>' +
       (b.show_quantity !== false ? '<div class="pdp-qty sticky-qty"><button type="button" data-pdp-q="-">-</button><span data-pdp-qty>1</span><button type="button" data-pdp-q="+">+</button></div>' : '') +
@@ -2183,7 +2415,7 @@
   }
 
   function popupHtml(s, p, t) {
-    return '<div class="pdp-zoom" data-pdp-zoom><img alt="" data-pdp-zoom-img></div>' +
+    return '<div class="pdp-zoom" data-pdp-zoom role="dialog" aria-modal="true" aria-label="Product images"><img alt="" data-pdp-zoom-img><div class="pdp-zoom-controls"><button type="button" data-zoom-step="-1" aria-label="Previous enlarged image">&#8249;</button><button type="button" data-zoom-close aria-label="Close enlarged image">&#215;</button><button type="button" data-zoom-step="1" aria-label="Next enlarged image">&#8250;</button></div></div>' +
       '<div class="pdp-page-pop" data-pdp-page-pop role="dialog" aria-modal="true">' +
         '<div class="pdp-page-pop-card">' +
           '<button type="button" class="pdp-page-pop-x" data-pdp-page-pop-close aria-label="Close">×</button>' +
@@ -2237,9 +2469,9 @@
       ['price', { size: 24, show_taxes: false, show_saving: true, saving_type: 'percentage', saving_style: 'filled', saving_position: 'right', saving_label: '', saving_bg: '', saving_text_color: '#ffffff', saving_icon: false }],
       ['rating', { layout: 'default', star_style: 'boxed', style: 'stars-rating-custom', custom_text: 'Trusted by 2000+', underline_text: false, review_label: 'reviews', size: 14, color: '#0f3636', text_color: '' }],
       ['inventory', { show_status: true, show_count: true, custom_text: '', low_stock_threshold: 5, low_stock_text: 'Low stock - {n} items left', sold_out_text: 'Sold out', status_style: 'dot', in_stock_color: '#10a443', status_color: '#f59e0b', font_size: 14 }],
-      ['variant', { hide_sold_out: false, picker_type: 'buttons', swatch_style: 'color', shape: 'normal', nested_dropdown: false, show_group_title: false, sku_display_name: '', show_sku_in_option: false }],
-      ['buy', { show_quantity: true, show_add: true, atc_layout: 'with-quantity', atc_icon: 'bag-plus', atc_background: '#FFC439', atc_text_color: '#FFFFFF', atc_shape: 'pill', atc_custom_radius: 8, show_dynamic: true, channels: ['buy_now', 'paypal'], buy_now_text: 'Buy now', buy_now_background: '#000000', buy_now_text_color: '#FFFFFF', dyn_shape: 'normal', dyn_custom_radius: 8, show_payment_options: true, channel_logo: true, show_safe_checkout: true, safe_checkout_align: 'center', safe_checkout_label: 'GUARANTEED SAFE CHECKOUT', trust_logos: ['visa', 'mastercard', 'amex', 'paypal', 'apple_pay', 'google_pay'], trust_logo_size: 28 }],
-      ['icon_text', { layout: 'horizontal', item_layout: 'icon-left', alignment: 'left', font: 'body', size: 16, icon_size: 20, item_gap: 24, icon_text_gap: 8, background: false, background_color: '#f6f6f6', corner_radius: 10, text_color: '', icon_color: '', card_style: 'none', icon_1: 'box', image_1: '', first_heading: 'Orders over $50 ship free', first_content: '', icon_2: 'return', image_2: '', second_heading: '30 day returns', second_content: '', icon_3: 'star', image_3: '', third_heading: '', third_content: '' }],
+      ['variant', { hide_sold_out: false, picker_type: 'buttons', swatch_style: 'color', shape: 'normal', nested_dropdown: false, show_group_title: true, sku_display_name: '', show_sku_in_option: false }],
+      ['buy', { show_quantity: true, show_add: true, atc_layout: 'with-quantity', atc_icon: 'bag-plus', atc_background: '#FFC439', atc_text_color: '#FFFFFF', atc_shape: 'pill', atc_custom_radius: 8, show_dynamic: true, channels: ['buy_now', 'paypal'], buy_now_text: 'Buy now', buy_now_background: '#000000', buy_now_text_color: '#FFFFFF', dyn_shape: 'pill', dyn_custom_radius: 8, show_payment_options: true, channel_logo: true, show_safe_checkout: true, safe_checkout_align: 'center', safe_checkout_label: 'GUARANTEED SAFE CHECKOUT', trust_logos: ['visa', 'mastercard', 'amex', 'paypal', 'apple_pay', 'google_pay'], trust_logo_size: 24 }],
+      ['icon_text', { layout: 'horizontal', item_layout: 'icon-left', alignment: 'left', font: 'body', size: 15, icon_size: 20, item_gap: 24, icon_text_gap: 8, background: false, background_color: '#f6f6f6', corner_radius: 10, text_color: '', icon_color: '', card_style: 'none', icon_1: 'box', image_1: '', first_heading: 'Orders over $50 ship free', first_content: '', icon_2: 'return', image_2: '', second_heading: '30 day returns', second_content: '', icon_3: 'star', image_3: '', third_heading: '', third_content: '' }],
       ['collapsible', { heading: 'Overview', icon: 'none', content: 'A clinically proven, non-sticky, vegan lip treatment that delivers the intense hydration of a lip mask with a sweet sheer tint using food-grade, non-artificial flavor. Designed for sensitive, irritated lips, this cushiony treatment delivers instant comfort to rescue dry, chapped lips.', custom_liquid: '', open: false }],
       ['collapsible', { heading: 'How to use', icon: 'none', content: 'Apply generously to lips for hydration and comfort. Use at night for an overnight mask.', custom_liquid: '', open: false }],
       ['collapsible', { heading: 'Ingredients', icon: 'none', content: '<ul><li>Dulce De Leche</li><li>Ube vanilla</li><li>Watermelon kiwi</li><li>Blood orange vanilla</li></ul>', custom_liquid: '', open: false }],
@@ -2251,7 +2483,7 @@
         scroll: true, nav_style: 'auto', auto_play: false, cards_per_row: 1,
       }],
       ['actions', { show_share: true, layout: 'tile', icon_style: 'brand', platforms: ['facebook', 'x', 'pinterest'], show_copy: true }],
-      ['sticky', { show_image: true, show_title: true, show_price: true, show_quantity: true, show_after_scroll: true, appear_at: 'scroll', mobile_visible: true, button_text: 'Add to cart' }],
+      ['sticky', { show_image: true, show_title: true, show_price: true, show_quantity: true, appear_at: 'scroll', mobile_visible: true, button_text: 'Add to cart' }],
     ]).map((pair) => ({ kind: pair[0], hidden: false, settings: pair[1] })),
     render: function (s, blocks, ctx) {
       const t = ctx.tokens || {};
@@ -2274,13 +2506,35 @@
       const selInv = selected.inventory == null ? (p.inventory == null ? 99 : p.inventory) : selected.inventory;
       // Shell always carries a default SKU so ATC works even when Variant block is hidden / empty.
       const shellData = '<span hidden data-pdp-variant-data data-pdp-shell-data>' +
-        '<i data-pdp-variant data-id="' + OS.esc(selected.id || p.id || p.handle || 'default') + '" data-color="' + OS.esc(selected.color || '') + '" data-size="' + OS.esc(selected.size || '') + '" data-price="' + Number(selected.price == null ? p.price : selected.price) + '" data-compare="' + Number(selected.compareAt == null ? p.compareAt || 0 : selected.compareAt) + '" data-inventory="' + Number(selInv) + '" data-image="' + OS.esc(selected.image || p.image || '') + '" data-sku="' + OS.esc(selected.sku || p.sku || '') + '"></i></span>';
-      return '<div class="pdpx' + (mob ? ' mob' : '') + '" data-media-size="' + OS.esc(mediaSize) + '" data-pdp-handle="' + OS.esc(p.handle || p.id || '') + '" data-pdp-url-state="' + OS.esc(resolved.urlState) + '" data-pdp-variant="' + OS.esc(selected.id || p.id || '') + '" data-pdp-price="' + Number(selected.price == null ? p.price : selected.price) + '" data-pdp-image="' + OS.esc(selected.image || p.image || '') + '" data-pdp-inventory="' + Number(selInv) + '" style="color:' + text + ';font-family:' + OS.bodyFamily(t) + ';padding:' + padTop + 'px ' + padX + ' ' + padBot + 'px">' +
+        '<i data-pdp-variant data-id="' + OS.esc(selected.id || p.id || p.handle || 'default') + '" data-color="' + OS.esc(selected.color || '') + '" data-size="' + OS.esc(selected.size || '') + '" data-price="' + Number(selected.price == null ? p.price : selected.price) + '" data-compare="' + Number(selected.compareAt == null ? p.compareAt || 0 : selected.compareAt) + '" data-inventory="' + Number(selInv) + '" data-preorder="' + (selected.preorder || p.preorder ? '1' : '0') + '" data-available="' + (selected.available === false ? '0' : '1') + '" data-image="' + OS.esc(selected.image || p.image || '') + '" data-sku="' + OS.esc(selected.sku || p.sku || '') + '"></i></span>';
+      const sizeStyle = s.size_style === 'outline' ? 'outline' : '';
+      const swatchStyle = s.swatch_ring ? 'ring' : '';
+      return '<div class="pdpx' + (mob ? ' mob' : '') + '" data-media-size="' + OS.esc(mediaSize) + '"' +
+        (sizeStyle ? ' data-pdp-size-style="' + OS.esc(sizeStyle) + '"' : '') +
+        (swatchStyle ? ' data-pdp-swatch-style="' + OS.esc(swatchStyle) + '"' : '') +
+        ' data-pdp-handle="' + OS.esc(p.handle || p.id || '') + '" data-pdp-url-state="' + OS.esc(resolved.urlState) + '" data-pdp-variant="' + OS.esc(selected.id || p.id || '') + '" data-pdp-price="' + Number(selected.price == null ? p.price : selected.price) + '" data-pdp-image="' + OS.esc(selected.image || p.image || '') + '" data-pdp-inventory="' + Number(selInv) + '" style="color:' + text + ';font-family:' + OS.bodyFamily(t) + ';padding:' + padTop + 'px ' + padX + ' ' + padBot + 'px">' +
         '<div style="max-width:100%;width:100%;margin:0 auto">' +
         '<div class="pdp-grid" style="grid-template-columns:' + size + '% minmax(0,1fr)">' +
           mediaHtml(items, s, t, mob) +
           '<div class="pdp-buy" style="background:' + bg + ';color:' + text + ';padding:' + (bg && bg !== 'transparent' ? '16px' : '0') + '">' +
-            visible.filter((b) => b.kind !== 'sticky').map((b) => rowHtml(b, p, s, t, ctx, selected)).join('') +
+            (function () {
+              const rows = visible.filter((b) => b.kind !== 'sticky');
+              const out = [];
+              for (let i = 0; i < rows.length; i++) {
+                const b = rows[i];
+                const next = rows[i + 1];
+                // Size guide pop-up sits on the Size label row (Symmetry).
+                if (b.kind === 'variant' && next && next.kind === 'popup') {
+                  const guideHtml = rowHtml(next, p, s, t, ctx, selected, true);
+                  const merged = Object.assign({}, b, { settings: Object.assign({}, b.settings || {}, { _size_guide_html: guideHtml }) });
+                  out.push(rowHtml(merged, p, s, t, ctx, selected));
+                  i++;
+                  continue;
+                }
+                out.push(rowHtml(b, p, s, t, ctx, selected));
+              }
+              return out.join('');
+            })() +
           '</div></div></div>' +
           stickyHtml(visible.find((b) => b.kind === 'sticky'), p, t, visible.find((b) => b.kind === 'buy')) +
           shellData + popupHtml(s, p, t) + customCss + '</div>';
@@ -2296,26 +2550,68 @@
       function heroCell() {
         return root.querySelector('.pdp-stage > .pdp-cell, .pdp-carousel > .pdp-cell, .pdp-media > .pdp-cell');
       }
-      function slideHero(hero, nextUrl, dir) {
-        if (!hero || !nextUrl) return;
-        const nextBg = 'url("' + nextUrl + '")';
-        const curBg = hero.style.backgroundImage || '';
-        if (!dir || reduceMotion || slideBusy || !curBg || curBg === nextBg) {
-          hero.style.backgroundImage = nextBg;
+      function setHeroMedia(hero, poster, videoUrl) {
+        if (!hero) return;
+        const existingVideo = hero.querySelector('video');
+        const existingImg = hero.querySelector('img');
+        if (videoUrl) {
+          hero.classList.add('is-video', 'is-playing');
+          hero.classList.remove('zoomable');
+          hero.setAttribute('data-src', poster || '');
+          hero.setAttribute('data-video', videoUrl);
+          if (existingImg) existingImg.remove();
+          let video = existingVideo;
+          if (!video) {
+            video = document.createElement('video');
+            video.setAttribute('muted', '');
+            video.muted = true;
+            video.loop = true;
+            video.playsInline = true;
+            video.autoplay = true;
+            video.preload = 'metadata';
+            hero.insertBefore(video, hero.firstChild);
+          }
+          if (poster) video.setAttribute('poster', poster);
+          if (video.getAttribute('src') !== videoUrl) video.src = videoUrl;
+          video.play().catch(() => {});
+        } else {
+          hero.classList.remove('is-video', 'is-playing');
+          if (settings.enable_zoom) hero.classList.add('zoomable');
+          hero.setAttribute('data-src', poster || '');
+          hero.setAttribute('data-video', '');
+          if (existingVideo) {
+            existingVideo.pause();
+            existingVideo.remove();
+          }
+          let img = existingImg;
+          if (!img) {
+            img = document.createElement('img');
+            img.alt = '';
+            img.decoding = 'async';
+            hero.insertBefore(img, hero.firstChild);
+          }
+          if (poster && img.getAttribute('src') !== poster) img.src = poster;
+        }
+      }
+      function slideHero(hero, poster, videoUrl, dir) {
+        if (!hero || !(poster || videoUrl)) return;
+        if (!dir || reduceMotion || slideBusy) {
+          setHeroMedia(hero, poster, videoUrl);
           return;
         }
         const stage = hero.closest('.pdp-stage') || hero.parentElement;
-        if (!stage) { hero.style.backgroundImage = nextBg; return; }
+        if (!stage) { setHeroMedia(hero, poster, videoUrl); return; }
         slideBusy = true;
+        const curPoster = hero.getAttribute('data-src') || '';
         const out = document.createElement('div');
         out.className = 'pdp-slide ' + (dir > 0 ? 'to-left' : 'to-right');
-        out.style.backgroundImage = curBg;
+        out.style.backgroundImage = curPoster ? 'url("' + curPoster + '")' : '';
         const inn = document.createElement('div');
         inn.className = 'pdp-slide ' + (dir > 0 ? 'from-right' : 'from-left');
-        inn.style.backgroundImage = nextBg;
+        inn.style.backgroundImage = poster ? 'url("' + poster + '")' : '';
         stage.appendChild(out);
         stage.appendChild(inn);
-        hero.style.backgroundImage = nextBg;
+        setHeroMedia(hero, poster, videoUrl);
         let done = false;
         const finish = () => {
           if (done) return;
@@ -2327,15 +2623,17 @@
         inn.addEventListener('animationend', finish, { once: true });
         window.setTimeout(finish, 500);
       }
-      function activate(i, src, dir) {
+      function activate(i, src, dir, videoUrl) {
         root.querySelectorAll('[data-pdp-thumb],[data-pdp-dot]').forEach((el) => {
           const on = Number(el.getAttribute('data-pdp-thumb') || el.getAttribute('data-pdp-dot')) === i;
           el.classList.toggle('on', on);
         });
-        const srcEl = root.querySelector('[data-pdp-media="' + i + '"]');
-        const image = src || (srcEl && srcEl.getAttribute('data-src'));
+        const srcEl = root.querySelector('[data-pdp-thumb][data-pdp-thumb="' + i + '"],[data-pdp-media="' + i + '"]') ||
+          root.querySelector('[data-pdp-thumb="' + i + '"]');
+        const poster = src || (srcEl && srcEl.getAttribute('data-src')) || '';
+        const video = videoUrl != null ? videoUrl : (srcEl && srcEl.getAttribute('data-video')) || '';
         const hero = heroCell();
-        if (image && hero) slideHero(hero, image, dir || 0);
+        if ((poster || video) && hero) slideHero(hero, poster, video, dir || 0);
       }
       root.querySelectorAll('[data-pdp-thumb],[data-pdp-dot]').forEach((el) => el.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -2343,7 +2641,7 @@
         const next = Number(el.getAttribute('data-pdp-thumb') || el.getAttribute('data-pdp-dot'));
         const cur = currentIndex();
         if (next === cur) return;
-        activate(next, el.getAttribute('data-src'), next > cur ? 1 : -1);
+        activate(next, el.getAttribute('data-src'), next > cur ? 1 : -1, el.getAttribute('data-video') || '');
       }));
       root.querySelectorAll('[data-pdp-nav]').forEach((el) => el.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -2354,17 +2652,69 @@
         const cur = currentIndex();
         const dir = Number(el.getAttribute('data-pdp-nav')) || 1;
         const next = (cur + dir + marks.length) % marks.length;
-        activate(next, marks[next].getAttribute('data-src'), dir);
+        activate(next, marks[next].getAttribute('data-src'), dir, marks[next].getAttribute('data-video') || '');
       }));
+      let zoomIndex = 0;
+      let zoomTrigger = null;
+      const zoomSources = Array.from(root.querySelectorAll('[data-pdp-thumb][data-src]')).filter((el) => !el.getAttribute('data-video'));
+      const zoomImages = (zoomSources.length ? zoomSources : Array.from(root.querySelectorAll('[data-pdp-media]:not(.is-video)'))).map(el => el.getAttribute('data-src')).filter(Boolean);
+      function showZoomImage() {
+        zoom.querySelector('img').src = zoomImages[zoomIndex] || '';
+        zoom.querySelector('img').alt = 'Product image ' + (zoomIndex + 1);
+      }
+      function closeZoom() {
+        zoom.classList.remove('on');
+        if (zoomTrigger) zoomTrigger.focus();
+      }
       root.querySelectorAll('[data-pdp-media]').forEach((el) => el.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (el.classList.contains('is-video')) { el.classList.toggle('is-playing'); return; }
+        if (el.classList.contains('is-video')) {
+          const video = el.querySelector('video');
+          if (video) {
+            if (video.paused) { video.play().catch(() => {}); el.classList.add('is-playing'); }
+            else { video.pause(); el.classList.remove('is-playing'); }
+          } else {
+            el.classList.toggle('is-playing');
+          }
+          return;
+        }
         if (!settings.enable_zoom || !zoom) return;
-        const img = zoom.querySelector('img');
-        if (img) img.src = el.getAttribute('data-src') || '';
+        zoomTrigger = el;
+        zoomIndex = zoomSources.length ? currentIndex() : Math.max(0, zoomImages.indexOf(el.getAttribute('data-src')));
+        showZoomImage();
+        const host = root.closest('.os-frame') || root;
+        const r = host.getBoundingClientRect();
+        const sc = document.getElementById('os-cscroll');
+        const viewport = sc ? sc.getBoundingClientRect() : { top: 0, bottom: window.innerHeight };
+        zoom.style.left = r.left + 'px';
+        zoom.style.top = Math.max(0, viewport.top) + 'px';
+        zoom.style.width = r.width + 'px';
+        zoom.style.height = (Math.min(window.innerHeight, viewport.bottom) - Math.max(0, viewport.top)) + 'px';
+        zoom.style.right = 'auto';
+        zoom.style.bottom = 'auto';
         zoom.classList.add('on');
+        zoom.querySelector('[data-zoom-close]').focus();
       }));
-      if (zoom) zoom.addEventListener('click', (e) => { e.stopPropagation(); zoom.classList.remove('on'); });
+      if (zoom) {
+        zoom.querySelectorAll('[data-zoom-step]').forEach(button => {
+          button.disabled = zoomImages.length < 2;
+          button.addEventListener('click', () => {
+            zoomIndex = (zoomIndex + Number(button.dataset.zoomStep) + zoomImages.length) % zoomImages.length;
+            showZoomImage();
+          });
+        });
+        zoom.addEventListener('click', e => {
+          e.stopPropagation();
+          if (e.target === zoom || e.target.closest('[data-zoom-close]')) closeZoom();
+        });
+        zoom.addEventListener('keydown', e => {
+          if (e.key === 'Escape') { e.preventDefault(); closeZoom(); }
+          if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+            e.preventDefault();
+            zoom.querySelector('[data-zoom-step="' + (e.key === 'ArrowLeft' ? '-1' : '1') + '"]').click();
+          }
+        });
+      }
       // Inline recommendations: side arrows + peek + pointer-drag / touch swipe (scrollbar hidden).
       root.querySelectorAll('[data-pdp-rec]').forEach((rail) => {
         let drag = null;
@@ -2421,17 +2771,25 @@
           e.stopPropagation();
         }, true);
       });
-      // Video column — carousel arrows + click-to-enlarge (shared lightbox with Video feed).
-      root.querySelectorAll('[data-pdp-vc-open]').forEach((btn) => {
-        btn.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          if (typeof OS.openVideoLightbox === 'function') {
-            OS.openVideoLightbox(btn.getAttribute('data-cover') || '', btn.getAttribute('data-video') || '');
-          }
-        });
-      });
+      // Video column — carousel arrows + click-to-enlarge with playlist prev/next (shared lightbox).
       root.querySelectorAll('[data-pdp-vc]').forEach((rail) => {
+        const openBtns = Array.from(rail.querySelectorAll('[data-pdp-vc-open]'));
+        const playlist = openBtns.map((btn) => ({
+          cover: btn.getAttribute('data-cover') || '',
+          video: btn.getAttribute('data-video') || '',
+        }));
+        openBtns.forEach((btn, i) => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (typeof OS.openVideoLightbox === 'function') {
+              OS.openVideoLightbox(playlist.length ? playlist : [{
+                cover: btn.getAttribute('data-cover') || '',
+                video: btn.getAttribute('data-video') || '',
+              }], i);
+            }
+          });
+        });
         const wrap = rail.closest('[data-pdp-vc-wrap]');
         const prevBtn = wrap ? wrap.querySelector('[data-pdp-vc-nav="-1"]') : null;
         const nextBtn = wrap ? wrap.querySelector('[data-pdp-vc-nav="1"]') : null;
@@ -2505,6 +2863,8 @@
           price: Number(el.dataset.price || 0),
           compareAt: Number(el.dataset.compare || 0),
           inventory: Number(el.dataset.inventory || 0),
+          preorder: el.dataset.preorder === '1',
+          available: el.dataset.available !== '0',
           image: el.dataset.image,
           sku: el.dataset.sku,
         };
@@ -2583,8 +2943,10 @@
         });
         const colorLabel = root.querySelector('[data-pdp-color-label]');
         const sizeLabel = root.querySelector('[data-pdp-size-label]');
+        const nestedLabel = root.querySelector('[data-pdp-nested-label]');
         if (colorLabel && currentColor) colorLabel.textContent = currentColor;
         if (sizeLabel && currentSize) sizeLabel.textContent = currentSize;
+        if (nestedLabel) nestedLabel.textContent = [currentSize, currentColor].filter(Boolean).join(' / ') || 'Variant';
         syncDd(colorDd, currentColor, all, 'color');
         syncDd(sizeDd, currentSize, all, 'size');
         if (nestedDd) {
@@ -2621,27 +2983,33 @@
         if (stock) {
           const threshold = Number(stock.getAttribute('data-low-threshold') || 5);
           const isLow = match.inventory > 0 && match.inventory <= threshold;
-          stock.classList.toggle('sold', match.inventory <= 0);
+          const isPreorder = !!match.preorder;
+          stock.classList.toggle('preorder', isPreorder);
+          stock.classList.toggle('sold', match.inventory <= 0 && !isPreorder);
           stock.classList.toggle('low', isLow);
           const inStockColor = stock.getAttribute('data-in-stock-color') || '#10a443';
           const lowStockColor = stock.getAttribute('data-low-stock-color') || '#f59e0b';
-          stock.style.setProperty('--status-color', match.inventory <= 0 ? '#9ca3af' : (isLow ? lowStockColor : inStockColor));
+          stock.style.setProperty('--status-color', isPreorder ? '#222222' : (match.inventory <= 0 ? '#9ca3af' : (isLow ? lowStockColor : inStockColor)));
           const text = stock.querySelector('span');
           const showCount = stock.getAttribute('data-show-count') !== '0';
           const customText = stock.getAttribute('data-custom-text') || '';
           const lowTextTpl = stock.getAttribute('data-low-text') || 'Low stock - {n} items left';
           const soldText = stock.getAttribute('data-sold-text') || 'Sold out';
           if (text) {
-            text.textContent = match.inventory <= 0
-              ? soldText
-              : (isLow
+            text.textContent = isPreorder
+              ? 'Pre-order now · ships as soon as it is in stock.'
+              : (match.inventory <= 0
+                ? soldText
+                : (isLow
                 ? lowTextTpl.replace(/\{n\}/g, String(match.inventory)) + customText
-                : ((showCount ? match.inventory + ' in stock' : 'In stock') + customText));
+                : ((showCount ? match.inventory + ' in stock' : 'In stock') + customText)));
           }
         }
         const soldBadge = root.querySelector('[data-pdp-sold-badge]');
         if (soldBadge) {
-          soldBadge.hidden = match.inventory > 0;
+          soldBadge.hidden = match.inventory > 0 || !!match.preorder;
+          const preorderBadge = root.querySelector('[data-pdp-preorder-badge]');
+          if (preorderBadge) preorderBadge.hidden = !match.preorder;
           const badges = soldBadge.closest('[data-pdp-badges]');
           if (badges) {
             const anyVisible = [...badges.querySelectorAll('.pdp-tag')].some((el) => !el.hidden);
@@ -2651,16 +3019,21 @@
         if (sku) sku.textContent = match.sku || '';
         if (match.image) {
           const hero = root.querySelector('.pdp-stage > .pdp-cell, .pdp-carousel > .pdp-cell, .pdp-media > .pdp-cell');
-          if (hero) hero.style.backgroundImage = 'url("' + match.image + '")';
+          if (hero) {
+            const img = hero.querySelector('img');
+            if (img) img.src = match.image;
+            else hero.style.backgroundImage = 'url("' + match.image + '")';
+            hero.setAttribute('data-src', match.image);
+          }
         }
         if (qty > Math.max(1, match.inventory)) {
           qty = Math.max(1, match.inventory);
           if (qtyEl) qtyEl.textContent = String(qty);
         }
         root.querySelectorAll('[data-pdp-atc]').forEach((button) => {
-          button.disabled = match.inventory <= 0;
+          button.disabled = match.inventory <= 0 && !match.preorder;
           const icon = button.getAttribute('data-atc-icon') || 'bag-plus';
-          button.innerHTML = atcButtonInner(icon, match.inventory <= 0 ? 'Sold out' : 'Add to cart');
+          button.innerHTML = atcButtonInner(icon, match.inventory <= 0 && !match.preorder ? 'Sold out' : 'Add to cart');
         });
         // render() puts data-pdp-variant on .pdpx; hydrate root is .os-sec — keep the shell in sync.
         shellEl.setAttribute('data-pdp-variant', match.id || '');
@@ -2756,16 +3129,80 @@
       }
       syncVariant();
       const accordions = [...root.querySelectorAll('[data-pdp-acc]')];
-      const setAcc = (box, open) => {
-        box.classList.toggle('open', open);
-        const mark = box.querySelector(':scope > button .pdp-acc-mark') || box.querySelector(':scope > button span:last-child');
-        if (mark) mark.textContent = open ? '–' : '+';
+      const reduceAccMotion = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      // Wildpeak AccordionDetails: height 250ms ease + content fade/slide; plus vertical arm rotates 270deg via CSS.
+      const setAcc = (box, open, opts) => {
+        opts = opts || {};
+        const body = box.querySelector(':scope > .body');
+        const btn = box.querySelector(':scope > button');
+        if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        if (!body) { box.classList.toggle('open', open); return Promise.resolve(); }
+        if (box._accAnims) {
+          box._accAnims.forEach((a) => { try { a.cancel(); } catch (err) {} });
+          box._accAnims = null;
+        }
+        const instant = !!opts.instant || reduceAccMotion() || typeof body.animate !== 'function';
+        if (instant) {
+          box.classList.toggle('open', open);
+          body.style.height = '';
+          body.style.opacity = '';
+          body.style.transform = '';
+          body.style.paddingBottom = '';
+          return Promise.resolve();
+        }
+        if (open) {
+          box.classList.add('open');
+          body.style.height = '0px';
+          body.style.opacity = '0';
+          body.style.transform = 'translateY(10px)';
+          body.style.paddingBottom = '0px';
+          const target = body.scrollHeight;
+          const anim = body.animate(
+            [
+              { height: '0px', opacity: 0, transform: 'translateY(10px)', paddingBottom: '0px' },
+              { height: target + 'px', opacity: 0.85, transform: 'translateY(0)', paddingBottom: '12px' },
+            ],
+            { duration: 250, easing: 'ease', fill: 'forwards' }
+          );
+          box._accAnims = [anim];
+          return anim.finished.then(() => {
+            body.style.height = '';
+            body.style.opacity = '';
+            body.style.transform = '';
+            body.style.paddingBottom = '';
+            box._accAnims = null;
+          }).catch(() => { box._accAnims = null; });
+        }
+        const start = body.scrollHeight || body.offsetHeight;
+        body.style.height = start + 'px';
+        body.style.opacity = '0.85';
+        body.style.transform = 'translateY(0)';
+        body.style.paddingBottom = '12px';
+        const anim = body.animate(
+          [
+            { height: start + 'px', opacity: 0.85, transform: 'translateY(0)', paddingBottom: '12px' },
+            { height: '0px', opacity: 0, transform: 'translateY(10px)', paddingBottom: '0px' },
+          ],
+          { duration: 250, easing: 'ease', fill: 'forwards' }
+        );
+        box._accAnims = [anim];
+        return anim.finished.then(() => {
+          box.classList.remove('open');
+          body.style.height = '';
+          body.style.opacity = '';
+          body.style.transform = '';
+          body.style.paddingBottom = '';
+          box._accAnims = null;
+        }).catch(() => {
+          box.classList.remove('open');
+          box._accAnims = null;
+        });
       };
       const isAccordion = (box) => box.getAttribute('data-accordion') === '1';
       let keptAcc = false;
       accordions.forEach((box) => {
         if (!box.classList.contains('open')) return;
-        if (isAccordion(box) && keptAcc) setAcc(box, false);
+        if (isAccordion(box) && keptAcc) setAcc(box, false, { instant: true });
         else if (isAccordion(box)) keptAcc = true;
       });
       accordions.forEach((box) => {
@@ -2775,7 +3212,7 @@
           e.stopPropagation();
           const open = !box.classList.contains('open');
           if (isAccordion(box) && open) {
-            accordions.forEach((other) => { if (isAccordion(other)) setAcc(other, false); });
+            accordions.forEach((other) => { if (other !== box && isAccordion(other) && other.classList.contains('open')) setAcc(other, false); });
           }
           setAcc(box, open);
         });
@@ -2815,7 +3252,7 @@
       function addCurrentVariant(fromBtn) {
         if (atcBusy) return;
         const match = currentMatch || productFallbackMatch();
-        if (!match || match.inventory <= 0) return;
+        if (!match || (match.inventory <= 0 && !match.preorder)) return;
         currentMatch = match;
         atcBusy = true;
         const line = {
@@ -3199,12 +3636,17 @@
         const pinToCanvas = () => {
           const host = (sc && sc.getBoundingClientRect) ? sc : null;
           if (!host) return;
-          const r = host.getBoundingClientRect();
+          const frame = root.closest('.os-frame') || host;
+          const r = frame.getBoundingClientRect();
           const pad = 12;
-          sticky.style.left = Math.round(r.left + pad) + 'px';
-          sticky.style.width = Math.max(0, Math.round(r.width - pad * 2)) + 'px';
+          const fullWidth = sticky.getAttribute('data-pdp-width-mode') === 'full';
+          const mobile = !!root.querySelector('.pdpx.mob') || root.classList.contains('mob');
+          const container = root.querySelector('.pdp-grid');
+          const bounds = !mobile && !fullWidth && container ? container.getBoundingClientRect() : r;
+          sticky.style.left = Math.round(bounds.left) + 'px';
+          sticky.style.width = Math.max(0, Math.round(bounds.width)) + 'px';
           sticky.style.right = 'auto';
-          sticky.style.bottom = Math.max(8, Math.round(window.innerHeight - r.bottom + 8)) + 'px';
+          sticky.style.bottom = Math.max(8, Math.round(window.innerHeight - host.getBoundingClientRect().bottom + 8)) + 'px';
         };
         const clearPin = () => {
           sticky.style.left = '';

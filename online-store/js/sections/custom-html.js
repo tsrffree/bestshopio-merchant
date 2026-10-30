@@ -42,7 +42,7 @@
         info: 'Scripts, global style tags, iframes and inline event handlers are removed for storefront safety.' },
       { sub: 'Colors' },
       { key: 'background', control: 'color', label: 'Background', default: 'transparent', allowTransparent: true },
-      { key: 'text', control: 'color', label: 'Text', default: '', allowTransparent: true, info: 'Blank inherits the theme text color.' },
+      { key: 'text', control: 'color', label: 'Text', default: '', allowTransparent: true, blankValue: () => OS.themeColor('text_color', '#000000'), info: 'Blank inherits the theme text color.' },
     ],
     defaults: () => ({}),
     render: function (s, blocks, ctx) {

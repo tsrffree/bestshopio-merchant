@@ -44,7 +44,7 @@
       { key: 'link_url', control: 'url', label: 'Link URL', default: '' },
       { sub: 'Colors' },
       { key: 'background', control: 'color', label: 'Background', default: 'transparent', allowTransparent: true },
-      { key: 'text', control: 'color', label: 'Text', default: '', allowTransparent: true, info: 'Blank inherits the theme text color.' },
+      { key: 'text', control: 'color', label: 'Text', default: '', allowTransparent: true, blankValue: () => OS.themeColor('text_color', '#000000'), info: 'Blank inherits the theme text color.' },
     ],
     blocks: {
       name: 'Blog', kind: 'blog', max: 1,

@@ -7,50 +7,68 @@
    Page seeds are "thin" ({id,kind[,settings overrides][,blocks]}) — app.js materialises full
    settings from each section's defaults() at editor start, so defaults have a single source. */
 (function () {
-  // Prototype-only stand-ins from the Voltix Minimal clothing demo.
-  // Not for commercial use. Each key matches the frame that consumes it:
-  // hero ~2:1 slideshow, iwt/blog ~4:3, cat ~3:4 collection tiles,
-  // p* 1400x2000 catalog shots (about 3:4), ug* lifestyle tiles for a square wall.
+  // Prototype-only stand-ins. Sleek Wildpeak assets live under online-store/assets/wildpeak/.
+  // Apparel set (p1-p6) + home/collection/testimonial tiles are downloaded from the
+  // sleek-wildpeak demo. Wellness / default accessory SKUs (p7+) stay on Voltix CDN.
+  // Not for commercial use. Frame ratios: hero ~2:1, iwt/blog ~4:3, cat ~3:4,
+  // p* product shots ~3:4, ug* lifestyle tiles square.
   const shot = (file, v, w) =>
     'https://cdn.shopify.com/s/files/1/0824/4861/3621/files/' + file + '?v=' + v + '&width=' + w;
+  const wp = (file) => 'online-store/assets/wildpeak/' + file;
   const IMG = {
-    // User-provided PDP reference image group is represented by the matched product gallery below.
-    hero1: shot('Rectangle_150897.png', '1790760274', 1800),
-    hero2: shot('Rectangle_150897_1.png', '1790760274', 1800),
-    hero3: shot('Rectangle_150897_2.png', '1790760274', 1800),
-    iwt: shot('Rectangle_771_4.png', '1790761727', 1400),
-    iwt2: shot('Rectangle_150912.png', '1790760273', 1400),
-    cat1: shot('Rectangle_150865_4.png', '1790760272', 900),
-    cat2: shot('Rectangle_150865_5.png', '1790760272', 900),
-    cat3: shot('Rectangle_150865_6.png', '1790760272', 900),
-    cat4: shot('Rectangle_150865_7.png', '1790760272', 900),
-    cat5: shot('Rectangle_150865_8.png', '1790760272', 900),
-    cat6: shot('Rectangle_727_2.png', '1790762047', 900),
-    p1: shot('Rectangle_151009.png', '1791374340', 900),
-    p1b: shot('Rectangle_151026.png', '1791374326', 900),
-    p1c: shot('Rectangle_151027.png', '1791374322', 900),
-    p1d: shot('Rectangle_151030.png', '1791374329', 900),
-    p1sand: shot('MinimalBeigeWide-LegTrousers.png', '1791783885', 900),
-    p1blk: shot('Rectangle_151009_0238d1d3-46a7-448b-827c-b56c2202a714.png', '1791450043', 900),
-    p2: shot('Rectangle_151232.png', '1791449614', 900),
-    p2b: shot('Rectangle_151233.png', '1791449618', 900),
-    p2c: shot('Rectangle_151231.png', '1791449622', 900),
-    p2ivr: shot('Rectangle_151210.png', '1791449394', 900),
-    p3: shot('Rectangle_151272.png', '1791453079', 900),
-    p3b: shot('Rectangle_151273.png', '1791453083', 900),
-    p4: shot('Rectangle150928.png', '1791370037', 900),
-    p4b: shot('Rectangle150970_1.png', '1791370037', 900),
-    p5: shot('Rectangle_150910.png', '1791368089', 900),
-    p5b: shot('Rectangle_150924.png', '1791368074', 900),
-    p5c: shot('Rectangle_150923.png', '1791368077', 900),
-    // Product-page gallery only. Same Breton sweater set as the Minimal PDP screenshot.
-    look1: shot('Rectangle_150910.png', '1791368089', 1200),
-    look2: shot('Rectangle_150924.png', '1791368074', 1200),
-    look3: shot('Rectangle_150923.png', '1791368077', 1200),
-    look4: shot('Rectangle_150925.png', '1791368070', 1200),
-    look5: shot('Rectangle_150921.png', '1791368085', 1200),
-    look6: shot('Rectangle_150922.png', '1791368081', 1200),
-    p6: shot('DeepBrownTailoredWide-LegTrousers.png', '1791783778', 900),
+    // Wildpeak home slideshow + theme cover.
+    hero1: wp('slideshow_1.jpg'),
+    hero2: wp('slideshow_2.jpg'),
+    hero3: wp('slideshow_3.jpg'),
+    cover: wp('cover_preview.jpg'),
+    iwt: wp('iwt_1.jpg'),
+    iwt2: wp('iwt_2.jpg'),
+    cat1: wp('cat_1.jpg'),
+    cat2: wp('cat_2.jpg'),
+    cat3: wp('cat_3.jpg'),
+    cat4: wp('cat_4.jpg'),
+    cat5: wp('cat_5.jpg'),
+    cat6: wp('cat_6.jpg'),
+    // Apparel PDP hero: Ingrid Merino short sleeve (Wildpeak).
+    p1: wp('black_01.webp'),
+    p1b: wp('black_02.webp'),
+    p1c: wp('black_03.webp'),
+    p1d: wp('black_04.webp'),
+    p1e: wp('black_05.webp'),
+    p1f: wp('black_06.webp'),
+    p1grn: wp('green_01.webp'),
+    p1grn2: wp('green_02.webp'),
+    p1brg: wp('burgundy_01.webp'),
+    p1brg2: wp('burgundy_02.webp'),
+    p1sand: wp('black_01.webp'),
+    p1blk: wp('black_01.webp'),
+    // Apparel related set — Wildpeak products paired to p2-p6.
+    p2: wp('p2_01.webp'),
+    p2b: wp('p2_02.webp'),
+    p2c: wp('p2_03.webp'),
+    p2ivr: wp('p2_ivr.webp'),
+    p3: wp('p3_01.webp'),
+    p3b: wp('p3_02.webp'),
+    p3c: wp('p3_03.webp'),
+    p4: wp('p4_01.webp'),
+    p4b: wp('p4_02.webp'),
+    p4c: wp('p4_03.webp'),
+    p4brown: wp('p4_brown.jpg'),
+    p5: wp('p5_ls_01.webp'),
+    p5b: wp('p5_ls_02.webp'),
+    p5c: wp('p5_03.webp'),
+    // PDP gallery aliases — Ingrid black set for apparel compare.
+    look1: wp('black_01.webp'),
+    look2: wp('black_02.webp'),
+    look3: wp('black_03.webp'),
+    look4: wp('black_04.webp'),
+    look5: wp('black_05.webp'),
+    look6: wp('black_06.webp'),
+    p6: wp('p6_01.webp'),
+    p6b: wp('p6_02.webp'),
+    p6c: wp('p6_03.webp'),
+    shorts1: wp('shorts_ing_01.webp'),
+    shorts2: wp('shorts_ing_02.webp'),
     p7: shot('Rectangle_151119.png', '1791451213', 900),
     p8: shot('Rectangle_151005.png', '1791450400', 900),
     p9: shot('Rectangle_151252.png', '1791454769', 900),
@@ -65,17 +83,20 @@
     p18: shot('Rectangle150951.png', '1791438084', 900),
     p19: shot('Rectangle151090.png', '1791438852', 900),
     p20: shot('MinimalBeigeTailoredWoolOvercoat_05de1806-9b05-4715-8687-899f5978254c.png', '1791783634', 900),
-    av1: shot('image_29_6.png', '1790760273', 400),
-    av2: shot('Cinematic_Countryside_Tailoring_Duo_81f9be3a-dfd4-4ad6-9d9e-ce3079045a2a.png', '1790851232', 400),
-    av3: shot('Triple_Power_Suits_in_Glass_Architecture.png', '1790851313', 400),
-    blog1: shot('Rectangle_150904_1.png', '1790762254', 1400),
-    blog2: shot('Rectangle_150906.png', '1791176746', 1400),
-    ug1: shot('Rectangle_724_7.png', '1790762047', 900),
-    ug2: shot('Rectangle_725_19.png', '1790762047', 900),
-    ug3: shot('Rectangle_726_2.png', '1790762047', 900),
-    ug4: shot('Rectangle_728_1.png', '1790762047', 900),
-    ug5: shot('Rectangle_727_2.png', '1790762047', 900),
-    ug6: shot('Rectangle_560_5.png', '1790762047', 800),
+    av1: wp('av_1.webp'),
+    av2: wp('av_2.webp'),
+    av3: wp('av_3.webp'),
+    blog1: wp('testi_1.jpg'),
+    blog2: wp('testi_2.jpg'),
+    ug1: wp('ug_1.jpg'),
+    ug2: wp('ug_2.jpg'),
+    ug3: wp('ug_3.jpg'),
+    ug4: wp('ug_4.webp'),
+    ug5: wp('ug_5.webp'),
+    ug6: wp('ug_6.webp'),
+    testi1: wp('testi_1.jpg'),
+    testi2: wp('testi_2.jpg'),
+    testi3: wp('testi_3.jpg'),
     svcShip: shot('delivery_1_4.svg', '1790770946', 250),
     svcVip: shot('secured-payment_1_2.svg', '1790760271', 250),
   };
@@ -84,7 +105,7 @@
   const THEMES = [
     {
       id: 1, handle: 'aura', title: 'Aura',
-      pc_image: IMG.hero1, h5_image: IMG.hero2,
+      pc_image: IMG.cover, h5_image: IMG.hero2,
       created_time: '2026-05-06 04:13:15', updated_time: '2026-06-12 17:42:08',
     },
   ];
@@ -107,6 +128,7 @@
       { kind: 'breadcrumbs', name: 'Breadcrumbs', desc: 'Store path; current page name off on desktop, on on mobile by default', pages: ['product'] },
       { kind: 'product-main', name: 'Product information', desc: 'Gallery, buy box and purchase blocks for this product', pages: ['product'] },
       { kind: 'related-products', name: 'Related products', desc: 'Rule-based or hand-picked product recommendations', pages: ['product'] },
+      { kind: 'product-reviews', name: 'Product reviews', desc: 'This product’s own review list and score summary', pages: ['product'] },
       { kind: 'vendor-reviews', name: 'Vendor reviews', desc: 'Reviews across every product from the same vendor', pages: ['product'] },
     ] },
     { id: 'collection', label: 'Collection', entries: [
@@ -146,8 +168,9 @@
 
   // ---------- Theme settings · 8 groups (verbatim from theme-settings.canvas.tsx) ----------
   // Row kinds: {sub} = subheading, {info} = helper line, otherwise a field descriptor.
-  const FONT_HEAD = ['DM Sans', 'Playfair Display', 'DM Serif Display', 'Manrope', 'Inter', 'Georgia'].map((v) => ({ value: v, label: v }));
-  const FONT_BODY = ['DM Sans', 'Inter', 'Manrope', 'Lato', 'Source Sans 3', 'system-ui'].map((v) => ({ value: v, label: v }));
+  // Fraunces matches Sleek Wildpeak headings; DM Sans matches its body.
+  const FONT_HEAD = ['Montserrat', 'Fraunces', 'DM Sans', 'Playfair Display', 'DM Serif Display', 'Manrope', 'Inter', 'Georgia'].map((v) => ({ value: v, label: v }));
+  const FONT_BODY = ['Montserrat', 'DM Sans', 'Inter', 'Manrope', 'Lato', 'Source Sans 3', 'system-ui'].map((v) => ({ value: v, label: v }));
   const WEIGHT_OPTS = [
     { value: '400', label: 'Regular' },
     { value: '500', label: 'Medium' },
@@ -164,21 +187,22 @@
     { value: 'uppercase', label: 'UPPERCASE' },
     { value: 'lowercase', label: 'lowercase' },
   ];
+  // Theme tokens tuned to Sleek Wildpeak (black/white + Fraunces/DM Sans).
   const SETTINGS_GROUPS = [
     { key: 'colors', name: 'Colors', desc: 'Brand, surface and status colors', open: true, fields: [
       { sub: 'Brand' },
-      { key: 'primary_color', label: 'Primary color', control: 'color', default: '#103635', info: 'Brand color. Drives the announcement bar background in the preview.' },
+      { key: 'primary_color', label: 'Primary color', control: 'color', default: '#000000', info: 'Brand color. Drives the announcement bar background in the preview.' },
       { key: 'secondary_color', label: 'Secondary color', control: 'color', default: '#666666', info: 'Used by secondary nav links and product vendor labels.' },
       { sub: 'Surface' },
       { key: 'page_background', label: 'Page background', control: 'color', default: '#FFFFFF' },
-      { key: 'text_color', label: 'Body text', control: 'color', default: '#1A1A1A' },
-      { key: 'heading_color', label: 'Heading text', control: 'color', default: '#103635' },
-      { key: 'link_color', label: 'Link text', control: 'color', default: '#103635' },
+      { key: 'text_color', label: 'Body text', control: 'color', default: '#000000' },
+      { key: 'heading_color', label: 'Heading text', control: 'color', default: '#000000' },
+      { key: 'link_color', label: 'Link text', control: 'color', default: '#000000' },
       { key: 'border_color', label: 'Border', control: 'color', default: '#E5E5E5' },
-      { key: 'footer_background', label: 'Footer background', control: 'color', default: '#103635', info: 'Background of the footer block. Pick a dark brand color for best contrast with white text.' },
+      { key: 'footer_background', label: 'Footer background', control: 'color', default: '#000000', info: 'Background of the footer block. Pick a dark brand color for best contrast with white text.' },
       { sub: 'Status' },
-      { key: 'sale_price_color', label: 'Sale price', control: 'color', default: '#D92D20', info: 'Used on sale badges and crossed-out prices.' },
-      { key: 'error_color', label: 'Error / destructive', control: 'color', default: '#D92D20' },
+      { key: 'sale_price_color', label: 'Sale price', control: 'color', default: '#D63A2F', info: 'Used on sale badges and crossed-out prices.' },
+      { key: 'error_color', label: 'Error / destructive', control: 'color', default: '#D63A2F' },
       { key: 'success_color', label: 'Success', control: 'color', default: '#12B76A' },
     ] },
     { key: 'typography', name: 'Typography', desc: 'Storefront type, matched to the current theme', open: true, fields: [
@@ -187,10 +211,10 @@
       { key: 'body_bold_weight', label: 'Bolder font weight', control: 'select', options: WEIGHT_OPTS, default: '500', info: 'Used to highlight certain titles and labels.' },
       { key: 'base_font_size', label: 'Base size', control: 'range', min: 12, max: 22, step: 1, unit: 'px', default: 16 },
       { sub: 'Headings' },
-      { key: 'heading_font', label: 'Font', control: 'select', options: FONT_HEAD, default: 'DM Sans' },
+      { key: 'heading_font', label: 'Font', control: 'select', options: FONT_HEAD, default: 'Fraunces' },
       { key: 'heading_scale', label: 'Font size scale', control: 'range', min: 100, max: 150, step: 1, unit: '%', default: 100 },
       { key: 'heading_scale_mobile', label: 'Mobile font size scale', control: 'range', min: 50, max: 150, step: 1, unit: '%', default: 80 },
-      { key: 'heading_letter_spacing', label: 'Letter spacing', control: 'range', min: -10, max: 10, step: 1, unit: '%', default: -4 },
+      { key: 'heading_letter_spacing', label: 'Letter spacing', control: 'range', min: -10, max: 10, step: 1, unit: '%', default: 0 },
       { key: 'heading_uppercase', label: 'Uppercase headings', control: 'toggle', default: false },
       { sub: 'Display headings' },
       { key: 'display_headings', label: 'Use for display headings', control: 'toggle', default: false },
@@ -201,34 +225,34 @@
       { key: 'subheading_family', label: 'Font family', control: 'select', options: FONT_ROLE, default: 'body' },
       { key: 'subheading_weight', label: 'Font weight', control: 'select', options: WEIGHT_OPTS, default: '500' },
       { key: 'subheading_letter_spacing', label: 'Letter spacing', control: 'range', min: -10, max: 10, step: 1, unit: '%', default: 0 },
-      { key: 'subheading_transform', label: 'Text transform', control: 'select', options: TEXT_CASE, default: 'capitalize' },
+      { key: 'subheading_transform', label: 'Text transform', control: 'select', options: TEXT_CASE, default: 'none' },
       { sub: 'Product cards title' },
-      { key: 'card_title_scale', label: 'Font size scale', control: 'range', min: 75, max: 150, step: 1, unit: '%', default: 112 },
+      { key: 'card_title_scale', label: 'Font size scale', control: 'range', min: 75, max: 150, step: 1, unit: '%', default: 100 },
       { key: 'card_title_family', label: 'Font family', control: 'select', options: FONT_ROLE, default: 'heading' },
-      { key: 'card_title_weight', label: 'Font weight', control: 'select', options: WEIGHT_OPTS, default: '500' },
+      { key: 'card_title_weight', label: 'Font weight', control: 'select', options: WEIGHT_OPTS, default: '400' },
       { key: 'card_title_uppercase', label: 'Uppercase product title', control: 'toggle', default: false },
       { sub: 'Navigation' },
       { key: 'nav_family', label: 'Font family', control: 'select', options: FONT_ROLE, default: 'body' },
       { key: 'nav_weight', label: 'Font weight', control: 'select', options: WEIGHT_OPTS, default: '500' },
-      { key: 'nav_uppercase', label: 'Uppercase navigation', control: 'toggle', default: false },
+      { key: 'nav_uppercase', label: 'Uppercase navigation', control: 'toggle', default: true },
       { sub: 'Buttons' },
-      { key: 'button_font_family', label: 'Font family', control: 'select', options: FONT_ROLE, default: 'heading' },
+      { key: 'button_font_family', label: 'Font family', control: 'select', options: FONT_ROLE, default: 'body' },
       { key: 'button_font_weight', label: 'Font weight', control: 'select', options: WEIGHT_OPTS, default: '500' },
-      { key: 'button_letter_spacing', label: 'Letter spacing', control: 'range', min: -10, max: 10, step: 1, unit: '%', default: 0 },
-      { key: 'button_text_transform', label: 'Text transform', control: 'select', options: TEXT_CASE, default: 'capitalize' },
+      { key: 'button_letter_spacing', label: 'Letter spacing', control: 'range', min: -10, max: 10, step: 1, unit: '%', default: 5 },
+      { key: 'button_text_transform', label: 'Text transform', control: 'select', options: TEXT_CASE, default: 'uppercase' },
     ] },
     { key: 'buttons', name: 'Buttons', desc: 'Primary, secondary and shape', fields: [
       { sub: 'Primary button' },
-      { key: 'primary_button_background', label: 'Background', control: 'color', default: '#103635' },
+      { key: 'primary_button_background', label: 'Background', control: 'color', default: '#000000' },
       { key: 'primary_button_text', label: 'Text', control: 'color', default: '#FFFFFF' },
       { sub: 'Secondary button' },
       { key: 'secondary_button_background', label: 'Background', control: 'color', default: 'transparent', allowTransparent: true },
-      { key: 'secondary_button_text', label: 'Text', control: 'color', default: '#103635' },
+      { key: 'secondary_button_text', label: 'Text', control: 'color', default: '#000000' },
       { sub: 'Shape' },
-      { key: 'button_border_color', label: 'Border color', control: 'color', default: '#103635' },
+      { key: 'button_border_color', label: 'Border color', control: 'color', default: '#000000' },
       { key: 'button_border_width', label: 'Border width', control: 'range', min: 0, max: 4, step: 1, unit: 'px', default: 1 },
-      { key: 'button_border_radius', label: 'Corner radius', control: 'range', min: 0, max: 40, step: 1, unit: 'px', default: 40, info: 'Capped at 40px — once radius ≥ height ÷ 2 the corners are fully pilled.' },
-      { key: 'button_height', label: 'Height', control: 'range', min: 32, max: 64, step: 1, unit: 'px', default: 44 },
+      { key: 'button_border_radius', label: 'Corner radius', control: 'range', min: 0, max: 40, step: 1, unit: 'px', default: 5, info: 'Capped at 40px — once radius ≥ height ÷ 2 the corners are fully pilled.' },
+      { key: 'button_height', label: 'Height', control: 'range', min: 32, max: 64, step: 1, unit: 'px', default: 48 },
       { key: 'button_horizontal_padding', label: 'Horizontal padding', control: 'range', min: 8, max: 48, step: 1, unit: 'px', default: 24 },
     ] },
     { key: 'layout', name: 'Layout', desc: 'Page width, spacing and radius', fields: [
@@ -244,8 +268,8 @@
       { key: 'page_horizontal_padding_desktop', label: 'Horizontal padding · Desktop', control: 'range', min: 8, max: 80, step: 2, unit: 'px', default: 40 },
       { key: 'page_horizontal_padding_mobile', label: 'Horizontal padding · Mobile', control: 'range', min: 4, max: 40, step: 2, unit: 'px', default: 16 },
       { sub: 'Radius' },
-      { key: 'image_border_radius', label: 'Image radius', control: 'range', min: 0, max: 40, step: 1, unit: 'px', default: 12 },
-      { key: 'card_border_radius', label: 'Card radius', control: 'range', min: 0, max: 40, step: 1, unit: 'px', default: 12 },
+      { key: 'image_border_radius', label: 'Image radius', control: 'range', min: 0, max: 40, step: 1, unit: 'px', default: 0 },
+      { key: 'card_border_radius', label: 'Card radius', control: 'range', min: 0, max: 40, step: 1, unit: 'px', default: 0 },
     ] },
     { key: 'product_cards', name: 'Product cards', desc: 'Default product card visuals', fields: [
       { sub: 'Image' },
@@ -273,10 +297,10 @@
       { key: 'input_text', label: 'Text', control: 'color', default: '#1A1A1A' },
       { key: 'placeholder_color', label: 'Placeholder', control: 'color', default: '#999999' },
       { key: 'input_border_color', label: 'Border (default)', control: 'color', default: '#E5E5E5' },
-      { key: 'focus_border_color', label: 'Border (focused)', control: 'color', default: '#103635' },
+      { key: 'focus_border_color', label: 'Border (focused)', control: 'color', default: '#000000' },
       { sub: 'Shape' },
-      { key: 'input_border_radius', label: 'Corner radius', control: 'range', min: 0, max: 40, step: 1, unit: 'px', default: 40 },
-      { key: 'input_height', label: 'Height', control: 'range', min: 32, max: 64, step: 1, unit: 'px', default: 44 },
+      { key: 'input_border_radius', label: 'Corner radius', control: 'range', min: 0, max: 40, step: 1, unit: 'px', default: 5 },
+      { key: 'input_height', label: 'Height', control: 'range', min: 32, max: 64, step: 1, unit: 'px', default: 48 },
       { key: 'input_horizontal_padding', label: 'Horizontal padding', control: 'range', min: 8, max: 32, step: 1, unit: 'px', default: 16 },
     ] },
     { key: 'social_media', name: 'Social media', desc: 'URLs surfaced in Footer / Header', fields: [
@@ -294,45 +318,119 @@
   ];
 
   // Product metafield definitions available as dynamic sources in the theme editor.
+  // Keep aligned with products/js SHOP_PRODUCT_DEFS + GOOGLE_PRODUCT_DEFS (merchant product admin).
   const PRODUCT_METAFIELD_DEFS = [
     { namespace: 'custom', key: 'fabric_weight', name: 'Fabric weight', type: 'single_line_text' },
     { namespace: 'custom', key: 'fit_guide', name: 'Fit guide', type: 'single_line_text' },
     { namespace: 'custom', key: 'care_instructions', name: 'Care instructions', type: 'multi_line_text' },
     { namespace: 'custom', key: 'material', name: 'Material', type: 'single_line_text' },
+    { namespace: 'custom', key: 'launch_date', name: 'Launch date', type: 'date' },
+    { namespace: 'custom', key: 'is_bestseller', name: 'Bestseller', type: 'boolean' },
     { namespace: 'google', key: 'gender', name: 'Gender', type: 'single_line_text' },
     { namespace: 'google', key: 'age_group', name: 'Age group', type: 'single_line_text' },
+    { namespace: 'google', key: 'condition', name: 'Condition', type: 'single_line_text' },
   ];
 
   // ---------- sample platform resources (drive product/collection/menu/blog/page pickers) ----------
+  // Chantilly / Symmetry swim PDP reference set.
+  const SWIM_IMG = {
+    hero: 'online-store/assets/chantilly-swim/aruba_dark_sage_1.webp',
+    detail: 'online-store/assets/chantilly-swim/aruba_dark_sage_2.webp',
+    side: 'online-store/assets/chantilly-swim/aruba_dark_sage_3.webp',
+    back: 'online-store/assets/chantilly-swim/aruba_dark_sage_4.jpg',
+    angle: 'online-store/assets/chantilly-swim/aruba_dark_sage_5.jpg',
+    video: 'online-store/assets/chantilly-swim/aruba_sage_video.mp4',
+    videoPoster: 'online-store/assets/chantilly-swim/aruba_sage_video_poster.webp',
+    santorini: 'online-store/assets/chantilly-swim/aruba_santorini.webp',
+    fire: 'online-store/assets/chantilly-swim/aruba_fire.webp',
+  };
   const SAMPLE = {
     products: [
-      { id: 'p1', handle: 'linen-feel-wide-pants', title: 'Linen-feel wide pants', vendor: 'Aura Studio', category: 'Bottoms', sku: 'AUR-LINEN-SND-S', inventory: 7, price: 35.0, compareAt: 45.0, rating: 4.8, reviews: 214, image: IMG.p1, images: [IMG.p1, IMG.p1b, IMG.p1c, IMG.p1d, IMG.p1sand, IMG.p1blk], swatches: ['#c8b6a6', '#2b2f36', '#e8e1d6'], tags: ['tag__hot_Best Seller', 'tag__new_Spring Edit'], description: '<p>A relaxed wide-leg trouser cut from a breathable linen blend. Soft enough for all-day wear, with a clean front crease that keeps the silhouette polished from desk to dinner.</p><p><strong>Best For:</strong></p><ul><li>Warm-weather travel</li><li>Office-casual days</li><li>Weekend city walks</li></ul><p>Pair with a soft rib tee or a tucked shell top. True to size with a mid-rise waist and easy drape through the hip.</p>', metafields: { 'custom.fabric_weight': '210 gsm', 'custom.fit_guide': 'True to size', 'custom.care_instructions': 'Machine wash cold. Hang dry.', 'custom.material': 'Linen blend', 'google.gender': 'unisex', 'google.age_group': 'adult' }, variants: [
-        { id: 'p1-snd-s', title: 'Sand / S', color: 'Sand', size: 'S', sku: 'AUR-LINEN-SND-S', price: 35.0, compareAt: 45.0, inventory: 7, image: IMG.p1sand, available: true },
-        { id: 'p1-snd-m', title: 'Sand / M', color: 'Sand', size: 'M', sku: 'AUR-LINEN-SND-M', price: 35.0, compareAt: 45.0, inventory: 12, image: IMG.p1sand, available: true },
-        { id: 'p1-blk-s', title: 'Black / S', color: 'Black', size: 'S', sku: 'AUR-LINEN-BLK-S', price: 32.99, compareAt: 45.0, inventory: 18, image: IMG.p1blk, available: true },
-        { id: 'p1-blk-m', title: 'Black / M', color: 'Black', size: 'M', sku: 'AUR-LINEN-BLK-M', price: 32.99, compareAt: 45.0, inventory: 0, image: IMG.p1blk, available: false },
-        { id: 'p1-crm-s', title: 'Cream / S', color: 'Cream', size: 'S', sku: 'AUR-LINEN-CRM-S', price: 35.0, compareAt: 45.0, inventory: 0, image: IMG.p1c, available: false },
-        { id: 'p1-crm-m', title: 'Cream / M', color: 'Cream', size: 'M', sku: 'AUR-LINEN-CRM-M', price: 35.0, compareAt: 45.0, inventory: 0, image: IMG.p1c, available: false },
+      { id: 'p1', handle: 'ingrid-merino-short-sleeve-black', title: 'Ingrid merino short sleeve black', vendor: 'Sleek Wildpeak', category: 'Tops', sku: 'WP-INGRID-BLK-S', inventory: 10, price: 99.0, compareAt: 0, rating: 5.0, reviews: 3, image: IMG.p1, images: [IMG.p1, IMG.p1b, IMG.p1c, IMG.p1d, IMG.p1e, IMG.p1f, IMG.p1grn, IMG.p1brg], swatches: ['#1a1a1a', '#2f5a3c', '#6b2d3c'], tags: ['tag__hot_Best Seller'], description: '<p>Elevate your wardrobe with this short sleeve. Crafted from premium Merino wool, this versatile top offers a perfect blend of comfort and sophistication. The natural fibers provide exceptional softness, breathability, and temperature regulation, making it an ideal choice for any season.</p><p><strong>Best For:</strong></p><ul><li>Layering under shells</li><li>Cool-weather travel</li><li>Everyday base layers</li></ul><p>True to size with a clean short-sleeve cut. Pair with merino shorts or tailored bottoms.</p>', metafields: { 'custom.fabric_weight': '180 gsm', 'custom.fit_guide': 'True to size', 'custom.care_instructions': 'Machine wash cold. Lay flat to dry.', 'custom.material': 'Merino wool', 'google.gender': 'unisex', 'google.age_group': 'adult' }, variants: [
+        { id: 'p1-blk-s', title: 'Black / S', color: 'Black', size: 'S', sku: 'WP-INGRID-BLK-S', price: 99.0, compareAt: 0, inventory: 10, image: IMG.p1, available: true },
+        { id: 'p1-blk-m', title: 'Black / M', color: 'Black', size: 'M', sku: 'WP-INGRID-BLK-M', price: 99.0, compareAt: 0, inventory: 10, image: IMG.p1, available: true },
+        { id: 'p1-blk-l', title: 'Black / L', color: 'Black', size: 'L', sku: 'WP-INGRID-BLK-L', price: 99.0, compareAt: 0, inventory: 8, image: IMG.p1, available: true },
+        { id: 'p1-blk-xl', title: 'Black / XL', color: 'Black', size: 'XL', sku: 'WP-INGRID-BLK-XL', price: 99.0, compareAt: 0, inventory: 6, image: IMG.p1, available: true },
+        { id: 'p1-grn-s', title: 'Green / S', color: 'Green', size: 'S', sku: 'WP-INGRID-GRN-S', price: 99.0, compareAt: 0, inventory: 10, image: IMG.p1grn, available: true },
+        { id: 'p1-grn-m', title: 'Green / M', color: 'Green', size: 'M', sku: 'WP-INGRID-GRN-M', price: 99.0, compareAt: 0, inventory: 10, image: IMG.p1grn, available: true },
+        { id: 'p1-grn-l', title: 'Green / L', color: 'Green', size: 'L', sku: 'WP-INGRID-GRN-L', price: 99.0, compareAt: 0, inventory: 7, image: IMG.p1grn, available: true },
+        { id: 'p1-grn-xl', title: 'Green / XL', color: 'Green', size: 'XL', sku: 'WP-INGRID-GRN-XL', price: 99.0, compareAt: 0, inventory: 5, image: IMG.p1grn, available: true },
+        { id: 'p1-brg-s', title: 'Burgundy / S', color: 'Burgundy', size: 'S', sku: 'WP-INGRID-BRG-S', price: 99.0, compareAt: 0, inventory: 10, image: IMG.p1brg, available: true },
+        { id: 'p1-brg-m', title: 'Burgundy / M', color: 'Burgundy', size: 'M', sku: 'WP-INGRID-BRG-M', price: 99.0, compareAt: 0, inventory: 9, image: IMG.p1brg, available: true },
+        { id: 'p1-brg-l', title: 'Burgundy / L', color: 'Burgundy', size: 'L', sku: 'WP-INGRID-BRG-L', price: 99.0, compareAt: 0, inventory: 4, image: IMG.p1brg, available: true },
+        { id: 'p1-brg-xl', title: 'Burgundy / XL', color: 'Burgundy', size: 'XL', sku: 'WP-INGRID-BRG-XL', price: 99.0, compareAt: 0, inventory: 0, image: IMG.p1brg, available: false },
       ] },
-      { id: 'p2', handle: 'soft-rib-tee', title: 'Soft rib tee', status: 'draft', vendor: 'Aura Studio', category: 'Tops', sku: 'AUR-RIB-TEE', inventory: 0, price: 18.99, compareAt: 26.0, rating: 4.6, reviews: 98, image: IMG.p2, images: [IMG.p2, IMG.p2b, IMG.p2c], swatches: ['#1b3a2b', '#eae3d6'], tags: ['tag__hot_End of Summer Sale'], description: '<p>A soft rib tee with an easy everyday drape. Fine rib cotton holds its shape wash after wash while staying cool against the skin.</p><p><strong>Best For:</strong></p><ul><li>Layering under jackets</li><li>Travel packing lists</li><li>Everyday basics rotation</li></ul>', variants: [
-        { id: 'p2-frs-s', title: 'Forest / S', color: 'Forest', size: 'S', sku: 'AUR-RIB-FRS-S', price: 18.99, compareAt: 26.0, inventory: 0, image: IMG.p2, available: false },
-        { id: 'p2-ivr-m', title: 'Ivory / M', color: 'Ivory', size: 'M', sku: 'AUR-RIB-IVR-M', price: 18.99, compareAt: 26.0, inventory: 0, image: IMG.p2ivr, available: false },
+      // Badge matrix for apparel PDP QA (switch preview product while editing Badges and tags):
+      // p1 hot only · p2 new only · p3 hot+new · p4 sale/saving · p5 sold out · p6 multi + sale
+      { id: 'p2', handle: 'ingrid-merino-singlet-black', title: 'Ingrid merino singlet black', status: 'active', vendor: 'Sleek Wildpeak', category: 'Tops', sku: 'WP-SINGLET-BLK-S', inventory: 24, price: 79.0, compareAt: 0, rating: 4.6, reviews: 98, image: IMG.p2, images: [IMG.p2, IMG.p2b, IMG.p2c, IMG.p2ivr], swatches: ['#1a1a1a', '#eae3d6'], tags: ['tag__new_New Arrival'], description: '<p>A fine merino singlet with a clean neckline and soft hand. Breathable enough for warm days, warm enough under a shell.</p><p><strong>Best For:</strong></p><ul><li>Layering under jackets</li><li>Travel packing lists</li><li>Everyday base layers</li></ul>', variants: [
+        { id: 'p2-blk-s', title: 'Black / S', color: 'Black', size: 'S', sku: 'WP-SINGLET-BLK-S', price: 79.0, compareAt: 0, inventory: 12, image: IMG.p2, available: true },
+        { id: 'p2-ivr-m', title: 'Ivory / M', color: 'Ivory', size: 'M', sku: 'WP-SINGLET-IVR-M', price: 79.0, compareAt: 0, inventory: 12, image: IMG.p2ivr, available: true },
       ] },
-      { id: 'p3', title: 'Editorial shell dress', vendor: 'Aura Studio', category: 'Dresses', price: 41.5, compareAt: 58.0, rating: 4.9, reviews: 176, image: IMG.p3, images: [IMG.p3, IMG.p3b], swatches: ['#3a3f4a', '#9fb0a0', '#d8c3a5'], description: '<p>An editorial shell dress with a clean column line and soft shoulder. Fluid fabric moves with you without clinging, finished with a concealed back zip.</p><p><strong>Best For:</strong></p><ul><li>Gallery nights</li><li>Summer dinners</li><li>Travel dressing</li></ul>',
+      { id: 'p3', handle: 'emma-3l-shell-jacket-green', title: 'Emma 3L shell jacket green', vendor: 'Sleek Wildpeak', category: 'Outerwear', price: 248.0, compareAt: 0, rating: 4.9, reviews: 176, image: IMG.p3, images: [IMG.p3, IMG.p3b, IMG.p3c], swatches: ['#2f5a3c', '#1a1a1a'], tags: ['tag__hot_Trail Ready', 'tag__new_Season Drop'], description: '<p>A lightweight 3-layer shell with taped seams and a quiet outdoor cut. Packs small, blocks wind, and layers clean over merino.</p><p><strong>Best For:</strong></p><ul><li>Trail days</li><li>Travel packing</li><li>Unpredictable weather</li></ul>', metafields: { 'custom.fabric_weight': '3L shell', 'custom.fit_guide': 'Regular fit', 'custom.care_instructions': 'Wipe clean. Hang dry.', 'custom.material': '3-layer waterproof shell', 'google.gender': 'unisex', 'google.age_group': 'adult' },
         variants: [
-          { id: 'p3-blk-m', title: 'Black / M', price: 41.5, compareAt: 58.0 },
-          { id: 'p3-blk-s', title: 'Black / S', price: 41.5, compareAt: 58.0 },
-          { id: 'p3-snd-m', title: 'Sand / M', price: 44.0, compareAt: 60.0 },
-          { id: 'p3-grn-l', title: 'Sage / L', price: 44.0, compareAt: 60.0 },
+          { id: 'p3-grn-s', title: 'Green / S', color: 'Green', size: 'S', price: 248.0, compareAt: 0, inventory: 6, image: IMG.p3, available: true },
+          { id: 'p3-grn-m', title: 'Green / M', color: 'Green', size: 'M', price: 248.0, compareAt: 0, inventory: 8, image: IMG.p3, available: true },
+          { id: 'p3-grn-l', title: 'Green / L', color: 'Green', size: 'L', price: 248.0, compareAt: 0, inventory: 4, image: IMG.p3, available: true },
+          { id: 'p3-blk-m', title: 'Black / M', color: 'Black', size: 'M', price: 248.0, compareAt: 0, inventory: 5, image: IMG.p3b, available: true },
         ] },
-      { id: 'p4', title: 'Street denim jacket', status: 'draft', vendor: 'Aura Studio', category: 'Outerwear', price: 54.0, compareAt: 72.0, rating: 4.7, reviews: 132, image: IMG.p4, images: [IMG.p4, IMG.p4b], swatches: ['#33415c', '#1b1f24'], description: '<p>A street denim jacket with a slightly oversized fit and broken-in wash. Metal buttons, chest pockets, and a soft collar that sits clean over tees or knits.</p><p><strong>Best For:</strong></p><ul><li>Cool evenings</li><li>Layering over dresses</li><li>Weekend errands</li></ul>',
+      { id: 'p4', handle: 'minna-wool-fleece-jacket-black', title: 'Minna wool fleece jacket black', status: 'active', vendor: 'Sleek Wildpeak', category: 'Outerwear', price: 198.0, compareAt: 248.0, rating: 4.7, reviews: 132, image: IMG.p4, images: [IMG.p4, IMG.p4b, IMG.p4c, IMG.p4brown], swatches: ['#1a1a1a', '#6b4a32'], tags: ['tag__hot_Limited Drop'], description: '<p>A minimal wool-fleece jacket with a soft hand and structured collar. Warm enough for cool evenings without bulk.</p><p><strong>Best For:</strong></p><ul><li>Cool evenings</li><li>Layering over base layers</li><li>Weekend trails</li></ul>', metafields: { 'custom.fabric_weight': '320 gsm', 'custom.fit_guide': 'Relaxed fit', 'custom.care_instructions': 'Dry clean or wash cold. Lay flat to dry.', 'custom.material': 'Wool fleece', 'google.gender': 'unisex', 'google.age_group': 'adult' },
         variants: [
-          { id: 'p4-ind-m', title: 'Indigo / M', price: 54.0, compareAt: 72.0 },
-          { id: 'p4-ind-l', title: 'Indigo / L', price: 56.0, compareAt: 74.0 },
-          { id: 'p4-blk-m', title: 'Black / M', price: 58.0, compareAt: 76.0 },
+          { id: 'p4-blk-m', title: 'Black / M', color: 'Black', size: 'M', price: 198.0, compareAt: 248.0, inventory: 9, image: IMG.p4, available: true },
+          { id: 'p4-blk-l', title: 'Black / L', color: 'Black', size: 'L', price: 198.0, compareAt: 248.0, inventory: 5, image: IMG.p4, available: true },
+          { id: 'p4-brn-m', title: 'Brown / M', color: 'Brown', size: 'M', price: 198.0, compareAt: 248.0, inventory: 3, image: IMG.p4brown, available: true },
         ] },
-      { id: 'p5', title: 'Crewneck sweater', vendor: 'Aura Studio', category: 'Tops', price: 44.0, compareAt: 0, rating: 4.5, reviews: 64, image: IMG.p5, images: [IMG.p5, IMG.p5b, IMG.p5c], swatches: ['#6b705c', '#cb997e'], description: '<p>A classic crewneck sweater in a mid-weight knit. Smooth hand feel, neat rib at the cuff and hem, and enough structure to wear on its own or under a coat.</p><p><strong>Best For:</strong></p><ul><li>Cooler mornings</li><li>Layering season</li><li>Travel neutrals</li></ul>' },
-      { id: 'p6', title: 'Pleated midi skirt', status: 'archived', vendor: 'Aura Studio', category: 'Dresses', price: 38.0, compareAt: 49.0, rating: 4.4, reviews: 51, image: IMG.p6, swatches: ['#1b1f24', '#b08968'], description: '<p>A pleated midi skirt with a soft swing and elastic waist. Falls below the knee with enough movement for walking and sitting comfort.</p><p><strong>Best For:</strong></p><ul><li>Desk-to-dinner looks</li><li>Warm-weather workwear</li><li>Pairing with fitted knits</li></ul>' },
+      { id: 'p5', handle: 'ingrid-merino-long-sleeve-black', title: 'Ingrid merino long sleeve black', vendor: 'Sleek Wildpeak', category: 'Tops', inventory: 0, price: 119.0, compareAt: 0, rating: 4.5, reviews: 64, image: IMG.p5, images: [IMG.p5, IMG.p5b, IMG.p5c], swatches: ['#1a1a1a', '#6b2d3c'], tags: ['tag__hot_Core Layer'], description: '<p>Long-sleeve merino with a clean crew neck and temperature-regulating hand feel. Soft enough for daily wear, tough enough for travel.</p><p><strong>Best For:</strong></p><ul><li>Cooler mornings</li><li>Layering season</li><li>Travel neutrals</li></ul>', metafields: { 'custom.fabric_weight': '180 gsm', 'custom.fit_guide': 'True to size', 'custom.care_instructions': 'Machine wash cold. Lay flat to dry.', 'custom.material': 'Merino wool', 'google.gender': 'unisex', 'google.age_group': 'adult' },
+        variants: [
+          { id: 'p5-blk-s', title: 'Black / S', color: 'Black', size: 'S', price: 119.0, compareAt: 0, inventory: 0, image: IMG.p5, available: false },
+          { id: 'p5-blk-m', title: 'Black / M', color: 'Black', size: 'M', price: 119.0, compareAt: 0, inventory: 0, image: IMG.p5, available: false },
+          { id: 'p5-brg-m', title: 'Burgundy / M', color: 'Burgundy', size: 'M', price: 119.0, compareAt: 0, inventory: 0, image: IMG.p5b, available: false },
+        ] },
+      { id: 'p6', handle: 'ester-outdoor-shorts-black', title: 'Ester outdoor shorts black', status: 'active', vendor: 'Sleek Wildpeak', category: 'Bottoms', inventory: 14, price: 98.0, compareAt: 128.0, rating: 4.4, reviews: 51, image: IMG.p6, images: [IMG.p6, IMG.p6b, IMG.p6c], swatches: ['#1a1a1a', '#b08968'], tags: ['tag__hot_Best Seller', 'tag__new_Summer Edit'], description: '<p>Outdoor shorts with a soft swing and secure waist. Enough movement for hiking, clean enough for town.</p><p><strong>Best For:</strong></p><ul><li>Warm trail days</li><li>Travel packing</li><li>Pairing with merino tops</li></ul>', metafields: { 'custom.fabric_weight': '140 gsm', 'custom.fit_guide': 'True to size', 'custom.care_instructions': 'Machine wash cold. Hang dry.', 'custom.material': 'Softshell blend', 'google.gender': 'unisex', 'google.age_group': 'adult' },
+        variants: [
+          { id: 'p6-blk-s', title: 'Black / S', color: 'Black', size: 'S', price: 98.0, compareAt: 128.0, inventory: 7, image: IMG.p6, available: true },
+          { id: 'p6-blk-m', title: 'Black / M', color: 'Black', size: 'M', price: 98.0, compareAt: 128.0, inventory: 5, image: IMG.p6, available: true },
+          { id: 'p6-tan-m', title: 'Tan / M', color: 'Tan', size: 'M', price: 98.0, compareAt: 128.0, inventory: 2, image: IMG.p6b, available: true },
+          { id: 'p6-tan-l', title: 'Tan / L', color: 'Tan', size: 'L', price: 98.0, compareAt: 128.0, inventory: 0, image: IMG.p6b, available: false },
+        ] },
+      { id: 'swim-aruba', handle: 'b-swim-benga-u76-aruba-top', title: 'Aruba Top', vendor: 'B Swim', category: 'Swim Tops', sku: 'BSWIM-ARUBA-U76', inventory: 0, preorder: true, price: 112.0, compareAt: 127.27, rating: 4.0, reviews: 4, image: SWIM_IMG.hero, images: [SWIM_IMG.hero, SWIM_IMG.detail, SWIM_IMG.side, SWIM_IMG.back, SWIM_IMG.angle], media: [
+        { type: 'image', src: SWIM_IMG.hero },
+        { type: 'video', poster: SWIM_IMG.videoPoster, video: SWIM_IMG.video },
+        { type: 'image', src: SWIM_IMG.detail },
+        { type: 'image', src: SWIM_IMG.side },
+        { type: 'image', src: SWIM_IMG.back },
+        { type: 'image', src: SWIM_IMG.angle },
+      ], swatches: ['#5b8e90', '#f5dfb4', '#f3a0a2', '#775246', '#1c3935', '#f3bd3d', '#56b7c6', '#ef784f', '#111111'], tags: [], summary: 'Soft Aruba swim top with adjustable coverage. Pre-order now and we ship as soon as it is back in stock.', highlights: ['Mix-and-match with any B Swim bottom', 'Soft recycled swim fabric', 'Adjustable straps for a custom fit'], description: '<p>Pre-order now to make sure you do not miss out! As soon as it is in stock, we will ship it to you.</p>', metafields: { 'custom.fit_guide': 'Runs small · true to size · runs large', 'custom.care_instructions': 'Rinse in cold water after each wear. Lay flat to dry.', 'custom.material': 'Recycled swim fabric', 'custom.swim_note': 'Tops and bottoms sold separately.', 'custom.fabric_weight': '190 gsm', 'google.gender': 'female', 'google.age_group': 'adult', 'google.condition': 'new', 'custom.is_bestseller': 'true' }, variants: [
+        { id: 'swim-aruba-sage-xs', title: 'Dark Sage / XS', color: 'Dark Sage', size: 'XS', sku: 'BSWIM-ARUBA-SAGE-XS', price: 112.0, compareAt: 127.27, inventory: 0, available: true, preorder: true, image: SWIM_IMG.hero },
+        { id: 'swim-aruba-sage-s', title: 'Dark Sage / S', color: 'Dark Sage', size: 'S', sku: 'BSWIM-ARUBA-SAGE-S', price: 112.0, compareAt: 127.27, inventory: 0, available: true, preorder: true, image: SWIM_IMG.hero },
+        { id: 'swim-aruba-sage-m', title: 'Dark Sage / M', color: 'Dark Sage', size: 'M', sku: 'BSWIM-ARUBA-SAGE-M', price: 112.0, compareAt: 127.27, inventory: 0, available: true, preorder: true, image: SWIM_IMG.hero },
+        { id: 'swim-aruba-sage-l', title: 'Dark Sage / L', color: 'Dark Sage', size: 'L', sku: 'BSWIM-ARUBA-SAGE-L', price: 112.0, compareAt: 127.27, inventory: 0, available: true, preorder: true, image: SWIM_IMG.hero },
+        { id: 'swim-aruba-sage-d', title: 'Dark Sage / D', color: 'Dark Sage', size: 'D', sku: 'BSWIM-ARUBA-SAGE-D', price: 112.0, compareAt: 127.27, inventory: 0, available: true, preorder: true, image: SWIM_IMG.hero },
+        { id: 'swim-aruba-sage-dd', title: 'Dark Sage / DD', color: 'Dark Sage', size: 'DD', sku: 'BSWIM-ARUBA-SAGE-DD', price: 112.0, compareAt: 127.27, inventory: 0, available: true, preorder: true, image: SWIM_IMG.hero },
+        { id: 'swim-aruba-santorini-xs', title: 'Santorini / XS', color: 'Santorini', size: 'XS', sku: 'BSWIM-ARUBA-SANTORINI-XS', price: 112.0, compareAt: 127.27, inventory: 0, available: true, preorder: true, image: SWIM_IMG.santorini },
+        { id: 'swim-aruba-fire-xs', title: 'Fire / XS', color: 'Fire', size: 'XS', sku: 'BSWIM-ARUBA-FIRE-XS', price: 112.0, compareAt: 127.27, inventory: 0, available: true, preorder: true, image: SWIM_IMG.fire },
+        { id: 'swim-aruba-bengal-xs', title: 'Bengal / XS', color: 'Bengal', size: 'XS', sku: 'BSWIM-ARUBA-BENGAL-XS', price: 112.0, compareAt: 127.27, inventory: 0, available: true, preorder: true, image: SWIM_IMG.hero },
+        { id: 'swim-aruba-palma-xs', title: 'Palma / XS', color: 'Palma', size: 'XS', sku: 'BSWIM-ARUBA-PALMA-XS', price: 112.0, compareAt: 127.27, inventory: 0, available: true, preorder: true, image: SWIM_IMG.hero },
+        { id: 'swim-aruba-sunglow-xs', title: 'Sun Glow / XS', color: 'Sun Glow', size: 'XS', sku: 'BSWIM-ARUBA-SUNGLOW-XS', price: 112.0, compareAt: 127.27, inventory: 0, available: true, preorder: true, image: SWIM_IMG.hero },
+        { id: 'swim-aruba-lagoon-xs', title: 'Lagoon / XS', color: 'Lagoon', size: 'XS', sku: 'BSWIM-ARUBA-LAGOON-XS', price: 112.0, compareAt: 127.27, inventory: 0, available: true, preorder: true, image: SWIM_IMG.hero },
+        { id: 'swim-aruba-burum-xs', title: 'Burum / XS', color: 'Burum', size: 'XS', sku: 'BSWIM-ARUBA-BURUM-XS', price: 112.0, compareAt: 127.27, inventory: 0, available: true, preorder: true, image: SWIM_IMG.hero },
+        { id: 'swim-aruba-raven-xs', title: 'Raven / XS', color: 'Raven', size: 'XS', sku: 'BSWIM-ARUBA-RAVEN-XS', price: 112.0, compareAt: 127.27, inventory: 0, available: true, preorder: true, image: SWIM_IMG.hero },
+      ] },
+      { id: 'swim-cecilia', handle: 'b-swim-cecilia-1pc', title: 'Cecilia 1pc', vendor: 'B Swim', category: 'One Pieces', sku: 'BSWIM-CECILIA', inventory: 12, preorder: true, price: 186.0, compareAt: 0, rating: 4.0, reviews: 4, image: SWIM_IMG.santorini, images: [SWIM_IMG.santorini, SWIM_IMG.detail, SWIM_IMG.side], swatches: ['#f5dfb4', '#5b8e90', '#111111'], tags: ['tag__new_New arrival'], description: '<p>A sculpted one-piece with clean lines and soft support. Pair with a cover-up for beach-to-brunch days.</p>', variants: [
+        { id: 'swim-cecilia-s', title: 'Santorini / S', color: 'Santorini', size: 'S', price: 186.0, inventory: 6, available: true, preorder: true, image: SWIM_IMG.santorini },
+        { id: 'swim-cecilia-m', title: 'Santorini / M', color: 'Santorini', size: 'M', price: 186.0, inventory: 6, available: true, preorder: true, image: SWIM_IMG.santorini },
+      ] },
+      { id: 'swim-belize', handle: 'b-swim-belize-bralette', title: 'Belize Bralette', vendor: 'B Swim', category: 'Swim Tops', sku: 'BSWIM-BELIZE', inventory: 18, price: 108.0, compareAt: 121.0, rating: 4.0, reviews: 4, image: SWIM_IMG.fire, images: [SWIM_IMG.fire, SWIM_IMG.angle, SWIM_IMG.back], swatches: ['#f3a0a2', '#ef784f', '#111111', '#5b8e90'], tags: [], description: '<p>A soft bralette top with adjustable straps. Mix with any B Swim bottom.</p>', variants: [
+        { id: 'swim-belize-s', title: 'Fire / S', color: 'Fire', size: 'S', price: 108.0, compareAt: 121.0, inventory: 9, available: true, image: SWIM_IMG.fire },
+        { id: 'swim-belize-m', title: 'Fire / M', color: 'Fire', size: 'M', price: 108.0, compareAt: 121.0, inventory: 9, available: true, image: SWIM_IMG.fire },
+      ] },
+      { id: 'swim-forever', handle: 'b-swim-forever-tankini', title: 'Forever Tankini', vendor: 'B Swim', category: 'Swim Tops', sku: 'BSWIM-FOREVER', inventory: 20, price: 115.0, compareAt: 0, rating: 4.2, reviews: 4, image: SWIM_IMG.detail, images: [SWIM_IMG.detail, SWIM_IMG.hero, SWIM_IMG.side], swatches: ['#5b8e90', '#1c3935', '#f3bd3d'], tags: [], description: '<p>A tankini top with easy coverage and beach-day comfort.</p>', variants: [
+        { id: 'swim-forever-m', title: 'Dark Sage / M', color: 'Dark Sage', size: 'M', price: 115.0, inventory: 10, available: true, image: SWIM_IMG.detail },
+        { id: 'swim-forever-l', title: 'Dark Sage / L', color: 'Dark Sage', size: 'L', price: 115.0, inventory: 10, available: true, image: SWIM_IMG.detail },
+      ] },
+      { id: 'swim-muse', handle: 'b-swim-muse-halter', title: 'Muse Halter', vendor: 'B Swim', category: 'Swim Tops', sku: 'BSWIM-MUSE', inventory: 14, price: 98.0, compareAt: 0, rating: 4.1, reviews: 3, image: SWIM_IMG.side, images: [SWIM_IMG.side, SWIM_IMG.back], swatches: ['#56b7c6', '#f5dfb4'], tags: [], description: '<p>A halter swim top with a clean neckline and soft support.</p>', variants: [
+        { id: 'swim-muse-s', title: 'Lagoon / S', color: 'Lagoon', size: 'S', price: 98.0, inventory: 7, available: true, image: SWIM_IMG.side },
+        { id: 'swim-muse-m', title: 'Lagoon / M', color: 'Lagoon', size: 'M', price: 98.0, inventory: 7, available: true, image: SWIM_IMG.side },
+      ] },
       { id: 'p7', title: 'Canvas weekender tote', vendor: 'Aura Studio', price: 29.0, compareAt: 39.0, rating: 4.7, reviews: 83, image: IMG.p7, swatches: ['#b08968', '#2b2f36'], description: '<p>A sturdy canvas weekender tote with interior pockets and a reinforced base. Room for a change of clothes, laptop sleeve, and weekend extras without losing shape.</p><p><strong>Best For:</strong></p><ul><li>Overnight trips</li><li>Gym-to-office days</li><li>Market runs</li></ul>' },
       { id: 'p8', handle: 'everyday-rib-socks-3-pack', title: 'Everyday rib socks · 3 pack', status: 'deactivated', vendor: 'Aura Studio', sku: 'AUR-RIB-SOCKS-SAND-S', inventory: 3, price: 16.0, compareAt: 24.0, rating: 4.6, reviews: 119, image: IMG.p1, images: [IMG.p1, IMG.p1b, IMG.p1c, IMG.p1d, IMG.p1sand, IMG.p1blk], swatches: ['#c8b6a6', '#2b2f36', '#e8e1d6'], tags: ['tag__hot_Best seller', 'tag__new_Black Friday Sale'], description: '<p>Soft rib cotton socks with reinforced heel and toe. Pack of three everyday neutrals that stay put without digging in.</p><p><strong>Best For:</strong></p><ul><li>Daily rotation</li><li>Sneakers and loafers</li><li>Gifting sets</li></ul><p>Machine wash cold with like colors. Hang dry to keep the rib elastic.</p>', metafields: { 'custom.fabric_weight': '160 gsm', 'custom.fit_guide': 'True to size', 'custom.care_instructions': 'Machine wash cold with like colors. Hang dry.', 'custom.material': 'Cotton rib', 'google.gender': 'unisex', 'google.age_group': 'adult' }, variants: [
         { id: 'p8-sand-s', title: 'Sand / S', color: 'Sand', size: 'S', sku: 'AUR-RIB-SOCKS-SAND-S', price: 16.0, compareAt: 24.0, inventory: 3, image: IMG.p1, available: true },
@@ -422,6 +520,14 @@
         '<p>Have a question about your order or one of our products? We would love to hear from you.</p>' +
         '<p><strong>Email.</strong> support@example.com — we reply to every message within one business day.</p>' +
         '<p><strong>Hours.</strong> Monday to Friday, 9am–5pm. Messages sent over the weekend are answered the next business day.</p>' },
+      { id: 'pg-size-chart', title: 'Size chart', url: '/pages/size-chart', content:
+        '<p>Wildpeak apparel uses a true-to-size outdoor cut. Measure against the chart below before you order.</p>' +
+        '<p><strong>Tops (cm).</strong> S 86–91 · M 91–96 · L 96–101 · XL 101–109</p>' +
+        '<p><strong>Bottoms (cm).</strong> S 71–76 · M 76–81 · L 81–86 · XL 86–94</p>' +
+        '<p>Between sizes? Size up for layering under shells. Size down for a closer base-layer fit.</p>' },
+      { id: 'pg-swim-size-chart', title: 'Swim size guide', url: '/pages/swim-size-guide', content:
+        '<p><strong>Fit guide</strong></p><p>Runs small <span style="display:inline-block;width:180px;border-top:1px solid #999;vertical-align:middle"></span> True to size <span style="display:inline-block;width:180px;border-top:1px solid #999;vertical-align:middle"></span> Runs large</p>' +
+        '<p>Aruba tops are sold separately from bottoms. If you prefer more coverage, size up in the cup or band.</p>' },
     ],
     blogs: [
       { id: 'blog-journal', title: 'Journal', posts: [
@@ -440,9 +546,11 @@
   // engine materialises each instance's settings from OS_SECTIONS[kind].defaults(), applying any
   // `settings` override here. Blocks likewise: {kind} -> blockDef.defaults().
   const DEFAULT_THEME = {
-    name: 'Aura · Draft',
-    announcement: { hidden: false, kind: 'announcement-bar', settings: {} },
-    header: { hidden: false, kind: 'header', settings: {} },
+    name: 'Symmetry Swim · Draft',
+    announcement: { hidden: false, kind: 'announcement-bar', settings: { background: '#222222', text: '#FFFFFF', text_size: 'small' }, blocks: [
+      { kind: 'message', settings: { text: 'Free shipping on orders over $50', link: '' } },
+    ] },
+    header: { hidden: false, kind: 'header', settings: { logo_text: 'SYMMETRY', layout: 'logoTopCenter', background: '#FFFFFF', text_color: '#222222', border_bottom: true } },
     footer: { hidden: false, kind: 'footer', settings: {} },
     // Multi-template shape: each page type holds a `list` of named templates. `id:'default'`
     // is the built-in fallback (can't be deleted). `assigned` is a mock count shown in the
@@ -461,23 +569,25 @@
       ] },
       product: { list: [
         { id: 'default', name: 'Default product', isDefault: true, assigned: 8, assignedResourceIds: ['p8', 'p11', 'p13', 'p15', 'p16', 'p18', 'p19', 'p20'], sections: [
+          // OOB PDP section list (PRD 3.3.2): Breadcrumbs · Product information · Media with text · Testimonial · FAQ
+          { id: 'sec-pdp-bc', kind: 'breadcrumbs', hidden: true },
           { id: 'sec-pdp-main', kind: 'product-main', blocks: [
             { kind: 'badges', settings: { show_sold_out: false, show_saving: false, badge_position: 'left', badge_icon: 'none', badge_gap: 8 } },
             { kind: 'title', settings: { title_size: 30 } },
             { kind: 'price', settings: { show_taxes: false, show_saving: true, saving_type: 'percentage', saving_style: 'filled', saving_position: 'right' } },
             { kind: 'rating', settings: { layout: 'default', star_style: 'boxed', style: 'stars-rating-custom', custom_text: 'Trusted by 2000+', underline_text: false, size: 14, color: '#0f3636', text_color: '' } },
             { kind: 'inventory', settings: { show_status: true, show_count: true, low_stock_threshold: 5, status_style: 'dot', in_stock_color: '#10a443', status_color: '#f59e0b' } },
-            { kind: 'variant', settings: { hide_sold_out: false, picker_type: 'buttons', swatch_style: 'color', shape: 'normal', show_group_title: false } },
-            { kind: 'buy', settings: { show_quantity: true, show_add: true, atc_layout: 'with-quantity', atc_icon: 'bag-plus', atc_background: '#FFC439', atc_text_color: '#FFFFFF', atc_shape: 'pill', atc_custom_radius: 8, show_dynamic: true, channels: ['buy_now', 'paypal'], buy_now_text: 'Buy now', buy_now_background: '#000000', buy_now_text_color: '#FFFFFF', dyn_shape: 'normal', dyn_custom_radius: 8, show_payment_options: true, channel_logo: true, show_safe_checkout: true, safe_checkout_align: 'center', safe_checkout_label: 'GUARANTEED SAFE CHECKOUT', trust_logos: ['visa', 'mastercard', 'amex', 'paypal', 'apple_pay', 'google_pay'], trust_logo_size: 28 } },
-            { kind: 'icon_text', settings: { layout: 'horizontal', item_layout: 'icon-left', alignment: 'left', font: 'body', size: 16, icon_size: 20, item_gap: 24, icon_text_gap: 8, background: false, background_color: '#f6f6f6', corner_radius: 10, text_color: '', icon_color: '', card_style: 'none', icon_1: 'box', image_1: '', first_heading: 'Orders over $50 ship free', first_content: '', icon_2: 'return', image_2: '', second_heading: '30 day returns', second_content: '', icon_3: 'star', image_3: '', third_heading: '', third_content: '' } },
+            { kind: 'variant', settings: { hide_sold_out: false, picker_type: 'buttons', swatch_style: 'color', shape: 'normal', show_group_title: true } },
+            { kind: 'buy', settings: { show_quantity: true, show_add: true, atc_layout: 'with-quantity', atc_icon: 'bag-plus', atc_background: '#FFC439', atc_text_color: '#FFFFFF', atc_shape: 'pill', atc_custom_radius: 8, show_dynamic: true, channels: ['buy_now', 'paypal'], buy_now_text: 'Buy now', buy_now_background: '#000000', buy_now_text_color: '#FFFFFF', dyn_shape: 'pill', dyn_custom_radius: 8, show_payment_options: true, channel_logo: true, show_safe_checkout: true, safe_checkout_align: 'center', safe_checkout_label: 'GUARANTEED SAFE CHECKOUT', trust_logos: ['visa', 'mastercard', 'amex', 'paypal', 'apple_pay', 'google_pay'], trust_logo_size: 24 } },
+            { kind: 'icon_text', settings: { layout: 'horizontal', item_layout: 'icon-left', alignment: 'left', font: 'body', size: 15, icon_size: 20, item_gap: 24, icon_text_gap: 8, background: false, background_color: '#f6f6f6', corner_radius: 10, text_color: '', icon_color: '', card_style: 'none', icon_1: 'box', image_1: '', first_heading: 'Orders over $50 ship free', first_content: '', icon_2: 'return', image_2: '', second_heading: '30 day returns', second_content: '', icon_3: 'star', image_3: '', third_heading: '', third_content: '' } },
             { kind: 'collapsible', settings: { heading: 'Overview', icon: 'none', open: false } },
             { kind: 'collapsible', settings: { heading: 'Details', icon: 'none', open: false } },
             { kind: 'recommendations', settings: { heading: 'You Might Also Like', per_row: 2, mobile_count: 2, empty_behavior: 'hide', dedupe_current: true } },
-            { kind: 'sticky', settings: { show_image: true, show_title: true, show_price: true, show_quantity: true, show_after_scroll: true, appear_at: 'scroll', mobile_visible: true } },
+            { kind: 'sticky', settings: { show_image: true, show_title: true, show_price: true, show_quantity: true, appear_at: 'scroll', mobile_visible: true } },
           ] },
-          { id: 'sec-pdp-trust', kind: 'text-with-icon' },
+          { id: 'sec-pdp-iwt', kind: 'media-with-text' },
           { id: 'sec-pdp-reviews', kind: 'testimonial' },
-          { id: 'sec-pdp-related', kind: 'related-products' },
+          { id: 'sec-pdp-faq', kind: 'faq' },
         ] },
         { id: 'pdp-wellness', name: 'Wellness product', assigned: 6, assignedResourceIds: ['p7', 'p9', 'p10', 'p12', 'p14', 'p17'], sections: [
           { id: 'sec-well-bc', kind: 'breadcrumbs', hidden: false },
@@ -488,8 +598,8 @@
             { kind: 'rating', settings: { layout: 'default', star_style: 'regular', style: 'stars-rating-custom', size: 14, color: '#f5b301', custom_text: 'Trusted by 2000+' } },
             { kind: 'inventory', settings: { show_status: true, show_count: true, low_stock_threshold: 8, status_style: 'dot', in_stock_color: '#10a443', status_color: '#f59e0b' } },
             { kind: 'variant', settings: { hide_sold_out: false, picker_type: 'buttons', swatch_style: 'text', shape: 'normal', show_group_title: true } },
-            { kind: 'buy', settings: { show_quantity: true, show_add: true, atc_layout: 'with-quantity', atc_icon: 'bag-plus', show_dynamic: true, show_payment_options: true, atc_shape: 'pill', dyn_shape: 'pill', channels: ['paypal', 'apple_pay', 'google_pay'], channel_logo: true, show_safe_checkout: true, safe_checkout_label: 'GUARANTEED SAFE CHECKOUT', trust_logos: ['norton', 'paypal', 'visa', 'mastercard', 'mcafee', 'money_back', 'amex', 'discover', 'apple_pay', 'google_pay'], trust_logo_size: 28 } },
-            { kind: 'icon_text', settings: { layout: 'horizontal', item_layout: 'icon-left', alignment: 'left', font: 'body', size: 16, icon_size: 20, item_gap: 24, icon_text_gap: 8, background: true, background_color: '#f6f6f6', corner_radius: 10, text_color: '', icon_color: '', card_style: 'outline', icon_1: 'truck', image_1: '', first_heading: 'Express shipping', first_content: '', icon_2: 'shield', image_2: '', second_heading: '90-day money-back', second_content: '', icon_3: 'leaf', image_3: '', third_heading: 'Clean ingredients', third_content: '' } },
+            { kind: 'buy', settings: { show_quantity: true, show_add: true, atc_layout: 'with-quantity', atc_icon: 'bag-plus', show_dynamic: true, show_payment_options: true, atc_shape: 'pill', dyn_shape: 'pill', channels: ['paypal', 'apple_pay', 'google_pay'], channel_logo: true, show_safe_checkout: true, safe_checkout_label: 'GUARANTEED SAFE CHECKOUT', trust_logos: ['norton', 'paypal', 'visa', 'mastercard', 'mcafee', 'money_back', 'amex', 'discover', 'apple_pay', 'google_pay'], trust_logo_size: 24 } },
+            { kind: 'icon_text', settings: { layout: 'horizontal', item_layout: 'icon-left', alignment: 'left', font: 'body', size: 15, icon_size: 20, item_gap: 24, icon_text_gap: 8, background: true, background_color: '#f6f6f6', corner_radius: 10, text_color: '', icon_color: '', card_style: 'outline', icon_1: 'truck', image_1: '', first_heading: 'Express shipping', first_content: '', icon_2: 'shield', image_2: '', second_heading: '90-day money-back', second_content: '', icon_3: 'leaf', image_3: '', third_heading: 'Clean ingredients', third_content: '' } },
             { kind: 'shipping', settings: { delivery_text: 'Estimated delivery:', days: 5, date_format: '%b %d', timezone: 'store' } },
             { kind: 'featured_reviews', settings: { heading: 'What Our Customers Are Saying', layout: 'trust', data_source: 'auto', auto_count: 3, reviews: [], show_image: true, show_avatar: true, round_avatar: true, star_color: '#16a34a', show_verified: true, verified_text: 'Verified Customer', verified_subtext: 'Real customer · Verified order · Real buyer', scroll: true, nav_style: 'auto', auto_play: false, cards_per_row: 1 } },
             { kind: 'video_column', settings: { heading: '', heading_color: '', per_row: 4, mobile_count: 2, gap: 10, corner_radius: 12, video_border: 'transparent', show_play_button: true } },
@@ -497,7 +607,7 @@
             { kind: 'collapsible', settings: { heading: 'How to use', icon: 'stopwatch', open: false, accordion_mode: true, icon_position: 'right' } },
             { kind: 'collapsible', settings: { heading: 'Ingredients', icon: 'leaf', open: false, accordion_mode: true, icon_position: 'right' } },
             { kind: 'recommendations', settings: { heading: 'You Might Also Like', per_row: 2, mobile_count: 2, empty_behavior: 'hide', dedupe_current: true } },
-            { kind: 'sticky', settings: { show_image: true, show_title: true, show_price: true, show_quantity: true, show_after_scroll: true, appear_at: 'scroll', mobile_visible: true, button_text: 'Add to cart' } },
+            { kind: 'sticky', settings: { show_image: true, show_title: true, show_price: true, show_quantity: true, appear_at: 'scroll', mobile_visible: true, button_text: 'Add to cart' } },
           ] },
           { id: 'sec-well-story', kind: 'media-with-text' },
           { id: 'sec-well-reviews', kind: 'testimonial', settings: { heading: 'What Our Customers Are Saying' } },
@@ -505,27 +615,52 @@
           { id: 'sec-well-video', kind: 'video-feed', settings: { heading: '', video_card_style: 'simple', desktop_videos: 4, layout_style: 'carousel' } },
           { id: 'sec-well-related', kind: 'related-products' },
         ] },
-        { id: 'pdp-apparel', name: 'Apparel product', assigned: 6, assignedResourceIds: ['p1', 'p2', 'p3', 'p4', 'p5', 'p6'], sections: [
+        { id: 'pdp-apparel', name: 'Swim product', assigned: 1, assignedResourceIds: ['swim-aruba'], sections: [
           { id: 'sec-app-bc', kind: 'breadcrumbs', hidden: false },
-          { id: 'sec-app-main', kind: 'product-main', blocks: [
-            { kind: 'badges', settings: { show_sold_out: true, show_saving: true, saving_type: 'text', badge_position: 'left', badge_icon: 'fire', badge_gap: 8 } },
-            { kind: 'title', settings: { title_size: 30 } },
-            { kind: 'price', settings: { show_taxes: false, show_saving: true, saving_type: 'text', saving_style: 'outline', saving_label: 'Sale', saving_position: 'right' } },
-            { kind: 'rating', settings: { layout: 'single-icon', style: 'stars-custom', size: 14, color: '#123b8f', custom_text: 'from 100,000+ Drivers', underline_text: true } },
-            { kind: 'inventory', settings: { show_status: true, show_count: false, low_stock_threshold: 5, status_style: 'text-only' } },
-            { kind: 'variant', settings: { hide_sold_out: false, picker_type: 'buttons', swatch_style: 'color', shape: 'circle', show_group_title: true } },
-            { kind: 'buy', settings: { show_quantity: true, show_add: true, atc_layout: 'full-width', atc_icon: 'bag-plus', buy_now_text: 'Buy now', show_dynamic: true, show_payment_options: false, atc_shape: 'pill', dyn_shape: 'pill', channels: ['buy_now', 'paypal'], channel_logo: true, show_safe_checkout: false } },
-            { kind: 'icon_text', settings: { layout: 'horizontal', item_layout: 'icon-left', alignment: 'left', font: 'body', size: 14, icon_size: 20, item_gap: 24, icon_text_gap: 8, background: false, background_color: '#f6f6f6', corner_radius: 10, text_color: '', icon_color: '', card_style: 'none', icon_1: 'truck', image_1: '', first_heading: 'Free shipping over $50', first_content: '', icon_2: 'return', image_2: '', second_heading: '30-day returns', second_content: '', icon_3: 'ruler', image_3: '', third_heading: 'Size guide', third_content: '' } },
-            { kind: 'featured_reviews', settings: { heading: '', layout: 'nav', data_source: 'manual', auto_count: 3, show_image: false, show_avatar: true, round_avatar: false, star_color: '#16a34a', show_verified: true, verified_text: 'Verified Customer', verified_subtext: 'Real customer · Verified order · Real buyer', scroll: true, nav_style: 'auto', auto_play: false, cards_per_row: 1 } },
-            { kind: 'collapsible', settings: { heading: 'Fit & fabric', icon: 'shirt', open: false, accordion_mode: true } },
-            { kind: 'collapsible', settings: { heading: 'Care', icon: 'washing', open: false, accordion_mode: true } },
-            { kind: 'collapsible', settings: { heading: 'Shipping & returns', icon: 'box', open: false, accordion_mode: true } },
-            { kind: 'recommendations', settings: { heading: 'Complete the look', per_row: 2, mobile_count: 2, empty_behavior: 'hide', dedupe_current: true } },
-            { kind: 'sticky', settings: { show_image: true, show_title: true, show_price: true, show_quantity: true, show_after_scroll: true, appear_at: 'scroll', mobile_visible: true } },
+          { id: 'sec-app-main', kind: 'product-main', settings: {
+            desktop_media_size: 'medium',
+            desktop_media_layout: 'collage-2',
+            mobile_thumbnails: true,
+            enable_zoom: true,
+            padding_top: 0,
+            padding_bottom: 72,
+            size_style: 'outline',
+            swatch_ring: true,
+          }, blocks: [
+            { kind: 'title', settings: { title_size: 34, title_weight: '200', title_letter_spacing: -0.04, title_margin_bottom: 17, title_font_family: 'Montserrat', description: '', description_color: '#666666', description_size: 14, description_top: 6, description_bottom: 0 } },
+            { kind: 'price', settings: { show_taxes: false, show_saving: true, saving_type: 'percentage', saving_style: 'outline', saving_position: 'right', size: 24, weight: '300' } },
+            { kind: 'rating', settings: { layout: 'default', star_style: 'regular', style: 'stars-and-count', size: 13, color: '#232323', review_label: 'reviews', underline_text: false } },
+            { kind: 'description', settings: { text: '', width: 'fill', alignment: 'left', background: true, background_color: '#ececec', corner_radius: 0, padding_top: 15, padding_bottom: 14, padding_left: 17, padding_right: 17 } },
+            { kind: 'variant', settings: { hide_sold_out: false, picker_type: 'buttons', swatch_style: 'color', shape: 'normal', show_group_title: true } },
+            { kind: 'popup', settings: { label: 'Size guide', page: 'pg-swim-size-chart', popup_width: 560, popup_height: 420 } },
+            { kind: 'buy', settings: { show_quantity: true, show_add: true, atc_layout: 'full-width', atc_icon: 'none', atc_background: '#232323', atc_text_color: '#ffffff', atc_shape: 'square', atc_custom_radius: 0, show_dynamic: false, channels: [], buy_now_text: 'Buy it now', buy_now_background: '#232323', buy_now_text_color: '#ffffff', dyn_shape: 'square', dyn_custom_radius: 0, show_payment_options: false, channel_logo: false, show_safe_checkout: false } },
+            { kind: 'icon_text', settings: { layout: 'horizontal', item_layout: 'icon-top', alignment: 'center', font: 'body', size: 12, icon_size: 24, item_gap: 30, icon_text_gap: 8, background: false, background_color: '#f6f6f6', corner_radius: 0, text_color: '#232323', icon_color: '#232323', card_style: 'none', icon_1: 'world', image_1: '', first_heading: '<strong>Free shipping</strong>', first_content: 'Worldwide', icon_2: 'beach', image_2: '', second_heading: '<strong>Beach Ready</strong>', second_content: 'Styles for all', icon_3: 'leaf', image_3: '', third_heading: '<strong>Eco Swimwear</strong>', third_content: 'Sustainable' } },
+            { kind: 'collapsible', settings: { heading: 'Description', icon: 'eye', icon_position: 'right', open: false, accordion_mode: true, content: '<p>This bombshell bra will flatter any shape and provide just the right amount of support. Adjustable straps and underwire make this top as comfortable as it is cute and classy. Bottom sold separately.</p>' } },
+            { kind: 'collapsible', settings: { heading: 'Shipping & Returns', icon: 'box', icon_position: 'right', open: false, accordion_mode: true, content: '<p>Free 2 Day Shipping on Orders $50+. Returns must be postmarked within 15 days of delivery for a refund and within 30 days for a store credit or exchange. Read our full returns policy in our FAQ page.</p>' } },
+            { kind: 'collapsible', settings: { heading: 'Tops and bottoms sold separately', icon: 'price-tag', icon_position: 'right', open: false, accordion_mode: true, content: '<p>All suits are sold as separates. Tops and bottoms are paired together in pictures, so check the product title to confirm which piece you are purchasing.</p>' } },
+            { kind: 'recommendations', settings: { subheading: '', heading: 'Related products', content: '', products: ['swim-cecilia', 'swim-belize'], per_row: 2, mobile_count: 2, image_ratio: 'portrait', empty_behavior: 'hide', exclude_soldout: false, dedupe_current: true } },
+            { kind: 'sticky', settings: { show_image: true, show_title: true, show_price: true, show_quantity: true, appear_at: 'scroll', mobile_visible: true, width_mode: 'container', desktop_button_width: 320, button_text: 'Add to cart' } },
           ] },
-          { id: 'sec-app-story', kind: 'media-with-text' },
-          { id: 'sec-app-reviews', kind: 'testimonial', settings: { heading: 'Real customer fits' } },
-          { id: 'sec-app-related', kind: 'related-products' },
+          // OOB PDP page sections after Product information
+          { id: 'sec-app-iwt', kind: 'media-with-text', settings: { section_heading: 'Beach Ready', section_subheading: '', heading_alignment: 'center' }, blocks: [
+            { kind: 'image', settings: { image: SWIM_IMG.detail, image_width: 50, image_position: 'left', subheading: 'B Swim', heading: 'Made for sunny days', content: 'Supportive swim separates designed to flatter every shape. Pair this top with your favorite B Swim bottom.', button_text: 'Shop swim bottoms', button_url: '#', button_style: 'text' } },
+            { kind: 'image', settings: { image: SWIM_IMG.santorini, image_width: 50, image_position: 'right', subheading: 'Eco Swimwear', heading: 'A better beach wardrobe', content: 'Recycled swim fabric, adjustable support, and colors made to mix across the collection.', button_text: 'Explore the collection', button_url: '#', button_style: 'underline' } },
+          ] },
+          { id: 'sec-app-testi', kind: 'testimonial', settings: { heading: 'Customer favorites' } },
+          { id: 'sec-app-faq', kind: 'faq', settings: {
+            layout_style: 'and-text',
+            heading: 'Pre-order FAQs',
+            content: 'Questions about pre-orders? Open the answers below or email <a href="mailto:hello@aura.shop">hello@aura.shop</a>.',
+            support_hours: '',
+            answer_time: '',
+            text_position: 'left',
+            accordion_background: '#f6f6f6',
+          }, blocks: [
+            { kind: 'item', settings: { question: 'What is a pre-order?', answer: '<p>A pre-order reserves a product before its scheduled release. It ships as soon as it is back in stock.</p>' } },
+            { kind: 'item', settings: { question: 'How do I place a pre-order?', answer: '<p>Select your color and size, then click Pre-order. Your order confirmation will include the reservation details.</p>' } },
+            { kind: 'item', settings: { question: 'When will I be charged?', answer: '<p>Your payment method is validated when you order and charged when the product is ready to ship.</p>' } },
+            { kind: 'item', settings: { question: 'When will I receive my pre-order?', answer: '<p>We send an email before the release date and ship as soon as inventory arrives. Delivery timing can vary by destination.</p>' } },
+          ] },
         ] }
       ] },
       collection: { list: [

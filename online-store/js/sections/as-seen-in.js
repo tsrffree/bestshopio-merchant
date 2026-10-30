@@ -42,7 +42,7 @@
       { key: 'logo_height', control: 'range', label: 'Logo height', min: 16, max: 80, step: 1, unit: 'px', default: 32 },
       { sub: 'Colors' },
       { key: 'background', control: 'color', label: 'Background', default: 'transparent', allowTransparent: true },
-      { key: 'text', control: 'color', label: 'Text', default: '', allowTransparent: true, info: 'Blank inherits the theme heading color.' },
+      { key: 'text', control: 'color', label: 'Text', default: '', allowTransparent: true, blankValue: () => OS.themeColor('heading_color', '#000000'), info: 'Blank inherits the theme heading color.' },
     ],
     blocks: {
       name: 'Logo', kind: 'logo', max: 20,
