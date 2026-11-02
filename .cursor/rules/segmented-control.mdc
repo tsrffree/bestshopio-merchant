@@ -1,0 +1,16 @@
+# Segmented control 组件规范
+
+Shared segmented control: `control: 'segmented'` rendered as `.os-seg2` in `online-store/js/app.js`.
+
+When the user names segmented / 分段 / 分段按钮 for a change, update this shared control so every caller gets the change. Do not patch one field only.
+
+## Layout
+
+- Compact 12px labels, hug content width (do not stretch across the settings column)
+- 4+ options automatically fall back to a select dropdown
+- Each segment is an equal visual button: label text must be centered horizontally and vertically inside the segment (`inline-flex` + `align-items:center` + `justify-content:center` + `text-align:center`)
+
+## Copy
+
+- Prototype system copy is English
+- Field-specific option labels live on each schema `options[].label`

@@ -1,0 +1,54 @@
+# 富文本编辑器组件 (text / 文本组件规范)
+
+When the user says text 组件, 文本组件, 富文本, or text / 文本组件规范, use this shared component only:
+
+- Implementation: `assets/richtext-editor.js` (`BSRichText.render` / `BSRichText.wire`)
+- Do not fork a second toolbar in section schemas, product detail, or theme editor panels
+- When the user names this component for a change, update the shared implementation so every caller gets the change. Do not patch one screen only.
+
+## Toolbar layout (must match)
+
+Single compact row (no wrap):
+
+1. Block format control as `Aa` + chevron (not the word Paragraph)
+2. Bold
+3. Italic
+4. Bulleted list
+5. Numbered list
+6. Link
+7. More (`...`)
+
+Collapsed inside More:
+
+- Text color
+- Highlight
+- Insert icon
+
+## Dynamic source menu
+
+Connected chip / bound field menu items:
+
+1. Change dynamic source
+2. Edit value
+3. Remove dynamic source
+
+Remove hover must use the warning red bar (same as image Remove): background `#FEE1E6`, text/icon `#8E0B21`. Apply via `button.danger` on `[data-rt-remove-source]`.
+
+Related collection-source Remove in `online-store/js/app.js` (`.os-op-source-remove`) must use the same tokens.
+
+## Height (Content / autoHeight)
+
+Content-like fields and `autoHeight` richtext must not waste vertical space:
+
+1. Empty: one line high
+2. Filled: height fits the content lines; no spare blank row
+
+Shared fit lives in `refreshAutoHeight` (`assets/richtext-editor.js`). Content textareas use `.os-ta-fit` in `online-store/js/app.js`.
+
+## Rules
+
+- Keep the toolbar on one line; use the Aa icon for paragraph/heading format
+- Expose exactly those five formatting controls on the main toolbar
+- Keep color, highlight, and insert-icon under More
+- All `control: 'richtext'` fields and product richtext surfaces must use this design
+- Paragraph list and More panel stay inside the right panel / viewport; outside click collapses them

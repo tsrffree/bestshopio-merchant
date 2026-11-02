@@ -1,5 +1,7 @@
-/* Shared rich-text editor used by theme editor, product detail, and other surfaces.
-   Compact toolbar (online): Paragraph | Insert icon | More (...).
+/* 富文本编辑器组件 (text / 文本组件规范)
+   Shared rich-text editor for theme editor, product detail, and other surfaces.
+   Compact single-row toolbar: Aa | Bold | Italic | Bullet | Number | Link | More
+   More panel keeps Text color, Highlight, and Insert icon collapsed.
    Call BSRichText.render / BSRichText.wire; do not fork a second toolbar. */
 (function (global) {
   function esc(s) {
@@ -47,28 +49,22 @@
         '<span>' + esc(o.label) + '</span><span class="bs-rt-block-check" hidden>' + I.check + '</span>' +
       '</button>'
     ).join('');
+    // Online paragraph control: compact Aa + chevron (not the word "Paragraph")
     return '<div class="bs-rt-block-wrap i18n-skip">' +
-      '<button type="button" class="bs-rt-block-btn" data-rt-block-toggle title="Paragraph format"' + (disabled ? ' disabled' : '') + '>' +
-        '<span data-rt-block-label>Paragraph</span>' + I.chevron +
+      '<button type="button" class="bs-rt-block-btn" data-rt-block-toggle title="Paragraph" aria-label="Paragraph"' + (disabled ? ' disabled' : '') + '>' +
+        '<span class="bs-rt-aa" aria-hidden="true">Aa</span>' + I.chevron +
       '</button>' +
       '<div class="bs-rt-block-menu" hidden data-rt-block-menu role="listbox">' + items + '</div>' +
     '</div>';
   }
 
   function morePanelHtml(disabled) {
-    // Online more menu: Bold / Italic / Text color / Highlight | Bullet / Number / Link
+    // Collapsed remainder: Text color / Highlight / Insert icon
     return '<div class="bs-rt-more-panel" hidden data-rt-more-panel>' +
       '<div class="bs-rt-more-row">' +
-        btn('bold', 'Bold', '<b>B</b>', disabled) +
-        btn('italic', 'Italic', '<i>I</i>', disabled) +
         btn('foreColor', 'Text color', I.textColor, disabled) +
         btn('hiliteColor', 'Highlight', I.highlighter, disabled) +
-      '</div>' +
-      '<div class="bs-rt-more-divider"></div>' +
-      '<div class="bs-rt-more-row">' +
-        btn('insertUnorderedList', 'Bulleted list', I.bullet, disabled) +
-        btn('insertOrderedList', 'Numbered list', I.number, disabled) +
-        btn('createLink', 'Insert link', I.link, disabled) +
+        btn('insertIcon', 'Insert icon', I.icon, disabled) +
       '</div>' +
     '</div>';
   }
@@ -95,8 +91,19 @@
 
   function refreshAutoHeight(root, editor) {
     if (!root || !editor || !root.classList.contains('is-autoheight')) return;
-    const tall = isMultilineHtml('', editor);
+    const text = String(editor.innerText || '').replace(/\u00a0/g, ' ');
+    const empty = !text.replace(/\n/g, '').trim();
+    const tall = !empty && isMultilineHtml('', editor);
     root.classList.toggle('is-tall', tall);
+    // Fit height to content: empty = one line; filled = no spare blank line.
+    editor.style.height = 'auto';
+    const minPx = 36;
+    if (empty) {
+      editor.style.height = minPx + 'px';
+      return;
+    }
+    editor.style.overflow = 'hidden';
+    editor.style.height = Math.max(minPx, editor.scrollHeight) + 'px';
   }
 
   function render(opts) {
@@ -128,7 +135,11 @@
     return '<div class="bs-richtext' + (connected ? ' is-bound' : '') + (autoHeight ? ' is-autoheight' : '') + (tall ? ' is-tall' : '') + '" data-rt-root data-rt-id="' + esc(id) + '" data-rt-source-label="' + esc(sourceLabel) + '"' + (autoHeight ? ' data-rt-autoheight="1"' : '') + ' ' + attrs + '>' +
       '<div class="bs-rt-toolbar">' +
         blockMenuHtml(disabled) +
-        btn('insertIcon', 'Insert icon', I.icon, disabled) +
+        btn('bold', 'Bold', '<b>B</b>', disabled) +
+        btn('italic', 'Italic', '<i>I</i>', disabled) +
+        btn('insertUnorderedList', 'Bulleted list', I.bullet, disabled) +
+        btn('insertOrderedList', 'Numbered list', I.number, disabled) +
+        btn('createLink', 'Insert link', I.link, disabled) +
         '<span class="bs-rt-more-wrap">' +
           btn('more', 'More formatting', I.more, disabled) +
           morePanelHtml(disabled) +
@@ -138,9 +149,59 @@
     '</div>';
   }
 
+  // Keep toolbar pops fully visible: .os-right overflow clips absolute panels,
+  // so park on body as fixed and nudge inside the right panel / viewport.
+  function clearRtPopPos(panel) {
+    if (!panel) return;
+    panel.removeAttribute('data-rt-pop-live');
+    if (panel._rtPopHost && panel.parentElement !== panel._rtPopHost) {
+      panel._rtPopHost.appendChild(panel);
+    }
+    panel.style.position = '';
+    panel.style.left = '';
+    panel.style.top = '';
+    panel.style.right = '';
+    panel.style.bottom = '';
+    panel.style.zIndex = '';
+  }
+  function placeRtPop(panel, anchor) {
+    if (!panel || !anchor) return;
+    if (!panel._rtPopHost) panel._rtPopHost = panel.parentElement;
+    if (panel.parentElement !== document.body) document.body.appendChild(panel);
+    panel.hidden = false;
+    panel.setAttribute('data-rt-pop-live', '1');
+    const ar = anchor.getBoundingClientRect();
+    const host = anchor.closest('.os-right') || anchor.closest('.os-fld');
+    const pr = host ? host.getBoundingClientRect() : null;
+    const pad = 8;
+    panel.style.position = 'fixed';
+    panel.style.right = 'auto';
+    panel.style.bottom = 'auto';
+    panel.style.zIndex = '260';
+    panel.style.left = '0px';
+    panel.style.top = '0px';
+    const mw = panel.offsetWidth || 120;
+    const mh = panel.offsetHeight || 44;
+    // Prefer right-align under the More button (toolbar sits at the panel edge)
+    let left = ar.right - mw;
+    let top = ar.bottom + 4;
+    const maxRight = Math.min(window.innerWidth - pad, pr ? pr.right - pad : window.innerWidth - pad);
+    const minLeft = Math.max(pad, pr ? pr.left + pad : pad);
+    if (left + mw > maxRight) left = maxRight - mw;
+    if (left < minLeft) left = minLeft;
+    if (top + mh > window.innerHeight - pad) {
+      const above = ar.top - 4 - mh;
+      if (above >= pad) top = above;
+    }
+    panel.style.left = Math.round(left) + 'px';
+    panel.style.top = Math.round(top) + 'px';
+  }
+
   function closeAllPops(except) {
     document.querySelectorAll('.bs-rt-more-panel').forEach((p) => {
-      if (p !== except) p.hidden = true;
+      if (p === except) return;
+      p.hidden = true;
+      clearRtPopPos(p);
     });
     document.querySelectorAll('.bs-rt-block-menu').forEach((p) => {
       if (p !== except) p.hidden = true;
@@ -336,11 +397,35 @@
     pop.className = 'bs-rt-source-pop i18n-skip';
     pop.setAttribute('role', 'menu');
 
+    // Grow to fit long source labels on one line; expand left inside .os-right
+    // (same clamp pattern as placeRtPop / image Change menu).
     const placePop = () => {
       const rect = field.getBoundingClientRect();
-      const popW = 280;
-      pop.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - popW - 8)) + 'px';
-      pop.style.top = (rect.bottom + 6) + 'px';
+      const clip = field.closest('.os-right') || field.closest('.os-left');
+      const cr = clip ? clip.getBoundingClientRect() : null;
+      const pad = 8;
+      const maxRight = Math.min(window.innerWidth - pad, cr ? cr.right - pad : window.innerWidth - pad);
+      const minLeft = Math.max(pad, cr ? cr.left + pad : pad);
+      const maxW = Math.max(220, maxRight - minLeft);
+      pop.style.boxSizing = 'border-box';
+      pop.style.width = 'auto';
+      pop.style.minWidth = '280px';
+      pop.style.maxWidth = maxW + 'px';
+      let pw = Math.ceil(pop.offsetWidth || 280);
+      if (pw < 280) pw = 280;
+      if (pw > maxW) pw = maxW;
+      pop.style.width = pw + 'px';
+      let left = rect.right - pw;
+      if (left < minLeft) left = minLeft;
+      if (left + pw > maxRight) left = Math.max(minLeft, maxRight - pw);
+      let top = rect.bottom + 6;
+      const ph = pop.offsetHeight || 120;
+      if (top + ph > window.innerHeight - pad) {
+        const above = rect.top - 6 - ph;
+        if (above >= pad) top = above;
+      }
+      pop.style.left = Math.round(left) + 'px';
+      pop.style.top = Math.round(top) + 'px';
     };
 
     const attachClose = () => {
@@ -357,7 +442,7 @@
       pop.innerHTML = '<div class="bs-rt-source-crumb">Template <span>›</span> Product <span>›</span> ' + esc(sourceLabel) + '</div>' +
         '<button type="button" data-rt-change-source><span>' + I.database + '</span>Change dynamic source</button>' +
         '<button type="button" data-rt-edit-source><span>' + svg('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>') + '</span>Edit value</button>' +
-        '<button type="button" data-rt-remove-source><span>' + svg('<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>') + '</span>Remove dynamic source</button>';
+        '<button type="button" class="danger" data-rt-remove-source><span>' + svg('<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>') + '</span>Remove dynamic source</button>';
       document.body.appendChild(pop);
       placePop();
       const edit = pop.querySelector('[data-rt-edit-source]');
@@ -451,25 +536,54 @@
 
     const moreBtn = el.querySelector('[data-rt-cmd="more"]');
     const morePanel = el.querySelector('[data-rt-more-panel]');
+    let onMoreOutside = null;
+    const unbindMoreOutside = () => {
+      if (!onMoreOutside) return;
+      document.removeEventListener('mousedown', onMoreOutside, true);
+      onMoreOutside = null;
+    };
+    const closeMorePanel = () => {
+      if (!morePanel) return;
+      morePanel.hidden = true;
+      clearRtPopPos(morePanel);
+      unbindMoreOutside();
+    };
+    const bindMoreOutside = () => {
+      unbindMoreOutside();
+      onMoreOutside = (e) => {
+        if (!morePanel || morePanel.hidden) { unbindMoreOutside(); return; }
+        if (morePanel.contains(e.target)) return;
+        if (moreBtn && (e.target === moreBtn || moreBtn.contains(e.target))) return;
+        // Color / icon sub-pops are body-level; keep More open while they are used
+        if (e.target.closest && e.target.closest('.bs-rt-color-pop, .bs-rt-icon-pop')) return;
+        closeMorePanel();
+      };
+      setTimeout(() => document.addEventListener('mousedown', onMoreOutside, true), 0);
+    };
     if (moreBtn && morePanel) {
       moreBtn.onclick = (event) => {
         event.preventDefault();
         event.stopPropagation();
         if (moreBtn.disabled) return;
-        const open = morePanel.hidden;
+        const willOpen = morePanel.hidden;
         closeAllPops(morePanel);
-        morePanel.hidden = !open;
+        if (willOpen) {
+          placeRtPop(morePanel, moreBtn);
+          bindMoreOutside();
+        } else {
+          closeMorePanel();
+        }
       };
     }
 
     const blockToggle = el.querySelector('[data-rt-block-toggle]');
     const blockMenu = el.querySelector('[data-rt-block-menu]');
-    const blockLabel = el.querySelector('[data-rt-block-label]');
     let currentBlock = 'P';
     const syncBlockUI = () => {
-      if (blockLabel) {
-        const hit = BLOCK_OPTS.find((o) => o.value === currentBlock) || BLOCK_OPTS[0];
-        blockLabel.textContent = hit.label;
+      const hit = BLOCK_OPTS.find((o) => o.value === currentBlock) || BLOCK_OPTS[0];
+      if (blockToggle) {
+        blockToggle.title = hit.label;
+        blockToggle.setAttribute('aria-label', hit.label);
       }
       if (blockMenu) {
         blockMenu.querySelectorAll('[data-rt-block]').forEach((item) => {
@@ -482,20 +596,43 @@
     };
     syncBlockUI();
     if (blockToggle && blockMenu) {
+      const blockWrap = blockToggle.closest('.bs-rt-block-wrap') || blockMenu.parentElement;
+      let onBlockOutside = null;
+      const unbindBlockOutside = () => {
+        if (!onBlockOutside) return;
+        document.removeEventListener('mousedown', onBlockOutside, true);
+        onBlockOutside = null;
+      };
+      const closeBlockMenu = () => {
+        blockMenu.hidden = true;
+        unbindBlockOutside();
+      };
+      const bindBlockOutside = () => {
+        unbindBlockOutside();
+        onBlockOutside = (e) => {
+          if (blockMenu.hidden) { unbindBlockOutside(); return; }
+          if (blockWrap && blockWrap.contains(e.target)) return;
+          // Click outside = abandon local block selection and collapse the list
+          closeBlockMenu();
+        };
+        setTimeout(() => document.addEventListener('mousedown', onBlockOutside, true), 0);
+      };
       blockToggle.onclick = (event) => {
         event.preventDefault();
         event.stopPropagation();
         if (blockToggle.disabled) return;
-        const open = blockMenu.hidden;
+        const willOpen = blockMenu.hidden;
         closeAllPops(blockMenu);
-        blockMenu.hidden = !open;
+        blockMenu.hidden = !willOpen;
+        if (willOpen) bindBlockOutside();
+        else unbindBlockOutside();
       };
       blockMenu.querySelectorAll('[data-rt-block]').forEach((item) => {
         item.onmousedown = (e) => e.preventDefault();
         item.onclick = () => {
           currentBlock = item.getAttribute('data-rt-block') || 'P';
           syncBlockUI();
-          blockMenu.hidden = true;
+          closeBlockMenu();
           if (bound) return;
           editor.focus();
           try { document.execCommand('formatBlock', false, '<' + currentBlock + '>'); } catch (e) {}
@@ -531,7 +668,7 @@
           if (kind === 'hiliteColor') exec('hiliteColor', color === 'transparent' ? '#ffffff' : color);
           else exec('foreColor', color);
           pop.remove();
-          if (morePanel) morePanel.hidden = true;
+          closeMorePanel();
         };
       });
       const close = (e) => {
@@ -562,7 +699,7 @@
         } else {
           exec(cmd);
         }
-        if (morePanel) morePanel.hidden = true;
+        closeMorePanel();
       };
     });
   }
@@ -577,19 +714,21 @@
     }
     st.textContent = [
       '.bs-richtext{width:100%;border:1px solid var(--ctl,#c9cccf);border-radius:8px;background:#fff;overflow:visible}',
-      '.bs-rt-toolbar{display:flex;align-items:center;gap:4px;flex-wrap:wrap;padding:5px 8px;border-bottom:1px solid #e3e3e3;background:#f7f7f7;border-radius:8px 8px 0 0}',
-      '.bs-rt-sep{width:1px;height:18px;margin:0 3px;background:#d4d4d4}',
-      '.bs-rt-btn{min-width:28px;height:28px;padding:0 6px;border:1px solid transparent;border-radius:6px;background:transparent;color:#303030;font:inherit;font-size:12px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}',
+      /* Single compact toolbar row — do not wrap B / I / lists / link / more */
+      '.bs-rt-toolbar{display:flex;align-items:center;gap:2px;flex-wrap:nowrap;padding:4px 6px;border-bottom:1px solid #e3e3e3;background:#f7f7f7;border-radius:8px 8px 0 0;min-width:0}',
+      '.bs-rt-sep{width:1px;height:18px;margin:0 2px;background:#d4d4d4;flex:none}',
+      '.bs-rt-btn{min-width:26px;height:26px;padding:0 4px;border:1px solid transparent;border-radius:6px;background:transparent;color:#303030;font:inherit;font-size:12px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:none}',
       '.bs-rt-btn:hover:not(:disabled){background:#fff;border-color:#d4d4d4}',
       '.bs-rt-btn:disabled{opacity:.45;cursor:default}',
       '.bs-rt-btn svg{width:14px;height:14px;display:block}',
-      '.bs-rt-select{height:28px;max-width:120px;border:1px solid #d4d4d4;border-radius:6px;background:#fff;color:#303030;font:inherit;font-size:12px}',
+      '.bs-rt-select{height:26px;max-width:120px;border:1px solid #d4d4d4;border-radius:6px;background:#fff;color:#303030;font:inherit;font-size:12px}',
       '.bs-rt-select:disabled{opacity:.45}',
-      '.bs-rt-block-wrap{position:relative;display:inline-flex}',
-      '.bs-rt-block-btn{height:28px;padding:0 8px;border:1px solid #d4d4d4;border-radius:6px;background:#fff;color:#303030;font:inherit;font-size:12px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}',
-      '.bs-rt-block-btn:hover:not(:disabled){background:#fafafa}',
+      '.bs-rt-block-wrap{position:relative;display:inline-flex;flex:none}',
+      '.bs-rt-block-btn{height:26px;min-width:26px;padding:0 4px;border:1px solid transparent;border-radius:6px;background:transparent;color:#303030;font:inherit;font-size:12px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;gap:1px;white-space:nowrap}',
+      '.bs-rt-block-btn:hover:not(:disabled){background:#fff;border-color:#d4d4d4}',
       '.bs-rt-block-btn:disabled{opacity:.45;cursor:default}',
-      '.bs-rt-block-btn svg{width:12px;height:12px;opacity:.7}',
+      '.bs-rt-aa{font-size:13px;font-weight:700;letter-spacing:-0.04em;line-height:1;font-family:Georgia,"Times New Roman",serif}',
+      '.bs-rt-block-btn svg{width:10px;height:10px;opacity:.7;flex:none}',
       '.bs-rt-block-menu{position:absolute;left:0;top:calc(100% + 4px);z-index:45;min-width:168px;padding:6px;border:1px solid #d9d9d9;border-radius:10px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.14)}',
       '.bs-rt-block-menu[hidden]{display:none!important}',
       '.bs-rt-block-item{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:7px 10px;border:0;border-radius:8px;background:#fff;color:#303030;text-align:left;font:inherit;cursor:pointer}',
@@ -607,8 +746,10 @@
       '.bs-rt-block-item.is-h5{font-size:13px;font-weight:700;line-height:1.4}',
       '.bs-rt-block-item.is-h6{font-size:12px;font-weight:700;line-height:1.4}',
       '.bs-rt-more-wrap{position:relative;display:inline-flex}',
-      '.bs-rt-more-panel{position:absolute;left:0;top:calc(100% + 4px);z-index:40;display:flex;flex-direction:column;gap:4px;min-width:auto;padding:6px;border:1px solid #d9d9d9;border-radius:10px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.14)}',
+      /* Default absolute; opened state is re-parked fixed via placeRtPop so .os-right cannot clip it */
+      '.bs-rt-more-panel{position:absolute;right:0;left:auto;top:calc(100% + 4px);z-index:40;display:flex;flex-direction:column;gap:4px;min-width:auto;padding:6px;border:1px solid #d9d9d9;border-radius:10px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.14)}',
       '.bs-rt-more-panel[hidden]{display:none!important}',
+      '.bs-rt-more-panel[data-rt-pop-live="1"]{position:fixed}',
       '.bs-rt-more-row{display:flex;align-items:center;gap:2px}',
       '.bs-rt-more-divider{height:1px;margin:2px 4px;background:#e3e3e3}',
       '.bs-rt-icolor,.bs-rt-ihl{display:inline-flex;align-items:center;gap:1px;line-height:1}',
@@ -621,8 +762,8 @@
       '.bs-rt-color-grid button{width:28px;height:28px;padding:0;border:1px solid #d4d4d4;border-radius:6px;cursor:pointer}',
       '.bs-rt-color-grid button:hover{outline:2px solid #005bd3;outline-offset:1px}',
       '.bs-rt-editor{min-height:112px;padding:10px 12px;color:var(--ink,#1a1a1a);font-size:13px;line-height:1.55;outline:none;overflow:auto;background:#fff;border-radius:0 0 8px 8px}',
-      '.bs-richtext.is-autoheight .bs-rt-editor{min-height:36px;padding-top:8px;padding-bottom:8px}',
-      '.bs-richtext.is-autoheight.is-tall .bs-rt-editor{min-height:112px;padding-top:10px;padding-bottom:10px}',
+      '.bs-richtext.is-autoheight .bs-rt-editor{min-height:36px;height:36px;overflow:hidden;padding-top:8px;padding-bottom:8px;box-sizing:border-box}',
+      '.bs-richtext.is-autoheight.is-tall .bs-rt-editor{padding-top:10px;padding-bottom:10px}',
       '.bs-rt-editor:empty:before{content:attr(data-placeholder);color:#9aa3b0}',
       '.bs-rt-editor.is-bound{min-height:52px;display:flex;align-items:flex-start}',
       '.bs-rt-editor img,.bs-rt-editor video{display:block;max-width:100%;height:auto;margin:8px 0;border-radius:6px}',
@@ -641,7 +782,8 @@
       '.bs-rt-source-icon{display:inline-flex;color:#005bd3}',
       '.bs-rt-source-icon svg{width:14px;height:14px;display:block}',
       '.bs-rt-source-pop,.bs-rt-icon-pop{position:fixed;z-index:500;min-width:220px;padding:8px 0;border:1px solid #d9d9d9;border-radius:10px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.16);color:#303030}',
-      '.bs-rt-source-pop.is-list{width:280px;max-width:min(320px,calc(100vw - 16px));padding-bottom:4px}',
+      /* min 280; grow with longest label; placePop clamps inside .os-right and expands left */
+      '.bs-rt-source-pop.is-list{min-width:280px;width:max-content;max-width:min(380px,calc(100vw - 16px));padding-bottom:4px}',
       '.bs-rt-source-crumb{padding:3px 12px 8px;color:#6b7280;font-size:12px;white-space:nowrap}',
       '.bs-rt-source-crumb span{padding:0 4px;color:#a0a6ad}',
       '.bs-rt-source-search{position:relative;margin:0 10px 8px}',
@@ -649,9 +791,13 @@
       '.bs-rt-source-search-ico svg{width:14px;height:14px;display:block}',
       '.bs-rt-source-search input{width:100%;box-sizing:border-box;height:32px;padding:0 10px 0 32px;border:1px solid #c9cccf;border-radius:8px;background:#fff;color:#303030;font:inherit;font-size:13px;outline:none}',
       '.bs-rt-source-search input:focus{border-color:#005bd3;box-shadow:0 0 0 1px #005bd3}',
-      '.bs-rt-source-pop button{display:flex;align-items:center;gap:9px;width:100%;padding:9px 12px;border:0;background:#fff;color:#303030;text-align:left;font:inherit;font-size:13px;cursor:pointer}',
+      '.bs-rt-source-pop button{display:flex;align-items:center;gap:9px;width:100%;padding:9px 12px;border:0;background:#fff;color:#303030;text-align:left;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}',
       '.bs-rt-source-pop button:hover,.bs-rt-source-pop button.on{background:#f5f6f7}',
-      '.bs-rt-source-pop button span{display:inline-flex;width:15px;color:#555}',
+      /* Remove dynamic source: same warning red bar as image Remove (#FEE1E6 / #8E0B21) */
+      '.bs-rt-source-pop button.danger{color:#8E0B21}',
+      '.bs-rt-source-pop button.danger:hover,.bs-rt-source-pop button.danger.on{background:#FEE1E6;color:#8E0B21}',
+      '.bs-rt-source-pop button.danger span{color:inherit}',
+      '.bs-rt-source-pop button span{display:inline-flex;flex:none;width:15px;color:#555}',
       '.bs-rt-source-pop button svg{width:15px;height:15px}',
       '.bs-rt-source-list{max-height:280px;overflow:auto;padding:0 0 4px}',
       '.bs-rt-source-empty{padding:10px 12px;color:#6b7280;font-size:12px}',

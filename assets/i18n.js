@@ -9,10 +9,9 @@
        loaded module views, dropdowns, modals, toasts and date-pickers are covered
        with ZERO changes to the modules themselves.
 
-   Language is persisted in localStorage and defaults to ZH (this is "the Chinese
-   version"). Toggling reloads the page (hash route is preserved), which keeps the
-   English path byte-for-byte unchanged — backward compatible: when lang==='en'
-   this file installs the toggle and does nothing else.
+   Language is persisted in localStorage and defaults to EN (system copy is English).
+   Toggling reloads the page (hash route is preserved). When lang==='en' this file
+   installs the toggle and does not translate. ZH remains an optional overlay.
 
    Extending: module dictionaries call  window.I18N.extend({ "English": "中文" })
    and  window.I18N.addRules([{ re:/.../,$ zh:function(m){...} }]).  See assets/i18n-dict.js. */
@@ -20,7 +19,14 @@
   'use strict';
 
   var LANG_KEY = 'bsio_lang';
-  function getLang() { try { return localStorage.getItem(LANG_KEY) || 'zh'; } catch (e) { return 'zh'; } }
+  // Prototype system language defaults to English. Only switch to ZH via the header toggle.
+  function getLang() {
+    try {
+      var stored = localStorage.getItem(LANG_KEY);
+      if (stored === 'zh' || stored === 'en') return stored;
+      return 'en';
+    } catch (e) { return 'en'; }
+  }
   function setLang(l) { try { localStorage.setItem(LANG_KEY, l); } catch (e) {} }
   var lang = getLang();
 

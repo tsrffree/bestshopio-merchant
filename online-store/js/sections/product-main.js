@@ -398,10 +398,10 @@
     '.pdpx .pdp-stock i{position:relative;width:10px;height:10px;margin:0 4px;border-radius:50%;background:var(--status-color);display:block;flex:none}',
     '.pdpx .pdp-stock i::before,.pdpx .pdp-stock i::after{position:absolute;left:0;top:0;width:100%;height:100%;content:"";background:var(--status-color);border-radius:50%;animation:pdp-inventory-pulse 2s linear infinite}',
     '.pdpx .pdp-stock i::after{animation-delay:1s}',
-    '.pdpx .pdp-stock.sold{--status-color:#9ca3af}',
+    // Color comes from In stock / Low stock settings (green #10a443 / yellow #f59e0b OOB), not theme.
     '.pdpx .pdp-stock.sold i::before,.pdpx .pdp-stock.sold i::after{animation:none}',
-    '.pdpx .pdp-stock.low{--status-color:#f59e0b}',
     '.pdpx .pdp-stock.low i::before,.pdpx .pdp-stock.low i::after{animation:none}',
+    '.pdpx .pdp-stock.preorder.low i::before,.pdpx .pdp-stock.preorder.low i::after{animation:none}',
     '.pdpx .pdp-stock.style-badge{display:inline-flex;padding:4px 10px;border-radius:999px;background:color-mix(in srgb, var(--status-color) 14%, #fff);}',
     '.pdpx .pdp-stock.style-text i{display:none}',
     '@keyframes pdp-inventory-pulse{0%{opacity:.6}100%{transform:scale(2.5);opacity:0}}',
@@ -696,8 +696,8 @@
     { value: 'google_pay', label: 'Google Pay' }, { value: 'venmo', label: 'Venmo' }, { value: 'bancontact', label: 'Bancontact' }, { value: 'giropay', label: 'Giropay' },
   ];
   function normalizeBuyChannels(list) {
-    // Dynamic checkout channels. Shop removed; buy_now lives here under show_dynamic.
-    const allowed = ['buy_now', 'paypal', 'apple_pay', 'google_pay'];
+    // Dynamic checkout channels. Shop / Apple Pay / Google Pay removed from Channels (wallets stay in Trust logos).
+    const allowed = ['buy_now', 'paypal'];
     const src = Array.isArray(list) ? list : [];
     const out = [];
     src.forEach((id) => {
@@ -948,12 +948,12 @@
       { key: 'custom_tag_style', control: 'segmented', label: 'Tag style', default: 'filled', options: [
         { value: 'filled', label: 'Filled' }, { value: 'outline', label: 'Outline' },
       ] },
-      { key: 'hot_badge_bg', control: 'color', label: 'Hot tag background', default: '', allowTransparent: true, blankValue: () => OS.themeColor('primary_color', '#000000'), info: 'Blank inherits the theme primary color. Applies to tag__hot_*. T = transparent.' },
+      { key: 'hot_badge_bg', control: 'color', label: 'Hot tag background', default: '', allowTransparent: true, blankValue: () => OS.themeColor('primary_color', '#000000') },
       { key: 'hot_badge_text_color', control: 'color', label: 'Hot tag text', default: '#ffffff', allowTransparent: true, blankValue: () => '#ffffff', visibleWhen: (v) => v.custom_tag_style !== 'outline' },
-      { key: 'new_badge_bg', control: 'color', label: 'New tag background', default: '#FFC439', allowTransparent: true, blankValue: () => '#FFC439', info: 'Applies to tag__new_*. T = transparent.' },
+      { key: 'new_badge_bg', control: 'color', label: 'New tag background', default: '#FFC439', allowTransparent: true, blankValue: () => '#FFC439' },
       { key: 'new_badge_text_color', control: 'color', label: 'New tag text', default: '#ffffff', allowTransparent: true, blankValue: () => '#ffffff', visibleWhen: (v) => v.custom_tag_style !== 'outline' },
       { key: 'badge_icon', control: 'select', label: 'Badge icon', default: 'none', options: ((window.OS_THEME_ICONS && window.OS_THEME_ICONS.options) ? window.OS_THEME_ICONS.options(true) : [{ value: 'none', label: 'None' }, { value: 'fire', label: 'Fire' }, { value: 'heart', label: 'Heart' }, { value: 'truck', label: 'Truck' }, { value: 'star', label: 'Star' }]) },
-      { key: 'badge_icon_image', control: 'image', label: 'Custom badge icon', default: '', info: 'Custom image replaces the built-in icon when set.' },
+      { key: 'badge_icon_image', control: 'image', label: 'Custom badge icon', default: '' },
       { sub: 'Product badges' },
       { key: 'show_sold_out', control: 'toggle', label: 'Show sold out badge', default: false },
       ...savingFields({ show_saving: false, saving_position: 'right' }),
@@ -966,7 +966,7 @@
       { key: 'title_size', control: 'range', label: 'Title font size', min: 10, max: 50, step: 1, unit: 'px', default: 30 },
       // Title description is freeform or metafield-backed — never product.description.
       { key: 'description', control: 'richtext', label: 'Description', default: '', maxlength: 1000, placeholder: 'Add description...', autoHeight: true, dynamicSource: { mode: 'metafields', includeProductFields: true } },
-      { key: 'description_color', control: 'color', label: 'Description color', default: '#000000', allowTransparent: true, blankValue: () => OS.themeColor('text_color', '#000000'), info: 'Blank inherits the theme text color. T = transparent.' },
+      { key: 'description_color', control: 'color', label: 'Description color', default: '#000000', allowTransparent: true, blankValue: () => OS.themeColor('text_color', '#000000') },
       { key: 'description_size', control: 'range', label: 'Description font size', min: 10, max: 50, step: 1, unit: 'px', default: 14 },
       { key: 'description_top', control: 'range', label: 'Description top padding', min: 0, max: 100, step: 1, unit: 'px', default: 0 },
       { key: 'description_bottom', control: 'range', label: 'Description bottom padding', min: 0, max: 100, step: 1, unit: 'px', default: 0 },
@@ -983,7 +983,7 @@
       fields: [
       { key: 'layout', control: 'segmented', label: 'Layout', default: 'default', options: [
         { value: 'default', label: 'Default' },
-        { value: 'single-icon', label: 'Single icon' },
+        { value: 'single-icon', label: 'Single' },
       ] },
       { key: 'star_style', control: 'select', label: 'Star style', default: 'boxed', options: [
         { value: 'regular', label: 'Regular' },
@@ -1004,8 +1004,8 @@
       { key: 'underline_text', control: 'toggle', label: 'Underline text', default: false, visibleWhen: (v) => v.style === 'stars-rating-custom' || v.style === 'stars-custom' },
       { key: 'review_label', control: 'text', label: 'Review label', default: 'reviews', reinjectWhenVisible: true, visibleWhen: (v) => v.style === 'stars-and-count' || v.style === 'stars-and-reviews' },
       { key: 'size', control: 'range', label: 'Size', min: 8, max: 48, step: 1, unit: 'px', default: 14 },
-      { key: 'color', control: 'color', label: 'Star color', default: '#0f3636', allowTransparent: true, blankValue: () => '#0f3636', info: 'Defaults to brand teal. T = transparent.' },
-      { key: 'text_color', control: 'color', label: 'Text color', default: '', allowTransparent: true, blankValue: () => OS.themeColor('text_color', '#000000'), info: 'Blank inherits the theme text color. T = transparent.' },
+      { key: 'color', control: 'color', label: 'Star color', default: '#0f3636', allowTransparent: true, blankValue: () => '#0f3636' },
+      { key: 'text_color', control: 'color', label: 'Text color', default: '', allowTransparent: true, blankValue: () => OS.themeColor('text_color', '#000000') },
     ] },
     description: { name: 'Description', icon: 'text', unique: true, preview: '<div class="os-blkprev-copy">Soft knit bottle cover with festive trim. Perfect for holiday gifting.</div>', fields: [
       { key: 'text', control: 'richtext', label: 'Text', default: '', placeholder: 'Add product description...', dynamicSource: { label: 'Description', path: 'resource.description', defaultConnected: true } },
@@ -1050,42 +1050,52 @@
       { key: 'picker_type', control: 'segmented', label: 'Selector style', default: 'buttons', options: [
         { value: 'dropdown', label: 'Dropdown' }, { value: 'buttons', label: 'Buttons' },
       ] },
+      // Swatches: independent color-board control (default on). Cascades style + shape for both Buttons and Dropdown.
+      { key: 'swatches', control: 'toggle', label: 'Swatches', default: true },
       { key: 'swatch_style', control: 'select', label: 'Style', default: 'color', options: [
         { value: 'color', label: 'Color swatches' },
         { value: 'image', label: 'Variant image' },
         { value: 'text', label: 'Text' },
-      ], visibleWhen: (v) => v.picker_type === 'buttons' },
+      ], visibleWhen: (v) => v.swatches !== false },
       { key: 'shape', control: 'segmented', label: 'Shape', default: 'normal', options: [
         { value: 'normal', label: 'Normal' }, { value: 'circle', label: 'Circle' }, { value: 'square', label: 'Square' },
-      ], visibleWhen: (v) => v.picker_type === 'buttons' && !v.nested_dropdown },
-      { key: 'nested_dropdown', control: 'toggle', label: 'Nested dropdown', default: false, info: 'Show one dropdown with combined option values.' },
+      ], visibleWhen: (v) => v.swatches !== false },
       { key: 'show_group_title', control: 'toggle', label: 'Show group title', default: true, info: 'Shows Color / Size labels with the selected option name, and updates the name when the shopper switches variants.' },
-      { key: 'sku_display_name', control: 'text', label: 'SKU display name', default: '', placeholder: 'Empty = original SKU', visibleWhen: (v) => !!v.show_sku_in_option },
-      { key: 'show_sku_in_option', control: 'toggle', label: 'Show SKU in option', default: false },
+      // nested_dropdown / show_sku_in_option / sku_display_name: 已下线, 旧数据仍静默读取渲染
     ] },
     buy: { name: 'Buy buttons', icon: 'cart', unique: true, preview: '<div class="os-blkprev-btns"><div class="b b1">Add to cart</div><div class="b b2">Buy with PayPal</div></div>', fields: [
       { sub: 'Add to cart' },
       { key: 'show_quantity', control: 'toggle', label: 'Show quantity selector', default: true },
-      { key: 'show_add', control: 'toggle', label: 'Show Add-to-cart button', default: true },
-      { key: 'atc_layout', control: 'segmented', label: 'Add to cart style', default: 'with-quantity', options: [
-        { value: 'with-quantity', label: 'With quantity' }, { value: 'full-width', label: 'Full width' },
+      { key: 'show_add', control: 'toggle', label: 'Show button', default: true },
+      { key: 'atc_layout', control: 'segmented', label: 'Style', default: 'with-quantity', options: [
+        { value: 'with-quantity', label: 'Normal' }, { value: 'full-width', label: 'Full width' },
       ], visibleWhen: (v) => !!v.show_add },
-      { key: 'atc_icon', control: 'select', label: 'Add to cart icon', default: 'bag-plus', options: ((window.OS_THEME_ICONS && window.OS_THEME_ICONS.options) ? window.OS_THEME_ICONS.options(true) : [{ value: 'none', label: 'None' }, { value: 'bag-plus', label: 'Bag plus' }, { value: 'gift', label: 'Gift' }, { value: 'heart', label: 'Heart' }, { value: 'star', label: 'Star' }]), visibleWhen: (v) => !!v.show_add, info: 'Default is shopping bag with plus. Pick None to hide, or any icon from the theme library.' },
-      { key: 'atc_background', control: 'color', label: 'Add to cart background', default: '#FFC439', allowTransparent: true, blankValue: () => '#FFC439', info: 'Defaults to PayPal yellow. T = transparent.', visibleWhen: (v) => !!v.show_add },
-      { key: 'atc_text_color', control: 'color', label: 'Add to cart text', default: '#FFFFFF', allowTransparent: true, blankValue: () => '#FFFFFF', info: 'Defaults to white. T = transparent.', visibleWhen: (v) => !!v.show_add },
+      { key: 'atc_icon', control: 'select', label: 'Icon', default: 'bag-plus', options: ((window.OS_THEME_ICONS && window.OS_THEME_ICONS.options) ? window.OS_THEME_ICONS.options(true) : [{ value: 'none', label: 'None' }, { value: 'bag-plus', label: 'Bag plus' }, { value: 'gift', label: 'Gift' }, { value: 'heart', label: 'Heart' }, { value: 'star', label: 'Star' }]), visibleWhen: (v) => !!v.show_add },
+      { key: 'atc_background', control: 'color', label: 'Background', default: '#FFC439', allowTransparent: true, blankValue: () => '#FFC439', visibleWhen: (v) => !!v.show_add, refreshPanel: true },
+      { key: 'atc_border', control: 'color', label: 'Button border', default: '', allowTransparent: true, blankValue: (v) => {
+        const bg = v && v.atc_background;
+        if (bg && bg !== 'transparent') return bg;
+        return '#FFC439';
+      }, visibleWhen: (v) => !!v.show_add },
+      { key: 'atc_text_color', control: 'color', label: 'Text', default: '#FFFFFF', allowTransparent: true, blankValue: () => '#FFFFFF', visibleWhen: (v) => !!v.show_add },
       { key: 'atc_shape', control: 'segmented', label: 'Button shape', default: 'pill', options: [
         { value: 'normal', label: 'Normal' }, { value: 'pill', label: 'Pill' }, { value: 'square', label: 'Square' }, { value: 'custom', label: 'Custom' },
       ] },
       { key: 'atc_custom_radius', control: 'range', label: 'Custom radius', min: 0, max: 40, step: 1, unit: 'px', default: 8, visibleWhen: (v) => (v.atc_shape || v.button_shape) === 'custom' },
       { sub: 'Dynamic checkout' },
       { key: 'show_dynamic', control: 'toggle', label: 'Show dynamic checkout buttons', default: true },
-      // Buy now + wallets under show_dynamic. Only selected channels render. Card brands → Trust logos.
+      // Buy now + PayPal under show_dynamic. Apple Pay / Google Pay removed from Channels (remain in Trust logos).
       { key: 'channels', control: 'multiselect', label: 'Channels', default: ['buy_now', 'paypal'], options: [
-        { value: 'buy_now', label: 'Buy now' }, { value: 'paypal', label: 'PayPal' }, { value: 'apple_pay', label: 'Apple Pay' }, { value: 'google_pay', label: 'Google Pay' },
-      ], visibleWhen: (v) => !!v.show_dynamic },
+        { value: 'buy_now', label: 'Buy now' }, { value: 'paypal', label: 'PayPal' },
+      ], visibleWhen: (v) => !!v.show_dynamic, afterChange: (v, target, prev) => {
+        // Adding any channel turns on Show channel logo (PayPal brand mark, etc.).
+        const next = Array.isArray(v) ? v : [];
+        const before = Array.isArray(prev) ? prev : [];
+        if (next.some((id) => before.indexOf(id) < 0)) target.channel_logo = true;
+      } },
       { key: 'buy_now_text', control: 'text', label: 'Buy now label', default: 'Buy now', visibleWhen: (v) => !!v.show_dynamic && Array.isArray(v.channels) && v.channels.indexOf('buy_now') >= 0 },
-      { key: 'buy_now_background', control: 'color', label: 'Buy now background', default: '#000000', allowTransparent: true, blankValue: () => '#000000', info: 'Defaults to black. T = transparent.', visibleWhen: (v) => !!v.show_dynamic && Array.isArray(v.channels) && v.channels.indexOf('buy_now') >= 0 },
-      { key: 'buy_now_text_color', control: 'color', label: 'Buy now text', default: '#FFFFFF', allowTransparent: true, blankValue: () => '#FFFFFF', info: 'Defaults to white. T = transparent.', visibleWhen: (v) => !!v.show_dynamic && Array.isArray(v.channels) && v.channels.indexOf('buy_now') >= 0 },
+      { key: 'buy_now_background', control: 'color', label: 'Buy now background', default: '#000000', allowTransparent: true, blankValue: () => '#000000', visibleWhen: (v) => !!v.show_dynamic && Array.isArray(v.channels) && v.channels.indexOf('buy_now') >= 0 },
+      { key: 'buy_now_text_color', control: 'color', label: 'Buy now text', default: '#FFFFFF', allowTransparent: true, blankValue: () => '#FFFFFF', visibleWhen: (v) => !!v.show_dynamic && Array.isArray(v.channels) && v.channels.indexOf('buy_now') >= 0 },
       { key: 'dyn_shape', control: 'segmented', label: 'Button shape', default: 'pill', options: [
         { value: 'normal', label: 'Normal' }, { value: 'pill', label: 'Pill' }, { value: 'square', label: 'Square' }, { value: 'custom', label: 'Custom' },
       ], visibleWhen: (v) => !!v.show_dynamic },
@@ -1118,15 +1128,15 @@
       { key: 'font', control: 'select', label: 'Title font family', default: 'body', options: [
         { value: 'body', label: 'Body font' }, { value: 'heading', label: 'Heading font' },
       ] },
-      { key: 'size', control: 'range', label: 'Title size', min: 10, max: 48, step: 1, unit: 'px', default: 16, info: 'Defaults to the theme body base size (Typography → Base size).' },
+      { key: 'size', control: 'range', label: 'Title size', min: 10, max: 48, step: 1, unit: 'px', default: 16 },
       { key: 'icon_size', control: 'range', label: 'Icon size', min: 16, max: 96, step: 1, unit: 'px', default: 20 },
       { key: 'item_gap', control: 'range', label: 'Item gap', min: 4, max: 48, step: 1, unit: 'px', default: 24 },
       { key: 'icon_text_gap', control: 'range', label: 'Icon / text gap', min: 0, max: 32, step: 1, unit: 'px', default: 8 },
       { key: 'background', control: 'toggle', label: 'Show background', default: false },
       { key: 'background_color', control: 'color', label: 'Background color', default: '#f6f6f6', allowTransparent: true, blankValue: () => '#f6f6f6', visibleWhen: (v) => !!v.background },
       { key: 'corner_radius', control: 'range', label: 'Corner radius', min: 0, max: 40, step: 1, unit: 'px', default: 10, visibleWhen: (v) => !!v.background },
-      { key: 'text_color', control: 'color', label: 'Text color', default: '', allowTransparent: true, blankValue: () => OS.themeColor('text_color', '#000000'), info: 'Blank inherits the theme text color. T = transparent.' },
-      { key: 'icon_color', control: 'color', label: 'Icon color', default: '', allowTransparent: true, blankValue: () => OS.themeColor('primary_color', '#000000'), info: 'Blank inherits the theme primary color. T = transparent.' },
+      { key: 'text_color', control: 'color', label: 'Text color', default: '', allowTransparent: true, blankValue: () => OS.themeColor('text_color', '#000000') },
+      { key: 'icon_color', control: 'color', label: 'Icon color', default: '', allowTransparent: true, blankValue: () => OS.themeColor('primary_color', '#000000') },
       { key: 'card_style', control: 'segmented', label: 'Card style', default: 'none', options: [
         { value: 'none', label: 'None' }, { value: 'outline', label: 'Outline' }, { value: 'filled', label: 'Filled' },
       ] },
@@ -1163,7 +1173,7 @@
     collapsible: { name: 'Collapsible row', preview: '<div class="os-blkprev-row"><span>Overview</span><span>+</span></div>', fields: [
       { key: 'heading', control: 'text', label: 'Heading', default: 'Overview' },
       { key: 'icon', control: 'select', label: 'Icon', default: 'none', options: ((window.OS_THEME_ICONS && window.OS_THEME_ICONS.options) ? window.OS_THEME_ICONS.options(true) : [{ value: 'none', label: 'None' }, { value: 'fire', label: 'Fire' }, { value: 'heart', label: 'Heart' }, { value: 'truck', label: 'Truck' }, { value: 'star', label: 'Star' }]) },
-      { key: 'content', control: 'richtext', label: 'Row content', default: 'Add product details such as fit, materials, care, or shipping notes.', autoHeight: true, dynamicSource: { mode: 'metafields', includeProductFields: true } },
+      { key: 'content', control: 'richtext', label: 'Content', default: 'Add product details such as fit, materials, care, or shipping notes.', autoHeight: true, dynamicSource: { mode: 'metafields', includeProductFields: true } },
       { key: 'custom_liquid', control: 'textarea', label: 'Custom liquid', default: '' },
       { key: 'open', control: 'toggle', label: 'Open by default', default: false },
       { key: 'accordion_mode', control: 'toggle', label: 'Accordion mode', default: false, info: 'When on, only one row stays open at a time.' },
@@ -1215,7 +1225,7 @@
       { key: 'show_copy', control: 'toggle', label: 'Show copy link', default: true, visibleWhen: (v) => v.show_share !== false },
     ] },
     // Products default to [] — empty uses collection source or automatic fallback.
-    recommendations: { name: 'Inline recommendations', unique: true, fields: [
+    recommendations: { name: 'Related products', unique: true, fields: [
       { key: 'subheading', control: 'text', label: 'Subheading', default: '', dynamicSource: { label: 'Subheading' } },
       { key: 'heading', control: 'text', label: 'Heading', default: 'You Might Also Like', dynamicSource: { label: 'Heading' } },
       { key: 'content', control: 'richtext', label: 'Content', default: '', dynamicSource: { label: 'Content' } },
@@ -1307,7 +1317,7 @@
       { key: 'auto_count', control: 'range', label: 'Reviews to show', min: 1, max: 8, step: 1, default: 3, visibleWhen: (v) => v.data_source === 'auto' },
       { key: 'reviews', control: 'review_items', label: 'Reviews', default: [], max: 10, visibleWhen: (v) => v.data_source !== 'auto', info: 'Each row can select an existing review or use manual edit. Default is one manual entry.' },
     ] },
-    sticky: { name: 'Sticky cart', unique: true, preview: '<div class="os-blkprev-btns"><div class="b b1">Add to cart</div></div>', fields: [
+    sticky: { name: 'Sticky cart', unique: true, preview: '<div class="os-blkprev-btns"><div class="b b1">ADD TO CART</div></div>', fields: [
       { key: 'show_image', control: 'toggle', label: 'Show image', default: true },
       { key: 'show_title', control: 'toggle', label: 'Show title', default: true },
       { key: 'show_price', control: 'toggle', label: 'Show price', default: true },
@@ -1317,10 +1327,10 @@
       ] },
       { key: 'mobile_visible', control: 'toggle', label: 'Show on mobile', default: true },
       { key: 'width_mode', control: 'segmented', label: 'Bar width', default: 'container', options: [
-        { value: 'container', label: 'Follow container' }, { value: 'full', label: 'Full width' },
+        { value: 'container', label: 'Normal' }, { value: 'full', label: 'Full width' },
       ], info: 'Follow container keeps the sticky bar aligned with the preview container. Full width spans the page viewport.' },
-      { key: 'desktop_button_width', control: 'range', label: 'Button width · desktop', min: 240, max: 560, step: 10, unit: 'px', default: 320, info: 'Mobile uses the automatic width formula.' },
-      { key: 'button_text', control: 'text', label: 'Button text', default: 'Add to cart' },
+      { key: 'desktop_button_width', control: 'range', label: 'Button width · desktop', min: 150, max: 560, step: 10, unit: 'px', default: 320, info: 'Mobile uses the automatic width formula.' },
+      { key: 'button_text', control: 'text', label: 'Button text', default: 'ADD TO CART' },
     ] },
     divider: { name: 'Separator', preview: '<div class="os-blkprev-line"></div>', fields: [
       { key: 'color', control: 'color', label: 'Color', default: '#E5E5E5', allowTransparent: true, blankValue: () => OS.themeColor('border_color', '#E5E5E5'), info: 'Blank inherits Theme › Colors › Border. T = transparent.' },
@@ -1331,15 +1341,17 @@
     // Vertical video rail inside the buy column — click opens the shared lightbox player.
     video_column: { name: 'Video column', icon: 'play', preview: (() => {
       const IMG = (OS.sample && OS.sample.IMG) || {};
-      const a = IMG.ug1 || IMG.p3 || '';
-      const b = IMG.ug2 || IMG.p4 || '';
-      const c = IMG.ug3 || IMG.p5 || '';
+      const a = IMG.swimVc1 || IMG.ug1 || IMG.p3 || '';
+      const b = IMG.swimVc2 || IMG.ug2 || IMG.p4 || '';
+      const c = IMG.swimVc3 || IMG.ug3 || IMG.p5 || '';
       const cell = (src) => '<span class="os-blkprev-vc-cell"' + (src ? ' style="background-image:url(' + OS.esc(src) + ')"' : '') + '></span>';
       return '<div class="os-blkprev-vc">' + cell(a) + cell(b) + cell(c) + '</div>';
     })(),
       defaults: () => {
         const IMG = (OS.sample && OS.sample.IMG) || {};
-        const covers = [IMG.ug1, IMG.ug2, IMG.ug3, IMG.ug4, IMG.ug5, IMG.ug6].filter(Boolean);
+        // Prefer Chantilly swim covers; fall back to Wildpeak ug* when swim assets are absent.
+        const swim = [IMG.swimVc1, IMG.swimVc2, IMG.swimVc3, IMG.swimVc4, IMG.swimVc5, IMG.swimVc6].filter(Boolean);
+        const covers = swim.length ? swim : [IMG.ug1, IMG.ug2, IMG.ug3, IMG.ug4, IMG.ug5, IMG.ug6].filter(Boolean);
         return {
           heading: '',
           heading_color: '',
@@ -1347,19 +1359,24 @@
           mobile_count: 2,
           gap: 10,
           corner_radius: 12,
-          video_border: 'transparent',
+          video_border: '#f5f5f5',
           show_play_button: true,
-          videos: covers.map((cover, i) => ({ id: 'vi-seed-' + i, cover_image: cover, video_url: '', accessible_label: '' })),
+          videos: covers.map((cover, i) => ({
+            id: 'vi-seed-' + i,
+            cover_image: cover,
+            video_url: (i === 0 && IMG.swimVc1 && cover === IMG.swimVc1) ? (IMG.swimVideo || '') : '',
+            accessible_label: '',
+          })),
         };
       },
       fields: [
       { key: 'heading', control: 'text', label: 'Heading', default: '' },
-      { key: 'heading_color', control: 'color', label: 'Heading color', default: '', allowTransparent: true, blankValue: () => OS.themeColor('heading_color', '#1a1a1a'), info: 'Blank inherits the theme heading color. T = transparent.' },
+      { key: 'heading_color', control: 'color', label: 'Heading color', default: '', allowTransparent: true, blankValue: () => OS.themeColor('heading_color', '#1a1a1a') },
       { key: 'per_row', control: 'range', label: 'Videos per row · Desktop', min: 2, max: 6, step: 1, default: 4 },
       { key: 'mobile_count', control: 'range', label: 'Videos per row · Mobile', min: 1, max: 2, step: 1, default: 2 },
       { key: 'gap', control: 'range', label: 'Gap', min: 4, max: 24, step: 1, unit: 'px', default: 10 },
       { key: 'corner_radius', control: 'range', label: 'Corner radius', min: 0, max: 24, step: 1, unit: 'px', default: 12 },
-      { key: 'video_border', control: 'color', label: 'Video border', default: 'transparent', allowTransparent: true, blankValue: () => '#222222', info: 'T = no border. Turn T off to restore a dark border.' },
+      { key: 'video_border', control: 'color', label: 'Video border', default: '#f5f5f5', allowTransparent: true, blankValue: () => '#f5f5f5' },
       { key: 'show_play_button', control: 'toggle', label: 'Show play button', default: true },
       { key: 'videos', control: 'video_items', label: 'Videos', default: [], max: 12, info: 'Click a cover in the preview to open the enlarged player.' },
     ] },
@@ -1388,7 +1405,7 @@
   function savingFields(defaults) {
     const d = defaults || {};
     return [
-      { key: 'show_saving', control: 'toggle', label: 'Show saving amount', default: d.show_saving == null ? true : d.show_saving, info: 'Only shows when the product has a compare-at price higher than the selling price.' },
+      { key: 'show_saving', control: 'toggle', label: 'Show saving amount', default: d.show_saving == null ? false : d.show_saving, info: 'Only shows when the product has a compare-at price higher than the selling price.' },
       { key: 'saving_type', control: 'select', label: 'Type', default: d.saving_type || 'percentage', options: [
         { value: 'percentage', label: 'Percentage' }, { value: 'fixed', label: 'Fixed amount' },
         { value: 'text', label: 'Sale' }, { value: 'label', label: 'Saving text' },
@@ -1621,6 +1638,8 @@
       colors.forEach((color, i) => { colorMap[color] = (p.swatches || [])[i] || ['#222222', '#c8b6a6', '#94a3b8'][i % 3]; });
       const shape = b.shape === 'circle' ? ' shape-circle' : (b.shape === 'square' ? ' shape-square' : '');
       const isDropdown = b.picker_type === 'dropdown' || !!b.nested_dropdown;
+      // Swatches default on when missing (开箱 / 旧数据未写该字段).
+      const useSwatches = b.swatches !== false;
       const showTitle = !!b.show_group_title;
       const skuLabel = (v) => {
         if (!b.show_sku_in_option) return '';
@@ -1645,6 +1664,23 @@
         const match = vis.find((v) => v.color === color && v.image) || vis.find((v) => v.color === color);
         return (match && match.image) || (p.images && p.images[0]) || p.image || '';
       };
+      const colorSwatchHtml = () => '<div class="pdp-swatches">' + colors.map((color) => {
+        const textStyle = b.swatch_style === 'text';
+        const imageStyle = b.swatch_style === 'image';
+        const sold = !vis.some((v) => v.color === color && inStock(v));
+        const img = imageStyle ? imageForColor(color) : '';
+        const bg = textStyle ? '' : (imageStyle
+          ? (img ? 'background-image:url(' + OS.esc(img) + ')' : 'background:' + colorMap[color])
+          : 'background:' + colorMap[color]);
+        const match = vis.find((v) => v.color === color) || {};
+        return '<button type="button" class="' + (textStyle ? 'pdp-size' : 'pdp-sw') + (imageStyle ? ' pdp-sw-img' : '') + shape + (color === selectedColor ? ' on' : '') + (sold ? ' sold' : '') + '" data-pdp-color="' + OS.esc(color) + '"' +
+          (textStyle ? '' : ' aria-label="' + OS.esc(color) + '" style="' + bg + '"') + '>' + (textStyle ? OS.esc(color + skuLabel(match)) : '') + '</button>';
+      }).join('') + '</div>';
+      const colorButtonHtml = () => '<div class="pdp-sizes">' + colors.map((color) => {
+        const sold = !vis.some((v) => v.color === color && inStock(v));
+        const match = vis.find((v) => v.color === color) || {};
+        return '<button type="button" class="pdp-size' + shape + (color === selectedColor ? ' on' : '') + (sold ? ' sold' : '') + '" data-pdp-color="' + OS.esc(color) + '">' + OS.esc(color + skuLabel(match)) + '</button>';
+      }).join('') + '</div>';
       // Keep every SKU in the data node so deep links to sold-out variants still resolve (PRD).
       // No variants array → one default SKU from the product (single-SKU / no-picker case).
       const dataSource = variants.length ? variants : [{
@@ -1675,26 +1711,16 @@
           (showTitle ? '<div class="pdp-label">Variant: <span class="pdp-opt-val" data-pdp-nested-label>' + OS.esc(selectedCombo) + '</span></div>' : '<span hidden data-pdp-nested-label>' + OS.esc(selectedCombo) + '</span>') +
           nestedDd + '</div></div><span hidden data-pdp-variant-data>' + data + '</span>';
       } else {
-        const colorHtml = isDropdown
-          ? ddHtml('color', 'Color', colors, selectedColor)
-          : '<div class="pdp-swatches">' + colors.map((color) => {
-            const textStyle = b.swatch_style === 'text';
-            const imageStyle = b.swatch_style === 'image';
-            const sold = !vis.some((v) => v.color === color && inStock(v));
-            const img = imageStyle ? imageForColor(color) : '';
-            const bg = textStyle ? '' : (imageStyle
-              ? (img ? 'background-image:url(' + OS.esc(img) + ')' : 'background:' + colorMap[color])
-              : 'background:' + colorMap[color]);
-            const match = vis.find((v) => v.color === color) || {};
-            return '<button type="button" class="' + (textStyle ? 'pdp-size' : 'pdp-sw') + (imageStyle ? ' pdp-sw-img' : '') + shape + (color === selectedColor ? ' on' : '') + (sold ? ' sold' : '') + '" data-pdp-color="' + OS.esc(color) + '"' +
-              (textStyle ? '' : ' aria-label="' + OS.esc(color) + '" style="' + bg + '"') + '>' + (textStyle ? OS.esc(color + skuLabel(match)) : '') + '</button>';
-          }).join('') + '</div>';
+        // Size follows Selector style. Color: Swatches on → board UI; off → same interaction as Size.
+        const colorHtml = useSwatches
+          ? colorSwatchHtml()
+          : (isDropdown ? ddHtml('color', 'Color', colors, selectedColor) : colorButtonHtml());
         const sizeHtml = isDropdown
           ? ddHtml('size', 'Size', sizes, selectedSize)
           : '<div class="pdp-sizes">' + sizes.map((z) => {
             const sold = !vis.some((v) => v.size === z && inStock(v));
             const match = vis.find((v) => v.size === z) || {};
-            return '<button type="button" class="pdp-size' + shape + (z === selectedSize ? ' on' : '') + (sold ? ' sold' : '') + '" data-pdp-size="' + OS.esc(z) + '">' + OS.esc(z + skuLabel(match)) + '</button>';
+            return '<button type="button" class="pdp-size' + (useSwatches ? shape : '') + (z === selectedSize ? ' on' : '') + (sold ? ' sold' : '') + '" data-pdp-size="' + OS.esc(z) + '">' + OS.esc(z + skuLabel(match)) + '</button>';
           }).join('') + '</div>';
         const sizeGuideHtml = b._size_guide_html ? ('<span class="pdp-size-guide-slot">' + b._size_guide_html + '</span>') : '';
         body = '<div class="pdp-options"><div class="pdp-option">' +
@@ -1747,6 +1773,8 @@
       const lowStockColor = b.status_color || '#f59e0b';
       const fontSize = Math.max(10, Math.min(50, b.font_size == null ? 14 : Number(b.font_size)));
       const isLow = inventory > 0 && inventory <= threshold;
+      // Status color: green above threshold, yellow at/below (incl. 0 / preorder). Never theme primary.
+      const triggeredLow = inventory <= threshold;
       const statusText = preorder
         ? 'Pre-order now · ships as soon as it is in stock.'
         : (inventory <= 0
@@ -1756,8 +1784,9 @@
           : ((showCount ? inventory + ' in stock' : 'In stock') + customText)));
       
       const styleClass = style === 'badge' ? ' style-badge' : (style === 'text-only' ? ' style-text' : '');
-      const activeColor = preorder ? '#222222' : (inventory <= 0 ? '#9ca3af' : (isLow ? lowStockColor : inStockColor));
-      body = '<div class="pdp-stock' + (preorder ? ' preorder' : (inventory <= 0 ? ' sold' : (isLow ? ' low' : ''))) + styleClass + '" data-pdp-stock data-show-count="' + (showCount ? '1' : '0') + '" data-custom-text="' + OS.esc(customText) + '" data-low-threshold="' + threshold + '" data-low-text="' + OS.esc(lowTextTpl) + '" data-sold-text="' + OS.esc(soldText) + '" data-in-stock-color="' + OS.esc(inStockColor) + '" data-low-stock-color="' + OS.esc(lowStockColor) + '" style="--status-color:' + OS.esc(activeColor) + ';--pdp-stock-fs:' + fontSize + 'px"><i></i><span>' +
+      const activeColor = triggeredLow ? lowStockColor : inStockColor;
+      const stateClass = (preorder ? ' preorder' : (inventory <= 0 ? ' sold' : '')) + (triggeredLow ? ' low' : '');
+      body = '<div class="pdp-stock' + stateClass + styleClass + '" data-pdp-stock data-show-count="' + (showCount ? '1' : '0') + '" data-custom-text="' + OS.esc(customText) + '" data-low-threshold="' + threshold + '" data-low-text="' + OS.esc(lowTextTpl) + '" data-sold-text="' + OS.esc(soldText) + '" data-in-stock-color="' + OS.esc(inStockColor) + '" data-low-stock-color="' + OS.esc(lowStockColor) + '" style="--status-color:' + OS.esc(activeColor) + ';--pdp-stock-fs:' + fontSize + 'px"><i></i><span>' +
         OS.esc(statusText) + '</span></div>';
     } else if (block.kind === 'buy') {
       const showDyn = !!b.show_dynamic;
@@ -1777,9 +1806,13 @@
       const atcFull = b.atc_layout === 'full-width';
       const useLogo = !!b.channel_logo;
       const buyNowLabel = b.buy_now_text || 'Buy now';
-      // Drop theme button border — filled ATC looks harsh with a contrasting outline.
-      // Keep btnStyle height / font / letter-spacing / transform; only paint from Buy block.
-      const atcColorStyle = (b.atc_background ? ';background:' + b.atc_background : '') + (b.atc_text_color ? ';color:' + b.atc_text_color : '') + ';border:0';
+      // Keep btnStyle height / font / letter-spacing / transform; paint from Buy block.
+      // Button border OOB follows Background (blank atc_border → same as fill); T = no border.
+      const atcBg = b.atc_background || '#FFC439';
+      const atcBorderRaw = b.atc_border;
+      const atcBorder = (atcBorderRaw == null || atcBorderRaw === '') ? atcBg : atcBorderRaw;
+      const atcBorderStyle = atcBorder === 'transparent' ? ';border:0' : ';border:1px solid ' + atcBorder;
+      const atcColorStyle = ';background:' + atcBg + (b.atc_text_color ? ';color:' + b.atc_text_color : '') + atcBorderStyle;
       const buyNowColorStyle = ';background:' + (b.buy_now_background || '#fff') + ';color:' + (b.buy_now_text_color || 'inherit') + ';border:0';
       const paypalLogo = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="38 6 86 24" height="22" aria-hidden="true" focusable="false">' +
         '<path fill="#253B80" d="M46.211 6.749h-6.839c-.468 0-.866.34-.939.802l-2.766 17.537c-.055.346.213.658.564.658h3.265c.468 0 .866-.34.939-.803l.746-4.73c.072-.463.471-.803.938-.803h2.165c4.505 0 7.105-2.18 7.784-6.5.306-1.89.013-3.375-.872-4.415C50.224 7.353 48.5 6.749 46.211 6.749zm.789 6.405c-.374 2.454-2.249 2.454-4.062 2.454h-1.032l.724-4.583c.043-.277.283-.481.563-.481h.473c1.235 0 2.4 0 3.002.704.361.41.471 1.034.332 1.906z"/>' +
@@ -1830,9 +1863,10 @@
         : '';
       const atcIcon = b.atc_icon == null ? 'bag-plus' : b.atc_icon;
       const atcType = atcFull ? ';font-size:14px;font-weight:300;letter-spacing:0.08em;text-transform:uppercase;height:47px;min-height:47px' : '';
+      const atcLabel = 'Add to cart';
       const atcHtml = b.show_add
-        ? '<button type="button" class="pdp-atc' + (atcFull ? ' full' : '') + '" data-pdp-atc data-atc-icon="' + OS.esc(atcIcon) + '" style="' + OS.btnStyle(t) + ';' + atcRadiusStyle + atcColorStyle + atcType + '"' + (inventory <= 0 && !preorder ? ' disabled' : '') + '>' +
-          (inventory <= 0 && !preorder ? atcButtonInner(atcIcon, 'Sold out') : atcButtonInner(atcIcon, 'Add to cart')) + '</button>'
+        ? '<button type="button" class="pdp-atc' + (atcFull ? ' full' : '') + '" data-pdp-atc data-atc-icon="' + OS.esc(atcIcon) + '" data-atc-label="' + OS.esc(atcLabel) + '" style="' + OS.btnStyle(t) + ';' + atcRadiusStyle + atcColorStyle + atcType + '"' + (inventory <= 0 && !preorder ? ' disabled' : '') + '>' +
+          (inventory <= 0 && !preorder ? atcButtonInner(atcIcon, 'Sold out') : atcButtonInner(atcIcon, atcLabel)) + '</button>'
         : '';
       let buyPrimary = '';
       if (qtyHtml || atcHtml) {
@@ -2399,19 +2433,22 @@
     const atcRadius = buyButtonRadius(atcShape, buy.atc_custom_radius != null ? buy.atc_custom_radius : buy.custom_radius, themeButtonRadius(t));
     const atcBg = buy.atc_background || '#FFC439';
     const atcFg = buy.atc_text_color || '#FFFFFF';
+    const atcBorderRaw = buy.atc_border;
+    const atcBorder = (atcBorderRaw == null || atcBorderRaw === '') ? atcBg : atcBorderRaw;
+    const atcBorderStyle = atcBorder === 'transparent' ? ';border:0' : ';border:1px solid ' + atcBorder;
     const atcIcon = buy.atc_icon == null ? 'bag-plus' : buy.atc_icon;
-    const label = b.button_text || 'Add to cart';
+    const label = b.button_text || 'ADD TO CART';
     const btnH = themeButtonHeight(t);
-    const atcStyle = OS.btnStyle(t) + ';border-radius:' + atcRadius + 'px;background:' + atcBg + ';color:' + atcFg + ';border:0';
+    const atcStyle = OS.btnStyle(t) + ';border-radius:' + atcRadius + 'px;background:' + atcBg + ';color:' + atcFg + atcBorderStyle;
     const widthMode = b.width_mode === 'full' ? ' is-full-width' : '';
-    const desktopButtonWidth = Math.max(240, Number(b.desktop_button_width) || 320);
+    const desktopButtonWidth = Math.max(150, Number(b.desktop_button_width) || 320);
     const qtyWidth = b.show_quantity !== false ? 125 : 0;
     const stickyStyle = '--pdp-sticky-button-width:' + desktopButtonWidth + 'px;--pdp-sticky-qty-width:' + qtyWidth + 'px;--pdp-btn-h:' + btnH + 'px;--pdp-atc-radius:' + atcRadius + 'px';
     return '<div class="pdp-sticky bottom' + appear + mobHide + widthMode + '" data-block-id="' + OS.esc(block.id) + '" data-pdp-sticky data-pdp-width-mode="' + OS.esc(b.width_mode || 'container') + '" style="' + stickyStyle + '">' +
       (b.show_image !== false ? '<img alt="" src="' + OS.esc(p.image) + '">' : '') +
       '<div class="meta">' + (b.show_title !== false ? '<b>' + OS.esc(p.title) + '</b>' : '') + (b.show_price !== false ? '<span data-pdp-sticky-price>' + OS.money(p.price) + '</span>' : '') + '</div>' +
       (b.show_quantity !== false ? '<div class="pdp-qty sticky-qty"><button type="button" data-pdp-q="-">-</button><span data-pdp-qty>1</span><button type="button" data-pdp-q="+">+</button></div>' : '') +
-      '<button type="button" class="pdp-atc" data-pdp-atc data-atc-icon="' + OS.esc(atcIcon) + '" style="' + atcStyle + '">' + atcButtonInner(atcIcon, label) + '</button></div>';
+      '<button type="button" class="pdp-atc" data-pdp-atc data-atc-icon="' + OS.esc(atcIcon) + '" data-atc-label="' + OS.esc(label) + '" style="' + atcStyle + '">' + atcButtonInner(atcIcon, label) + '</button></div>';
   }
 
   function popupHtml(s, p, t) {
@@ -2450,7 +2487,6 @@
     schema: [
       { key: 'full_width', control: 'toggle', label: 'Full width', default: false },
       { sub: 'Media' },
-      { tip: 'Learn more about media types.', tipLink: { text: 'media types', href: 'https://help.shopify.com/manual/online-store/themes/theme-structure/theme-settings#media' } },
       { key: 'desktop_media_size', control: 'select', inline: true, label: 'Desktop media width', default: 'medium', options: [
         { value: 'small', label: 'Small' }, { value: 'medium', label: 'Medium' }, { value: 'large', label: 'Large' },
       ], info: 'Media is automatically optimized for mobile.' },
@@ -2466,11 +2502,11 @@
     defaultBlocks: () => ([
       ['badges', { custom_tag_style: 'filled', hot_badge_bg: '', hot_badge_text_color: '#ffffff', new_badge_bg: '#FFC439', new_badge_text_color: '#ffffff', badge_icon: 'none', badge_icon_image: '', show_sold_out: false, show_saving: false, saving_type: 'percentage', saving_style: 'filled', saving_position: 'right', saving_label: '', saving_bg: '', saving_text_color: '#ffffff', saving_icon: false, badge_position: 'left', badge_gap: 8 }],
       ['title', { title_size: 30, description: '', description_color: '#000000', description_size: 14, description_top: 0, description_bottom: 0 }],
-      ['price', { size: 24, show_taxes: false, show_saving: true, saving_type: 'percentage', saving_style: 'filled', saving_position: 'right', saving_label: '', saving_bg: '', saving_text_color: '#ffffff', saving_icon: false }],
+      ['price', { size: 24, show_taxes: false, show_saving: false, saving_type: 'percentage', saving_style: 'filled', saving_position: 'right', saving_label: '', saving_bg: '', saving_text_color: '#ffffff', saving_icon: false }],
       ['rating', { layout: 'default', star_style: 'boxed', style: 'stars-rating-custom', custom_text: 'Trusted by 2000+', underline_text: false, review_label: 'reviews', size: 14, color: '#0f3636', text_color: '' }],
       ['inventory', { show_status: true, show_count: true, custom_text: '', low_stock_threshold: 5, low_stock_text: 'Low stock - {n} items left', sold_out_text: 'Sold out', status_style: 'dot', in_stock_color: '#10a443', status_color: '#f59e0b', font_size: 14 }],
-      ['variant', { hide_sold_out: false, picker_type: 'buttons', swatch_style: 'color', shape: 'normal', nested_dropdown: false, show_group_title: true, sku_display_name: '', show_sku_in_option: false }],
-      ['buy', { show_quantity: true, show_add: true, atc_layout: 'with-quantity', atc_icon: 'bag-plus', atc_background: '#FFC439', atc_text_color: '#FFFFFF', atc_shape: 'pill', atc_custom_radius: 8, show_dynamic: true, channels: ['buy_now', 'paypal'], buy_now_text: 'Buy now', buy_now_background: '#000000', buy_now_text_color: '#FFFFFF', dyn_shape: 'pill', dyn_custom_radius: 8, show_payment_options: true, channel_logo: true, show_safe_checkout: true, safe_checkout_align: 'center', safe_checkout_label: 'GUARANTEED SAFE CHECKOUT', trust_logos: ['visa', 'mastercard', 'amex', 'paypal', 'apple_pay', 'google_pay'], trust_logo_size: 24 }],
+      ['variant', { hide_sold_out: false, picker_type: 'buttons', swatches: true, swatch_style: 'color', shape: 'normal', show_group_title: true }],
+      ['buy', { show_quantity: true, show_add: true, atc_layout: 'with-quantity', atc_icon: 'bag-plus', atc_background: '#FFC439', atc_border: '', atc_text_color: '#FFFFFF', atc_shape: 'pill', atc_custom_radius: 8, show_dynamic: true, channels: ['buy_now', 'paypal'], buy_now_text: 'Buy now', buy_now_background: '#000000', buy_now_text_color: '#FFFFFF', dyn_shape: 'pill', dyn_custom_radius: 8, show_payment_options: true, channel_logo: true, show_safe_checkout: true, safe_checkout_align: 'center', safe_checkout_label: 'GUARANTEED SAFE CHECKOUT', trust_logos: ['visa', 'mastercard', 'amex', 'paypal', 'apple_pay', 'google_pay'], trust_logo_size: 24 }],
       ['icon_text', { layout: 'horizontal', item_layout: 'icon-left', alignment: 'left', font: 'body', size: 15, icon_size: 20, item_gap: 24, icon_text_gap: 8, background: false, background_color: '#f6f6f6', corner_radius: 10, text_color: '', icon_color: '', card_style: 'none', icon_1: 'box', image_1: '', first_heading: 'Orders over $50 ship free', first_content: '', icon_2: 'return', image_2: '', second_heading: '30 day returns', second_content: '', icon_3: 'star', image_3: '', third_heading: '', third_content: '' }],
       ['collapsible', { heading: 'Overview', icon: 'none', content: 'A clinically proven, non-sticky, vegan lip treatment that delivers the intense hydration of a lip mask with a sweet sheer tint using food-grade, non-artificial flavor. Designed for sensitive, irritated lips, this cushiony treatment delivers instant comfort to rescue dry, chapped lips.', custom_liquid: '', open: false }],
       ['collapsible', { heading: 'How to use', icon: 'none', content: 'Apply generously to lips for hydration and comfort. Use at night for an overnight mask.', custom_liquid: '', open: false }],
@@ -2483,7 +2519,7 @@
         scroll: true, nav_style: 'auto', auto_play: false, cards_per_row: 1,
       }],
       ['actions', { show_share: true, layout: 'tile', icon_style: 'brand', platforms: ['facebook', 'x', 'pinterest'], show_copy: true }],
-      ['sticky', { show_image: true, show_title: true, show_price: true, show_quantity: true, appear_at: 'scroll', mobile_visible: true, button_text: 'Add to cart' }],
+      ['sticky', { show_image: true, show_title: true, show_price: true, show_quantity: true, appear_at: 'scroll', mobile_visible: true, button_text: 'ADD TO CART' }],
     ]).map((pair) => ({ kind: pair[0], hidden: false, settings: pair[1] })),
     render: function (s, blocks, ctx) {
       const t = ctx.tokens || {};
@@ -2983,13 +3019,15 @@
         if (stock) {
           const threshold = Number(stock.getAttribute('data-low-threshold') || 5);
           const isLow = match.inventory > 0 && match.inventory <= threshold;
+          const triggeredLow = match.inventory <= threshold;
           const isPreorder = !!match.preorder;
           stock.classList.toggle('preorder', isPreorder);
           stock.classList.toggle('sold', match.inventory <= 0 && !isPreorder);
-          stock.classList.toggle('low', isLow);
+          stock.classList.toggle('low', triggeredLow);
           const inStockColor = stock.getAttribute('data-in-stock-color') || '#10a443';
           const lowStockColor = stock.getAttribute('data-low-stock-color') || '#f59e0b';
-          stock.style.setProperty('--status-color', isPreorder ? '#222222' : (match.inventory <= 0 ? '#9ca3af' : (isLow ? lowStockColor : inStockColor)));
+          // Green above threshold, yellow at/below (same for preorder / sold).
+          stock.style.setProperty('--status-color', triggeredLow ? lowStockColor : inStockColor);
           const text = stock.querySelector('span');
           const showCount = stock.getAttribute('data-show-count') !== '0';
           const customText = stock.getAttribute('data-custom-text') || '';
@@ -3033,7 +3071,9 @@
         root.querySelectorAll('[data-pdp-atc]').forEach((button) => {
           button.disabled = match.inventory <= 0 && !match.preorder;
           const icon = button.getAttribute('data-atc-icon') || 'bag-plus';
-          button.innerHTML = atcButtonInner(icon, match.inventory <= 0 && !match.preorder ? 'Sold out' : 'Add to cart');
+          // Keep each ATC's own label (Sticky cart button_text vs Buy Add to cart).
+          const label = button.getAttribute('data-atc-label') || 'Add to cart';
+          button.innerHTML = atcButtonInner(icon, match.inventory <= 0 && !match.preorder ? 'Sold out' : label);
         });
         // render() puts data-pdp-variant on .pdpx; hydrate root is .os-sec — keep the shell in sync.
         shellEl.setAttribute('data-pdp-variant', match.id || '');
@@ -3230,7 +3270,7 @@
       function playAtcButton(btn) {
         if (!btn) return;
         const icon = btn.getAttribute('data-atc-icon') || 'bag-plus';
-        const prev = btn.getAttribute('data-prev-label') || 'Add to cart';
+        const prev = btn.getAttribute('data-atc-label') || btn.getAttribute('data-prev-label') || 'Add to cart';
         btn.setAttribute('data-prev-label', prev);
         btn.classList.add('is-adding');
         btn.classList.remove('is-added');
@@ -3244,7 +3284,7 @@
             btn.classList.remove('is-added');
             const sold = currentMatch && currentMatch.inventory <= 0;
             btn.disabled = !!sold;
-            btn.innerHTML = atcButtonInner(icon, sold ? 'Sold out' : (btn.getAttribute('data-prev-label') || 'Add to cart'));
+            btn.innerHTML = atcButtonInner(icon, sold ? 'Sold out' : (btn.getAttribute('data-prev-label') || btn.getAttribute('data-atc-label') || 'Add to cart'));
             atcBusy = false;
           }, 850);
         }, 360);

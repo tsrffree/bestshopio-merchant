@@ -76,14 +76,19 @@
     buy: { name: 'Buy buttons', icon: 'cart', fields: [
       { sub: 'Add to cart' },
       { key: 'show_quantity', control: 'toggle', label: 'Show quantity selector', default: false },
-      { key: 'show_add', control: 'toggle', label: 'Show Add-to-cart button', default: true },
-      { key: 'button_text', control: 'text', label: 'Add to cart text', default: 'Add to cart', visibleWhen: (v) => v.show_add !== false },
-      { key: 'atc_layout', control: 'segmented', label: 'Add to cart style', default: 'with-quantity', options: [
-        { value: 'with-quantity', label: 'With quantity' }, { value: 'full-width', label: 'Full width' },
+      { key: 'show_add', control: 'toggle', label: 'Show button', default: true },
+      { key: 'button_text', control: 'text', label: 'Label', default: 'Add to cart', visibleWhen: (v) => v.show_add !== false },
+      { key: 'atc_layout', control: 'segmented', label: 'Style', default: 'with-quantity', options: [
+        { value: 'with-quantity', label: 'Normal' }, { value: 'full-width', label: 'Full width' },
       ], visibleWhen: (v) => v.show_add !== false },
-      { key: 'atc_icon', control: 'select', label: 'Add to cart icon', default: 'bag-plus', options: ((window.OS_THEME_ICONS && window.OS_THEME_ICONS.options) ? window.OS_THEME_ICONS.options(true) : [{ value: 'none', label: 'None' }, { value: 'bag-plus', label: 'Bag plus' }, { value: 'gift', label: 'Gift' }, { value: 'heart', label: 'Heart' }, { value: 'star', label: 'Star' }]), visibleWhen: (v) => v.show_add !== false, info: 'Default is shopping bag with plus. Pick None to hide, or any icon from the theme library.' },
-      { key: 'atc_background', control: 'color', label: 'Add to cart background', default: '#FFC439', allowTransparent: true, blankValue: () => '#FFC439', info: 'Defaults to PayPal yellow. T = transparent.', visibleWhen: (v) => v.show_add !== false },
-      { key: 'atc_text_color', control: 'color', label: 'Add to cart text', default: '#FFFFFF', allowTransparent: true, blankValue: () => '#FFFFFF', info: 'Defaults to white. T = transparent.', visibleWhen: (v) => v.show_add !== false },
+      { key: 'atc_icon', control: 'select', label: 'Icon', default: 'bag-plus', options: ((window.OS_THEME_ICONS && window.OS_THEME_ICONS.options) ? window.OS_THEME_ICONS.options(true) : [{ value: 'none', label: 'None' }, { value: 'bag-plus', label: 'Bag plus' }, { value: 'gift', label: 'Gift' }, { value: 'heart', label: 'Heart' }, { value: 'star', label: 'Star' }]), visibleWhen: (v) => v.show_add !== false },
+      { key: 'atc_background', control: 'color', label: 'Background', default: '#FFC439', allowTransparent: true, blankValue: () => '#FFC439', visibleWhen: (v) => v.show_add !== false, refreshPanel: true },
+      { key: 'atc_border', control: 'color', label: 'Button border', default: '', allowTransparent: true, blankValue: (v) => {
+        const bg = v && v.atc_background;
+        if (bg && bg !== 'transparent') return bg;
+        return '#FFC439';
+      }, visibleWhen: (v) => v.show_add !== false },
+      { key: 'atc_text_color', control: 'color', label: 'Text', default: '#FFFFFF', allowTransparent: true, blankValue: () => '#FFFFFF', visibleWhen: (v) => v.show_add !== false },
       { key: 'atc_shape', control: 'segmented', label: 'Button shape', default: 'pill', options: [
         { value: 'normal', label: 'Normal' }, { value: 'pill', label: 'Pill' }, { value: 'square', label: 'Square' }, { value: 'custom', label: 'Custom' },
       ] },
@@ -91,11 +96,16 @@
       { sub: 'Dynamic checkout' },
       { key: 'show_dynamic', control: 'toggle', label: 'Show dynamic checkout buttons', default: true },
       { key: 'channels', control: 'multiselect', label: 'Channels', default: ['buy_now', 'paypal'], options: [
-        { value: 'buy_now', label: 'Buy now' }, { value: 'paypal', label: 'PayPal' }, { value: 'apple_pay', label: 'Apple Pay' }, { value: 'google_pay', label: 'Google Pay' },
-      ], visibleWhen: (v) => !!v.show_dynamic },
+        { value: 'buy_now', label: 'Buy now' }, { value: 'paypal', label: 'PayPal' },
+      ], visibleWhen: (v) => !!v.show_dynamic, afterChange: (v, target, prev) => {
+        // Adding any channel turns on Show channel logo (PayPal brand mark, etc.).
+        const next = Array.isArray(v) ? v : [];
+        const before = Array.isArray(prev) ? prev : [];
+        if (next.some((id) => before.indexOf(id) < 0)) target.channel_logo = true;
+      } },
       { key: 'buy_now_text', control: 'text', label: 'Buy now label', default: 'Buy now', visibleWhen: (v) => !!v.show_dynamic && Array.isArray(v.channels) && v.channels.indexOf('buy_now') >= 0 },
-      { key: 'buy_now_background', control: 'color', label: 'Buy now background', default: '#000000', allowTransparent: true, blankValue: () => '#000000', info: 'Defaults to black. T = transparent.', visibleWhen: (v) => !!v.show_dynamic && Array.isArray(v.channels) && v.channels.indexOf('buy_now') >= 0 },
-      { key: 'buy_now_text_color', control: 'color', label: 'Buy now text', default: '#FFFFFF', allowTransparent: true, blankValue: () => '#FFFFFF', info: 'Defaults to white. T = transparent.', visibleWhen: (v) => !!v.show_dynamic && Array.isArray(v.channels) && v.channels.indexOf('buy_now') >= 0 },
+      { key: 'buy_now_background', control: 'color', label: 'Buy now background', default: '#000000', allowTransparent: true, blankValue: () => '#000000', visibleWhen: (v) => !!v.show_dynamic && Array.isArray(v.channels) && v.channels.indexOf('buy_now') >= 0 },
+      { key: 'buy_now_text_color', control: 'color', label: 'Buy now text', default: '#FFFFFF', allowTransparent: true, blankValue: () => '#FFFFFF', visibleWhen: (v) => !!v.show_dynamic && Array.isArray(v.channels) && v.channels.indexOf('buy_now') >= 0 },
       { key: 'dyn_shape', control: 'segmented', label: 'Button shape', default: 'normal', options: [
         { value: 'normal', label: 'Normal' }, { value: 'pill', label: 'Pill' }, { value: 'square', label: 'Square' }, { value: 'custom', label: 'Custom' },
       ], visibleWhen: (v) => !!v.show_dynamic },
@@ -141,7 +151,7 @@
       { id: OS.uid('fp'), kind: 'price', hidden: false, settings: { show_compare_at: true, show_savings: true } },
       { id: OS.uid('fp'), kind: 'variant', hidden: false, settings: { picker_type: 'buttons' } },
       { id: OS.uid('fp'), kind: 'quantity', hidden: false, settings: {} },
-      { id: OS.uid('fp'), kind: 'buy', hidden: false, settings: { show_quantity: false, show_add: true, button_text: 'Add to cart', atc_layout: 'with-quantity', atc_icon: 'bag-plus', atc_background: '#FFC439', atc_text_color: '#FFFFFF', atc_shape: 'pill', atc_custom_radius: 8, show_dynamic: true, channels: ['buy_now', 'paypal'], buy_now_text: 'Buy now', buy_now_background: '#000000', buy_now_text_color: '#FFFFFF', dyn_shape: 'normal', dyn_custom_radius: 8, show_payment_options: true, channel_logo: true, show_safe_checkout: true, safe_checkout_align: 'center', safe_checkout_label: 'GUARANTEED SAFE CHECKOUT', trust_logos: ['visa', 'mastercard', 'amex', 'paypal', 'apple_pay', 'google_pay'], trust_logo_size: 28 } },
+      { id: OS.uid('fp'), kind: 'buy', hidden: false, settings: { show_quantity: false, show_add: true, button_text: 'Add to cart', atc_layout: 'with-quantity', atc_icon: 'bag-plus', atc_background: '#FFC439', atc_border: '', atc_text_color: '#FFFFFF', atc_shape: 'pill', atc_custom_radius: 8, show_dynamic: true, channels: ['buy_now', 'paypal'], buy_now_text: 'Buy now', buy_now_background: '#000000', buy_now_text_color: '#FFFFFF', dyn_shape: 'normal', dyn_custom_radius: 8, show_payment_options: true, channel_logo: true, show_safe_checkout: true, safe_checkout_align: 'center', safe_checkout_label: 'GUARANTEED SAFE CHECKOUT', trust_logos: ['visa', 'mastercard', 'amex', 'paypal', 'apple_pay', 'google_pay'], trust_logo_size: 28 } },
       { id: OS.uid('fp'), kind: 'description', hidden: false, settings: { heading: 'Details', content: 'Soft, breathable linen-feel fabric with a relaxed fit. Machine washable. Designed in-house and made to last.' } },
     ]),
     render: function (s, blocks, ctx) {
@@ -177,7 +187,7 @@
           const atcRadiusStyle = 'border-radius:' + shapeRadius(atcShape, b.atc_custom_radius != null ? b.atc_custom_radius : b.custom_radius) + 'px';
           const dynRadiusStyle = 'border-radius:' + shapeRadius(dynShape, b.dyn_custom_radius != null ? b.dyn_custom_radius : b.custom_radius) + 'px';
           const atcFull = b.atc_layout === 'full-width';
-          const allowed = ['buy_now', 'paypal', 'apple_pay', 'google_pay'];
+          const allowed = ['buy_now', 'paypal'];
           let channels = Array.isArray(b.channels) ? b.channels.filter((id) => allowed.indexOf(id) >= 0) : null;
           if (channels == null) channels = ['buy_now', 'paypal'];
           if (b.show_buy_now && channels.indexOf('buy_now') < 0) channels = ['buy_now'].concat(channels);
@@ -185,7 +195,11 @@
           const showDyn = b.show_dynamic !== false || !!b.show_paypal;
           const showPayMore = showDyn && channels.length > 0 && b.show_payment_options !== false;
           const buyNowLabel = b.buy_now_text || 'Buy now';
-          const atcColorStyle = (b.atc_background ? ';background:' + b.atc_background : '') + (b.atc_text_color ? ';color:' + b.atc_text_color : '') + ';border:0';
+          const atcBg = b.atc_background || '#FFC439';
+          const atcBorderRaw = b.atc_border;
+          const atcBorder = (atcBorderRaw == null || atcBorderRaw === '') ? atcBg : atcBorderRaw;
+          const atcBorderStyle = atcBorder === 'transparent' ? ';border:0' : ';border:1px solid ' + atcBorder;
+          const atcColorStyle = ';background:' + atcBg + (b.atc_text_color ? ';color:' + b.atc_text_color : '') + atcBorderStyle;
           const buyNowColorStyle = ';background:' + (b.buy_now_background || '#fff') + ';color:' + (b.buy_now_text_color || 'inherit') + ';border:0';
           const paySrc = {
             visa: 'settings/assets/payments/visa.svg', mastercard: 'settings/assets/payments/mastercard.svg', amex: 'settings/assets/payments/amex.svg',

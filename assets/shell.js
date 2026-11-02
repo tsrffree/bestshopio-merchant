@@ -174,7 +174,7 @@
     // Online store is a self-contained Theme editor. Version it independently so
     // a Theme-only release cannot reuse stale app/data scripts from a prior shell release.
     var moduleV = id === 'settings' ? '20261029-spu-eg'
-      : id === 'online-store' ? '20261030-chantilly-swim40'
+      : id === 'online-store' ? '20261103-video-border'
       : id === 'analytics' ? '20260922-address-info1'
       : id === 'orders' ? '20261013-no-channel'
       : id === 'products' ? '20261030-product-meta1'
@@ -193,14 +193,14 @@
       if (id === 'online-store' && !window.POST_PURCHASE_ORDER_MOCK)
         return loadScript('assets/post-purchase-order-mock.js?v=' + moduleV);
     });
-    // Shared compact rich-text editor (Paragraph | Icon | More) for theme editor + product detail.
+    // 富文本编辑器组件 (text / 文本组件): Paragraph | B I list link | More
     chain = chain.then(function () {
       if ((id === 'online-store' || id === 'products') && !window.OS_THEME_ICONS)
         return loadScript('online-store/js/theme-icons.js?v=20261028-rt1').catch(function () {});
     });
     chain = chain.then(function () {
       if ((id === 'online-store' || id === 'products') && !window.BSRichText)
-        return loadScript('assets/richtext-editor.js?v=20261030-rt7');
+        return loadScript('assets/richtext-editor.js?v=20261102-content-fit');
     });
     // Product settings and the Vendors page share one vendor list. Load it before either module,
     // and load the product catalog before Vendors so vendor products can resolve names.

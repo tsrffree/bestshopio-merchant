@@ -334,16 +334,44 @@
   // ---------- sample platform resources (drive product/collection/menu/blog/page pickers) ----------
   // Chantilly / Symmetry swim PDP reference set.
   const SWIM_IMG = {
-    hero: 'online-store/assets/chantilly-swim/aruba_dark_sage_1.webp',
-    detail: 'online-store/assets/chantilly-swim/aruba_dark_sage_2.webp',
-    side: 'online-store/assets/chantilly-swim/aruba_dark_sage_3.webp',
+    hero: 'online-store/assets/chantilly-swim/aruba_dark_sage_1.jpg',
+    detail: 'online-store/assets/chantilly-swim/aruba_dark_sage_2.jpg',
+    side: 'online-store/assets/chantilly-swim/aruba_dark_sage_3.jpg',
     back: 'online-store/assets/chantilly-swim/aruba_dark_sage_4.jpg',
     angle: 'online-store/assets/chantilly-swim/aruba_dark_sage_5.jpg',
     video: 'online-store/assets/chantilly-swim/aruba_sage_video.mp4',
-    videoPoster: 'online-store/assets/chantilly-swim/aruba_sage_video_poster.webp',
-    santorini: 'online-store/assets/chantilly-swim/aruba_santorini.webp',
-    fire: 'online-store/assets/chantilly-swim/aruba_fire.webp',
+    videoPoster: 'online-store/assets/chantilly-swim/aruba_sage_video_poster.jpg',
+    santorini: 'online-store/assets/chantilly-swim/aruba_santorini.jpg',
+    fire: 'online-store/assets/chantilly-swim/aruba_fire.jpg',
+    bengal: 'online-store/assets/chantilly-swim/aruba_bengal.jpg',
+    palma: 'online-store/assets/chantilly-swim/aruba_palma.jpg',
+    sunGlow: 'online-store/assets/chantilly-swim/aruba_sun_glow.jpg',
+    lagoon: 'online-store/assets/chantilly-swim/aruba_lagoon.jpg',
+    burum: 'online-store/assets/chantilly-swim/aruba_burum.jpg',
+    raven: 'online-store/assets/chantilly-swim/aruba_raven.jpg',
+    beachReady: 'online-store/assets/chantilly-swim/beach_ready.jpg',
+    cecilia: 'online-store/assets/chantilly-swim/related_cecilia.jpg',
+    belize: 'online-store/assets/chantilly-swim/related_belize.jpg',
+    // Blog posts on Chantilly Belize PDP — review / testimonial lifestyle library
+    blogVitamin: 'online-store/assets/chantilly-swim/blog_vitamin_a.jpg',
+    blogStyles: 'online-store/assets/chantilly-swim/blog_finding_styles.jpg',
+    blogEarth: 'online-store/assets/chantilly-swim/blog_earth_month.jpg',
+    // Mock buyer headshots for Testimonial avatars (not product crops)
+    avSarah: 'online-store/assets/chantilly-swim/av_sarah.jpg',
+    avJames: 'online-store/assets/chantilly-swim/av_james.jpg',
+    avMei: 'online-store/assets/chantilly-swim/av_mei.jpg',
+    avDana: 'online-store/assets/chantilly-swim/av_dana.jpg',
+    avChris: 'online-store/assets/chantilly-swim/av_chris.jpg',
+    avAlicia: 'online-store/assets/chantilly-swim/av_alicia.jpg',
   };
+  // Video column / UGC rail covers for Swim PDP — prefer these over Wildpeak ug*.
+  IMG.swimVc1 = SWIM_IMG.videoPoster;
+  IMG.swimVc2 = SWIM_IMG.santorini;
+  IMG.swimVc3 = SWIM_IMG.fire;
+  IMG.swimVc4 = SWIM_IMG.beachReady;
+  IMG.swimVc5 = SWIM_IMG.blogVitamin;
+  IMG.swimVc6 = SWIM_IMG.blogStyles;
+  IMG.swimVideo = SWIM_IMG.video;
   const SAMPLE = {
     products: [
       { id: 'p1', handle: 'ingrid-merino-short-sleeve-black', title: 'Ingrid merino short sleeve black', vendor: 'Sleek Wildpeak', category: 'Tops', sku: 'WP-INGRID-BLK-S', inventory: 10, price: 99.0, compareAt: 0, rating: 5.0, reviews: 3, image: IMG.p1, images: [IMG.p1, IMG.p1b, IMG.p1c, IMG.p1d, IMG.p1e, IMG.p1f, IMG.p1grn, IMG.p1brg], swatches: ['#1a1a1a', '#2f5a3c', '#6b2d3c'], tags: ['tag__hot_Best Seller'], description: '<p>Elevate your wardrobe with this short sleeve. Crafted from premium Merino wool, this versatile top offers a perfect blend of comfort and sophistication. The natural fibers provide exceptional softness, breathability, and temperature regulation, making it an ideal choice for any season.</p><p><strong>Best For:</strong></p><ul><li>Layering under shells</li><li>Cool-weather travel</li><li>Everyday base layers</li></ul><p>True to size with a clean short-sleeve cut. Pair with merino shorts or tailored bottoms.</p>', metafields: { 'custom.fabric_weight': '180 gsm', 'custom.fit_guide': 'True to size', 'custom.care_instructions': 'Machine wash cold. Lay flat to dry.', 'custom.material': 'Merino wool', 'google.gender': 'unisex', 'google.age_group': 'adult' }, variants: [
@@ -392,36 +420,36 @@
           { id: 'p6-tan-m', title: 'Tan / M', color: 'Tan', size: 'M', price: 98.0, compareAt: 128.0, inventory: 2, image: IMG.p6b, available: true },
           { id: 'p6-tan-l', title: 'Tan / L', color: 'Tan', size: 'L', price: 98.0, compareAt: 128.0, inventory: 0, image: IMG.p6b, available: false },
         ] },
-      { id: 'swim-aruba', handle: 'b-swim-benga-u76-aruba-top', title: 'Aruba Top', vendor: 'B Swim', category: 'Swim Tops', sku: 'BSWIM-ARUBA-U76', inventory: 0, preorder: true, price: 112.0, compareAt: 127.27, rating: 4.0, reviews: 4, image: SWIM_IMG.hero, images: [SWIM_IMG.hero, SWIM_IMG.detail, SWIM_IMG.side, SWIM_IMG.back, SWIM_IMG.angle], media: [
+      { id: 'swim-aruba', handle: 'b-swim-benga-u76-aruba-top', title: 'Aruba Top', vendor: 'B Swim', category: 'Swim Tops', sku: 'BSWIM-ARUBA-U76', inventory: 0, preorder: true, price: 113.0, compareAt: 0, rating: 4.0, reviews: 4, image: SWIM_IMG.hero, images: [SWIM_IMG.hero, SWIM_IMG.detail, SWIM_IMG.side, SWIM_IMG.back, SWIM_IMG.angle], media: [
         { type: 'image', src: SWIM_IMG.hero },
         { type: 'video', poster: SWIM_IMG.videoPoster, video: SWIM_IMG.video },
         { type: 'image', src: SWIM_IMG.detail },
         { type: 'image', src: SWIM_IMG.side },
         { type: 'image', src: SWIM_IMG.back },
         { type: 'image', src: SWIM_IMG.angle },
-      ], swatches: ['#5b8e90', '#f5dfb4', '#f3a0a2', '#775246', '#1c3935', '#f3bd3d', '#56b7c6', '#ef784f', '#111111'], tags: [], summary: 'Soft Aruba swim top with adjustable coverage. Pre-order now and we ship as soon as it is back in stock.', highlights: ['Mix-and-match with any B Swim bottom', 'Soft recycled swim fabric', 'Adjustable straps for a custom fit'], description: '<p>Pre-order now to make sure you do not miss out! As soon as it is in stock, we will ship it to you.</p>', metafields: { 'custom.fit_guide': 'Runs small · true to size · runs large', 'custom.care_instructions': 'Rinse in cold water after each wear. Lay flat to dry.', 'custom.material': 'Recycled swim fabric', 'custom.swim_note': 'Tops and bottoms sold separately.', 'custom.fabric_weight': '190 gsm', 'google.gender': 'female', 'google.age_group': 'adult', 'google.condition': 'new', 'custom.is_bestseller': 'true' }, variants: [
-        { id: 'swim-aruba-sage-xs', title: 'Dark Sage / XS', color: 'Dark Sage', size: 'XS', sku: 'BSWIM-ARUBA-SAGE-XS', price: 112.0, compareAt: 127.27, inventory: 0, available: true, preorder: true, image: SWIM_IMG.hero },
-        { id: 'swim-aruba-sage-s', title: 'Dark Sage / S', color: 'Dark Sage', size: 'S', sku: 'BSWIM-ARUBA-SAGE-S', price: 112.0, compareAt: 127.27, inventory: 0, available: true, preorder: true, image: SWIM_IMG.hero },
-        { id: 'swim-aruba-sage-m', title: 'Dark Sage / M', color: 'Dark Sage', size: 'M', sku: 'BSWIM-ARUBA-SAGE-M', price: 112.0, compareAt: 127.27, inventory: 0, available: true, preorder: true, image: SWIM_IMG.hero },
-        { id: 'swim-aruba-sage-l', title: 'Dark Sage / L', color: 'Dark Sage', size: 'L', sku: 'BSWIM-ARUBA-SAGE-L', price: 112.0, compareAt: 127.27, inventory: 0, available: true, preorder: true, image: SWIM_IMG.hero },
-        { id: 'swim-aruba-sage-d', title: 'Dark Sage / D', color: 'Dark Sage', size: 'D', sku: 'BSWIM-ARUBA-SAGE-D', price: 112.0, compareAt: 127.27, inventory: 0, available: true, preorder: true, image: SWIM_IMG.hero },
-        { id: 'swim-aruba-sage-dd', title: 'Dark Sage / DD', color: 'Dark Sage', size: 'DD', sku: 'BSWIM-ARUBA-SAGE-DD', price: 112.0, compareAt: 127.27, inventory: 0, available: true, preorder: true, image: SWIM_IMG.hero },
-        { id: 'swim-aruba-santorini-xs', title: 'Santorini / XS', color: 'Santorini', size: 'XS', sku: 'BSWIM-ARUBA-SANTORINI-XS', price: 112.0, compareAt: 127.27, inventory: 0, available: true, preorder: true, image: SWIM_IMG.santorini },
-        { id: 'swim-aruba-fire-xs', title: 'Fire / XS', color: 'Fire', size: 'XS', sku: 'BSWIM-ARUBA-FIRE-XS', price: 112.0, compareAt: 127.27, inventory: 0, available: true, preorder: true, image: SWIM_IMG.fire },
-        { id: 'swim-aruba-bengal-xs', title: 'Bengal / XS', color: 'Bengal', size: 'XS', sku: 'BSWIM-ARUBA-BENGAL-XS', price: 112.0, compareAt: 127.27, inventory: 0, available: true, preorder: true, image: SWIM_IMG.hero },
-        { id: 'swim-aruba-palma-xs', title: 'Palma / XS', color: 'Palma', size: 'XS', sku: 'BSWIM-ARUBA-PALMA-XS', price: 112.0, compareAt: 127.27, inventory: 0, available: true, preorder: true, image: SWIM_IMG.hero },
-        { id: 'swim-aruba-sunglow-xs', title: 'Sun Glow / XS', color: 'Sun Glow', size: 'XS', sku: 'BSWIM-ARUBA-SUNGLOW-XS', price: 112.0, compareAt: 127.27, inventory: 0, available: true, preorder: true, image: SWIM_IMG.hero },
-        { id: 'swim-aruba-lagoon-xs', title: 'Lagoon / XS', color: 'Lagoon', size: 'XS', sku: 'BSWIM-ARUBA-LAGOON-XS', price: 112.0, compareAt: 127.27, inventory: 0, available: true, preorder: true, image: SWIM_IMG.hero },
-        { id: 'swim-aruba-burum-xs', title: 'Burum / XS', color: 'Burum', size: 'XS', sku: 'BSWIM-ARUBA-BURUM-XS', price: 112.0, compareAt: 127.27, inventory: 0, available: true, preorder: true, image: SWIM_IMG.hero },
-        { id: 'swim-aruba-raven-xs', title: 'Raven / XS', color: 'Raven', size: 'XS', sku: 'BSWIM-ARUBA-RAVEN-XS', price: 112.0, compareAt: 127.27, inventory: 0, available: true, preorder: true, image: SWIM_IMG.hero },
+      ], swatches: ['#5b8e90', '#f5dfb4', '#f3a0a2', '#775246', '#1c3935', '#f3bd3d', '#56b7c6', '#ef784f', '#111111'], tags: [], summary: 'Pre-order now to make sure you do not miss out! As soon as it is in stock, we will ship it to you.', highlights: ['Free 2 Day Shipping on Orders $50+', 'Beach Ready', 'Eco Swimwear'], description: '<p>Pre-order now to make sure you do not miss out! As soon as it is in stock, we will ship it to you.</p>', metafields: { 'custom.fit_guide': 'Runs small · true to size · runs large', 'custom.care_instructions': 'Rinse in cold water after each wear. Lay flat to dry.', 'custom.material': 'Recycled swim fabric', 'custom.swim_note': 'Tops and bottoms sold separately.', 'custom.fabric_weight': '190 gsm', 'google.gender': 'female', 'google.age_group': 'adult', 'google.condition': 'new', 'custom.is_bestseller': 'true' }, variants: [
+        { id: 'swim-aruba-sage-xs', title: 'Dark Sage / XS', color: 'Dark Sage', size: 'XS', sku: 'BSWIM-ARUBA-SAGE-XS', price: 113.0, compareAt: 0, inventory: 0, available: true, preorder: true, image: SWIM_IMG.hero },
+        { id: 'swim-aruba-sage-s', title: 'Dark Sage / S', color: 'Dark Sage', size: 'S', sku: 'BSWIM-ARUBA-SAGE-S', price: 113.0, compareAt: 0, inventory: 0, available: true, preorder: true, image: SWIM_IMG.hero },
+        { id: 'swim-aruba-sage-m', title: 'Dark Sage / M', color: 'Dark Sage', size: 'M', sku: 'BSWIM-ARUBA-SAGE-M', price: 113.0, compareAt: 0, inventory: 0, available: true, preorder: true, image: SWIM_IMG.hero },
+        { id: 'swim-aruba-sage-l', title: 'Dark Sage / L', color: 'Dark Sage', size: 'L', sku: 'BSWIM-ARUBA-SAGE-L', price: 113.0, compareAt: 0, inventory: 0, available: true, preorder: true, image: SWIM_IMG.hero },
+        { id: 'swim-aruba-sage-d', title: 'Dark Sage / D', color: 'Dark Sage', size: 'D', sku: 'BSWIM-ARUBA-SAGE-D', price: 113.0, compareAt: 0, inventory: 0, available: true, preorder: true, image: SWIM_IMG.hero },
+        { id: 'swim-aruba-sage-dd', title: 'Dark Sage / DD', color: 'Dark Sage', size: 'DD', sku: 'BSWIM-ARUBA-SAGE-DD', price: 113.0, compareAt: 0, inventory: 0, available: true, preorder: true, image: SWIM_IMG.hero },
+        { id: 'swim-aruba-santorini-xs', title: 'Santorini / XS', color: 'Santorini', size: 'XS', sku: 'BSWIM-ARUBA-SANTORINI-XS', price: 113.0, compareAt: 0, inventory: 0, available: true, preorder: true, image: SWIM_IMG.santorini },
+        { id: 'swim-aruba-fire-xs', title: 'Fire / XS', color: 'Fire', size: 'XS', sku: 'BSWIM-ARUBA-FIRE-XS', price: 113.0, compareAt: 0, inventory: 0, available: true, preorder: true, image: SWIM_IMG.fire },
+        { id: 'swim-aruba-bengal-xs', title: 'Bengal / XS', color: 'Bengal', size: 'XS', sku: 'BSWIM-ARUBA-BENGAL-XS', price: 113.0, compareAt: 0, inventory: 0, available: true, preorder: true, image: SWIM_IMG.bengal },
+        { id: 'swim-aruba-palma-xs', title: 'Palma / XS', color: 'Palma', size: 'XS', sku: 'BSWIM-ARUBA-PALMA-XS', price: 113.0, compareAt: 0, inventory: 0, available: true, preorder: true, image: SWIM_IMG.palma },
+        { id: 'swim-aruba-sunglow-xs', title: 'Sun Glow / XS', color: 'Sun Glow', size: 'XS', sku: 'BSWIM-ARUBA-SUNGLOW-XS', price: 113.0, compareAt: 0, inventory: 0, available: true, preorder: true, image: SWIM_IMG.sunGlow },
+        { id: 'swim-aruba-lagoon-xs', title: 'Lagoon / XS', color: 'Lagoon', size: 'XS', sku: 'BSWIM-ARUBA-LAGOON-XS', price: 113.0, compareAt: 0, inventory: 0, available: true, preorder: true, image: SWIM_IMG.lagoon },
+        { id: 'swim-aruba-burum-xs', title: 'Burum / XS', color: 'Burum', size: 'XS', sku: 'BSWIM-ARUBA-BURUM-XS', price: 113.0, compareAt: 0, inventory: 0, available: true, preorder: true, image: SWIM_IMG.burum },
+        { id: 'swim-aruba-raven-xs', title: 'Raven / XS', color: 'Raven', size: 'XS', sku: 'BSWIM-ARUBA-RAVEN-XS', price: 113.0, compareAt: 0, inventory: 0, available: true, preorder: true, image: SWIM_IMG.raven },
       ] },
-      { id: 'swim-cecilia', handle: 'b-swim-cecilia-1pc', title: 'Cecilia 1pc', vendor: 'B Swim', category: 'One Pieces', sku: 'BSWIM-CECILIA', inventory: 12, preorder: true, price: 186.0, compareAt: 0, rating: 4.0, reviews: 4, image: SWIM_IMG.santorini, images: [SWIM_IMG.santorini, SWIM_IMG.detail, SWIM_IMG.side], swatches: ['#f5dfb4', '#5b8e90', '#111111'], tags: ['tag__new_New arrival'], description: '<p>A sculpted one-piece with clean lines and soft support. Pair with a cover-up for beach-to-brunch days.</p>', variants: [
-        { id: 'swim-cecilia-s', title: 'Santorini / S', color: 'Santorini', size: 'S', price: 186.0, inventory: 6, available: true, preorder: true, image: SWIM_IMG.santorini },
-        { id: 'swim-cecilia-m', title: 'Santorini / M', color: 'Santorini', size: 'M', price: 186.0, inventory: 6, available: true, preorder: true, image: SWIM_IMG.santorini },
+      { id: 'swim-cecilia', handle: 'b-swim-cecilia-1pc', title: 'Cecilia 1pc', vendor: 'Swim Systems', category: 'One Pieces', sku: 'SWIM-CECILIA', inventory: 12, preorder: true, price: 186.0, compareAt: 0, rating: 4.0, reviews: 4, image: SWIM_IMG.cecilia, images: [SWIM_IMG.cecilia], swatches: ['#111111'], tags: [], description: '<p>A sculpted one-piece with clean lines and soft support.</p>', variants: [
+        { id: 'swim-cecilia-s', title: 'Shadow / S', color: 'Shadow', size: 'S', price: 186.0, inventory: 6, available: true, preorder: true, image: SWIM_IMG.cecilia },
+        { id: 'swim-cecilia-m', title: 'Shadow / M', color: 'Shadow', size: 'M', price: 186.0, inventory: 6, available: true, preorder: true, image: SWIM_IMG.cecilia },
       ] },
-      { id: 'swim-belize', handle: 'b-swim-belize-bralette', title: 'Belize Bralette', vendor: 'B Swim', category: 'Swim Tops', sku: 'BSWIM-BELIZE', inventory: 18, price: 108.0, compareAt: 121.0, rating: 4.0, reviews: 4, image: SWIM_IMG.fire, images: [SWIM_IMG.fire, SWIM_IMG.angle, SWIM_IMG.back], swatches: ['#f3a0a2', '#ef784f', '#111111', '#5b8e90'], tags: [], description: '<p>A soft bralette top with adjustable straps. Mix with any B Swim bottom.</p>', variants: [
-        { id: 'swim-belize-s', title: 'Fire / S', color: 'Fire', size: 'S', price: 108.0, compareAt: 121.0, inventory: 9, available: true, image: SWIM_IMG.fire },
-        { id: 'swim-belize-m', title: 'Fire / M', color: 'Fire', size: 'M', price: 108.0, compareAt: 121.0, inventory: 9, available: true, image: SWIM_IMG.fire },
+      { id: 'swim-belize', handle: 'b-swim-belize-bralette', title: 'Belize Bralette', vendor: 'B Swim', category: 'Swim Tops', sku: 'BSWIM-BELIZE', inventory: 18, price: 108.0, compareAt: 121.0, rating: 4.0, reviews: 4, image: SWIM_IMG.belize, images: [SWIM_IMG.belize], swatches: ['#ef784f'], tags: [], description: '<p>A soft bralette top with adjustable straps. Mix with any B Swim bottom.</p>', variants: [
+        { id: 'swim-belize-s', title: 'Deep Dive / S', color: 'Deep Dive', size: 'S', price: 108.0, compareAt: 121.0, inventory: 9, available: true, image: SWIM_IMG.belize },
+        { id: 'swim-belize-m', title: 'Deep Dive / M', color: 'Deep Dive', size: 'M', price: 108.0, compareAt: 121.0, inventory: 9, available: true, image: SWIM_IMG.belize },
       ] },
       { id: 'swim-forever', handle: 'b-swim-forever-tankini', title: 'Forever Tankini', vendor: 'B Swim', category: 'Swim Tops', sku: 'BSWIM-FOREVER', inventory: 20, price: 115.0, compareAt: 0, rating: 4.2, reviews: 4, image: SWIM_IMG.detail, images: [SWIM_IMG.detail, SWIM_IMG.hero, SWIM_IMG.side], swatches: ['#5b8e90', '#1c3935', '#f3bd3d'], tags: [], description: '<p>A tankini top with easy coverage and beach-day comfort.</p>', variants: [
         { id: 'swim-forever-m', title: 'Dark Sage / M', color: 'Dark Sage', size: 'M', price: 115.0, inventory: 10, available: true, image: SWIM_IMG.detail },
@@ -430,6 +458,15 @@
       { id: 'swim-muse', handle: 'b-swim-muse-halter', title: 'Muse Halter', vendor: 'B Swim', category: 'Swim Tops', sku: 'BSWIM-MUSE', inventory: 14, price: 98.0, compareAt: 0, rating: 4.1, reviews: 3, image: SWIM_IMG.side, images: [SWIM_IMG.side, SWIM_IMG.back], swatches: ['#56b7c6', '#f5dfb4'], tags: [], description: '<p>A halter swim top with a clean neckline and soft support.</p>', variants: [
         { id: 'swim-muse-s', title: 'Lagoon / S', color: 'Lagoon', size: 'S', price: 98.0, inventory: 7, available: true, image: SWIM_IMG.side },
         { id: 'swim-muse-m', title: 'Lagoon / M', color: 'Lagoon', size: 'M', price: 98.0, inventory: 7, available: true, image: SWIM_IMG.side },
+      ] },
+      { id: 'swim-look-vitamin', handle: 'swim-look-vitamin-a', title: 'Vitamin A Edit', vendor: 'B Swim', category: 'Swim Looks', sku: 'BSWIM-LOOK-VIT', inventory: 8, price: 118.0, compareAt: 0, rating: 4.5, reviews: 4, image: SWIM_IMG.blogVitamin, images: [SWIM_IMG.blogVitamin], swatches: ['#1c3935'], tags: [], description: '<p>Editorial beach look from the Swim Life journal.</p>', variants: [
+        { id: 'swim-look-vitamin-m', title: 'Coastal / M', color: 'Coastal', size: 'M', price: 118.0, inventory: 4, available: true, image: SWIM_IMG.blogVitamin },
+      ] },
+      { id: 'swim-look-styles', handle: 'swim-look-finding-styles', title: 'Style Edit', vendor: 'B Swim', category: 'Swim Looks', sku: 'BSWIM-LOOK-STY', inventory: 8, price: 112.0, compareAt: 0, rating: 4.4, reviews: 3, image: SWIM_IMG.blogStyles, images: [SWIM_IMG.blogStyles], swatches: ['#111111'], tags: [], description: '<p>Editorial swim styling look from the Swim Life journal.</p>', variants: [
+        { id: 'swim-look-styles-m', title: 'Black / M', color: 'Black', size: 'M', price: 112.0, inventory: 4, available: true, image: SWIM_IMG.blogStyles },
+      ] },
+      { id: 'swim-look-earth', handle: 'swim-look-earth-month', title: 'Earth Month Edit', vendor: 'B Swim', category: 'Swim Looks', sku: 'BSWIM-LOOK-EARTH', inventory: 8, price: 116.0, compareAt: 0, rating: 4.6, reviews: 5, image: SWIM_IMG.blogEarth, images: [SWIM_IMG.blogEarth], swatches: ['#e879a0'], tags: [], description: '<p>Editorial resort look from the Swim Life journal.</p>', variants: [
+        { id: 'swim-look-earth-m', title: 'Rose / M', color: 'Rose', size: 'M', price: 116.0, inventory: 4, available: true, image: SWIM_IMG.blogEarth },
       ] },
       { id: 'p7', title: 'Canvas weekender tote', vendor: 'Aura Studio', price: 29.0, compareAt: 39.0, rating: 4.7, reviews: 83, image: IMG.p7, swatches: ['#b08968', '#2b2f36'], description: '<p>A sturdy canvas weekender tote with interior pockets and a reinforced base. Room for a change of clothes, laptop sleeve, and weekend extras without losing shape.</p><p><strong>Best For:</strong></p><ul><li>Overnight trips</li><li>Gym-to-office days</li><li>Market runs</li></ul>' },
       { id: 'p8', handle: 'everyday-rib-socks-3-pack', title: 'Everyday rib socks · 3 pack', status: 'deactivated', vendor: 'Aura Studio', sku: 'AUR-RIB-SOCKS-SAND-S', inventory: 3, price: 16.0, compareAt: 24.0, rating: 4.6, reviews: 119, image: IMG.p1, images: [IMG.p1, IMG.p1b, IMG.p1c, IMG.p1d, IMG.p1sand, IMG.p1blk], swatches: ['#c8b6a6', '#2b2f36', '#e8e1d6'], tags: ['tag__hot_Best seller', 'tag__new_Black Friday Sale'], description: '<p>Soft rib cotton socks with reinforced heel and toe. Pack of three everyday neutrals that stay put without digging in.</p><p><strong>Best For:</strong></p><ul><li>Daily rotation</li><li>Sneakers and loafers</li><li>Gifting sets</li></ul><p>Machine wash cold with like colors. Hang dry to keep the rib elastic.</p>', metafields: { 'custom.fabric_weight': '160 gsm', 'custom.fit_guide': 'True to size', 'custom.care_instructions': 'Machine wash cold with like colors. Hang dry.', 'custom.material': 'Cotton rib', 'google.gender': 'unisex', 'google.age_group': 'adult' }, variants: [
@@ -574,10 +611,10 @@
           { id: 'sec-pdp-main', kind: 'product-main', blocks: [
             { kind: 'badges', settings: { show_sold_out: false, show_saving: false, badge_position: 'left', badge_icon: 'none', badge_gap: 8 } },
             { kind: 'title', settings: { title_size: 30 } },
-            { kind: 'price', settings: { show_taxes: false, show_saving: true, saving_type: 'percentage', saving_style: 'filled', saving_position: 'right' } },
+            { kind: 'price', settings: { show_taxes: false, show_saving: false, saving_type: 'percentage', saving_style: 'filled', saving_position: 'right' } },
             { kind: 'rating', settings: { layout: 'default', star_style: 'boxed', style: 'stars-rating-custom', custom_text: 'Trusted by 2000+', underline_text: false, size: 14, color: '#0f3636', text_color: '' } },
             { kind: 'inventory', settings: { show_status: true, show_count: true, low_stock_threshold: 5, status_style: 'dot', in_stock_color: '#10a443', status_color: '#f59e0b' } },
-            { kind: 'variant', settings: { hide_sold_out: false, picker_type: 'buttons', swatch_style: 'color', shape: 'normal', show_group_title: true } },
+            { kind: 'variant', settings: { hide_sold_out: false, picker_type: 'buttons', swatches: true, swatch_style: 'color', shape: 'normal', show_group_title: true } },
             { kind: 'buy', settings: { show_quantity: true, show_add: true, atc_layout: 'with-quantity', atc_icon: 'bag-plus', atc_background: '#FFC439', atc_text_color: '#FFFFFF', atc_shape: 'pill', atc_custom_radius: 8, show_dynamic: true, channels: ['buy_now', 'paypal'], buy_now_text: 'Buy now', buy_now_background: '#000000', buy_now_text_color: '#FFFFFF', dyn_shape: 'pill', dyn_custom_radius: 8, show_payment_options: true, channel_logo: true, show_safe_checkout: true, safe_checkout_align: 'center', safe_checkout_label: 'GUARANTEED SAFE CHECKOUT', trust_logos: ['visa', 'mastercard', 'amex', 'paypal', 'apple_pay', 'google_pay'], trust_logo_size: 24 } },
             { kind: 'icon_text', settings: { layout: 'horizontal', item_layout: 'icon-left', alignment: 'left', font: 'body', size: 15, icon_size: 20, item_gap: 24, icon_text_gap: 8, background: false, background_color: '#f6f6f6', corner_radius: 10, text_color: '', icon_color: '', card_style: 'none', icon_1: 'box', image_1: '', first_heading: 'Orders over $50 ship free', first_content: '', icon_2: 'return', image_2: '', second_heading: '30 day returns', second_content: '', icon_3: 'star', image_3: '', third_heading: '', third_content: '' } },
             { kind: 'collapsible', settings: { heading: 'Overview', icon: 'none', open: false } },
@@ -594,20 +631,28 @@
           { id: 'sec-well-main', kind: 'product-main', blocks: [
             { kind: 'badges', settings: { show_sold_out: false, show_saving: true, saving_type: 'percentage', badge_position: 'left', badge_icon: 'leaf', custom_tag_style: 'filled', hot_badge_bg: '#1f6b4a', hot_badge_text_color: '#ffffff', new_badge_bg: '#FFC439', new_badge_text_color: '#ffffff', badge_gap: 8 } },
             { kind: 'title', settings: { title_size: 28 } },
-            { kind: 'price', settings: { show_taxes: false, show_saving: true, saving_type: 'percentage', saving_style: 'filled', saving_position: 'right' } },
+            { kind: 'price', settings: { show_taxes: false, show_saving: false, saving_type: 'percentage', saving_style: 'filled', saving_position: 'right' } },
             { kind: 'rating', settings: { layout: 'default', star_style: 'regular', style: 'stars-rating-custom', size: 14, color: '#f5b301', custom_text: 'Trusted by 2000+' } },
             { kind: 'inventory', settings: { show_status: true, show_count: true, low_stock_threshold: 8, status_style: 'dot', in_stock_color: '#10a443', status_color: '#f59e0b' } },
-            { kind: 'variant', settings: { hide_sold_out: false, picker_type: 'buttons', swatch_style: 'text', shape: 'normal', show_group_title: true } },
-            { kind: 'buy', settings: { show_quantity: true, show_add: true, atc_layout: 'with-quantity', atc_icon: 'bag-plus', show_dynamic: true, show_payment_options: true, atc_shape: 'pill', dyn_shape: 'pill', channels: ['paypal', 'apple_pay', 'google_pay'], channel_logo: true, show_safe_checkout: true, safe_checkout_label: 'GUARANTEED SAFE CHECKOUT', trust_logos: ['norton', 'paypal', 'visa', 'mastercard', 'mcafee', 'money_back', 'amex', 'discover', 'apple_pay', 'google_pay'], trust_logo_size: 24 } },
+            { kind: 'variant', settings: { hide_sold_out: false, picker_type: 'buttons', swatches: true, swatch_style: 'text', shape: 'normal', show_group_title: true } },
+            { kind: 'buy', settings: { show_quantity: true, show_add: true, atc_layout: 'with-quantity', atc_icon: 'bag-plus', show_dynamic: true, show_payment_options: true, atc_shape: 'pill', dyn_shape: 'pill', channels: ['paypal'], channel_logo: true, show_safe_checkout: true, safe_checkout_label: 'GUARANTEED SAFE CHECKOUT', trust_logos: ['norton', 'paypal', 'visa', 'mastercard', 'mcafee', 'money_back', 'amex', 'discover', 'apple_pay', 'google_pay'], trust_logo_size: 24 } },
             { kind: 'icon_text', settings: { layout: 'horizontal', item_layout: 'icon-left', alignment: 'left', font: 'body', size: 15, icon_size: 20, item_gap: 24, icon_text_gap: 8, background: true, background_color: '#f6f6f6', corner_radius: 10, text_color: '', icon_color: '', card_style: 'outline', icon_1: 'truck', image_1: '', first_heading: 'Express shipping', first_content: '', icon_2: 'shield', image_2: '', second_heading: '90-day money-back', second_content: '', icon_3: 'leaf', image_3: '', third_heading: 'Clean ingredients', third_content: '' } },
             { kind: 'shipping', settings: { delivery_text: 'Estimated delivery:', days: 5, date_format: '%b %d', timezone: 'store' } },
             { kind: 'featured_reviews', settings: { heading: 'What Our Customers Are Saying', layout: 'trust', data_source: 'auto', auto_count: 3, reviews: [], show_image: true, show_avatar: true, round_avatar: true, star_color: '#16a34a', show_verified: true, verified_text: 'Verified Customer', verified_subtext: 'Real customer · Verified order · Real buyer', scroll: true, nav_style: 'auto', auto_play: false, cards_per_row: 1 } },
-            { kind: 'video_column', settings: { heading: '', heading_color: '', per_row: 4, mobile_count: 2, gap: 10, corner_radius: 12, video_border: 'transparent', show_play_button: true } },
+            // Keep Wildpeak ug* covers on wellness — Swim PDP uses SWIM_IMG covers below.
+            { kind: 'video_column', settings: { heading: '', heading_color: '', per_row: 4, mobile_count: 2, gap: 10, corner_radius: 12, video_border: '#f5f5f5', show_play_button: true, videos: [
+              { id: 'vi-well-1', cover_image: IMG.ug1, video_url: '', accessible_label: '' },
+              { id: 'vi-well-2', cover_image: IMG.ug2, video_url: '', accessible_label: '' },
+              { id: 'vi-well-3', cover_image: IMG.ug3, video_url: '', accessible_label: '' },
+              { id: 'vi-well-4', cover_image: IMG.ug4, video_url: '', accessible_label: '' },
+              { id: 'vi-well-5', cover_image: IMG.ug5, video_url: '', accessible_label: '' },
+              { id: 'vi-well-6', cover_image: IMG.ug6, video_url: '', accessible_label: '' },
+            ] } },
             { kind: 'collapsible', settings: { heading: 'Supplement facts', icon: 'clipboard', open: true, accordion_mode: true, icon_position: 'right' } },
             { kind: 'collapsible', settings: { heading: 'How to use', icon: 'stopwatch', open: false, accordion_mode: true, icon_position: 'right' } },
             { kind: 'collapsible', settings: { heading: 'Ingredients', icon: 'leaf', open: false, accordion_mode: true, icon_position: 'right' } },
             { kind: 'recommendations', settings: { heading: 'You Might Also Like', per_row: 2, mobile_count: 2, empty_behavior: 'hide', dedupe_current: true } },
-            { kind: 'sticky', settings: { show_image: true, show_title: true, show_price: true, show_quantity: true, appear_at: 'scroll', mobile_visible: true, button_text: 'Add to cart' } },
+            { kind: 'sticky', settings: { show_image: true, show_title: true, show_price: true, show_quantity: true, appear_at: 'scroll', mobile_visible: true, button_text: 'ADD TO CART' } },
           ] },
           { id: 'sec-well-story', kind: 'media-with-text' },
           { id: 'sec-well-reviews', kind: 'testimonial', settings: { heading: 'What Our Customers Are Saying' } },
@@ -628,28 +673,42 @@
             swatch_ring: true,
           }, blocks: [
             { kind: 'title', settings: { title_size: 34, title_weight: '200', title_letter_spacing: -0.04, title_margin_bottom: 17, title_font_family: 'Montserrat', description: '', description_color: '#666666', description_size: 14, description_top: 6, description_bottom: 0 } },
-            { kind: 'price', settings: { show_taxes: false, show_saving: true, saving_type: 'percentage', saving_style: 'outline', saving_position: 'right', size: 24, weight: '300' } },
+            { kind: 'price', settings: { show_taxes: false, show_saving: false, saving_type: 'percentage', saving_style: 'outline', saving_position: 'right', size: 24, weight: '300' } },
             { kind: 'rating', settings: { layout: 'default', star_style: 'regular', style: 'stars-and-count', size: 13, color: '#232323', review_label: 'reviews', underline_text: false } },
             { kind: 'description', settings: { text: '', width: 'fill', alignment: 'left', background: true, background_color: '#ececec', corner_radius: 0, padding_top: 15, padding_bottom: 14, padding_left: 17, padding_right: 17 } },
-            { kind: 'variant', settings: { hide_sold_out: false, picker_type: 'buttons', swatch_style: 'color', shape: 'normal', show_group_title: true } },
-            { kind: 'popup', settings: { label: 'Size guide', page: 'pg-swim-size-chart', popup_width: 560, popup_height: 420 } },
+            { kind: 'variant', settings: { hide_sold_out: false, picker_type: 'buttons', swatches: true, swatch_style: 'color', shape: 'normal', show_group_title: true } },
             { kind: 'buy', settings: { show_quantity: true, show_add: true, atc_layout: 'full-width', atc_icon: 'none', atc_background: '#232323', atc_text_color: '#ffffff', atc_shape: 'square', atc_custom_radius: 0, show_dynamic: false, channels: [], buy_now_text: 'Buy it now', buy_now_background: '#232323', buy_now_text_color: '#ffffff', dyn_shape: 'square', dyn_custom_radius: 0, show_payment_options: false, channel_logo: false, show_safe_checkout: false } },
-            { kind: 'icon_text', settings: { layout: 'horizontal', item_layout: 'icon-top', alignment: 'center', font: 'body', size: 12, icon_size: 24, item_gap: 30, icon_text_gap: 8, background: false, background_color: '#f6f6f6', corner_radius: 0, text_color: '#232323', icon_color: '#232323', card_style: 'none', icon_1: 'world', image_1: '', first_heading: '<strong>Free shipping</strong>', first_content: 'Worldwide', icon_2: 'beach', image_2: '', second_heading: '<strong>Beach Ready</strong>', second_content: 'Styles for all', icon_3: 'leaf', image_3: '', third_heading: '<strong>Eco Swimwear</strong>', third_content: 'Sustainable' } },
-            { kind: 'collapsible', settings: { heading: 'Description', icon: 'eye', icon_position: 'right', open: false, accordion_mode: true, content: '<p>This bombshell bra will flatter any shape and provide just the right amount of support. Adjustable straps and underwire make this top as comfortable as it is cute and classy. Bottom sold separately.</p>' } },
+            { kind: 'icon_text', settings: { layout: 'horizontal', item_layout: 'icon-top', alignment: 'center', font: 'body', size: 12, icon_size: 24, item_gap: 30, icon_text_gap: 8, background: false, background_color: '#f6f6f6', corner_radius: 0, text_color: '#232323', icon_color: '#232323', card_style: 'none', icon_1: 'world', image_1: '', first_heading: '<strong>Free shipping</strong>', first_content: 'Free 2 Day Shipping on Orders $50+', icon_2: 'beach', image_2: '', second_heading: '<strong>Beach Ready</strong>', second_content: 'Styles for all', icon_3: 'leaf', image_3: '', third_heading: '<strong>Eco Swimwear</strong>', third_content: 'Sustainable' } },
+            { kind: 'video_column', settings: { heading: '', heading_color: '', per_row: 4, mobile_count: 2, gap: 10, corner_radius: 12, video_border: '#f5f5f5', show_play_button: true, videos: [
+              { id: 'vi-swim-1', cover_image: SWIM_IMG.videoPoster, video_url: SWIM_IMG.video, accessible_label: 'Aruba top in Dark Sage' },
+              { id: 'vi-swim-2', cover_image: SWIM_IMG.santorini, video_url: '', accessible_label: 'Aruba top in Santorini' },
+              { id: 'vi-swim-3', cover_image: SWIM_IMG.fire, video_url: '', accessible_label: 'Aruba top in Fire' },
+              { id: 'vi-swim-4', cover_image: SWIM_IMG.beachReady, video_url: '', accessible_label: 'Beach ready look' },
+              { id: 'vi-swim-5', cover_image: SWIM_IMG.blogVitamin, video_url: '', accessible_label: 'Vitamin A edit' },
+              { id: 'vi-swim-6', cover_image: SWIM_IMG.blogStyles, video_url: '', accessible_label: 'Style edit' },
+            ] } },
+            { kind: 'collapsible', settings: { heading: 'Description', icon: 'eye', icon_position: 'right', open: false, accordion_mode: true, content: '<p>This bombshell bra will flatter any shape and provide just the right amount of support. Adjustable straps and underwire make this top as comfortable as it is cute and classy. Bottom sold separately.</p><p><strong>BESTSWIMWEAR</strong> All products featured with kind permission from BESTSWIMWEAR. <a href="#">Click here to purchase.</a></p>' } },
             { kind: 'collapsible', settings: { heading: 'Shipping & Returns', icon: 'box', icon_position: 'right', open: false, accordion_mode: true, content: '<p>Free 2 Day Shipping on Orders $50+. Returns must be postmarked within 15 days of delivery for a refund and within 30 days for a store credit or exchange. Read our full returns policy in our FAQ page.</p>' } },
-            { kind: 'collapsible', settings: { heading: 'Tops and bottoms sold separately', icon: 'price-tag', icon_position: 'right', open: false, accordion_mode: true, content: '<p>All suits are sold as separates. Tops and bottoms are paired together in pictures, so check the product title to confirm which piece you are purchasing.</p>' } },
+            { kind: 'collapsible', settings: { heading: 'Tops and bottoms sold separately', icon: 'price-tag', icon_position: 'right', open: false, accordion_mode: true, content: '<p>All of our suits are sold as separates. Tops and bottoms are paired together in pictures, but please refer to the title of the item you are purchasing to make sure you are buying the correct piece.</p>' } },
             { kind: 'recommendations', settings: { subheading: '', heading: 'Related products', content: '', products: ['swim-cecilia', 'swim-belize'], per_row: 2, mobile_count: 2, image_ratio: 'portrait', empty_behavior: 'hide', exclude_soldout: false, dedupe_current: true } },
-            { kind: 'sticky', settings: { show_image: true, show_title: true, show_price: true, show_quantity: true, appear_at: 'scroll', mobile_visible: true, width_mode: 'container', desktop_button_width: 320, button_text: 'Add to cart' } },
+            { kind: 'sticky', settings: { show_image: true, show_title: true, show_price: true, show_quantity: true, appear_at: 'scroll', mobile_visible: true, width_mode: 'container', desktop_button_width: 320, button_text: 'ADD TO CART' } },
           ] },
           // OOB PDP page sections after Product information
           { id: 'sec-app-iwt', kind: 'media-with-text', settings: { section_heading: 'Beach Ready', section_subheading: '', heading_alignment: 'center' }, blocks: [
-            { kind: 'image', settings: { image: SWIM_IMG.detail, image_width: 50, image_position: 'left', subheading: 'B Swim', heading: 'Made for sunny days', content: 'Supportive swim separates designed to flatter every shape. Pair this top with your favorite B Swim bottom.', button_text: 'Shop swim bottoms', button_url: '#', button_style: 'text' } },
+            { kind: 'image', settings: { image: SWIM_IMG.beachReady, image_width: 50, image_position: 'left', subheading: 'B Swim', heading: 'Made for sunny days', content: 'Supportive swim separates designed to flatter every shape. Pair this top with your favorite B Swim bottom.', button_text: 'Shop swim bottoms', button_url: '#', button_style: 'text' } },
             { kind: 'image', settings: { image: SWIM_IMG.santorini, image_width: 50, image_position: 'right', subheading: 'Eco Swimwear', heading: 'A better beach wardrobe', content: 'Recycled swim fabric, adjustable support, and colors made to mix across the collection.', button_text: 'Explore the collection', button_url: '#', button_style: 'underline' } },
           ] },
-          { id: 'sec-app-testi', kind: 'testimonial', settings: { heading: 'Customer favorites' } },
+          { id: 'sec-app-testi', kind: 'testimonial', settings: { heading: 'Testimonial', show_product_price: true }, blocks: [
+            { kind: 'review', settings: { avatar: SWIM_IMG.avSarah, round_avatar: true, show_rating: true, rating: 5, author: 'Sarah M.', show_verified: true, verified_buyer_text: 'Verified buyer', heading: 'Pure quality', content: 'The fit is perfect and the fabric feels amazing. I’ve already ordered two more.', review_image: SWIM_IMG.blogVitamin, associated_product: 'swim-aruba' } },
+            { kind: 'review', settings: { avatar: SWIM_IMG.avJames, round_avatar: true, show_rating: true, rating: 4.5, author: 'James L.', show_verified: true, verified_buyer_text: 'Verified buyer', heading: 'Great value', content: 'Shipping was fast and the product exceeded my expectations for the price.', review_image: SWIM_IMG.blogStyles, associated_product: 'swim-belize' } },
+            { kind: 'review', settings: { avatar: SWIM_IMG.avMei, round_avatar: true, show_rating: true, rating: 5, author: 'Mei K.', show_verified: false, heading: 'Obsessed', content: 'My new favourite. Comfortable enough to wear every single day.', review_image: SWIM_IMG.blogEarth, associated_product: 'swim-cecilia' } },
+            { kind: 'review', settings: { avatar: SWIM_IMG.avDana, round_avatar: true, show_rating: true, rating: 4.5, author: 'Dana P.', show_verified: true, verified_buyer_text: 'Verified buyer', heading: 'Will buy again', content: 'Soft, well made and true to size. Highly recommend.', review_image: SWIM_IMG.beachReady, associated_product: 'swim-forever' } },
+            { kind: 'review', settings: { avatar: SWIM_IMG.avChris, round_avatar: true, show_rating: true, rating: 5, author: 'Chris N.', show_verified: true, verified_buyer_text: 'Verified buyer', heading: 'Everyday staple', content: 'Wore it three times this week. Holds its shape and washes well.', review_image: SWIM_IMG.santorini, associated_product: 'swim-muse' } },
+            { kind: 'review', settings: { avatar: SWIM_IMG.avAlicia, round_avatar: true, show_rating: true, rating: 4.5, author: 'Alicia R.', show_verified: true, verified_buyer_text: 'Verified buyer', heading: 'Better than expected', content: 'Color matches the photos and the cut is flattering. Already planning a second order.', review_image: SWIM_IMG.hero, associated_product: 'swim-aruba' } },
+          ] },
           { id: 'sec-app-faq', kind: 'faq', settings: {
             layout_style: 'and-text',
-            heading: 'Pre-order FAQs',
+            heading: 'FAQ',
             content: 'Questions about pre-orders? Open the answers below or email <a href="mailto:hello@aura.shop">hello@aura.shop</a>.',
             support_hours: '',
             answer_time: '',
@@ -659,7 +718,7 @@
             { kind: 'item', settings: { question: 'What is a pre-order?', answer: '<p>A pre-order reserves a product before its scheduled release. It ships as soon as it is back in stock.</p>' } },
             { kind: 'item', settings: { question: 'How do I place a pre-order?', answer: '<p>Select your color and size, then click Pre-order. Your order confirmation will include the reservation details.</p>' } },
             { kind: 'item', settings: { question: 'When will I be charged?', answer: '<p>Your payment method is validated when you order and charged when the product is ready to ship.</p>' } },
-            { kind: 'item', settings: { question: 'When will I receive my pre-order?', answer: '<p>We send an email before the release date and ship as soon as inventory arrives. Delivery timing can vary by destination.</p>' } },
+            { kind: 'item', settings: { question: 'When will I receive my pre-order(s)?', answer: '<p>We send an email before the release date and ship as soon as inventory arrives. Delivery timing can vary by destination.</p>' } },
           ] },
         ] }
       ] },

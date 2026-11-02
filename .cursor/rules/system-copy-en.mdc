@@ -1,0 +1,9 @@
+# System copy is English
+
+System language defaults to English (`bsio_lang` fallback is `en` in `assets/i18n.js`).
+
+All prototype system copy (menus, buttons, toasts, dialogs, editor chrome, destructive actions) must be English.
+
+- Prefer writing English strings in source
+- Theme editor / shared controls that leave `.i18n-skip` containers (e.g. menus parked on `body`) must keep `i18n-skip` so ZH mode does not translate system actions like Remove
+- Do not ship Chinese for system operations such as Remove, Save, Discard, Select from library

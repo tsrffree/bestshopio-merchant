@@ -736,6 +736,8 @@ select::-ms-expand { display: none; }
 .ui-select-pop .opt { padding: 7px 10px; border-radius: 6px; font-size: 13px; color: var(--ink-body); cursor: pointer; white-space: nowrap; }
 .ui-select-pop .opt:hover { background: var(--panel); color: var(--ink); }
 .ui-select-pop .opt.sel { background: #ebf0ff; color: #356dff; font-weight: 600; }
+/* Theme editor: keep enhanced .os-select looking like the native control row */
+.ui-select.os-select { font-size: 12px; letter-spacing: -0.01em; }
 
 .ui-range { display: flex; align-items: center; cursor: pointer; user-select: none; box-sizing: border-box; }
 .ui-range:hover { border-color: var(--brand); }

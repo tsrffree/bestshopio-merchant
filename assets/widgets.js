@@ -43,12 +43,26 @@
     layer.appendChild(panel);
     document.body.appendChild(layer);
     var r = anchor.getBoundingClientRect();
+    // Theme editor right/left rails clip absolute menus; keep fixed pops inside the rail
+    // (same idea as placeImgMenu / richtext More), falling back to the viewport.
+    var clip = (anchor.closest && (anchor.closest('.os-right') || anchor.closest('.os-left'))) || null;
+    var cr = clip ? clip.getBoundingClientRect() : null;
+    var pad = 8;
+    var maxRight = Math.min(window.innerWidth - pad, cr ? cr.right - pad : window.innerWidth - pad);
+    var minLeft = Math.max(pad, cr ? cr.left + pad : pad);
+    var maxW = Math.max(120, maxRight - minLeft);
+    if (panel.offsetWidth > maxW) {
+      panel.style.boxSizing = 'border-box';
+      panel.style.width = maxW + 'px';
+      panel.style.maxWidth = maxW + 'px';
+      panel.classList.add('ui-select-pop--fit');
+    }
     var pw = panel.offsetWidth, ph = panel.offsetHeight;
     var left = r.left, top = r.bottom + 6;
     if (opts.align === 'right') left = r.right - pw;
-    if (left + pw > window.innerWidth - 8) left = window.innerWidth - 8 - pw;
-    if (left < 8) left = 8;
-    if (top + ph > window.innerHeight - 8) top = Math.max(8, r.top - 6 - ph); // flip up
+    if (left + pw > maxRight) left = Math.max(minLeft, maxRight - pw);
+    if (left < minLeft) left = minLeft;
+    if (top + ph > window.innerHeight - pad) top = Math.max(pad, r.top - 6 - ph); // flip up
     panel.style.top = top + 'px';
     panel.style.left = left + 'px';
     layer._close = closePop;
@@ -81,6 +95,9 @@
       if (openLayer && openLayer._owner === btn) { closePop(); return; }
       var panel = document.createElement('div');
       panel.className = 'ui-select-pop';
+      // Grow with longest label (single line). openPop clamps to .os-right / viewport
+      // and right-aligns so extra width expands left instead of spilling right.
+      panel.style.boxSizing = 'border-box';
       panel.style.minWidth = Math.max(btn.offsetWidth, 160) + 'px';
       Array.prototype.forEach.call(sel.options, function (o, i) {
         var opt = document.createElement('div');
@@ -96,7 +113,7 @@
         };
         panel.appendChild(opt);
       });
-      var l = openPop(btn, panel);
+      var l = openPop(btn, panel, { align: 'right' });
       l._owner = btn;
     };
     // keep label fresh if some code sets value programmatically
@@ -250,9 +267,11 @@
   }
 
   // ---------- scan + observe ----------
-  // enhance filter-bar selects, page-size, and form-field selects (.input);
+  // enhance filter-bar selects, page-size, form-field selects (.input), and
+  // Online Store theme-editor selects (.os-select) so long option labels stay
+  // inside the right rail (native <select> pops cannot be clamped).
   // skip the rich-text toolbar (.rt-select) and anything opting out via data-no-ui.
-  var SEL = 'select.filter-select, select.pg-size, select.input';
+  var SEL = 'select.filter-select, select.pg-size, select.input, select.os-select';
   function scan(scope) {
     var root = scope || document;
     root.querySelectorAll(SEL).forEach(function (s) {

@@ -1,0 +1,25 @@
+# Image component 规范
+
+Shared image control: `imageFieldHtml` / `wireImageField` in `online-store/js/app.js`.
+All `control: 'image'` fields use this design. Do not fork a second image picker.
+
+## Layout and states
+
+- Empty: dashed Select
+- Filled: thin `1px solid #c9cccf` border, filename at bottom when idle
+- Hover on filled: Change overlay only (no pencil / edit icon)
+- Menu: Select from library / Remove only
+- Select-from-library icon: solid filled landscape plate (cutout sun top-right + mountains), via `mediaSelectIcon()` — not outline frame; color inherits menu `#202223`
+- Menu must stay fully visible (fixed to body; nudge inside panel edges)
+
+## System copy
+
+- Prototype system copy is English only
+- Image menu labels: `Select from library`, `Remove`
+- Keep `.os-img-menu` as `i18n-skip` so Chinese UI mode does not translate these
+
+## Remove warning hover
+
+- Idle Remove: text + trash icon `#8E0B21`
+- Hover Remove: background `#FEE1E6`, text + icon `#8E0B21`
+- Colors sampled from the online reference screenshot

@@ -998,9 +998,10 @@
     return verb + ' ' + count + ' ' + plural;
   }
   // §8.2 unsaved-changes gate for switching templates (Save / Discard / Cancel).
+  // i18n-skip: theme-editor system chrome stays English even when UI lang is ZH.
   function confirmSwitchTemplate(proceed) {
     if (!ED || !isDirty()) { proceed(); return; }
-    const back = h('<div class="modal-backdrop" style="z-index:240"></div>');
+    const back = h('<div class="modal-backdrop i18n-skip" style="z-index:240"></div>');
     const m = h('<div class="modal"></div>');
     m.innerHTML = '<div class="modal-head">Unsaved changes</div>' +
       '<div class="modal-body"><div class="subtle" style="font-size:13.5px;line-height:1.6">You have unsaved changes. Save or discard your changes before switching templates.</div></div>' +
@@ -1733,7 +1734,12 @@
     const def = SECTIONS[s.kind]; const bd = blockDef(def, bl.kind);
     const head = bl.settings && (bl.settings.heading || bl.settings.question || bl.settings.title || bl.settings.author || bl.settings.label);
     const base = bd ? bd.name : (bl.kind || 'Block');
-    if (head && String(head).trim()) return base + ' · ' + String(head).trim().slice(0, 22);
+    // Skip "Name · Name" when heading matches the block type name (e.g. Related products).
+    if (head && String(head).trim()) {
+      const h = String(head).trim();
+      if (h.toLowerCase() === String(base).trim().toLowerCase()) return base;
+      return base + ' · ' + h.slice(0, 22);
+    }
     return base;
   }
 
@@ -2414,7 +2420,7 @@
       const def = SECTIONS[s.kind]; const bd = blockDef(def, bl.kind);
       const rm = isCheckout() ? '' : '<button class="os-remove" data-remove-blk="' + sel.sectionId + ':' + bl.id + '">' + I.trash + ' Remove block</button>';
       return panelHead(blockLabel(s, bl), 'block') +
-        '<div class="os-right-scroll" id="os-form">' + (bd && bd.fields && bd.fields.length ? schemaForm(bd.fields, bl.settings, '') : noSettings()) + panelFoot(rm) + '</div>';
+        '<div class="os-right-scroll" id="os-form" data-panel-kind="' + esc(bl.kind || '') + '">' + (bd && bd.fields && bd.fields.length ? schemaForm(bd.fields, bl.settings, '') : noSettings()) + panelFoot(rm) + '</div>';
     }
     return emptyRight('Select a section or block to edit.');
   }
@@ -2502,7 +2508,7 @@
         return oneLine(segOpts.length > 3 ? 'os-fld-pair' : 'os-fld-seg');
       }
       if (f.control === 'range') return oneLine('os-fld-range');
-      if (f.control === 'select' || f.control === 'number' || f.control === 'numberInherit' || f.control === 'color' || f.control === 'image') return oneLine('os-fld-pair');
+      if (f.control === 'select' || f.control === 'number' || f.control === 'numberInherit' || f.control === 'color' || f.control === 'image' || f.control === 'text' || f.control === 'url' || f.control === 'multiselect') return oneLine('os-fld-pair');
       if (f.control === 'product' || f.control === 'collection' || f.control === 'menu' || f.control === 'blog' || f.control === 'page') return oneLine('os-fld-pair');
     }
     return '<div class="os-fld">' + label + control(f, val, values, ctx) + hint + '</div>';
@@ -2589,12 +2595,41 @@
         connected: connected,
         sourceLabel: metaLabel,
         sourcePath: srcPath,
-        autoHeight: !!f.autoHeight,
+        autoHeight: fieldUsesContentFit(f),
         attrs: attrs,
       });
     }
     // Fallback if shared editor script has not loaded yet.
-    return '<div class="bs-richtext' + (f.autoHeight ? ' is-autoheight' : '') + '" ' + attrs + (f.autoHeight ? ' data-rt-autoheight="1"' : '') + '><div class="bs-rt-editor" contenteditable="true" data-rt-editor data-placeholder="' + esc(f.placeholder || 'Add description...') + '">' + (val || '') + '</div></div>';
+    const ah = fieldUsesContentFit(f);
+    return '<div class="bs-richtext' + (ah ? ' is-autoheight' : '') + '" ' + attrs + (ah ? ' data-rt-autoheight="1"' : '') + '><div class="bs-rt-editor" contenteditable="true" data-rt-editor data-placeholder="' + esc(f.placeholder || 'Add description...') + '">' + (val || '') + '</div></div>';
+  }
+  // Content / Review content: empty = one line; filled = height fits lines (no spare blank row).
+  function isContentLikeField(f) {
+    const key = String((f && f.key) || '').toLowerCase();
+    const label = String((f && f.label) || '').toLowerCase();
+    return key.indexOf('content') >= 0 || label.indexOf('content') >= 0;
+  }
+  function fieldUsesContentFit(f) {
+    if (!f) return false;
+    if (f.autoHeight === false) return false;
+    return !!f.autoHeight || isContentLikeField(f);
+  }
+  function fitTextarea(el) {
+    if (!el || !el.classList.contains('os-ta-fit')) return;
+    el.style.height = '0px';
+    el.style.height = Math.max(el.scrollHeight, 0) + 'px';
+  }
+  function wireFitTextareas(scope) {
+    const root = scope || document;
+    root.querySelectorAll('textarea.os-ta-fit').forEach((el) => {
+      if (el.getAttribute('data-ta-fit-wired') === '1') {
+        fitTextarea(el);
+        return;
+      }
+      el.setAttribute('data-ta-fit-wired', '1');
+      el.addEventListener('input', () => fitTextarea(el));
+      fitTextarea(el);
+    });
   }
   function control(f, val, values, ctx) {
     const opts = typeof f.options === 'function' ? (f.options(values, ctx) || []) : (f.options || []);
@@ -2604,8 +2639,10 @@
     switch (ctl) {
       case 'text': case 'url':
         return '<input class="os-input" ' + dk + (f.maxlength ? ' maxlength="' + f.maxlength + '"' : '') + ' type="text" value="' + esc(val) + '" placeholder="' + esc(f.placeholder == null ? 'Please enter' : f.placeholder) + '">';
-      case 'textarea': case 'custom_css':
-        return '<textarea class="os-input os-ta' + (ctl === 'custom_css' ? ' mono' : '') + '" ' + dk + (f.maxlength ? ' maxlength="' + f.maxlength + '"' : '') + ' rows="' + (ctl === 'custom_css' ? 4 : 3) + '" placeholder="' + esc(f.placeholder || '') + '">' + esc(val) + '</textarea>' + (ctl === 'richtext' ? '<div class="os-fhint">Rich text — basic HTML allowed.' + (f.maxlength ? ' Max ' + f.maxlength + ' characters.' : '') + '</div>' : (f.maxlength ? '<div class="os-fhint">Max ' + f.maxlength + ' characters.</div>' : ''));
+      case 'textarea': case 'custom_css': {
+        const fit = ctl !== 'custom_css' && (f.autoHeight || isContentLikeField(f));
+        return '<textarea class="os-input os-ta' + (ctl === 'custom_css' ? ' mono' : '') + (fit ? ' os-ta-fit' : '') + '" ' + dk + (f.maxlength ? ' maxlength="' + f.maxlength + '"' : '') + ' rows="' + (ctl === 'custom_css' ? 4 : (fit ? 1 : 3)) + '" placeholder="' + esc(f.placeholder || '') + '">' + esc(val) + '</textarea>' + (f.maxlength ? '<div class="os-fhint">Max ' + f.maxlength + ' characters.</div>' : '');
+      }
       case 'richtext':
         return richTextControl(f, val, dk, values);
       case 'select':
@@ -2641,25 +2678,9 @@
           '<button type="button" class="os-tbtn' + (auto ? ' on' : '') + '" data-ninh-auto title="Inherit theme value">Auto</button></div>';
       }
       case 'color':
-        return colorControl(f, val, dk);
+        return colorControl(f, val, dk, values);
       case 'image':
-        return '<div class="os-imgf" ' + dk + ' data-img-url="' + esc(val || '') + '">' +
-          (val
-            ? '<div class="os-imgbox on">' +
-                '<button type="button" class="os-img-thumb" data-img-pick style="background-image:url(' + esc(val) + ')" title="' + esc(mediaFileName(val, 'Selected image')) + '" aria-label="Change image"></button>' +
-                '<div class="os-img-actions">' +
-                  '<button type="button" class="os-img-select" data-img-pick>Change</button>' +
-                  '<button type="button" class="os-img-lib" data-img-pick title="Browse files" aria-label="Browse files">' + mediaLibIcon() + '</button>' +
-                '</div>' +
-                '<button type="button" class="os-img-remove" data-img-remove>Remove</button>' +
-              '</div>'
-            : '<div class="os-imgbox">' +
-                '<div class="os-img-actions">' +
-                  '<button type="button" class="os-img-select" data-img-pick>Select</button>' +
-                  '<button type="button" class="os-img-lib" data-img-pick title="Browse files" aria-label="Browse files">' + mediaLibIcon() + '</button>' +
-                '</div>' +
-              '</div>') +
-          '</div>';
+        return imageFieldHtml(val || '', dk);
       case 'collections':
         return collectionsControl(f, val, dk);
       case 'ordered_products':
@@ -2688,26 +2709,26 @@
     if (/^#[0-9a-fA-F]{6}$/.test(s)) return s.toLowerCase();
     return '';
   }
-  function colorBlankFallback(f) {
+  function colorBlankFallback(f, values) {
     let fb = '';
     if (f && typeof f.blankValue === 'function') {
-      try { fb = f.blankValue() || ''; } catch (_) { fb = ''; }
+      try { fb = f.blankValue(values) || ''; } catch (_) { fb = ''; }
     }
     if (!fb && f && f.default != null && f.default !== '') fb = String(f.default);
     return fb;
   }
-  function colorDisplay(f, val) {
+  function colorDisplay(f, val, values) {
     const isT = val === 'transparent';
     if (isT) return { display: 'transparent', blank: true, isT: true };
     if (val != null && val !== '') return { display: String(val), blank: false, isT: false };
-    const fb = colorBlankFallback(f);
+    const fb = colorBlankFallback(f, values);
     if (fb === 'transparent') return { display: 'transparent', blank: true, isT: true };
     // Reveal OOB / inherit color in the control even while the stored value stays blank.
     if (fb) return { display: fb, blank: false, isT: false, inherited: true };
     return { display: '', blank: true, isT: false };
   }
-  function colorControl(f, val, dk) {
-    const d = colorDisplay(f, val);
+  function colorControl(f, val, dk, values) {
+    const d = colorDisplay(f, val, values);
     const hex = expandHex(d.display) || '#000000';
     const field = '<div class="os-color">' +
       '<label class="os-sw' + (d.blank ? ' tsp' : '') + '" style="' + (d.blank ? '' : 'background:' + esc(d.display)) + '"><input type="color" value="' + esc(hex) + '"></label>' +
@@ -2716,15 +2737,16 @@
     return '<div class="os-color-wrap" ' + dk + '>' + field +
       '<button type="button" class="os-tbtn' + (d.isT ? ' on' : '') + '" data-tsp title="Transparent">T</button></div>';
   }
-  function wireColorControl(el, onChange, k, field) {
+  function wireColorControl(el, onChange, k, field, values) {
     field = field || {};
     const cp = el.querySelector('input[type=color]');
     const hx = el.querySelector('.os-hex');
     const sw = el.querySelector('.os-sw');
     const tb = el.querySelector('[data-tsp]');
     if (!cp || !hx || !sw) return;
+    const vals = () => values || currentSettings() || {};
     const paint = (v) => {
-      const d = colorDisplay(field, v);
+      const d = colorDisplay(field, v, vals());
       sw.classList.toggle('tsp', d.blank);
       sw.style.background = d.blank ? '' : d.display;
       if (tb) tb.classList.toggle('on', d.isT);
@@ -2741,18 +2763,19 @@
         if (full) { v = full; if (!live) hx.value = v; }
       }
       paint(v);
-      onChange(k, v, false);
+      onChange(k, v, !live && !!field.refreshPanel);
     };
     cp.oninput = () => { hx.value = cp.value; paint(cp.value); onChange(k, cp.value, false); };
+    cp.onchange = () => { if (field.refreshPanel) onChange(k, cp.value, true); };
     hx.oninput = () => commit(hx.value, true);
     hx.onchange = () => commit(hx.value, false);
     if (tb) tb.onclick = () => {
       const on = !tb.classList.contains('on');
-      if (on) { hx.value = 'transparent'; paint('transparent'); onChange(k, 'transparent', false); }
+      if (on) { hx.value = 'transparent'; paint('transparent'); onChange(k, 'transparent', !!field.refreshPanel); }
       else {
-        const fb = colorBlankFallback(field) || '#FFFFFF';
+        const fb = colorBlankFallback(field, vals()) || '#FFFFFF';
         const restored = (fb === 'transparent') ? '#FFFFFF' : fb;
-        hx.value = restored; paint(restored); onChange(k, restored, false);
+        hx.value = restored; paint(restored); onChange(k, restored, !!field.refreshPanel);
       }
     };
   }
@@ -2768,6 +2791,66 @@
   }
   function mediaLibIcon() {
     return '<svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M4.5 3.75A1.75 1.75 0 0 1 6.25 2h7.5A1.75 1.75 0 0 1 15.5 3.75v.5A1.75 1.75 0 0 1 13.75 6h-7.5A1.75 1.75 0 0 1 4.5 4.25v-.5zm0 5.5A1.75 1.75 0 0 1 6.25 7.5h7.5a1.75 1.75 0 0 1 1.75 1.75v.5A1.75 1.75 0 0 1 13.75 11.5h-7.5A1.75 1.75 0 0 1 4.5 9.75v-.5zm0 5.5A1.75 1.75 0 0 1 6.25 13h7.5a1.75 1.75 0 0 1 1.75 1.75v.5A1.75 1.75 0 0 1 13.75 17h-7.5A1.75 1.75 0 0 1 4.5 15.25v-.5z"/></svg>';
+  }
+  // Image 规范: Select-from-library icon — solid filled plate; sun + mountains are cutouts
+  // (not outline frame). Color inherits menu text (#202223). Mountains flush to bottom edge.
+  function mediaSelectIcon() {
+    return '<svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true">' +
+      '<path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="' +
+      'M2.75 4.5A1.75 1.75 0 0 1 4.5 2.75h11A1.75 1.75 0 0 1 17.25 4.5v11a1.75 1.75 0 0 1-1.75 1.75h-11A1.75 1.75 0 0 1 2.75 15.5v-11Z' +
+      'M13.55 7.15a1.3 1.3 0 1 0 0-2.6 1.3 1.3 0 0 0 0 2.6Z' +
+      'M2.75 17.25H17.25V15.1l-2.45-3.1a.7.7 0 0 0-1.12 0l-2.2 2.78-1.62-2.05a.7.7 0 0 0-1.12 0L5.5 15.1 2.75 17.05Z' +
+      '"/></svg>';
+  }
+  // Shared image control (prototype-wide image 规范):
+  // — empty: dashed Select; filled: thin solid border + filename; hover: Change only
+  // — menu: Select from library / Remove (English system copy; i18n-skip)
+  // — Select icon: solid filled landscape (cutout sun + mountains), color inherits #303030
+  // — Remove hover: warning red bar (#FEE1E6 / #8E0B21, sampled from online)
+  function imageFieldHtml(url, attrs) {
+    const u = url || '';
+    const name = mediaFileName(u, 'Selected image');
+    const attrStr = attrs ? (' ' + attrs) : '';
+    if (u) {
+      return '<div class="os-imgf"' + attrStr + ' data-img-url="' + esc(u) + '">' +
+        '<div class="os-imgbox on">' +
+          '<button type="button" class="os-img-thumb" data-img-menu style="background-image:url(' + esc(u) + ')" title="' + esc(name) + '" aria-label="Change image" aria-haspopup="menu" aria-expanded="false">' +
+            '<span class="os-img-name">' + esc(name) + '</span>' +
+            '<span class="os-img-hover" aria-hidden="true">' +
+              '<span class="os-img-change">Change</span>' +
+            '</span>' +
+          '</button>' +
+          '<div class="os-img-menu i18n-skip" hidden role="menu">' +
+            '<button type="button" class="os-img-menu-item" role="menuitem" data-img-pick>' +
+              '<span class="os-img-menu-ico">' + mediaSelectIcon() + '</span><span>Select from library</span>' +
+            '</button>' +
+            '<button type="button" class="os-img-menu-item danger" role="menuitem" data-img-remove>' +
+              '<span class="os-img-menu-ico">' + I.trash + '</span><span>Remove</span>' +
+            '</button>' +
+          '</div>' +
+        '</div></div>';
+    }
+    return '<div class="os-imgf"' + attrStr + ' data-img-url="">' +
+      '<div class="os-imgbox">' +
+        '<button type="button" class="os-img-empty" data-img-pick>' +
+          '<span class="os-img-empty-ico">' + mediaSelectIcon() + '</span><span>Select</span>' +
+        '</button>' +
+      '</div></div>';
+  }
+  let imgMenuCloserBound = false;
+  function ensureImgMenuCloser() {
+    if (imgMenuCloserBound) return;
+    imgMenuCloserBound = true;
+    document.addEventListener('click', (e) => {
+      if (e.target.closest && (e.target.closest('.os-imgf') || e.target.closest('.os-img-menu'))) return;
+      closeAllImgMenus();
+    });
+    window.addEventListener('resize', () => {
+      document.querySelectorAll('.os-img-menu[data-img-menu-live="1"]').forEach((menu) => {
+        const btn = menu._imgMenuBtn;
+        if (btn) placeImgMenu(menu, btn);
+      });
+    });
   }
   function mediaImageIcon() {
     return '<span class="os-imgdrop-ico" aria-hidden="true"><svg viewBox="20 58 24 20" width="24" height="20"><path d="M42.5 60.125C42.5 60.0829 42.4564 60 42.3418 60H22.6582C22.5436 60 22.5 60.0829 22.5 60.125V75.875C22.5 75.9171 22.5436 76 22.6582 76H42.3418C42.4564 76 42.5 75.9171 42.5 75.875V60.125ZM44.5 75.875C44.5 77.0756 43.5062 78 42.3418 78H22.6582C21.4938 78 20.5 77.0756 20.5 75.875V60.125C20.5 58.9244 21.4938 58 22.6582 58H42.3418C43.5062 58 44.5 58.9244 44.5 60.125V75.875Z" fill="currentColor"/><path d="M27.75 63.5C27.75 63.0858 27.4142 62.75 27 62.75C26.5858 62.75 26.25 63.0858 26.25 63.5C26.25 63.9142 26.5858 64.25 27 64.25C27.4142 64.25 27.75 63.9142 27.75 63.5ZM29.25 63.5C29.25 64.7426 28.2426 65.75 27 65.75C25.7574 65.75 24.75 64.7426 24.75 63.5C24.75 62.2574 25.7574 61.25 27 61.25C28.2426 61.25 29.25 62.2574 29.25 63.5Z" fill="currentColor"/><path d="M42.5 74.1113L33.8828 69.2734L30.9434 72.7031C30.5926 73.1124 29.9805 73.1705 29.5596 72.834L27.2305 70.9697L22.5 74.0664V75.8418C22.5 75.929 22.571 76 22.6582 76H42.3418C42.429 76 42.5 75.929 42.5 75.8418V74.1113ZM44.5 75.8418C44.5 77.0336 43.5336 78 42.3418 78H22.6582C21.4664 78 20.5 77.0336 20.5 75.8418V73.5264C20.5 73.189 20.6699 72.8742 20.9521 72.6895L26.7422 68.9004L26.8818 68.8232C27.2194 68.6725 27.6186 68.7197 27.9141 68.9561L30.0537 70.667L32.8984 67.3496C33.2087 66.9876 33.7317 66.8945 34.1475 67.1279L43.9893 72.6543C44.3045 72.8313 44.5 73.1648 44.5 73.5264V75.8418Z" fill="currentColor"/></svg></span>';
@@ -2845,7 +2928,7 @@
     const current = FILES.find((f) => f.url === currentUrl && f.kind === 'image');
     const st = { q: '', type: 'image', sort: 'new', page: 1, sel: current ? current.id : '' };
     const CHK = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
-    const backdrop = h('<div class="modal-backdrop os-sf-backdrop"></div>');
+    const backdrop = h('<div class="modal-backdrop os-sf-backdrop i18n-skip"></div>');
     const m = h('<div class="modal" style="width:860px;max-width:94vw"></div>');
     m.innerHTML =
       '<div class="modal-head flex items-center justify-between"><span>Select file</span><span class="drawer-x" data-x>' + I.x + '</span></div>' +
@@ -2932,12 +3015,107 @@
       if (picked) onPick(picked.url);
     };
   }
+  function clearImgMenuPos(menu) {
+    if (!menu) return;
+    const host = menu._imgMenuHost;
+    if (host && menu.parentElement !== host) {
+      try { host.appendChild(menu); } catch (err) { /* host may be gone after panel refresh */ }
+    }
+    menu._imgMenuHost = null;
+    menu._imgMenuBtn = null;
+    menu.removeAttribute('data-img-menu-live');
+    menu.style.position = '';
+    menu.style.left = '';
+    menu.style.top = '';
+    menu.style.right = '';
+    menu.style.bottom = '';
+    menu.style.minWidth = '';
+    menu.style.zIndex = '';
+  }
+  // 图片组件规范: Change menu must stay fully visible. .os-right overflow clips
+  // absolute menus, so park on body as fixed and nudge inside the panel edges.
+  function placeImgMenu(menu, anchorEl) {
+    if (!menu || !anchorEl) return;
+    if (!menu._imgMenuHost) menu._imgMenuHost = menu.parentElement;
+    menu._imgMenuBtn = anchorEl;
+    if (menu.parentElement !== document.body) document.body.appendChild(menu);
+    const anchor = anchorEl.getBoundingClientRect();
+    const panel = anchorEl.closest('.os-right');
+    const pr = panel ? panel.getBoundingClientRect() : null;
+    const pad = 8;
+    const minW = 220;
+    menu.hidden = false;
+    menu.setAttribute('data-img-menu-live', '1');
+    menu.style.position = 'fixed';
+    menu.style.right = 'auto';
+    menu.style.bottom = 'auto';
+    menu.style.minWidth = minW + 'px';
+    menu.style.zIndex = '260';
+    menu.style.left = '0px';
+    menu.style.top = '0px';
+    const mw = Math.max(minW, menu.offsetWidth || minW);
+    const mh = menu.offsetHeight || 88;
+    let left = anchor.left;
+    let top = anchor.bottom + 6;
+    const maxRight = Math.min(window.innerWidth - pad, pr ? pr.right - pad : window.innerWidth - pad);
+    const minLeft = Math.max(pad, pr ? pr.left + pad : pad);
+    if (left + mw > maxRight) left = Math.max(minLeft, maxRight - mw);
+    if (left < minLeft) left = minLeft;
+    if (top + mh > window.innerHeight - pad) {
+      const above = anchor.top - 6 - mh;
+      if (above >= pad) top = above;
+    }
+    menu.style.left = Math.round(left) + 'px';
+    menu.style.top = Math.round(top) + 'px';
+  }
+  function closeAllImgMenus(exceptBox) {
+    document.querySelectorAll('.os-imgbox.menu-open').forEach((box) => {
+      if (exceptBox && box === exceptBox) return;
+      box.classList.remove('menu-open');
+      const btn = box.querySelector('[data-img-menu]');
+      if (btn) btn.setAttribute('aria-expanded', 'false');
+    });
+    document.querySelectorAll('.os-img-menu[data-img-menu-live="1"]').forEach((menu) => {
+      if (exceptBox && menu._imgMenuHost && exceptBox.contains(menu._imgMenuHost)) return;
+      menu.hidden = true;
+      clearImgMenuPos(menu);
+    });
+  }
   function wireImageField(el, onChange) {
+    ensureImgMenuCloser();
     const k = el.getAttribute('data-fkey');
-    const openLib = () => openSelectFileModal(el.getAttribute('data-img-url') || '', (url) => onChange(k, url, true));
-    el.querySelectorAll('[data-img-pick]').forEach((b) => b.onclick = openLib);
-    const rm = el.querySelector('[data-img-remove]'); if (rm) rm.onclick = () => onChange(k, '', true);
     const box = el.querySelector('.os-imgbox');
+    const menu = el.querySelector('.os-img-menu');
+    const menuBtn = el.querySelector('[data-img-menu]');
+    const closeMenu = () => {
+      if (box) box.classList.remove('menu-open');
+      if (menu) { menu.hidden = true; clearImgMenuPos(menu); }
+      if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false');
+    };
+    const openLib = () => {
+      closeMenu();
+      openSelectFileModal(el.getAttribute('data-img-url') || '', (url) => onChange(k, url, true));
+    };
+    el.querySelectorAll('[data-img-pick]').forEach((b) => {
+      b.onclick = (e) => { e.preventDefault(); e.stopPropagation(); openLib(); };
+    });
+    const rm = el.querySelector('[data-img-remove]');
+    if (rm) rm.onclick = (e) => { e.preventDefault(); e.stopPropagation(); closeMenu(); onChange(k, '', true); };
+    if (menuBtn && menu) {
+      menuBtn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const opening = !box.classList.contains('menu-open');
+        if (opening) {
+          closeAllImgMenus(box);
+          box.classList.add('menu-open');
+          menuBtn.setAttribute('aria-expanded', 'true');
+          placeImgMenu(menu, menuBtn);
+        } else {
+          closeMenu();
+        }
+      };
+    }
     if (box) {
       box.ondragover = (e) => { e.preventDefault(); box.classList.add('drag'); };
       box.ondragleave = () => box.classList.remove('drag');
@@ -2965,7 +3143,7 @@
         sourceOptions: listSources
           ? (() => productDynamicSourceOptions(includeProductFields))
           : null,
-        autoHeight: !!f.autoHeight || el.getAttribute('data-rt-autoheight') === '1',
+        autoHeight: fieldUsesContentFit(f) || el.getAttribute('data-rt-autoheight') === '1',
       });
       return;
     }
@@ -3096,10 +3274,33 @@
       list +
       (currentId ? '<button type="button" class="os-op-source-remove" data-op-src-remove><span>' + I.database + '</span>Remove dynamic source</button>' : '');
     document.body.appendChild(pop);
+    // Grow with longest collection title; expand left and clamp inside .os-right.
     const rect = anchor.getBoundingClientRect();
-    const popW = 280;
-    pop.style.left = Math.max(8, Math.min(rect.right - popW, window.innerWidth - popW - 8)) + 'px';
-    pop.style.top = (rect.bottom + 6) + 'px';
+    const clip = anchor.closest('.os-right') || anchor.closest('.os-left');
+    const cr = clip ? clip.getBoundingClientRect() : null;
+    const pad = 8;
+    const maxRight = Math.min(window.innerWidth - pad, cr ? cr.right - pad : window.innerWidth - pad);
+    const minLeft = Math.max(pad, cr ? cr.left + pad : pad);
+    const maxW = Math.max(220, maxRight - minLeft);
+    pop.style.boxSizing = 'border-box';
+    pop.style.width = 'auto';
+    pop.style.minWidth = '280px';
+    pop.style.maxWidth = maxW + 'px';
+    let popW = Math.ceil(pop.offsetWidth || 280);
+    if (popW < 280) popW = 280;
+    if (popW > maxW) popW = maxW;
+    pop.style.width = popW + 'px';
+    let left = rect.right - popW;
+    if (left < minLeft) left = minLeft;
+    if (left + popW > maxRight) left = Math.max(minLeft, maxRight - popW);
+    let top = rect.bottom + 6;
+    const ph = pop.offsetHeight || 120;
+    if (top + ph > window.innerHeight - pad) {
+      const above = rect.top - 6 - ph;
+      if (above >= pad) top = above;
+    }
+    pop.style.left = Math.round(left) + 'px';
+    pop.style.top = Math.round(top) + 'px';
     pop.querySelectorAll('[data-op-src-col]').forEach((btn) => {
       btn.onclick = () => {
         const id = btn.getAttribute('data-op-src-col') || '';
@@ -3140,24 +3341,7 @@
     return defaultFeaturedReviewItem();
   }
   function reviewItemImageHtml(kind, url) {
-    const u = url || '';
-    return '<div class="os-imgf" data-ri-image="' + esc(kind) + '" data-img-url="' + esc(u) + '">' +
-      (u
-        ? '<div class="os-imgbox on">' +
-            '<button type="button" class="os-img-thumb" data-img-pick style="background-image:url(' + esc(u) + ')" title="' + esc(mediaFileName(u, 'Selected image')) + '" aria-label="Change image"></button>' +
-            '<div class="os-img-actions">' +
-              '<button type="button" class="os-img-select" data-img-pick>Change</button>' +
-              '<button type="button" class="os-img-lib" data-img-pick title="Browse files" aria-label="Browse files">' + mediaLibIcon() + '</button>' +
-            '</div>' +
-            '<button type="button" class="os-img-remove" data-img-remove>Remove</button>' +
-          '</div>'
-        : '<div class="os-imgbox">' +
-            '<div class="os-img-actions">' +
-              '<button type="button" class="os-img-select" data-img-pick>Select</button>' +
-              '<button type="button" class="os-img-lib" data-img-pick title="Browse files" aria-label="Browse files">' + mediaLibIcon() + '</button>' +
-            '</div>' +
-          '</div>') +
-    '</div>';
+    return imageFieldHtml(url || '', 'data-ri-image="' + esc(kind) + '"');
   }
   function reviewItemPair(label, controlHtml, extraCls) {
     return '<div class="os-fld os-fld-pair' + (extraCls ? ' ' + extraCls : '') + '">' +
@@ -3193,17 +3377,17 @@
       // Stack each field on its own row — same label|control pattern as other block editors.
       const customFields =
         '<div class="os-ri-fields" data-ri-custom' + (entryType === 'custom' ? '' : ' hidden') + '>' +
-          reviewItemPair('User avatar', reviewItemImageHtml('avatar', row.avatar || ''), 'os-ri-img') +
+          reviewItemPair('Avatar', reviewItemImageHtml('avatar', row.avatar || ''), 'os-ri-img') +
           reviewItemPair('Author',
             '<input class="os-input" data-ri-field="author" value="' + esc(row.author || '') + '" placeholder="Reviewer name">') +
           reviewItemPair('Rating',
             '<input class="os-input" type="number" min="1" max="5" step="0.5" data-ri-field="rating" value="' + esc(row.rating == null ? 5 : row.rating) + '">') +
           '<div class="os-fld">' +
-            '<label class="os-flabel">Review content</label>' +
-            '<textarea class="os-input os-ta" rows="4" data-ri-field="text" placeholder="Review content">' + esc(row.text || '') + '</textarea>' +
+            '<label class="os-flabel">Content</label>' +
+            '<textarea class="os-input os-ta os-ta-fit" rows="1" data-ri-field="text" placeholder="Content">' + esc(row.text || '') + '</textarea>' +
           '</div>' +
           (supportsImage
-            ? reviewItemPair('Review image', reviewItemImageHtml('image', row.image || ''), 'os-ri-img')
+            ? reviewItemPair('Image', reviewItemImageHtml('image', row.image || ''), 'os-ri-img')
             : '') +
         '</div>';
       const libraryFields =
@@ -3287,6 +3471,7 @@
       card.querySelectorAll('[data-ri-field]').forEach((el) => {
         const evt = el.tagName === 'SELECT' ? 'change' : 'input';
         el.addEventListener(evt, () => {
+          if (el.classList.contains('os-ta-fit')) fitTextarea(el);
           if (el.getAttribute('data-ri-field') === 'entry_type') syncType(card);
           commit(false);
         });
@@ -3304,6 +3489,7 @@
         setArr(cards.filter((c) => c !== card).map(readCard), true);
       };
     });
+    wireFitTextareas(root);
     const add = root.querySelector('[data-ri-add]');
     if (add) add.onclick = () => {
       const cur = getArr().slice();
@@ -3312,9 +3498,15 @@
       setArr(cur, true);
     };
   }
-  function defaultVideoItem() {
+  function videoCoverPool() {
     const IMG = (window.OS && window.OS.sample && window.OS.sample.IMG) || {};
-    return { id: uid('vi'), cover_image: IMG.ug1 || IMG.p3 || '', video_url: '', accessible_label: '' };
+    const swim = [IMG.swimVc1, IMG.swimVc2, IMG.swimVc3, IMG.swimVc4, IMG.swimVc5, IMG.swimVc6].filter(Boolean);
+    if (swim.length) return swim;
+    return [IMG.ug1, IMG.ug2, IMG.ug3, IMG.ug4, IMG.ug5, IMG.ug6, IMG.p3, IMG.p4].filter(Boolean);
+  }
+  function defaultVideoItem() {
+    const covers = videoCoverPool();
+    return { id: uid('vi'), cover_image: covers[0] || '', video_url: '', accessible_label: '' };
   }
   function videoItemsControl(f, val, dk) {
     const max = Math.max(1, Number(f.max) || 12);
@@ -3382,8 +3574,7 @@
     if (add) add.onclick = () => {
       const cur = getArr().slice();
       if (cur.length >= max) return;
-      const IMG = (window.OS && window.OS.sample && window.OS.sample.IMG) || {};
-      const covers = [IMG.ug1, IMG.ug2, IMG.ug3, IMG.ug4, IMG.ug5, IMG.ug6, IMG.p3, IMG.p4].filter(Boolean);
+      const covers = videoCoverPool();
       cur.push({ id: uid('vi'), cover_image: covers[cur.length % covers.length] || '', video_url: '', accessible_label: '' });
       setArr(cur, true);
     };
@@ -3446,7 +3637,11 @@
     const form = document.querySelector('#os-form'); if (!form) return;
     const target = currentSettings(); if (!target) { wireRemove(form); return; }
     const onChange = (k, v, rerenderPanel) => {
+      const fieldDef = (currentSchema() || []).find((x) => x.key === k) || {};
+      const prev = target[k];
       target[k] = v;
+      // Schema afterChange: e.g. Channels add → turn on Show channel logo.
+      if (typeof fieldDef.afterChange === 'function') fieldDef.afterChange(v, target, prev);
       if (rerenderPanel) reinjectVisibleDefaults(currentSchema(), target, schemaCtx());
       markDirty('field:' + ED.selection.kind + ':' + k); refreshAffectedCanvas(); if (rerenderPanel) refreshRight();
     };
@@ -3457,7 +3652,11 @@
         el.oninput = () => onChange(k, ctl === 'number' ? clampNum(el) : el.value, false);
         if (field.refreshPanel) el.onchange = () => refreshRight();
       } else if (ctl === 'textarea' || ctl === 'custom_css') {
-        el.oninput = () => onChange(k, el.value, false);
+        el.oninput = () => {
+          if (el.classList.contains('os-ta-fit')) fitTextarea(el);
+          onChange(k, el.value, false);
+        };
+        if (el.classList.contains('os-ta-fit')) fitTextarea(el);
       } else if (ctl === 'select') {
         el.onchange = () => onChange(k, el.value, true);
       } else if (ctl === 'range') {
@@ -3472,7 +3671,7 @@
           onChange(k, [...el.querySelectorAll('[data-v].on')].map((x) => coerce(x.getAttribute('data-v'))), true);
         });
       } else if (ctl === 'color') {
-        wireColorControl(el, onChange, k, field);
+        wireColorControl(el, onChange, k, field, target);
       } else if (ctl === 'numberInherit') {
         const numEl = el.querySelector('[data-ninh-num]'); const autoBtn = el.querySelector('[data-ninh-auto]'); const f = fieldByEl(el) || {};
         numEl.oninput = () => onChange(k, clamp(numEl.value, f.min == null ? -1e9 : f.min, f.max == null ? 1e9 : f.max, f.min || 0), false);
@@ -3498,6 +3697,7 @@
         el.onclick = () => openPickerPop(el, ctl, target[k], (v) => onChange(k, v, true), el.getAttribute('data-single') === '1', el.getAttribute('data-pickfrom'));
       }
     });
+    wireFitTextareas(form);
     wireRemove(form);
   }
   function wireColsReorder(list, getArr, setArr) {
@@ -3850,7 +4050,13 @@
     scopeEl.querySelectorAll('[data-control]').forEach((el) => {
       const k = el.getAttribute('data-fkey'); const ctl = el.getAttribute('data-control'); const f = schema.find((x) => x.key === k) || {};
       if (ctl === 'text' || ctl === 'url') el.oninput = () => change(k, el.value, false);
-      else if (ctl === 'textarea' || ctl === 'custom_css') el.oninput = () => change(k, el.value, false);
+      else if (ctl === 'textarea' || ctl === 'custom_css') {
+        el.oninput = () => {
+          if (el.classList.contains('os-ta-fit')) fitTextarea(el);
+          change(k, el.value, false);
+        };
+        if (el.classList.contains('os-ta-fit')) fitTextarea(el);
+      }
       else if (ctl === 'number') el.oninput = () => change(k, clamp(el.value, f.min == null ? -1e9 : f.min, f.max == null ? 1e9 : f.max, 0), false);
       else if (ctl === 'select') el.onchange = () => change(k, el.value, true);
       else if (ctl === 'range') wireRange(el, f, change);
@@ -3861,7 +4067,7 @@
         change(k, [...el.querySelectorAll('[data-v].on')].map((x) => coerce(x.getAttribute('data-v'))), true);
       });
       else if (ctl === 'color') {
-        wireColorControl(el, change, k, f);
+        wireColorControl(el, change, k, f, target);
       } else if (ctl === 'image') {
         wireImageField(el, change);
       } else if (ctl === 'richtext') {
@@ -4960,7 +5166,7 @@
   // The assignment ("Assigned to N …") happens in the admin, so a new template starts at 0.
   function openCreateTemplate(pt) {
     const g = tplGroupOf(pt); if (!g) return;
-    const back = h('<div class="modal-backdrop" style="z-index:240"></div>');
+    const back = h('<div class="modal-backdrop i18n-skip" style="z-index:240"></div>');
     const m = h('<div class="modal"></div>');
     const opts = sortedTplList(g.list).map((t) => '<option value="' + esc(t.id) + '">' + esc(t.name) + '</option>').join('');
     m.innerHTML =
@@ -5202,7 +5408,7 @@
   }
   function isMissing(v) { return v == null || (typeof v === 'string' && !v.trim()) || (Array.isArray(v) && !v.length); }
   function openIssues(issues, action) {
-    const back = h('<div class="modal-backdrop" style="z-index:240"></div>');
+    const back = h('<div class="modal-backdrop i18n-skip" style="z-index:240"></div>');
     const m = h('<div class="modal" style="width:480px"></div>');
     m.innerHTML = '<div class="modal-head">Fix ' + issues.length + ' issue' + (issues.length > 1 ? 's' : '') + ' before ' + (action || 'publishing') + '</div>' +
       '<div class="modal-body"><div class="os-issues">' + issues.slice(0, 12).map((x) => '<div class="os-issue"><span class="os-issue-w">' + esc(x.where) + '</span><span>' + esc(x.msg) + '</span></div>').join('') + (issues.length > 12 ? '<div class="os-info">…and ' + (issues.length - 12) + ' more</div>' : '') + '</div></div>' +
@@ -5214,7 +5420,7 @@
   // -------------------------------------------------------------- leave interception
   function attemptLeave(proceed) {
     if (!ED || !isDirty()) { proceed(); return; }
-    const back = h('<div class="modal-backdrop" style="z-index:240"></div>');
+    const back = h('<div class="modal-backdrop i18n-skip" style="z-index:240"></div>');
     const m = h('<div class="modal"></div>');
     m.innerHTML = '<div class="modal-head">Leave with unsaved changes?</div>' +
       '<div class="modal-body"><div class="subtle" style="font-size:13.5px;line-height:1.6">You have unsaved changes. Save them before you leave, or discard and exit.</div></div>' +
@@ -5232,7 +5438,7 @@
 
   // -------------------------------------------------------------- confirm modal
   function openConfirm(o) {
-    const back = h('<div class="modal-backdrop" style="z-index:240"></div>'); const m = h('<div class="modal"></div>');
+    const back = h('<div class="modal-backdrop i18n-skip" style="z-index:240"></div>'); const m = h('<div class="modal"></div>');
     m.innerHTML = '<div class="modal-head">' + esc(o.title) + '</div>' +
       '<div class="modal-body"><div class="subtle" style="font-size:13.5px;line-height:1.6">' + esc(o.body) + '</div></div>' +
       '<div class="modal-foot"><button class="btn btn-default" data-cancel>Cancel</button><button class="btn ' + (o.danger ? 'btn-danger' : 'btn-primary') + '" data-ok>' + esc(o.okText || 'OK') + '</button></div>';
@@ -5950,8 +6156,11 @@
   .btn-warn{background:#f59e0b;color:#fff}.btn-warn:hover{background:#e08c08}
   .btn-danger{background:var(--err);color:#fff}.btn-danger:hover{background:#b3401f}
   .os-top .btn[disabled]{opacity:.45;cursor:not-allowed}
-  .os-body{flex:1;min-height:0;display:grid;grid-template-columns:300px 1fr 296px;overflow:hidden}
-  .os-builder.os-full-preview .os-body{grid-template-columns:1fr}
+  /* Side panels stay fixed width; only the center preview may compress when the
+     window shrinks. minmax(0,1fr) lets the middle track go below content min-size
+     so overflow:hidden cannot clip the right config panel. */
+  .os-body{flex:1;min-height:0;min-width:0;display:grid;grid-template-columns:300px minmax(0,1fr) 296px;overflow:hidden}
+  .os-builder.os-full-preview .os-body{grid-template-columns:minmax(0,1fr)}
   .os-builder.os-full-preview .os-left,.os-builder.os-full-preview .os-right{display:none}
   .os-builder.os-full-preview .os-canvas-scroll{padding:0}
   .os-builder.os-full-preview .os-canvas-scroll:has(> .os-frame.mobile){padding:20px}
@@ -5964,7 +6173,7 @@
   .os-builder.os-full-preview .os-frame [data-block-id][data-blabel]::before{display:none}
 
   /* left tree */
-  .os-left{border-right:1px solid #e3e3e3;display:flex;flex-direction:column;min-height:0;background:#fff;color:#303030;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;letter-spacing:0}
+  .os-left{width:300px;min-width:300px;max-width:300px;border-right:1px solid #e3e3e3;display:flex;flex-direction:column;min-height:0;overflow:hidden;background:#fff;color:#303030;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;letter-spacing:0}
   .os-left-head{padding:12px 16px;font-size:13px;font-weight:600;color:var(--ink);border-bottom:1px solid var(--hair);flex-shrink:0}
   .os-left-scroll{flex:1;overflow:auto;padding:8px}
   .os-left-scroll.os-ck-tree{padding:0 10px 24px}
@@ -6068,8 +6277,8 @@
   .os-row.drop-before::before,.os-row.drop-after::before{content:'';position:absolute;left:8px;right:8px;height:2px;background:var(--brand);border-radius:2px}
   .os-row.drop-before::before{top:-1px}.os-row.drop-after::before{bottom:-1px}
 
-  /* center canvas */
-  .os-center{display:flex;flex-direction:column;min-height:0;background:#eef0f3}
+  /* center canvas — min-width:0 so the preview track can shrink under fixed sidebars */
+  .os-center{display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden;background:#eef0f3}
   .os-canvas-bar{flex-shrink:0;min-height:31px;padding:6px 14px;font-size:12px;color:var(--ink-muted);background:#f7f8fa;border-bottom:1px solid var(--hair);display:flex;align-items:center;justify-content:space-between;gap:12px;box-sizing:border-box}
   .os-canvas-bar button{display:inline-flex;align-items:center;gap:7px;border:0;background:transparent;color:var(--brand);font:600 11.5px inherit;cursor:pointer;white-space:nowrap}
   .os-canvas-bar kbd{padding:1px 5px;border:1px solid var(--ctl);border-bottom-width:2px;border-radius:4px;background:#fff;color:var(--ink-muted);font:10px ui-monospace,monospace}
@@ -6121,7 +6330,7 @@
 
   /* right panel */
   /* Right settings: section title 14 / block (os-sub) 13 / field content 12 */
-  .os-right{border-left:1px solid #e3e3e3;display:flex;flex-direction:column;min-height:0;overflow-x:hidden;overflow-y:auto;background:#fff;font-family:inherit;font-size:12px;color:#303030}
+  .os-right{width:296px;min-width:296px;max-width:296px;border-left:1px solid #e3e3e3;display:flex;flex-direction:column;min-height:0;overflow-x:hidden;overflow-y:auto;background:#fff;font-family:inherit;font-size:12px;color:#303030;box-sizing:border-box}
   .os-right-head{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:40px;padding:6px 16px;margin:0;border-bottom:1px solid #e3e3e3;background:#fff;flex:none;position:sticky;top:0;z-index:3;box-sizing:border-box}
   .os-rh-title{min-width:0;flex:1;color:#303030;font-size:14px;font-weight:650;line-height:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .os-rh-more{width:28px;height:28px;flex:none;margin:0;border:0;background:transparent;color:#6b7280;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
@@ -6155,18 +6364,22 @@
   /* fields — title / tip / content match Shopify theme editor hierarchy */
   .os-fld{margin-bottom:0;padding:6px 16px;border-bottom:0}
   .os-right-scroll > .os-fld{padding-left:16px;padding-right:16px}
-  /* Fixed two-column rhythm: labels left, controls right (Shopify theme editor) */
-  .os-fld-row,.os-fld-seg,.os-fld-range,.os-fld-pair,.os-fld-inline{display:grid;grid-template-columns:minmax(0,42%) minmax(0,1fr);align-items:center;column-gap:12px;row-gap:4px;min-height:28px}
+  /* Fixed two-column rhythm: labels left, controls right — control column 151px (range/select/color/…) */
+  .os-fld-seg,.os-fld-range,.os-fld-pair,.os-fld-inline{display:grid;grid-template-columns:minmax(0,1fr) 151px;align-items:center;column-gap:12px;row-gap:4px;min-height:28px}
+  /* Long label + small toggle: label up to 230px; toggle hugs content (all section/block panels) */
+  .os-fld-row{display:grid;grid-template-columns:minmax(0,230px) auto;align-items:center;column-gap:12px;row-gap:4px;min-height:28px}
   .os-fld-row .os-fhint,.os-fld-seg .os-fhint,.os-fld-range .os-fhint,.os-fld-pair .os-fhint,.os-fld-inline .os-fhint{grid-column:1 / -1;margin-top:0}
   .os-fld-row .os-flabel,.os-fld-seg .os-flabel,.os-fld-range .os-flabel,.os-fld-pair .os-flabel,.os-fld-inline .os-flabel{margin-bottom:0;align-self:center}
   .os-fld-pair:has(.os-imgf){align-items:center}
   .os-fld-pair:has(.os-imgf) .os-flabel{align-self:center}
-  .os-fld-row{grid-template-columns:minmax(0,1fr) auto}
-  .os-fld-pair .os-select,.os-fld-pair .os-input,.os-fld-pair .os-picker,.os-fld-pair .os-color-wrap,.os-fld-pair .os-color,.os-fld-pair .os-ninh,.os-fld-pair .os-imgf{width:100%;min-width:0}
-  /* Hug content + right-align in the settings grid cell (Shopify density) */
-  .os-fld-seg .os-seg2{width:max-content;max-width:100%;justify-self:end;justify-content:flex-start}
-  .os-fld-seg .os-seg2 button{flex:0 1 auto;min-width:0;padding:5px 10px}
+  .os-fld-row .os-tg{justify-self:end}
+  .os-fld-row .os-flabel{max-width:230px;white-space:normal;overflow-wrap:anywhere}
+  .os-fld-pair .os-select,.os-fld-pair .os-input,.os-fld-pair .os-picker,.os-fld-pair .os-color-wrap,.os-fld-pair .os-color,.os-fld-pair .os-ninh,.os-fld-pair .os-imgf,.os-fld-pair .os-msel{width:100%;min-width:0}
+  /* Segmented fills the 151px control column (same edge as select/color) */
+  .os-fld-seg > .os-seg2{width:100%;max-width:100%;min-width:0;justify-self:stretch;box-sizing:border-box}
+  .os-fld-seg .os-seg2 button{flex:1 1 0;min-width:0;padding:5px 8px}
   .os-fld-range .os-range-row{width:100%;min-width:0}
+  .os-fld-seg > *:not(.os-flabel):not(.os-fhint),.os-fld-pair > *:not(.os-flabel):not(.os-fhint),.os-fld-range > *:not(.os-flabel):not(.os-fhint){min-width:0;max-width:100%}
   /* Dense labels match Shopify theme editor (12px / #4D4D4D) */
   .os-flabel{display:flex;align-items:center;gap:5px;font-family:inherit;font-size:12px;font-weight:400;line-height:1.3;letter-spacing:-0.01em;color:#4d4d4d;margin-bottom:6px}
   .os-flabel.has-meta{width:100%;justify-content:space-between}
@@ -6189,6 +6402,8 @@
   .os-input{width:100%;height:32px;padding:0 10px;border:1px solid var(--ctl);border-radius:8px;font-size:12px;color:var(--ink);background:#fff;font-family:inherit;letter-spacing:-0.01em}
   .os-input:focus{outline:none;border-color:#005bd3;box-shadow:0 0 0 1px #005bd3}
   .os-ta{height:auto;min-height:72px;padding:8px 10px;line-height:1.5;resize:vertical}.os-ta.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px}
+  /* Content textareas: empty = one line; filled = fit lines with no spare blank row */
+  .os-ta.os-ta-fit{min-height:calc(1.5em + 16px);height:auto;overflow:hidden;resize:none;field-sizing:content;box-sizing:border-box}
   .os-richtext{width:100%;border:1px solid var(--ctl);border-radius:8px;background:#fff;overflow:hidden}
   .os-rt-toolbar{display:flex;align-items:center;gap:2px;flex-wrap:wrap;padding:5px 8px;border-bottom:1px solid #e3e3e3;background:#f7f7f7}
   .os-rt-sep{width:1px;height:18px;margin:0 3px;background:#d4d4d4}
@@ -6215,16 +6430,20 @@
   .os-rt-source-pop{position:fixed;z-index:500;min-width:220px;padding:8px 0;border:1px solid #d9d9d9;border-radius:10px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.16);color:#303030}
   .os-rt-source-crumb{padding:3px 12px 8px;color:#6b7280;font-size:12px;white-space:nowrap}
   .os-rt-source-crumb span{padding:0 4px;color:#a0a6ad}
-  .os-rt-source-pop button{display:flex;align-items:center;gap:9px;width:100%;padding:9px 12px;border:0;background:#fff;color:#303030;text-align:left;font:inherit;font-size:13px;cursor:pointer}
+  .os-rt-source-pop button{display:flex;align-items:center;gap:9px;width:100%;padding:9px 12px;border:0;background:#fff;color:#303030;text-align:left;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}
   .os-rt-source-pop button:hover{background:#f5f6f7}
+  .os-rt-source-pop button.danger{color:#8E0B21}
+  .os-rt-source-pop button.danger:hover{background:#FEE1E6;color:#8E0B21}
+  .os-rt-source-pop button.danger span{color:inherit}
   .os-rt-source-pop button span{display:inline-flex;width:15px;color:#555}
   .os-rt-source-pop button svg{width:15px;height:15px}
   .os-select{width:100%;height:32px;padding:0 8px;border:1px solid var(--ctl);border-radius:8px;font-size:12px;color:var(--ink);background:#fff;font-family:inherit;cursor:pointer;letter-spacing:-0.01em}
   .os-select:focus{outline:none;border-color:#005bd3;box-shadow:0 0 0 1px #005bd3}
   /* Shopify-tight segmented control: 12px, compact padding, no bleed between tabs */
   /* Hug label width; do not stretch tabs across the whole settings column */
+  /* Label text must sit centered in each segment (segmented 组件规范) */
   .os-seg2{display:inline-flex;max-width:100%;background:#eef0f3;border-radius:8px;padding:2px;gap:1px;box-sizing:border-box}
-  .os-seg2 button{flex:0 1 auto;min-width:0;border:0;background:transparent;font-size:12px;font-weight:450;letter-spacing:-0.02em;color:#4d4d4d;padding:5px 10px;border-radius:6px;cursor:pointer;font-family:inherit;white-space:nowrap;line-height:1.2}
+  .os-seg2 button{flex:0 1 auto;min-width:0;display:inline-flex;align-items:center;justify-content:center;text-align:center;border:0;background:transparent;font-size:12px;font-weight:450;letter-spacing:-0.02em;color:#4d4d4d;padding:5px 10px;border-radius:6px;cursor:pointer;font-family:inherit;white-space:nowrap;line-height:1.2}
   .os-seg2 button.on{background:#fff;color:#303030;font-weight:550;box-shadow:0 1px 2px rgba(0,0,0,.12),0 0 0 1px rgba(0,0,0,.04)}
   .os-msel{display:flex;flex-wrap:wrap;gap:6px}
   .os-msel-chip{border:1px solid #d4d4d4;background:#fff;color:var(--ink-body);border-radius:6px;padding:6px 10px;font:inherit;font-size:12px;font-weight:550;cursor:pointer}
@@ -6257,19 +6476,29 @@
   .os-tbtn{width:32px;height:32px;min-width:32px;min-height:32px;max-height:32px;border:1px solid #c9cccf;border-radius:8px;background:#fff;color:#616161;font-size:12px;font-weight:700;cursor:pointer;flex:none;box-sizing:border-box;padding:0;line-height:1}
   .os-tbtn.on{border-color:var(--brand);color:var(--brand);background:var(--brand-50)}
   .os-ninh{display:flex;align-items:center;gap:8px}.os-ninh .os-input{flex:1}.os-ninh .os-tbtn{width:auto;padding:0 10px;font-size:12px;font-weight:600}
-  .os-imgf{width:100%;min-width:0}
-  .os-imgbox{display:flex;flex-direction:column;align-items:stretch;gap:8px;width:100%;min-width:0;padding:8px;border:1px dashed #c9cccf;border-radius:8px;background:#fff;box-sizing:border-box}
+  .os-imgf{position:relative;width:100%;min-width:0}
+  .os-imgbox{position:relative;display:flex;flex-direction:column;align-items:stretch;width:100%;min-width:0;box-sizing:border-box}
+  .os-imgbox:not(.on){padding:0;border:1px dashed #c9cccf;border-radius:10px;background:#fff;overflow:hidden}
   .os-imgbox.drag{border-color:#303030;background:#f7f7f7}
-  .os-imgbox.on{gap:8px}
-  .os-img-actions{display:flex;align-items:stretch;width:100%;min-height:32px;overflow:hidden;border-radius:8px;background:#f1f1f1}
-  .os-img-select{flex:1 1 auto;min-width:0;height:32px;border:0;background:transparent;color:#303030;font:inherit;font-size:13px;font-weight:550;cursor:pointer;text-align:center}
-  .os-img-select:hover{background:#e8e8e8}
-  .os-img-lib{flex:none;display:inline-flex;align-items:center;justify-content:center;width:36px;height:32px;border:0;border-left:1px solid #d4d4d4;background:transparent;color:#616161;cursor:pointer}
-  .os-img-lib:hover{background:#e8e8e8;color:#303030}
-  .os-img-lib svg{display:block}
-  .os-img-thumb{display:block;width:100%;height:72px;border:0;border-radius:6px;background:#f1f1f1 center/cover no-repeat;cursor:pointer}
-  .os-img-remove{border:0;background:none;padding:0;color:#616161;font:inherit;font-size:12px;font-weight:400;text-align:center;cursor:pointer}
-  .os-img-remove:hover{color:#b3261e;text-decoration:underline;text-underline-offset:2px}
+  .os-imgbox.on{padding:0;border:0;background:transparent}
+  .os-img-empty{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:72px;padding:12px;border:0;background:transparent;color:#303030;font:inherit;font-size:13px;font-weight:550;cursor:pointer}
+  .os-img-empty:hover{background:#f7f7f7}
+  .os-img-empty-ico{display:inline-flex;color:#616161}
+  /* Filled state: thin line frame around the preview (same #c9cccf as other form controls) */
+  .os-img-thumb{position:relative;display:block;width:100%;height:88px;padding:0;border:1px solid #c9cccf;border-radius:10px;overflow:hidden;background:#f1f1f1 center/cover no-repeat;cursor:pointer;box-sizing:border-box}
+  .os-img-name{position:absolute;left:8px;right:8px;bottom:6px;z-index:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff;font-size:11px;font-weight:600;line-height:1.2;text-align:left;text-shadow:0 1px 2px rgba(0,0,0,.55);pointer-events:none}
+  .os-img-hover{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45);opacity:0;transition:opacity .12s ease;pointer-events:none}
+  .os-img-thumb:hover .os-img-hover,.os-imgbox.menu-open .os-img-hover{opacity:1}
+  .os-img-thumb:hover .os-img-name,.os-imgbox.menu-open .os-img-name{opacity:0}
+  .os-img-change{color:#fff;font-size:13px;font-weight:650;letter-spacing:.01em}
+  .os-img-menu{position:absolute;top:calc(100% + 6px);left:0;z-index:40;min-width:220px;padding:6px;border:1px solid #e3e3e3;border-radius:12px;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,.14)}
+  .os-img-menu-item{display:flex;align-items:center;gap:10px;width:100%;min-height:36px;padding:8px 10px;border:0;border-radius:8px;background:transparent;color:#202223;font:inherit;font-size:13px;font-weight:500;text-align:left;cursor:pointer}
+  .os-img-menu-item:hover{background:#f1f1f1}
+  /* Image 规范: Remove warning — sampled from online hover (#FEE1E6 / #8E0B21) */
+  .os-img-menu-item.danger{color:#8E0B21}
+  .os-img-menu-item.danger:hover{background:#FEE1E6;color:#8E0B21}
+  .os-img-menu-ico{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;flex:none;color:currentColor}
+  .os-img-menu-ico svg{display:block;width:16px;height:16px;flex:none}
   .os-sf-backdrop{z-index:280}
   .os-imgdrop-ico{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;width:24px;height:24px;color:#9ca3af}
   .os-imgdrop-ico svg{display:block;width:24px;height:20px}
@@ -6344,19 +6573,20 @@
   .os-op-bound-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;font-weight:600}
   .os-op-bound-clear{width:24px;height:24px;border:0;border-radius:5px;background:transparent;color:var(--ink-muted);font-size:18px;line-height:1;cursor:pointer}
   .os-op-bound-clear:hover{background:#f7e9e7;color:#b3261e}
-  .os-op-source-pop{position:fixed;z-index:500;width:280px;max-height:min(420px,70vh);overflow:auto;padding:8px 0;border:1px solid #d9d9d9;border-radius:10px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.16);color:#303030}
-  .os-op-source-crumb{padding:4px 12px 8px;font-size:11px;color:#6d7175;border-bottom:1px solid #eee;margin-bottom:4px}
+  .os-op-source-pop{position:fixed;z-index:500;min-width:280px;width:max-content;max-width:min(380px,calc(100vw - 16px));max-height:min(420px,70vh);overflow:auto;padding:8px 0;border:1px solid #d9d9d9;border-radius:10px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.16);color:#303030}
+  .os-op-source-crumb{padding:4px 12px 8px;font-size:11px;color:#6d7175;border-bottom:1px solid #eee;margin-bottom:4px;white-space:nowrap}
   .os-op-source-crumb span{margin:0 4px;opacity:.7}
   .os-op-source-list{display:flex;flex-direction:column}
-  .os-op-source-list button{display:flex;align-items:center;gap:9px;width:100%;padding:8px 12px;border:0;background:#fff;color:#303030;text-align:left;font:inherit;font-size:13px;cursor:pointer}
+  .os-op-source-list button{display:flex;align-items:center;gap:9px;width:100%;padding:8px 12px;border:0;background:#fff;color:#303030;text-align:left;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}
   .os-op-source-list button:hover,.os-op-source-list button.on{background:#f5f6f7}
   .os-op-source-thumb{width:32px;height:32px;flex:none;border-radius:6px;border:1px solid #e3e3e3;background:#f1f1f1 center/cover no-repeat}
   .os-op-source-copy{display:flex;flex-direction:column;gap:1px;min-width:0}
-  .os-op-source-copy strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;font-weight:600}
+  .os-op-source-copy strong{white-space:nowrap;font-size:12.5px;font-weight:600}
   .os-op-source-copy small{color:#6d7175;font-size:11px}
   .os-op-source-empty{padding:16px 12px;color:#6d7175;font-size:12px;text-align:center}
-  .os-op-source-remove{display:flex;align-items:center;gap:9px;width:100%;padding:9px 12px;border:0;border-top:1px solid #eee;background:#fff;color:#b3261e;text-align:left;font:inherit;font-size:13px;cursor:pointer;margin-top:4px}
-  .os-op-source-remove:hover{background:#faf0ef}
+  /* Remove dynamic source: same warning red bar as text / image Remove */
+  .os-op-source-remove{display:flex;align-items:center;gap:9px;width:100%;padding:9px 12px;border:0;border-top:1px solid #eee;background:#fff;color:#8E0B21;text-align:left;font:inherit;font-size:13px;cursor:pointer;margin-top:4px}
+  .os-op-source-remove:hover{background:#FEE1E6;color:#8E0B21}
   .os-op-source-remove span{display:inline-flex;width:15px;color:inherit}
   .os-op-source-remove svg{width:15px;height:15px}
   .os-ri{display:flex;flex-direction:column;gap:12px;width:100%}

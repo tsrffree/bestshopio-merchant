@@ -45,6 +45,7 @@
 - outline: 与 filled 同外框 (height 24 / radius 5 / padding 2 8 / weight 700); 底 #f9fafb; inset 0.5px hairline (画在内侧, 外尺寸不膨胀); 深色字
 
 ### 2. Price
+- show_saving: toggle / false (开箱默认关; 仅 compare-at 高于现价时才可能展示)
 - size: range / 24 / px, 10–120 (现价字号; 划线价与 Save 按比例缩放)
 - saving_position: segmented / right / [left, right]
 - saving_type: select / percentage / [Percentage, Fixed amount, Sale, Saving text]
@@ -60,13 +61,19 @@
 - low_stock_text: text / Low stock - {n} items left
 - sold_out_text: text / Sold out (独立自定义)
 - status_style: segmented / dot / [dot, badge, text-only]
-- status_color: color / 橙
+- in_stock_color: color / #10a443 (开箱绿; 不跟主题色; 库存 > threshold 时用)
+- status_color: color / #f59e0b (开箱黄; Low stock color; 库存 ≤ threshold 时用, 含 0 / preorder)
+- 状态点/徽章颜色只走上述两色, 不再写死灰/主题色
 
 ### 4. Variant
-- nested_dropdown: toggle / false (开 = 单下拉显示组合值 12-18M / Yellow)
-- show_group_title: toggle / true (显示 Color / Size 标题, 并随选中项更新名称)
-- sku_display_name: text / 空 (空 = 原始 SKU)
-- show_sku_in_option: toggle / false
+- picker_type: segmented / buttons (开箱默认 Buttons) / [dropdown, buttons]
+- swatches: toggle / true (开箱默认开; 独立色板控制器, 位于 Selector style 下方; Dropdown / Buttons 均显示)
+- swatch_style: select / color / [color=Color swatches, image=Variant image, text=Text] (visibleWhen swatches; 三种展示不变)
+- shape: segmented / normal / [normal, circle, square] (visibleWhen swatches)
+- 级联逻辑: Swatches 开 → Color 保持色板交互(含 style/shape); Selector style=dropdown 时仅 Size 为下拉. Swatches 关 → Color 跟随 Selector style (dropdown=下拉列表 / buttons=文字按钮)
+- show_group_title: toggle / true (开箱默认开; 显示 Color / Size 标题, 并随选中项更新名称)
+- nested_dropdown: 已下线 (旧数据仍静默渲染组合下拉)
+- show_sku_in_option / sku_display_name: 已下线 (旧数据仍静默读取; 不再展示配置项)
 
 ### 5. Buy
 - 侧栏分两块 (os-sub 分割线): Add to cart | Dynamic checkout
@@ -74,18 +81,21 @@
 - show_buy_now: 已下线 (立买归入 Channels, 挂在 show_dynamic 下)
 - show_dynamic: toggle / true — 开启后出现 Channels / more payment options / safe checkout; 关闭则这些配置项与预览一并隐藏
 - buy_now_text: text / Buy now (仅 channels 含 buy_now 时显示)
-- atc_layout: segmented / with-quantity / [with-quantity, full-width] (full-width = 加购按钮单独全宽, 类似 Buy now)
+- Add to cart 分区标题下字段不重复写 Add to cart 前缀: Show button / Style / Icon / Background / Button border / Text
+- atc_layout: segmented / with-quantity / [with-quantity, full-width]; labels Normal / Full width (with-quantity = 数量+加购并排; full-width = 加购按钮单独全宽, 类似 Buy now)
 - atc_icon: select / bag-plus / theme icon 库 (含 None; 默认购物袋+加号 20px, 显示在加购文案左侧)
-- atc_background / atc_text_color: color / 开箱 #FFC439 / #FFFFFF (T = transparent)
+- atc_background / atc_border / atc_text_color: color; Background 开箱 #FFC439; Button border 开箱空值跟随 Background (blankValue); Text 开箱 #FFFFFF; 均支持 T = transparent; 面板顺序 Background → Button border → Text
+- atc_background 变更且 Button border 仍为空时刷新面板, 使继承色同步
+
 - buy_now_background / buy_now_text_color: color / 开箱 #000000 / #FFFFFF (仅 channels 含 buy_now)
-- channel_logo: toggle / true (开箱开; PayPal 等渠道显示品牌 logo)
+- channel_logo: toggle / true (开箱开; PayPal 等渠道显示品牌 logo; 在 Channels 中新增任一渠道时自动打开, 手动关闭仍可关)
 - atc_shape: segmented / pill / [normal, pill, square, custom] (加购区块; ≥4 项自动下拉)
 - atc_custom_radius: range / 8 / px (仅 atc_shape=custom)
 - dyn_shape: segmented / normal / [normal, pill, square, custom] (结账区块; ≥4 项自动下拉; visibleWhen show_dynamic)
 - dyn_custom_radius: range / 8 / px (仅 dyn_shape=custom)
 - button_shape / custom_radius: 已下线 (遗留数据仍作 atc_shape / dyn_shape 回退)
 - button_layout: 已下线, 固定 stacked (无 Side by side 配置项)
-- channels: multi-select / 默认 [Buy now, PayPal] / 可选 [Buy now, PayPal, Apple Pay, Google Pay] (visibleWhen show_dynamic; Shop 不在 Channels)
+- channels: multi-select / 默认 [Buy now, PayPal] / 可选 [Buy now, PayPal] (visibleWhen show_dynamic; Shop / Apple Pay / Google Pay 不在 Channels; 旧数据中的 apple_pay / google_pay 静默丢弃; 钱包标识归 Trust logos)
   - 注意: Visa / Amex / Mastercard / Amazon 等卡品牌不是 Channels. 案例里它们出现在 Safe checkout / Payment & Security logo 条, 走 trust_logos
 - show_shop_installments: 已下线 (分期能力后续再补)
 - show_safe_checkout: toggle / true (开箱 Guaranteed Safe Checkout)
@@ -95,6 +105,7 @@
 - Featured product 的 Buy buttons 与 Product information 同字段集 (默认数据可不同; Featured 另有独立 Quantity block 时 show_quantity 默认关)
 
 ### 6. Collapsible
+- content: richtext / label Content (原 Row content; 三条可折叠行统一)
 - open: toggle / false (行级 Open by default; 勾哪行展开哪行, 与顺序无关)
 - accordion_mode: toggle / false (开 = 多行互斥只开一个)
 - icon_position: segmented / right / [left, right]
@@ -121,6 +132,7 @@
 - show_copy: toggle / true
 
 ### 10. Recommendations
+- block 开箱显示名: Related products (原 Inline recommendations; kind 仍为 recommendations)
 - empty_behavior: select / hide (空态隐藏整个 block)
 - exclude_soldout: toggle / false
 - dedupe_current: toggle / true
@@ -156,6 +168,7 @@
 - show_after_scroll: toggle / false (滚动后出现, 阈值默认 100px)
 - appear_at: segmented / scroll / [top, scroll]
 - mobile_visible: toggle / true
+- button_text: text / ADD TO CART (开箱默认; 原 Add to cart / 泳装模板 Pre-order)
 
 交互规则: 固定吸附底部 (无 Position 配置), 滚过主购买区后出现, 含数量, 移动端显示, 不含变体选择器.
 
@@ -173,6 +186,7 @@ product-main block 顺序: badges -> title -> price -> rating -> description -> 
 适配: bumpbabe / kovoapex / zumbamboo
 Section 顺序: breadcrumbs -> product-main(颜色/尺码) -> media-with-text -> testimonial -> related-products
 product-main block 顺序: badges -> title -> price -> rating -> description -> inventory -> variant(颜色/尺码) -> buy -> icon_text -> featured_reviews -> collapsible -> recommendations -> sticky
+开箱不含 Size guide Popup; Popup block 仍可手动添加
 
 ### 模板三 通用型 (`default`)
 适配: 其余店铺
