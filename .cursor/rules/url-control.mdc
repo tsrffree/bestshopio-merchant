@@ -1,0 +1,29 @@
+# URL 控件规范
+
+Shared URL control: `control: 'url'` via `urlControlHtml` / `wireUrlInput` in `online-store/js/app.js`.
+Nested Video URL rows use the same paste + validate pattern.
+
+When the user names URL / Video URL / 链接 for a layout, copy, or validation change, update this shared control so every caller gets the change. Do not patch one field only.
+
+## Layout and copy (match Shopify video URL chrome)
+
+- Layout: `.os-fld-pair` — label left, input in the 151px control column (not text stack)
+- Interaction: plain input — merchant types or pastes. No library search modal
+- Default placeholder: `Paste a link`
+- Hint under the input: for `video_url` use `Use a YouTube or Vimeo URL` when schema `info` is empty
+- Pair hints align under the control column
+
+## Validation
+
+- Empty is valid (no error)
+- `video` kind (`video_url` / `urlKind: 'video'`): accept YouTube, Vimeo, or direct `.mp4` / `.webm` / `.mov` (prototype files)
+- Other URL fields: accept `http` / `https` URL shape, plus `/path` and `#hash` (CTA placeholders)
+- Invalid: pink input (`.os-input.is-invalid`), alert row with `!` icon + message
+- Video error copy: `This link is invalid. Try pasting a complete Vimeo/YouTube link`
+- Generic error copy: `This link is invalid. Try pasting a complete URL`
+- Validate on input and blur; do not block save in the prototype
+
+## Contrast
+
+- Text / Heading / Content: `.os-fld-stack` (see `text-input.mdc`)
+- URL: pair paste input + optional hint + regex error state

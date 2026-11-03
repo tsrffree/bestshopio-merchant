@@ -2479,7 +2479,10 @@
     if (!visible(f, values, ctx)) return '';
     if (!f.key && typeof f.render === 'function') return f.render(values, ctx);
     const val = values[f.key];
-    const hint = f.info ? '<div class="os-fhint">' + esc(f.info) + '</div>' : '';
+    // URL (esp. video): Shopify-style hint under the input when schema omits info.
+    const urlHint = (f.control === 'url' && /video/i.test(String(f.key || ''))) ? 'Use a YouTube or Vimeo URL' : '';
+    const hintText = f.info || urlHint;
+    const hint = hintText ? '<div class="os-fhint">' + esc(hintText) + '</div>' : '';
     // Shopify theme editor: richtext / explicit dynamicSource fields show the database metadata icon at the label's top-right.
     // ordered_products + collections mode puts the icon beside Select instead (matches product-list source UX).
     const collectionSourceOnProducts = f.control === 'ordered_products' && f.dynamicSource && f.dynamicSource.mode === 'collections';
@@ -2508,8 +2511,10 @@
         return oneLine(segOpts.length > 3 ? 'os-fld-pair' : 'os-fld-seg');
       }
       if (f.control === 'range') return oneLine('os-fld-range');
-      if (f.control === 'select' || f.control === 'number' || f.control === 'numberInherit' || f.control === 'color' || f.control === 'image' || f.control === 'text' || f.control === 'url' || f.control === 'multiselect') return oneLine('os-fld-pair');
+      if (f.control === 'select' || f.control === 'number' || f.control === 'numberInherit' || f.control === 'color' || f.control === 'image' || f.control === 'url' || f.control === 'multiselect') return oneLine('os-fld-pair');
       if (f.control === 'product' || f.control === 'collection' || f.control === 'menu' || f.control === 'blog' || f.control === 'page') return oneLine('os-fld-pair');
+      // Text / Heading / Content richtext: label row, control full width below. URL stays pair (paste input).
+      if (f.control === 'text' || f.control === 'richtext' || f.control === 'textarea') return oneLine('os-fld-stack');
     }
     return '<div class="os-fld">' + label + control(f, val, values, ctx) + hint + '</div>';
   }
@@ -2637,8 +2642,10 @@
     const ctl = (f.control === 'segmented' && opts.length > 3) ? 'select' : f.control;
     const dk = 'data-fkey="' + esc(f.key) + '" data-control="' + ctl + '"';
     switch (ctl) {
-      case 'text': case 'url':
+      case 'text':
         return '<input class="os-input" ' + dk + (f.maxlength ? ' maxlength="' + f.maxlength + '"' : '') + ' type="text" value="' + esc(val) + '" placeholder="' + esc(f.placeholder == null ? 'Please enter' : f.placeholder) + '">';
+      case 'url':
+        return urlControlHtml(val, dk, f);
       case 'textarea': case 'custom_css': {
         const fit = ctl !== 'custom_css' && (f.autoHeight || isContentLikeField(f));
         return '<textarea class="os-input os-ta' + (ctl === 'custom_css' ? ' mono' : '') + (fit ? ' os-ta-fit' : '') + '" ' + dk + (f.maxlength ? ' maxlength="' + f.maxlength + '"' : '') + ' rows="' + (ctl === 'custom_css' ? 4 : (fit ? 1 : 3)) + '" placeholder="' + esc(f.placeholder || '') + '">' + esc(val) + '</textarea>' + (f.maxlength ? '<div class="os-fhint">Max ' + f.maxlength + ' characters.</div>' : '');
@@ -2681,6 +2688,8 @@
         return colorControl(f, val, dk, values);
       case 'image':
         return imageFieldHtml(val || '', dk);
+      case 'video':
+        return imageFieldHtml(val || '', dk, { kind: 'video' });
       case 'collections':
         return collectionsControl(f, val, dk);
       case 'ordered_products':
@@ -2807,14 +2816,18 @@
   // — menu: Select from library / Remove (English system copy; i18n-skip)
   // — Select icon: solid filled landscape (cutout sun + mountains), color inherits #303030
   // — Remove hover: warning red bar (#FEE1E6 / #8E0B21, sampled from online)
-  function imageFieldHtml(url, attrs) {
+  function imageFieldHtml(url, attrs, opts) {
+    const kind = (opts && opts.kind) === 'video' ? 'video' : 'image';
     const u = url || '';
-    const name = mediaFileName(u, 'Selected image');
-    const attrStr = attrs ? (' ' + attrs) : '';
+    const name = mediaFileName(u, kind === 'video' ? 'Selected video' : 'Selected image');
+    const attrStr = (attrs ? (' ' + attrs) : '') + (kind === 'video' ? ' data-media-kind="video"' : '');
+    const changeLabel = kind === 'video' ? 'Change video' : 'Change image';
     if (u) {
+      const thumbStyle = kind === 'video' ? '' : (' style="background-image:url(' + esc(u) + ')"');
       return '<div class="os-imgf"' + attrStr + ' data-img-url="' + esc(u) + '">' +
-        '<div class="os-imgbox on">' +
-          '<button type="button" class="os-img-thumb" data-img-menu style="background-image:url(' + esc(u) + ')" title="' + esc(name) + '" aria-label="Change image" aria-haspopup="menu" aria-expanded="false">' +
+        '<div class="os-imgbox on' + (kind === 'video' ? ' is-video' : '') + '">' +
+          '<button type="button" class="os-img-thumb" data-img-menu' + thumbStyle + ' title="' + esc(name) + '" aria-label="' + changeLabel + '" aria-haspopup="menu" aria-expanded="false">' +
+            (kind === 'video' ? '<span class="os-img-video-ico" aria-hidden="true">' + I.play + '</span>' : '') +
             '<span class="os-img-name">' + esc(name) + '</span>' +
             '<span class="os-img-hover" aria-hidden="true">' +
               '<span class="os-img-change">Change</span>' +
@@ -2831,9 +2844,9 @@
         '</div></div>';
     }
     return '<div class="os-imgf"' + attrStr + ' data-img-url="">' +
-      '<div class="os-imgbox">' +
+      '<div class="os-imgbox' + (kind === 'video' ? ' is-video' : '') + '">' +
         '<button type="button" class="os-img-empty" data-img-pick>' +
-          '<span class="os-img-empty-ico">' + mediaSelectIcon() + '</span><span>Select</span>' +
+          '<span class="os-img-empty-ico">' + mediaSelectIcon() + '</span><span>' + (kind === 'video' ? 'Select video' : 'Select') + '</span>' +
         '</button>' +
       '</div></div>';
   }
@@ -2883,12 +2896,19 @@
       (window.OS.featuredReviewCatalog() || []).forEach((r) => { add(r.image); add(r.avatar); });
     }
     MEDIA_LIB_UPLOADED.forEach((f) => add(f.url));
+    const sampleSwim = (D.SAMPLE && D.SAMPLE.SWIM_IMG) || {};
+    if (sampleSwim.video) add(sampleSwim.video);
+    if (sampleImg.swimVideo) add(sampleImg.swimVideo);
     add(currentUrl);
     const out = urls.map((url, i) => {
       const uploaded = MEDIA_LIB_UPLOADED.find((f) => f.url === url);
       if (uploaded) return Object.assign({}, uploaded);
       const themeHit = themeFiles.find((f) => url.endsWith('/' + f.file));
       if (themeHit) return { id: 'ti' + i, name: themeHit.name, ext: 'SVG', kind: 'image', url: url };
+      const isVideo = /\.(mp4|webm|mov)(\?|$)/i.test(url) || /video/i.test(url);
+      if (isVideo) {
+        return { id: 'fv' + i, name: mediaFileName(url, 'video-clip').replace(/\.[^.]+$/, ''), ext: ((url.split('.').pop() || 'MP4') + '').toUpperCase().slice(0, 4), kind: 'video', url: url };
+      }
       return { id: 'f' + i, name: NAMES[i % NAMES.length] + (i >= NAMES.length ? '-' + (Math.floor(i / NAMES.length) + 1) : ''), ext: EXT[i % EXT.length], kind: 'image', url: url };
     });
     if (urls[2]) out.splice(3, 0, { id: 'v1', name: 'product-demo', ext: 'WEBM', kind: 'video', url: urls[2] });
@@ -2921,12 +2941,14 @@
     inp.onchange = () => readLocalMedia(inp.files, (added) => { if (inp.parentNode) inp.parentNode.removeChild(inp); if (added.length) onPick(added); });
     inp.click();
   }
-  function openSelectFileModal(currentUrl, onPick) {
+  function openSelectFileModal(currentUrl, onPick, opts) {
     closePops();
+    const o = opts || {};
+    const preferType = o.preferType === 'video' || o.preferType === 'all' || o.preferType === 'image' ? o.preferType : 'image';
     const FILES = mediaLibraryFiles(currentUrl);
     const PAGE = 18;
-    const current = FILES.find((f) => f.url === currentUrl && f.kind === 'image');
-    const st = { q: '', type: 'image', sort: 'new', page: 1, sel: current ? current.id : '' };
+    const current = FILES.find((f) => f.url === currentUrl && (f.kind === 'image' || f.kind === 'video'));
+    const st = { q: '', type: preferType === 'all' ? 'all' : preferType, sort: 'new', page: 1, sel: current ? current.id : '' };
     const CHK = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
     const backdrop = h('<div class="modal-backdrop os-sf-backdrop i18n-skip"></div>');
     const m = h('<div class="modal" style="width:860px;max-width:94vw"></div>');
@@ -2936,7 +2958,10 @@
         '<div class="sf-toolbar">' +
           '<div class="sf-search"><span class="ic">' + I.search + '</span><input id="sf-q" placeholder="Search by file name" autocomplete="off" /></div>' +
           '<select class="filter-select" id="sf-type" style="width:130px">' +
-            '<option value="all">All</option><option value="image" selected>Images</option><option value="video">Videos</option><option value="raw">Other</option>' +
+            '<option value="all"' + (preferType === 'all' ? ' selected' : '') + '>All</option>' +
+            '<option value="image"' + (preferType === 'image' ? ' selected' : '') + '>Images</option>' +
+            '<option value="video"' + (preferType === 'video' ? ' selected' : '') + '>Videos</option>' +
+            '<option value="raw">Other</option>' +
           '</select>' +
           '<select class="filter-select" id="sf-sort" style="width:210px">' +
             '<option value="new">Date added (newest first)</option><option value="old">Date added (oldest first)</option><option value="name">File name (A–Z)</option>' +
@@ -3010,10 +3035,73 @@
     m.querySelector('[data-cancel]').onclick = cancel;
     backdrop.onclick = (e) => { if (e.target === backdrop) cancel(); };
     m.querySelector('[data-ok]').onclick = () => {
-      const picked = FILES.find((f) => f.id === st.sel && f.kind === 'image');
+      const picked = FILES.find((f) => f.id === st.sel && (f.kind === 'image' || f.kind === 'video'));
       close();
       if (picked) onPick(picked.url);
     };
+  }
+  // URL paste field: validate on type/blur. Video keys expect YouTube/Vimeo (prototype also allows .mp4/.webm/.mov).
+  function urlFieldKind(f) {
+    if (!f) return 'link';
+    if (f.urlKind === 'video' || f.urlKind === 'link') return f.urlKind;
+    const key = String(f.key || '').toLowerCase();
+    if (key === 'video_url' || /(^|_)video(_url)?$/.test(key)) return 'video';
+    return 'link';
+  }
+  function isValidUrlValue(raw, kind) {
+    const s = String(raw || '').trim();
+    if (!s) return true;
+    if (kind === 'video') {
+      if (/^(https?:\/\/)?([a-z0-9-]+\.)*(youtube\.com\/(watch\?v=|shorts\/|embed\/|live\/)|youtu\.be\/)[^\s]+$/i.test(s)) return true;
+      if (/^(https?:\/\/)?([a-z0-9-]+\.)*vimeo\.com\/\d+(\/[^\s]*)?$/i.test(s)) return true;
+      // Prototype seeds / direct files still valid alongside YouTube/Vimeo.
+      if (/\.(mp4|webm|mov)(\?|#|$)/i.test(s)) return true;
+      return false;
+    }
+    // Relative paths and in-page hash targets stay valid for link / button URL fields.
+    if (s.charAt(0) === '/' || s.charAt(0) === '#') return true;
+    try {
+      const withProto = /^[a-z][a-z0-9+.-]*:/i.test(s) ? s : ('https://' + s);
+      const u = new URL(withProto);
+      return (u.protocol === 'http:' || u.protocol === 'https:') && !!u.hostname;
+    } catch (err) {
+      return false;
+    }
+  }
+  function urlErrorMessage(kind) {
+    return kind === 'video'
+      ? 'This link is invalid. Try pasting a complete Vimeo/YouTube link'
+      : 'This link is invalid. Try pasting a complete URL';
+  }
+  function urlControlHtml(val, attrs, f) {
+    const kind = urlFieldKind(f || {});
+    const ph = (f && f.placeholder == null) ? 'Paste a link' : ((f && f.placeholder) || 'Paste a link');
+    const showErr = !!String(val || '').trim() && !isValidUrlValue(val, kind);
+    return '<div class="os-url-wrap' + (showErr ? ' is-invalid' : '') + '" data-url-kind="' + esc(kind) + '">' +
+      '<input class="os-input' + (showErr ? ' is-invalid' : '') + '" ' + attrs + ' type="url" data-url-kind="' + esc(kind) + '" value="' + esc(val || '') + '" placeholder="' + esc(ph) + '" autocomplete="off">' +
+      '<div class="os-url-err"' + (showErr ? '' : ' hidden') + ' role="alert">' +
+        '<span class="os-url-err-ico" aria-hidden="true">!</span>' +
+        '<span class="os-url-err-msg">' + esc(urlErrorMessage(kind)) + '</span>' +
+      '</div></div>';
+  }
+  function paintUrlValidity(input) {
+    if (!input) return;
+    const kind = input.getAttribute('data-url-kind') || 'link';
+    const wrap = input.closest('.os-url-wrap');
+    const err = wrap ? wrap.querySelector('.os-url-err') : null;
+    const show = !!String(input.value || '').trim() && !isValidUrlValue(input.value, kind);
+    input.classList.toggle('is-invalid', show);
+    if (wrap) wrap.classList.toggle('is-invalid', show);
+    if (err) err.hidden = !show;
+  }
+  function wireUrlInput(input, onValue) {
+    if (!input) return;
+    input.oninput = () => {
+      if (typeof onValue === 'function') onValue(input.value, false);
+      paintUrlValidity(input);
+    };
+    input.onblur = () => paintUrlValidity(input);
+    paintUrlValidity(input);
   }
   function clearImgMenuPos(menu) {
     if (!menu) return;
@@ -3094,7 +3182,8 @@
     };
     const openLib = () => {
       closeMenu();
-      openSelectFileModal(el.getAttribute('data-img-url') || '', (url) => onChange(k, url, true));
+      const preferType = el.getAttribute('data-media-kind') === 'video' ? 'video' : 'image';
+      openSelectFileModal(el.getAttribute('data-img-url') || '', (url) => onChange(k, url, true), { preferType: preferType });
     };
     el.querySelectorAll('[data-img-pick]').forEach((b) => {
       b.onclick = (e) => { e.preventDefault(); e.stopPropagation(); openLib(); };
@@ -3348,6 +3437,11 @@
       '<label class="os-flabel">' + esc(label) + '</label>' + controlHtml +
     '</div>';
   }
+  function reviewItemStack(label, controlHtml, extraCls) {
+    return '<div class="os-fld os-fld-stack' + (extraCls ? ' ' + extraCls : '') + '">' +
+      '<label class="os-flabel">' + esc(label) + '</label>' + controlHtml +
+    '</div>';
+  }
   // Featured reviews: only Media / Navigation / Trust render a review image.
   function featuredReviewSupportsImage(values) {
     const layout = (values && values.layout) || 'nav';
@@ -3378,14 +3472,12 @@
       const customFields =
         '<div class="os-ri-fields" data-ri-custom' + (entryType === 'custom' ? '' : ' hidden') + '>' +
           reviewItemPair('Avatar', reviewItemImageHtml('avatar', row.avatar || ''), 'os-ri-img') +
-          reviewItemPair('Author',
+          reviewItemStack('Author',
             '<input class="os-input" data-ri-field="author" value="' + esc(row.author || '') + '" placeholder="Reviewer name">') +
           reviewItemPair('Rating',
             '<input class="os-input" type="number" min="1" max="5" step="0.5" data-ri-field="rating" value="' + esc(row.rating == null ? 5 : row.rating) + '">') +
-          '<div class="os-fld">' +
-            '<label class="os-flabel">Content</label>' +
-            '<textarea class="os-input os-ta os-ta-fit" rows="1" data-ri-field="text" placeholder="Content">' + esc(row.text || '') + '</textarea>' +
-          '</div>' +
+          reviewItemStack('Content',
+            '<textarea class="os-input os-ta os-ta-fit" rows="1" data-ri-field="text" placeholder="Content">' + esc(row.text || '') + '</textarea>') +
           (supportsImage
             ? reviewItemPair('Image', reviewItemImageHtml('image', row.image || ''), 'os-ri-img')
             : '') +
@@ -3520,8 +3612,15 @@
           '<button type="button" class="os-ri-remove" data-vi-remove aria-label="Remove video">×</button></div>' +
         reviewItemPair('Cover image', reviewItemImageHtml('cover', cover), 'os-ri-img') +
         reviewItemPair('Video URL',
-          '<input class="os-input" data-vi-field="video_url" value="' + esc(row.video_url || '') + '" placeholder="https://…mp4">') +
-        reviewItemPair('Accessible label',
+          '<div class="os-url-wrap" data-url-kind="video">' +
+            '<input class="os-input" data-vi-field="video_url" data-url-kind="video" type="url" value="' + esc(row.video_url || '') + '" placeholder="Paste a link" autocomplete="off">' +
+            '<div class="os-url-err" hidden role="alert">' +
+              '<span class="os-url-err-ico" aria-hidden="true">!</span>' +
+              '<span class="os-url-err-msg">' + esc(urlErrorMessage('video')) + '</span>' +
+            '</div>' +
+            '<div class="os-fhint">Use a YouTube or Vimeo URL</div>' +
+          '</div>') +
+        reviewItemStack('Accessible label',
           '<input class="os-input" data-vi-field="accessible_label" value="' + esc(row.accessible_label || '') + '" placeholder="Describe this video">') +
       '</div>';
     }).join('');
@@ -3548,7 +3647,7 @@
     };
     root.querySelectorAll('.os-ri-card').forEach((card) => {
       const urlEl = card.querySelector('[data-vi-field="video_url"]');
-      if (urlEl) urlEl.addEventListener('input', () => commit(false));
+      if (urlEl) wireUrlInput(urlEl, () => commit(false));
       const labelEl = card.querySelector('[data-vi-field="accessible_label"]');
       if (labelEl) labelEl.addEventListener('input', () => commit(false));
       const img = card.querySelector('[data-ri-image="cover"]');
@@ -3648,9 +3747,11 @@
     form.querySelectorAll('[data-control]').forEach((el) => {
       const k = el.getAttribute('data-fkey'); const ctl = el.getAttribute('data-control');
       const field = (currentSchema() || []).find((x) => x.key === k) || {};
-      if (ctl === 'text' || ctl === 'url' || ctl === 'number') {
+      if (ctl === 'text' || ctl === 'number') {
         el.oninput = () => onChange(k, ctl === 'number' ? clampNum(el) : el.value, false);
         if (field.refreshPanel) el.onchange = () => refreshRight();
+      } else if (ctl === 'url') {
+        wireUrlInput(el, (v) => onChange(k, v, false));
       } else if (ctl === 'textarea' || ctl === 'custom_css') {
         el.oninput = () => {
           if (el.classList.contains('os-ta-fit')) fitTextarea(el);
@@ -3676,7 +3777,7 @@
         const numEl = el.querySelector('[data-ninh-num]'); const autoBtn = el.querySelector('[data-ninh-auto]'); const f = fieldByEl(el) || {};
         numEl.oninput = () => onChange(k, clamp(numEl.value, f.min == null ? -1e9 : f.min, f.max == null ? 1e9 : f.max, f.min || 0), false);
         autoBtn.onclick = () => { const on = !autoBtn.classList.contains('on'); autoBtn.classList.toggle('on', on); if (on) { numEl.value = ''; numEl.disabled = true; onChange(k, null, false); } else { numEl.disabled = false; const dv = (f.min != null ? f.min : 0); numEl.value = dv; onChange(k, dv, false); numEl.focus(); } };
-      } else if (ctl === 'image') {
+      } else if (ctl === 'image' || ctl === 'video') {
         wireImageField(el, onChange);
       } else if (ctl === 'richtext') {
         wireRichTextField(el, onChange, field, target);
@@ -4049,7 +4150,8 @@
     const change = (k, v, rerenderPanel) => { target[k] = v; after(); if (rerenderPanel) refreshRight(); };
     scopeEl.querySelectorAll('[data-control]').forEach((el) => {
       const k = el.getAttribute('data-fkey'); const ctl = el.getAttribute('data-control'); const f = schema.find((x) => x.key === k) || {};
-      if (ctl === 'text' || ctl === 'url') el.oninput = () => change(k, el.value, false);
+      if (ctl === 'text') el.oninput = () => change(k, el.value, false);
+      else if (ctl === 'url') wireUrlInput(el, (v) => change(k, v, false));
       else if (ctl === 'textarea' || ctl === 'custom_css') {
         el.oninput = () => {
           if (el.classList.contains('os-ta-fit')) fitTextarea(el);
@@ -4068,7 +4170,7 @@
       });
       else if (ctl === 'color') {
         wireColorControl(el, change, k, f, target);
-      } else if (ctl === 'image') {
+      } else if (ctl === 'image' || ctl === 'video') {
         wireImageField(el, change);
       } else if (ctl === 'richtext') {
         wireRichTextField(el, change, f, target);
@@ -6366,15 +6468,32 @@
   .os-right-scroll > .os-fld{padding-left:16px;padding-right:16px}
   /* Fixed two-column rhythm: labels left, controls right — control column 151px (range/select/color/…) */
   .os-fld-seg,.os-fld-range,.os-fld-pair,.os-fld-inline{display:grid;grid-template-columns:minmax(0,1fr) 151px;align-items:center;column-gap:12px;row-gap:4px;min-height:28px}
-  /* Long label + small toggle: label up to 230px; toggle hugs content (all section/block panels) */
-  .os-fld-row{display:grid;grid-template-columns:minmax(0,230px) auto;align-items:center;column-gap:12px;row-gap:4px;min-height:28px}
-  .os-fld-row .os-fhint,.os-fld-seg .os-fhint,.os-fld-range .os-fhint,.os-fld-pair .os-fhint,.os-fld-inline .os-fhint{grid-column:1 / -1;margin-top:0}
+  /* Text / URL: label row + full-width input on the next row */
+  .os-fld-stack{display:flex;flex-direction:column;align-items:stretch;gap:0;min-width:0}
+  .os-fld-stack .os-flabel{margin-bottom:6px;align-self:stretch;max-width:none}
+  .os-fld-stack .os-input,.os-fld-stack .os-picker,.os-fld-stack .bs-richtext,.os-fld-stack .os-ta,.os-fld-stack .os-richtext{width:100%;min-width:0;box-sizing:border-box}
+  .os-fld-stack .os-fhint{margin-top:4px}
+  /* Toggle: label + switch on one row (Shopify). Label stays single-line; hint may wrap below. */
+  .os-fld-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:12px;row-gap:4px;min-height:28px}
+  .os-fld-row .os-fhint,.os-fld-seg .os-fhint,.os-fld-range .os-fhint,.os-fld-inline .os-fhint{grid-column:1 / -1;margin-top:0}
+  /* URL / pair hints sit under the control column (Shopify: hint below Paste a link) */
+  .os-fld-pair .os-fhint{grid-column:2;margin-top:0}
+  .os-fld-pair:has(.os-fhint),.os-fld-pair:has(.os-url-wrap){align-items:start}
+  .os-fld-pair:has(.os-fhint) .os-flabel,.os-fld-pair:has(.os-url-wrap) .os-flabel{align-self:start;padding-top:8px}
   .os-fld-row .os-flabel,.os-fld-seg .os-flabel,.os-fld-range .os-flabel,.os-fld-pair .os-flabel,.os-fld-inline .os-flabel{margin-bottom:0;align-self:center}
   .os-fld-pair:has(.os-imgf){align-items:center}
   .os-fld-pair:has(.os-imgf) .os-flabel{align-self:center}
-  .os-fld-row .os-tg{justify-self:end}
-  .os-fld-row .os-flabel{max-width:230px;white-space:normal;overflow-wrap:anywhere}
-  .os-fld-pair .os-select,.os-fld-pair .os-input,.os-fld-pair .os-picker,.os-fld-pair .os-color-wrap,.os-fld-pair .os-color,.os-fld-pair .os-ninh,.os-fld-pair .os-imgf,.os-fld-pair .os-msel{width:100%;min-width:0}
+  .os-fld-row .os-tg{justify-self:end;flex:none}
+  .os-fld-row .os-flabel{max-width:none;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;overflow-wrap:normal}
+  .os-fld-pair .os-select,.os-fld-pair .os-input,.os-fld-pair .os-picker,.os-fld-pair .os-color-wrap,.os-fld-pair .os-color,.os-fld-pair .os-ninh,.os-fld-pair .os-imgf,.os-fld-pair .os-url-wrap,.os-fld-pair .os-msel{width:100%;min-width:0}
+  .os-url-wrap{display:flex;flex-direction:column;gap:4px;min-width:0;width:100%}
+  .os-url-wrap .os-fhint{margin:0}
+  .os-input.is-invalid{border-color:#8E0B21;background:#FEE1E6;color:#1a1a1a}
+  .os-input.is-invalid:focus{outline:2px solid #2C6ECB;outline-offset:1px;border-color:#8E0B21}
+  .os-url-err{display:flex;align-items:flex-start;gap:6px;margin:0;color:#8E0B21;font-size:11px;font-weight:400;line-height:1.4;letter-spacing:-0.01em}
+  .os-url-err[hidden]{display:none!important}
+  .os-url-err-ico{flex:none;display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;margin-top:1px;border:1.5px solid currentColor;border-radius:50%;font-size:10px;font-weight:700;line-height:1}
+  .os-url-err-msg{min-width:0;flex:1}
   /* Segmented fills the 151px control column (same edge as select/color) */
   .os-fld-seg > .os-seg2{width:100%;max-width:100%;min-width:0;justify-self:stretch;box-sizing:border-box}
   .os-fld-seg .os-seg2 button{flex:1 1 0;min-width:0;padding:5px 8px}
@@ -6486,6 +6605,9 @@
   .os-img-empty-ico{display:inline-flex;color:#616161}
   /* Filled state: thin line frame around the preview (same #c9cccf as other form controls) */
   .os-img-thumb{position:relative;display:block;width:100%;height:88px;padding:0;border:1px solid #c9cccf;border-radius:10px;overflow:hidden;background:#f1f1f1 center/cover no-repeat;cursor:pointer;box-sizing:border-box}
+  .os-imgbox.is-video .os-img-thumb{display:flex;align-items:center;justify-content:center;background:#1f1f1f}
+  .os-img-video-ico{display:inline-flex;color:#fff;opacity:.9}.os-img-video-ico svg{width:28px;height:28px}
+  .os-imgbox.is-video .os-img-name{text-shadow:none}
   .os-img-name{position:absolute;left:8px;right:8px;bottom:6px;z-index:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff;font-size:11px;font-weight:600;line-height:1.2;text-align:left;text-shadow:0 1px 2px rgba(0,0,0,.55);pointer-events:none}
   .os-img-hover{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45);opacity:0;transition:opacity .12s ease;pointer-events:none}
   .os-img-thumb:hover .os-img-hover,.os-imgbox.menu-open .os-img-hover{opacity:1}

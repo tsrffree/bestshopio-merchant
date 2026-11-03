@@ -203,7 +203,7 @@
       name: 'Video item', kind: 'item', max: 20,
       fields: [
         { key: 'cover_image', control: 'image', label: 'Cover image', default: '', required: true },
-        { key: 'video_url', control: 'url', label: 'Video URL', default: '', placeholder: 'https://…mp4', info: 'Blank uses a sample clip in the lightbox preview.' },
+        { key: 'video_url', control: 'url', label: 'Video URL', default: '', placeholder: 'Paste a link', info: 'Use a YouTube or Vimeo URL' },
         { key: 'username', control: 'text', label: 'Username', default: '' },
         { key: 'title', control: 'text', label: 'Title', default: '' },
         { key: 'platform', control: 'select', label: 'Platform', default: 'none', options: [{ value: 'none', label: 'None' }, { value: 'tiktok', label: 'TikTok' }, { value: 'instagram', label: 'Instagram' }, { value: 'youtube', label: 'YouTube' }] },

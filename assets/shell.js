@@ -174,7 +174,7 @@
     // Online store is a self-contained Theme editor. Version it independently so
     // a Theme-only release cannot reuse stale app/data scripts from a prior shell release.
     var moduleV = id === 'settings' ? '20261029-spu-eg'
-      : id === 'online-store' ? '20261103-video-border'
+      : id === 'online-store' ? '20261104-mwt-block'
       : id === 'analytics' ? '20260922-address-info1'
       : id === 'orders' ? '20261013-no-channel'
       : id === 'products' ? '20261030-product-meta1'

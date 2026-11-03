@@ -1,0 +1,23 @@
+# 文本输入框规范
+
+Shared text-like fields in `online-store/js/app.js`:
+
+- Schema: `control: 'text'`, `'richtext'`, `'textarea'` via `fieldHtml` → `.os-fld-stack`
+- Nested cards: text rows via `reviewItemStack` (Author, Content, Accessible label, …)
+
+When the user names 文本输入框 / Heading / Content / text input for a layout change, update this shared stack layout so every caller gets the change. Do not patch one field only.
+
+## Layout
+
+- Label on its own row (full width)
+- Input / richtext / textarea on the next row, full width of the settings column
+- Do not place label and control side-by-side in the 151px `.os-fld-pair` grid
+- Class: `.os-fld-stack`
+
+## Scope
+
+- Includes Heading, Content, Text, Subheading, and other `text` / `richtext` / `textarea` fields
+- Nested item text fields use `reviewItemStack`, not `reviewItemPair`
+- `control: 'url'` is a pair paste field with regex error UI (see `url-control.mdc`), not this stack layout
+- Image / color / select / range / segmented stay on their existing compact layouts unless the user names those controls
+- Toggle / 开关: label + switch on one row, label does not wrap (see `toggle-control.mdc`)

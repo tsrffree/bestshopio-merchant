@@ -1,0 +1,17 @@
+# Toggle / 开关组件规范
+
+Shared toggle: `control: 'toggle'` rendered as `.os-fld-row` + `.os-tg` in `online-store/js/app.js`.
+
+When the user names toggle / 开关 / Show … 开关 for a layout change, update this shared control so every caller gets the change. Do not patch one field only.
+
+## Layout (match Shopify theme editor)
+
+- Label and toggle stay on the **same row**
+- Label text stays **single-line** (no wrap). Use ellipsis if the panel is too narrow
+- Optional `info` / hint may wrap on the row below the label+toggle
+- Do not use `.os-fld-stack` for toggles (that layout is for text / Heading / Content inputs)
+
+## Contrast with text inputs
+
+- Text / URL / richtext / textarea: label row + control on the next row (`.os-fld-stack`)
+- Toggle: label + switch on one row (`.os-fld-row`)
